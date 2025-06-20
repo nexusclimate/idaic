@@ -12,7 +12,7 @@
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen h-full">
-  <div class="flex h-full">
+  <div class="flex h-full relative">
     <!-- Sidebar -->
     <aside id="sidebar" class="w-64 bg-black text-white p-6 flex flex-col justify-between transition-all duration-300">
       <div>
@@ -28,22 +28,21 @@
           <a href="#" class="block p-2 rounded hover:text-[#FF9900]">Settings</a>
         </nav>
       </div>
-      <div>
-        <a href="/index.html" class="block text-[#FF9900] font-normal hover:font-bold mb-4">Log out</a>
-        <button onclick="toggleSidebar()" class="bg-[#FF9900] text-white px-2 py-1 rounded-r transition-all duration-300 w-full">☰</button>
-      </div>
+      <a href="/index.html" class="block text-[#FF9900] font-normal hover:font-bold">Log out</a>
     </aside>
 
     <!-- Toggle Button outside sidebar -->
-    <button onclick="toggleSidebar()" class="absolute bottom-4 left-64 z-10 bg-[#FF9900] text-white px-2 py-1 rounded-r transition-all duration-300">
+    <button id="sidebarToggle" onclick="toggleSidebar()" class="absolute bottom-4 left-64 z-10 bg-[#FF9900] text-white px-2 py-1 rounded-r transition-all duration-300">
       ☰
     </button>
 
     <!-- Main Content -->
     <main class="flex-1 h-full overflow-hidden">
-      <section id="main-content" class="h-full p-8">
-        <h1 class="text-2xl font-bold mb-4">Welcome to the Members Area</h1>
-        <p class="text-gray-700">Use the navigation menu on the left to access content, projects, and settings. Click "Content" to view our full blog platform.</p>
+      <section id="main-content" class="h-full">
+        <div class="p-8">
+          <h1 class="text-2xl font-bold mb-4">Welcome to the Members Area</h1>
+          <p class="text-gray-700">Use the navigation menu on the left to access content, projects, and settings. Click "Content" to view our full blog platform.</p>
+        </div>
       </section>
     </main>
   </div>
@@ -54,7 +53,7 @@
       main.innerHTML = `
         <iframe 
           src="https://members.nexusclimate.co" 
-          class="w-full h-[calc(100vh-2rem)] border-none"
+          class="w-full h-[100vh] border-none"
           frameborder="0"
         ></iframe>
       `;
@@ -72,7 +71,7 @@
 
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
-      const toggleBtn = document.querySelector('button[onclick="toggleSidebar()"]');
+      const toggleBtn = document.getElementById('sidebarToggle');
 
       if (sidebar.classList.contains('w-64')) {
         sidebar.classList.remove('w-64');
