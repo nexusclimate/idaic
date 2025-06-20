@@ -34,6 +34,11 @@
       </div>
     </aside>
 
+    <!-- Toggle Button outside sidebar -->
+    <button onclick="toggleSidebar()" class="absolute bottom-4 left-64 z-10 bg-[#FF9900] text-white px-2 py-1 rounded-r transition-all duration-300">
+      ☰
+    </button>
+
     <!-- Main Content -->
     <main class="flex-1 h-full overflow-hidden">
       <section id="main-content" class="h-full p-8">
@@ -49,7 +54,7 @@
       main.innerHTML = `
         <iframe 
           src="https://members.nexusclimate.co" 
-          class="w-full h-full border-none"
+          class="w-full h-[calc(100vh-2rem)] border-none"
           frameborder="0"
         ></iframe>
       `;
@@ -72,9 +77,13 @@
       if (sidebar.classList.contains('w-64')) {
         sidebar.classList.remove('w-64');
         sidebar.classList.add('w-0', 'p-0', 'overflow-hidden');
+        toggleBtn.classList.remove('left-64');
+        toggleBtn.classList.add('left-0');
       } else {
         sidebar.classList.remove('w-0', 'p-0', 'overflow-hidden');
         sidebar.classList.add('w-64');
+        toggleBtn.classList.remove('left-0');
+        toggleBtn.classList.add('left-64');
       }
     }
   </script>
