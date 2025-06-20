@@ -19,7 +19,7 @@
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="h-20 mb-6">
         </div>
         <nav class="space-y-4">
-          <a href="#" class="block p-2 rounded hover:text-[#FF9900]">Dashboard</a>
+          <button onclick="showDashboard()" class="block w-full text-left p-2 rounded hover:text-[#FF9900]">Dashboard</button>
           <a href="#" class="block p-2 rounded hover:text-[#FF9900]">Projects</a>
           <a href="#" class="block p-2 rounded hover:text-[#FF9900]">Settings</a>
         </nav>
@@ -36,10 +36,19 @@
         <div class="text-gray-600">User: <span class="font-medium">demo@example.com</span></div>
       </header>
 
-      <section>
-        <p>This is the members-only area. Here you can add dashboards, interactive content, and more.</p>
+      <section id="main-content">
+        <p>This is the members-only area. Click Dashboard to view blog content from Ghost.</p>
       </section>
     </main>
   </div>
+
+  <script>
+    function showDashboard() {
+      const main = document.getElementById('main-content');
+      main.innerHTML = `
+        <iframe src="https://members.nexusclimate.co" class="w-full h-[80vh] rounded-lg border-2 border-gray-300"></iframe>
+      `;
+    }
+  </script>
 </body>
 </html>
