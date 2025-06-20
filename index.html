@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Nexus Member Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Work Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-md p-8 space-y-6 bg-gray-900 rounded-xl shadow-xl">
+    <h2 class="text-center text-2xl font-bold">Sign in to your account</h2>
+
+    <form class="space-y-5" action="/members.html" method="GET">
+      <div>
+        <label for="email" class="block mb-1">Email</label>
+        <input id="email" name="email" type="email" required class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label for="password" class="block mb-1">Password</label>
+        <input id="password" name="password" type="password" required class="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <button type="submit" class="w-full py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold">Sign in</button>
+    </form>
+
+    <div class="flex items-center justify-center">
+      <span class="text-gray-400 text-sm">or</span>
+    </div>
+
+    <div>
+      <button onclick="signInWithGoogle()" class="w-full py-2 bg-white text-black hover:bg-gray-100 rounded-lg font-semibold flex items-center justify-center">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5 mr-2" alt="Google logo" />
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function signInWithGoogle() {
+      // Simulate redirect to Auth0, Supabase, Firebase, etc.
+      window.location.href = "/members.html";
+    }
+  </script>
+</body>
+</html>
