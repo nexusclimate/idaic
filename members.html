@@ -17,7 +17,7 @@
       <div>
         <div class="mb-8">
           <a href="/members.html">
-            <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="h-20 mb-6">
+            <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="h-24 mb-6">
           </a>
         </div>
         <nav class="space-y-4">
@@ -39,42 +39,22 @@
       </header>
 
       <section id="main-content">
-        <p>This is the members-only area. Click Dashboard to view blog content from Ghost.</p>
+        <p>This is the members-only area. Click Dashboard to view the full Ghost blog.</p>
       </section>
     </main>
   </div>
 
-  <script src="https://unpkg.com/@tryghost/content-api"></script>
   <script>
     function showDashboard() {
       const main = document.getElementById('main-content');
       main.innerHTML = `
-        <h2 class="text-xl font-bold mb-4">Latest from the Blog</h2>
-        <div id="blog-posts" class="space-y-6"></div>
+        <h2 class="text-xl font-bold mb-4">Blog</h2>
+        <iframe 
+          src="https://members.nexusclimate.co" 
+          class="w-full h-[90vh] rounded border border-gray-300"
+          frameborder="0"
+        ></iframe>
       `;
-
-      const api = new GhostContentAPI({
-        url: 'https://members.nexusclimate.co',
-        key: '945cb700de019abfc2ed1277d9',
-        version: 'v5.0'
-      });
-
-      api.posts.browse({ limit: 3, include: 'tags,authors' })
-        .then(posts => {
-          const container = document.getElementById('blog-posts');
-          posts.forEach(post => {
-            container.innerHTML += `
-              <div class="p-4 bg-white rounded shadow">
-                <h3 class="text-lg font-bold text-black mb-2">${post.title}</h3>
-                <div class="prose max-w-none">${post.excerpt}</div>
-                <a href="${post.url}" class="text-[#FF9900] hover:underline" target="_blank">Read more</a>
-              </div>
-            `;
-          });
-        })
-        .catch(err => {
-          console.error('Error loading posts:', err);
-        });
     }
   </script>
 </body>
