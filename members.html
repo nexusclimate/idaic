@@ -14,7 +14,7 @@
 <body class="bg-gray-100 min-h-screen h-full">
   <div class="flex h-full">
     <!-- Sidebar -->
-    <aside class="w-64 bg-black text-white p-6 flex flex-col justify-between">
+    <aside id="sidebar" class="w-64 bg-black text-white p-6 flex flex-col justify-between transition-all duration-300">
       <div>
         <div class="mb-8">
           <a href="/members.html">
@@ -32,15 +32,19 @@
       </div>
     </aside>
 
+    <!-- Toggle Button -->
+    <button onclick="toggleSidebar()" class="absolute top-4 left-64 z-10 bg-[#FF9900] text-white px-2 py-1 rounded-r transition-all duration-300">
+      ☰
+    </button>
+
     <!-- Main Content -->
     <main class="flex-1 h-full overflow-hidden">
-      <header class="flex justify-between items-center p-8">
-        <h1 class="text-2xl font-semibold">Welcome Back</h1>
-        <div class="text-gray-600">User: <span class="font-medium">demo@example.com</span></div>
-      </header>
-
-      <section id="main-content" class="h-[calc(100%-5rem)]">
-        <p class="p-8">This is the members-only area. Click Dashboard to view the full Ghost blog.</p>
+      <section id="main-content" class="h-full">
+        <iframe 
+          src="https://members.nexusclimate.co" 
+          class="w-full h-full border-none"
+          frameborder="0"
+        ></iframe>
       </section>
     </main>
   </div>
@@ -55,6 +59,23 @@
           frameborder="0"
         ></iframe>
       `;
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const toggleBtn = document.querySelector('button[onclick="toggleSidebar()"]');
+
+      if (sidebar.classList.contains('w-64')) {
+        sidebar.classList.remove('w-64');
+        sidebar.classList.add('w-0', 'p-0', 'overflow-hidden');
+        toggleBtn.classList.remove('left-64');
+        toggleBtn.classList.add('left-0');
+      } else {
+        sidebar.classList.remove('w-0', 'p-0', 'overflow-hidden');
+        sidebar.classList.add('w-64');
+        toggleBtn.classList.remove('left-0');
+        toggleBtn.classList.add('left-64');
+      }
     }
   </script>
 </body>
