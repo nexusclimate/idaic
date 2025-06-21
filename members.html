@@ -11,6 +11,9 @@
     html, body { height: 100%; margin: 0; }
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
+    /* Main content text color black, version stays orange */
+    main, .content-section, .prose, .prose * { color: #000 !important; }
+    .sidebar-version { color: #f97316 !important; font-weight: bold; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -21,7 +24,6 @@
         <a href="/index.html">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
-
         <!-- MAIN SECTION -->
         <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Main</h3>
         <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
@@ -29,36 +31,28 @@
           <a href="#" onclick="showContent('dashboard')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Dashboard</a>
           <a href="#" onclick="showContent('content')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Content</a>
         </nav>
-
         <!-- EVENTS -->
         <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Events</h3>
         <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
         <nav class="space-y-2 mb-6">
           <a href="#" onclick="showContent('events')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Upcoming Events</a>
         </nav>
-
         <!-- NEWS -->
         <div class="mt-8"></div>
         <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Other Climate News</h3>
         <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
         <a href="#" onclick="showContent('news')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Climate Solution News</a>
         <a href="#" onclick="showContent('uaeNews')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">UAE Climate News</a>
-
         <!-- OTHER -->
         <div class="mt-6"></div>
         <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Other</h3>
         <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
         <a href="#" onclick="showContent('feedback')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Feedback</a>
+        <a href="#" onclick="showContent('changelog')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Change Log</a>
       </div>
-
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <a 
-          href="https://login.nexusclimate.co/changelog.html" 
-          target="_blank" 
-          class="text-xs text-orange-500 hover:underline"
-          title="View the full changelog"
-        >v0.3.12.1</a>
+        <span class="sidebar-version text-xs">v0.3.12.2</span>
       </div>
     </aside>
 
@@ -94,16 +88,9 @@
         <p>Let us know how we can improve this portal.</p>
       </div>
 
-      <!-- (In-page changelog kept for code completeness; you may remove if not needed) -->
-      <div id="changelog" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-4">Change Log</h2>
-        <ul class="list-disc ml-6">
-          <li>v0.3.7 – News section refactor, embedded changelog, layout fixes</li>
-          <li>v0.3.6 – UAE Climate News embedded, News section updated</li>
-          <li>v0.3.0 – News Section included in portal</li>
-          <li>v0.2.0 – Ghost embedded in the portal</li>
-          <li>v0.1.0 – MVP of IDAIC portal with sample workflow</li>
-        </ul>
+      <!-- Embedded changelog section -->
+      <div id="changelog" class="content-section hidden w-full h-full">
+        <iframe src="https://login.nexusclimate.co/changelog.html" class="w-full h-full min-h-[600px]" loading="lazy" frameborder="0"></iframe>
       </div>
     </main>
   </div>
