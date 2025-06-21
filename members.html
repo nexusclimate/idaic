@@ -16,13 +16,31 @@
       color: #f97316 !important;
       font-weight: bold;
       cursor: pointer;
-      text-decoration: underline;
       font-size: 0.82rem;
       padding-left: 0.25rem;
       transition: color 0.18s;
+      user-select: none;
+      border-radius: 5px;
+      padding: 2px 10px;
+      outline: none;
     }
-    .sidebar-version:hover {
-      color: #c2410c !important;
+    .sidebar-version:active, .sidebar-version:focus {
+      background: #fff7ed;
+    }
+    .sidebar-chapter {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+      cursor: default;
+      opacity: 0.95;
+    }
+    .sidebar-chapter:hover {
+      background: #222;
+      opacity: 1;
     }
   </style>
 </head>
@@ -41,6 +59,15 @@
           <a href="#" onclick="showContent('dashboard')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Dashboard</a>
           <a href="#" onclick="showContent('content')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Content</a>
         </nav>
+
+        <!-- CHAPTERS -->
+        <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Chapters</h3>
+        <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
+        <div class="mb-6">
+          <span class="sidebar-chapter">UK</span>
+          <span class="sidebar-chapter">MENA</span>
+        </div>
+
         <!-- EVENTS -->
         <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Events</h3>
         <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
@@ -61,7 +88,7 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <a href="#" id="sidebarVersion" class="sidebar-version" title="View Change Log">v0.3.12.2</a>
+        <span id="sidebarVersion" class="sidebar-version" tabindex="0" title="Show Change Log">v0.4.0</span>
       </div>
     </aside>
 
@@ -126,6 +153,13 @@
     document.getElementById('sidebarVersion').addEventListener('click', function(e) {
       e.preventDefault();
       showContent('changelog');
+    });
+    // For accessibility: allow keyboard Enter/Space to trigger changelog
+    document.getElementById('sidebarVersion').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showContent('changelog');
+      }
     });
   </script>
 </body>
