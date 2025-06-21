@@ -52,14 +52,14 @@
         <a href="#" onclick="showContent('feedback')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Feedback</a>
       </div>
 
-      <div class="p-4 flex justify-between items-center text-sm">
+      <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <a href="#" href="https://login.nexusclimate.co/changelog.html" class="text-xs text-orange-500 hover:underline">v0.3.8</a>
+        <a href="#" onclick="showContent('changelog')" href="#" class="text-xs text-orange-500 hover:underline">v0.3.8</a>
       </div>
     </aside>
 
     <!-- Sidebar toggle button -->
-    <button onclick="toggleSidebar()" class="absolute bottom-4 left-64 bg-orange-500 text-white px-2 py-1 text-xs rounded shadow z-50 transition-all duration-300">☰</button>
+    <button onclick="toggleSidebar()" id="sidebarToggle" class="absolute bottom-4 left-64 bg-orange-500 text-white px-2 py-1 text-xs rounded shadow z-50 transition-all duration-300">☰</button>
 
     <!-- Main Content -->
     <main class="flex-1 h-screen overflow-y-auto">
@@ -110,7 +110,15 @@
       document.getElementById(section).classList.remove('hidden');
     }
 
+    
     function toggleSidebar() {
+      const container = document.getElementById('mainContainer');
+      container.classList.toggle('sidebar-collapsed');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      toggleBtn.classList.toggle('left-64');
+      toggleBtn.classList.toggle('left-16');
+    }
+
       const container = document.getElementById('mainContainer');
       container.classList.toggle('sidebar-collapsed');
     }
