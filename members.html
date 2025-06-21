@@ -11,9 +11,29 @@
     html, body { height: 100%; margin: 0; }
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
-    /* Main content text color black, version stays orange */
     main, .content-section, .prose, .prose * { color: #000 !important; }
-    .sidebar-version { color: #f97316 !important; font-weight: bold; }
+    .version-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 100;
+      background: white;
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      padding: 0.5rem 1.25rem;
+      font-weight: bold;
+      color: #f97316;
+      border: 1.5px solid #f97316;
+      cursor: pointer;
+      transition: background 0.18s, box-shadow 0.18s;
+      font-size: 0.95rem;
+      text-decoration: none;
+      outline: none;
+    }
+    .version-fab:hover {
+      background: #fff7ed;
+      box-shadow: 0 4px 16px rgba(249,115,22,0.16);
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -48,11 +68,9 @@
         <h3 class="uppercase text-sm text-white font-bold mb-2 sidebar-text">Other</h3>
         <div class="border-t border-orange-500 mb-2 sidebar-text"></div>
         <a href="#" onclick="showContent('feedback')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Feedback</a>
-        <a href="#" onclick="showContent('changelog')" class="block px-3 py-2 rounded hover:text-orange-500 sidebar-text">Change Log</a>
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <span class="sidebar-version text-xs">v0.3.12.2</span>
       </div>
     </aside>
 
@@ -93,9 +111,10 @@
         <iframe src="https://login.nexusclimate.co/changelog.html" class="w-full h-full min-h-[600px]" loading="lazy" frameborder="0"></iframe>
       </div>
     </main>
+    <!-- Floating version number as clickable FAB -->
+    <a href="#" id="versionFab" class="version-fab" title="Show Change Log">v0.3.12.2</a>
   </div>
 
-  <!-- Fixed and cleaned up script -->
   <script>
     function showContent(section) {
       const sections = document.querySelectorAll('.content-section');
@@ -114,6 +133,12 @@
         toggleBtn.style.left = '16rem';
       }
     }
+
+    // Version FAB click - open changelog embedded
+    document.getElementById('versionFab').addEventListener('click', function(e) {
+      e.preventDefault();
+      showContent('changelog');
+    });
   </script>
 </body>
 </html>
