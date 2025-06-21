@@ -10,13 +10,12 @@
   <style>
     body { font-family: 'Roboto', sans-serif; }
     html, body { height: 100%; margin: 0; }
-    .full-height { height: 100vh; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="w-64 bg-black text-white flex flex-col">
+    <aside class="w-64 bg-black text-white flex flex-col justify-between">
       <div class="p-4 flex-grow">
         <a href="/index.html">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
@@ -27,12 +26,13 @@
           <div class="my-6"></div>
           <h3 class="uppercase text-sm text-white font-bold mb-2">News</h3>
           <div class="border-t border-orange-500 mb-2"></div>
-          <a href="#" onclick="showContent('news')" class="block px-3 py-2 rounded hover:text-orange-500">Climate News Section</a>
+          <a href="#" onclick="showContent('news')" class="block px-3 py-2 rounded hover:text-orange-500">Climate Solution News</a>
+          <a href="#" onclick="showContent('uaeNews')" class="block px-3 py-2 rounded hover:text-orange-500">UAE Climate News</a>
         </nav>
       </div>
-      <div class="p-4">
-        <a href="/index.html" class="block text-orange-500 hover:font-bold mb-2">Log out</a>
-        <a href="changelog.html" class="text-xs text-orange-500 hover:underline">v0.3.0</a>
+      <div class="p-4 flex justify-between items-center text-sm">
+        <a href="/index.html" class="text-orange-500 hover:font-bold">Log out</a>
+        <a href="changelog.html" class="text-xs text-orange-500 hover:underline">v0.3.6</a>
       </div>
     </aside>
 
@@ -49,6 +49,10 @@
 
       <div id="news" class="content-section hidden w-full h-full">
         <iframe src="https://climatesolutions.news/" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
+      </div>
+
+      <div id="uaeNews" class="content-section hidden w-full h-full">
+        <iframe src="https://news.nexusclimate.co/ae" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
     </main>
   </div>
