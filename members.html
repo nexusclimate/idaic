@@ -15,29 +15,49 @@
 <body class="bg-gray-100 text-gray-800">
   <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="w-64 bg-black text-white flex flex-col justify-between">
+    <aside id="sidebar" class="w-64 bg-black text-white flex flex-col transition-all duration-300">
       <div class="p-4 flex-grow">
         <a href="/index.html">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
-        <nav class="space-y-2">
+        <button onclick="toggleSidebar()" class="text-orange-500 text-xs mb-4">☰ Toggle Sidebar</button>
+
+        <!-- MAIN SECTION -->
+        <h3 class="uppercase text-sm text-white font-bold mb-2">Main</h3>
+        <div class="border-t border-orange-500 mb-2"></div>
+        <nav class="space-y-2 mb-6">
           <a href="#" onclick="showContent('dashboard')" class="block px-3 py-2 rounded hover:text-orange-500">Dashboard</a>
           <a href="#" onclick="showContent('content')" class="block px-3 py-2 rounded hover:text-orange-500">Content</a>
-          <div class="my-6"></div>
-          <h3 class="uppercase text-sm text-white font-bold mb-2">News</h3>
-          <div class="border-t border-orange-500 mb-2"></div>
-          <a href="#" onclick="showContent('news')" class="block px-3 py-2 rounded hover:text-orange-500">Climate Solution News</a>
-          <a href="#" onclick="showContent('uaeNews')" class="block px-3 py-2 rounded hover:text-orange-500">UAE Climate News</a>
         </nav>
+
+        <!-- EVENTS -->
+        <h3 class="uppercase text-sm text-white font-bold mb-2">Events</h3>
+        <div class="border-t border-orange-500 mb-2"></div>
+        <nav class="space-y-2 mb-6">
+          <a href="#" onclick="showContent('events')" class="block px-3 py-2 rounded hover:text-orange-500">Upcoming Events</a>
+        </nav>
+
+        <!-- NEWS -->
+        <div class="mt-8"></div>
+        <h3 class="uppercase text-sm text-white font-bold mb-2">Other Climate News</h3>
+        <div class="border-t border-orange-500 mb-2"></div>
+        <a href="#" onclick="showContent('news')" class="block px-3 py-2 rounded hover:text-orange-500">Climate Solution News</a>
+        <a href="#" onclick="showContent('uaeNews')" class="block px-3 py-2 rounded hover:text-orange-500">UAE Climate News</a>
+
+        <!-- OTHER -->
+        <div class="mt-6"></div>
+        <h3 class="uppercase text-sm text-white font-bold mb-2">Other</h3>
+        <div class="border-t border-orange-500 mb-2"></div>
+        <a href="#" onclick="showContent('feedback')" class="block px-3 py-2 rounded hover:text-orange-500">Feedback</a>
       </div>
       <div class="p-4 flex justify-between items-center text-sm">
-        <a href="/index.html" class="text-orange-500 hover:font-bold">Log out</a>
-        <a href="changelog.html" class="text-xs text-orange-500 hover:underline">v0.3.6</a>
+        <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
+        <a href="#" onclick="showContent('changelog')" class="text-xs text-orange-500 hover:underline">v0.3.7</a>
       </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 h-screen">
+    <main class="flex-1 h-screen overflow-y-auto">
       <div id="dashboard" class="content-section p-6">
         <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
         <p>This is your main dashboard. Customize with summaries or widgets here.</p>
@@ -47,12 +67,33 @@
         <iframe src="https://members.nexusclimate.co" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
 
+      <div id="events" class="content-section hidden p-6">
+        <h2 class="text-xl font-bold mb-2">Upcoming Events</h2>
+        <p>Stay tuned for upcoming climate events and workshops.</p>
+      </div>
+
       <div id="news" class="content-section hidden w-full h-full">
         <iframe src="https://climatesolutions.news/" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
 
       <div id="uaeNews" class="content-section hidden w-full h-full">
         <iframe src="https://news.nexusclimate.co/ae" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
+      </div>
+
+      <div id="feedback" class="content-section hidden p-6">
+        <h2 class="text-xl font-bold mb-2">Feedback</h2>
+        <p>Let us know how we can improve this portal.</p>
+      </div>
+
+      <div id="changelog" class="content-section hidden p-6">
+        <h2 class="text-xl font-bold mb-4">Change Log</h2>
+        <ul class="list-disc ml-6">
+          <li>v0.3.7 – News section refactor, embedded changelog, layout fixes</li>
+          <li>v0.3.6 – UAE Climate News embedded, News section updated</li>
+          <li>v0.3.0 – News Section included in portal</li>
+          <li>v0.2.0 – Ghost embedded in the portal</li>
+          <li>v0.1.0 – MVP of IDAIC portal with sample workflow</li>
+        </ul>
       </div>
     </main>
   </div>
@@ -62,6 +103,12 @@
       const sections = document.querySelectorAll('.content-section');
       sections.forEach(s => s.classList.add('hidden'));
       document.getElementById(section).classList.remove('hidden');
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('w-64');
+      sidebar.classList.toggle('w-16');
     }
   </script>
 </body>
