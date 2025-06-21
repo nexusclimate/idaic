@@ -9,7 +9,7 @@
   <style>
     body { font-family: 'Roboto', sans-serif; }
     .editable-area {
-      min-height: 200px;
+      min-height: 150px;
       outline: none;
       border: none;
       background: transparent;
@@ -28,27 +28,27 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-8">
-  <div class="max-w-2xl mx-auto bg-white shadow-lg p-6 rounded">
-    <h1 class="text-2xl font-bold border-b-2 border-orange-500 pb-2 mb-4 text-orange-600">
-      Welcome to the Minimal Viable Version Change log
+<body class="bg-transparent text-gray-900">
+  <div class="fixed top-6 left-6 max-w-md w-[360px] bg-white p-4 rounded border border-gray-200">
+    <h1 class="text-lg font-bold pb-2 mb-3 text-black border-b border-gray-200">
+      Minimal Viable Version Change log
     </h1>
-    <div class="mb-4 flex gap-2">
-      <button id="editBtn" class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">Edit</button>
-      <button id="saveBtn" class="save-btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm hidden">Save</button>
+    <div class="mb-3 flex gap-2">
+      <button id="editBtn" class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-xs">Edit</button>
+      <button id="saveBtn" class="save-btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-xs hidden">Save</button>
     </div>
     <div id="editableChangelog" class="editable-area prose prose-sm max-w-none text-gray-900" contenteditable="false">
-      <h2 class="text-xl font-semibold text-orange-600 mb-1">v0.3.12 – Integration of External News Websites <span class="text-xs text-gray-500">(Latest – 21 June 2025)</span></h2>
+      <h2 class="text-base font-semibold text-black mb-1">v0.3.12 – Integration of External News Websites <span class="text-xs text-gray-500">(Latest – 21 June 2025)</span></h2>
       <ul>
         <li><strong>12.1</strong> – Improvements to change log</li>
         <li><strong>11</strong> – Updates to sidebar</li>
         <li><strong>10</strong> – Improved section headers</li>
       </ul>
-      <h2 class="text-xl font-semibold text-orange-600 mb-1 mt-4">v0.2 – Integration of Blog post hosted by Ghost</h2>
+      <h2 class="text-base font-semibold text-black mb-1 mt-4">v0.2 – Integration of Blog post hosted by Ghost</h2>
       <ul>
         <li>Blog content integrated via Ghost platform</li>
       </ul>
-      <h2 class="text-xl font-semibold text-orange-600 mb-1 mt-4">v0.1 – IDAIC Members page deployment</h2>
+      <h2 class="text-base font-semibold text-black mb-1 mt-4">v0.1 – IDAIC Members page deployment</h2>
       <ul>
         <li>Initial MVP of the IDAIC members portal</li>
       </ul>
