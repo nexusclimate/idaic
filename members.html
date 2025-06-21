@@ -12,27 +12,17 @@
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     main, .content-section, .prose, .prose * { color: #000 !important; }
-    .version-fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 100;
-      background: white;
-      border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-      padding: 0.5rem 1.25rem;
+    .sidebar-version {
+      color: #f97316 !important;
       font-weight: bold;
-      color: #f97316;
-      border: 1.5px solid #f97316;
       cursor: pointer;
-      transition: background 0.18s, box-shadow 0.18s;
-      font-size: 0.95rem;
-      text-decoration: none;
-      outline: none;
+      text-decoration: underline;
+      font-size: 0.82rem;
+      padding-left: 0.25rem;
+      transition: color 0.18s;
     }
-    .version-fab:hover {
-      background: #fff7ed;
-      box-shadow: 0 4px 16px rgba(249,115,22,0.16);
+    .sidebar-version:hover {
+      color: #c2410c !important;
     }
   </style>
 </head>
@@ -71,6 +61,7 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
+        <a href="#" id="sidebarVersion" class="sidebar-version" title="View Change Log">v0.3.12.2</a>
       </div>
     </aside>
 
@@ -111,8 +102,6 @@
         <iframe src="https://login.nexusclimate.co/changelog.html" class="w-full h-full min-h-[600px]" loading="lazy" frameborder="0"></iframe>
       </div>
     </main>
-    <!-- Floating version number as clickable FAB -->
-    <a href="#" id="versionFab" class="version-fab" title="Show Change Log">v0.3.12.2</a>
   </div>
 
   <script>
@@ -126,7 +115,6 @@
       const container = document.getElementById('mainContainer');
       const toggleBtn = document.getElementById('sidebarToggle');
       container.classList.toggle('sidebar-collapsed');
-      // Move toggle button accordingly
       if (container.classList.contains('sidebar-collapsed')) {
         toggleBtn.style.left = '4rem';
       } else {
@@ -134,8 +122,8 @@
       }
     }
 
-    // Version FAB click - open changelog embedded
-    document.getElementById('versionFab').addEventListener('click', function(e) {
+    // Sidebar version click - open changelog embedded
+    document.getElementById('sidebarVersion').addEventListener('click', function(e) {
       e.preventDefault();
       showContent('changelog');
     });
