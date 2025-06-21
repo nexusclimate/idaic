@@ -26,6 +26,38 @@
     .edit-btn, .save-btn {
       transition: background 0.2s, color 0.2s;
     }
+    .footer-nexus {
+      position: fixed;
+      bottom: 24px;
+      left: 32px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      font-size: 0.93rem;
+    }
+    .footer-nexus-text {
+      color: #222;
+      font-weight: 400;
+      font-size: 0.95rem;
+    }
+    .footer-nexus-link {
+      color: #f97316;
+      text-decoration: underline;
+      font-weight: 400;
+      margin-left: 3px;
+    }
+    .footer-nexus-logo {
+      max-height: 28px;
+      height: 28px;
+      width: auto;
+      margin-top: 2px;
+    }
+    @media (max-width: 700px) {
+      .footer-nexus { left: 12px; bottom: 10px; }
+      .footer-nexus-logo { max-height: 22px; }
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900 p-8 flex flex-col min-h-screen">
@@ -55,14 +87,14 @@
       </ul>
     </div>
   </div>
-  <!-- Footer: Build by Nexus Climate -->
-  <div class="flex-grow"></div>
-  <footer class="w-full flex flex-col items-center justify-end mt-8 pb-2">
-    <a href="https://www.nexusclimate.vc" class="text-black font-bold text-base mb-1 hover:underline" target="_blank">
-      Build by Nexus Climate
-    </a>
-    <img src="https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png" alt="Nexus Climate Logo" class="h-10 w-auto" style="max-width:120px;">
-  </footer>
+  <!-- Fixed footer bottom left -->
+  <div class="footer-nexus">
+    <span class="footer-nexus-text">
+      Build by
+      <a href="https://www.nexusclimate.vc" target="_blank" class="footer-nexus-link">Nexus Climate</a>
+    </span>
+    <img src="https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png" alt="Nexus Climate Logo" class="footer-nexus-logo">
+  </div>
   <script>
     const editBtn = document.getElementById('editBtn');
     const saveBtn = document.getElementById('saveBtn');
