@@ -28,7 +28,8 @@
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-900 p-8">
+<body class="bg-gray-100 text-gray-900 p-8 flex flex-col min-h-screen">
+  <!-- Changelog box -->
   <div class="w-full max-w-5xl bg-white p-8 rounded border border-gray-200" style="margin-left:0;">
     <h1 class="text-2xl font-bold pb-2 mb-4 text-black border-b border-gray-200">
       Welcome to the Minimal Viable Version Change log
@@ -53,13 +54,15 @@
         <li>Initial MVP of the IDAIC members portal</li>
       </ul>
     </div>
-    <div class="flex items-center gap-3 border-t border-gray-200 mt-8 pt-4">
-      <img src="https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png" alt="Nexus Climate Logo" class="h-8 w-auto" style="max-width:110px;">
-      <a href="https://www.nexusclimate.vc" class="text-orange-600 font-semibold hover:underline text-sm" target="_blank">
-        Build by Nexus Climate
-      </a>
-    </div>
   </div>
+  <!-- Footer: Build by Nexus Climate -->
+  <div class="flex-grow"></div>
+  <footer class="w-full flex flex-col items-center justify-end mt-8 pb-2">
+    <a href="https://www.nexusclimate.vc" class="text-black font-bold text-base mb-1 hover:underline" target="_blank">
+      Build by Nexus Climate
+    </a>
+    <img src="https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png" alt="Nexus Climate Logo" class="h-10 w-auto" style="max-width:120px;">
+  </footer>
   <script>
     const editBtn = document.getElementById('editBtn');
     const saveBtn = document.getElementById('saveBtn');
