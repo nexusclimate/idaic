@@ -16,6 +16,26 @@
     .delete-btn:hover { background: #f43f5e; color: #fff; }
     .search-bar input { border: 1.5px solid #d1d5db; }
     .search-bar input:focus { outline: 2px solid #f97316; border-color: #f97316; }
+    .description-box {
+      border: 2px solid #f97316;
+      background: #fffbe8;
+      border-radius: 0.5rem;
+      min-height: 60px;
+      resize: vertical;
+      transition: border 0.2s;
+    }
+    .description-box:focus {
+      outline: 2px solid #f97316;
+      background: #fffde7;
+    }
+    /* Make grid responsive and fit container, not viewport */
+    #projectsList {
+      width: 100%;
+      margin: 0 auto;
+    }
+    @media (max-width: 900px) {
+      #projectsList { grid-template-columns: 1fr !important; }
+    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-0 m-0">
@@ -37,7 +57,7 @@
       </div>
     </div>
     <div id="projectsContainer" class="flex-1 w-full px-8 pb-8">
-      <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-full">
         <!-- Projects will be rendered here -->
       </div>
     </div>
@@ -101,7 +121,7 @@
             <span class="text-gray-700 font-semibold mr-2">Company:</span>
             <input type="text" class="editable-field text-gray-700 flex-1 rounded border-gray-300 px-2 py-1" placeholder="Company Name" value="${project.company || ''}" id="company-${realIdx}">
           </div>
-          <textarea class="editable-field text-gray-700 mb-2 block w-full rounded border-gray-300 px-2 py-1" rows="2" placeholder="Description" id="desc-${realIdx}">${project.description || ''}</textarea>
+          <textarea class="editable-field description-box text-gray-700 mb-2 block w-full px-2 py-1" rows="2" placeholder="Description" id="desc-${realIdx}">${project.description || ''}</textarea>
           <input type="date" class="editable-field text-gray-700 mb-3 block w-full rounded border-gray-300 px-2 py-1" value="${project.due || ''}" id="due-${realIdx}">
           <div class="flex gap-2">
             <button class="save-btn bg-green-500 text-white px-3 py-1 rounded" id="save-${realIdx}">Save</button>
