@@ -72,61 +72,29 @@
 <body class="bg-gray-100 text-gray-800">
   <div id="mainContainer" class="flex h-screen relative">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-black text-white flex flex-col transition-all duration-300">
-      <div class="p-4 flex-grow">
-        <a href="/index.html">
-          <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
-        </a>
-        <!-- MAIN SECTION -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a href="#" onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
-            <a href="#" onclick="showContent('content')" class="sidebar-link sidebar-text">Content</a>
-            <a href="#" onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
-          </nav>
-        </div>
-        <!-- CHAPTERS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a href="#" onclick="showContent('uk')" class="sidebar-link sidebar-text">UK</a>
-            <a href="#" onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
-          </nav>
-        </div>
-        <!-- EVENTS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a href="#" onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
-          </nav>
-        </div>
-        <!-- NEWS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a href="#" onclick="showContent('news')" class="sidebar-link sidebar-text">Climate Solution News</a>
-            <a href="#" onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
-          </nav>
-        </div>
-        <!-- OTHER -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">OTHER</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a href="#" onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
-          </nav>
-        </div>
-      </div>
-      <div class="p-4 flex justify-between items-center text-sm sidebar-text">
-        <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <a href="#" class="sidebar-version-link" onclick="showContent('changelog')">v0.4.3</a>
-      </div>
-    </aside>
+  <!-- Sidebar -->
+<aside id="sidebar" class="w-64 bg-black text-white flex flex-col transition-all duration-300">
+  <div class="p-4 flex-grow">
+    <a href="#" onclick="showContent('dashboard'); return false;">
+      <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
+    </a>
+    <!-- MAIN SECTION -->
+    <div class="sidebar-section">
+      <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
+      <div class="sidebar-divider sidebar-text"></div>
+      <nav>
+        <a href="#" onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
+        <a href="#" onclick="showContent('content')" class="sidebar-link sidebar-text">Content</a>
+        <a href="#" onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
+      </nav>
+    </div>
+    ...
+  </div>
+  <div class="p-4 flex justify-between items-center text-sm sidebar-text">
+    <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
+    <a href="#" class="sidebar-version-link" onclick="showContent('changelog')">v0.4.5</a>
+  </div>
+</aside>
 
     <!-- Toggle button -->
     <button onclick="toggleSidebar()" id="sidebarToggle" class="absolute bottom-4 left-64 bg-orange-500 text-white px-2 py-1 text-xs rounded shadow z-50 transition-all duration-300">☰</button>
