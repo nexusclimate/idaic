@@ -12,7 +12,7 @@
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     main, .content-section, .prose, .prose * { color: #000 !important; }
-    .sidebar-version-text, .sidebar-version-field {
+    .sidebar-version-link {
       color: #f97316 !important;
       font-weight: bold;
       font-size: 0.82rem;
@@ -25,17 +25,14 @@
       border: none;
       transition: box-shadow 0.15s, background 0.15s;
       cursor: pointer;
+      text-decoration: underline;
+      display: inline-block;
     }
-    .sidebar-version-field {
-      border: 1px solid #f97316;
-      background: #fff7ed;
-      cursor: text;
-    }
-    .sidebar-version-text:hover,
-    .sidebar-version-text:focus {
+    .sidebar-version-link:hover,
+    .sidebar-version-link:focus {
+      color: #f59e42 !important;
       text-decoration: underline;
       background: transparent;
-      cursor: pointer;
     }
     .sidebar-link {
       display: block;
@@ -74,120 +71,41 @@
     .sidebar-section {
       margin-bottom: 0.7rem !important;
     }
-    /* Asana styling */
-    .asana-embed-container {
-      max-width: 100%;
-      overflow: auto;
-      background: #f3f4f6 !important;
-      padding: 0;
-      border-radius: 0.5rem;
-    }
-    .asana-embed-iframe {
-      width: 100% !important;
-      min-width: 0 !important;
-      min-height: 80vh !important;
-      height: 80vh !important;
-      background: #f3f4f6 !important;
-      border: none;
-      margin: 0 auto;
-      display: block;
-    }
-    .asana-embed-footer {
-      background: #f3f4f6 !important;
-    }
-    /* Make the projects iframe always fill its content section */
+    /* Projects iframe */
     #projects.content-section {
-      padding: 0 !important;
-      margin: 0 !important;
-      height: 100vh;
-      width: 100vw;
-      max-width: 100%;
-      max-height: 100%;
-      background: #f3f4f6;
+      padding:0;margin:0;height:100vh;width:100vw;max-width:100%;max-height:100%;
     }
     #projects-iframe {
-      width: 100vw;
-      height: 100vh;
-      min-height: 100vh;
-      min-width: 100vw;
-      border: none;
+      width:100vw;height:100vh;min-height:100vh;min-width:100vw;border:none;display:block;background:#f3f4f6;
+    }
+    /* Feedback form styling for left alignment */
+    #feedback.content-section {
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+      height: 100vh !important;
+      max-width: 100%;
+      max-height: 100vh;
       display: block;
       background: #f3f4f6;
+      box-sizing: border-box;
     }
-    @media (max-width: 900px) {
-      .asana-embed-iframe {
-        min-height: 65vh !important;
-        height: 65vh !important;
-      }
-      #projects-iframe {
-        min-height: 80vh;
-        height: 80vh;
-        min-width: 100vw;
-      }
+    #feedback-iframe {
+      border: 0;
+      width: 100%;
+      height: 100vh;
+      min-width: 0;
+      min-height: 100vh;
+      display: block;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
   <script>
-    // Version: get and set from localStorage
-    function getStoredVersion() {
-      return localStorage.getItem('sidebarVersion') || "v4.1.0";
-    }
-    function setStoredVersion(val) {
-      localStorage.setItem('sidebarVersion', val);
-    }
-    window.addEventListener('DOMContentLoaded', function () {
-      // Sidebar Version Field Logic
-      let versionVal = getStoredVersion();
-      let versionDiv = document.getElementById('sidebarVersionWrapper');
-      renderVersionText();
-
-      function renderVersionText() {
-        versionDiv.innerHTML = `<span class="sidebar-version-text" tabindex="0" id="sidebarVersionText">${versionVal}</span>`;
-        document.getElementById('sidebarVersionText').onclick = function(e) {
-          e.stopPropagation();
-          renderVersionInput();
-        };
-        document.getElementById('sidebarVersionText').onkeydown = function(e) {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            showContent('changelog');
-          }
-        };
-        document.getElementById('sidebarVersionText').ondblclick = function(e) {
-          renderVersionInput();
-        };
-        document.getElementById('sidebarVersionText').addEventListener('click', function(e) {
-          // Also open changelog if not editing
-          showContent('changelog');
-        });
-      }
-
-      function renderVersionInput() {
-        versionDiv.innerHTML = `<input id="sidebarVersionField" class="sidebar-version-field" value="${versionVal}" spellcheck="false" autofocus />`;
-        const versionField = document.getElementById('sidebarVersionField');
-        versionField.focus();
-        versionField.select();
-
-        versionField.onblur = finishEdit;
-        versionField.onkeydown = function(e) {
-          if (e.key === 'Enter') {
-            versionField.blur();
-          }
-          if (e.key === 'Escape') {
-            renderVersionText();
-          }
-        };
-        function finishEdit() {
-          let val = versionField.value.trim();
-          if (!val.startsWith('v')) val = 'v' + val;
-          setStoredVersion(val);
-          versionVal = val;
-          renderVersionText();
-        }
-      }
-    });
-
     // Show/hide content
     function showContent(section) {
       const sections = document.querySelectorAll('.content-section');
@@ -204,6 +122,8 @@
         toggleBtn.style.left = '16rem';
       }
     }
+    // Version variable
+    const sidebarVersion = "v0.4.3";
   </script>
   <div id="mainContainer" class="flex h-screen relative">
     <!-- Sidebar -->
@@ -259,7 +179,8 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <span id="sidebarVersionWrapper"></span>
+        <!-- CHANGELOG VERSION LINK -->
+        <a href="#" class="sidebar-version-link" onclick="showContent('changelog');return false;">v0.4.3</a>
       </div>
     </aside>
     <!-- Sidebar toggle button -->
@@ -294,8 +215,10 @@
       <div id="uaeNews" class="content-section hidden w-full h-full">
         <iframe src="https://news.nexusclimate.co/ae" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
-               <div id="feedback" class="content-section hidden p-0 m-0 w-full h-full" style="height:100vh; width:100%; padding:0; margin:0; box-sizing:border-box;">
+      <!-- FEEDBACK: left-aligned, fills pane -->
+      <div id="feedback" class="content-section hidden" style="padding:0;margin:0;width:100%;height:100vh;max-width:100%;max-height:100vh;display:block;background:#f3f4f6;box-sizing:border-box;">
         <iframe 
+          id="feedback-iframe"
           src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"
           style="border:0;width:100%;height:100vh;min-width:0;min-height:100vh;display:block;background:#f3f4f6;margin:0;padding:0;box-sizing:border-box;"
           frameborder="0"
@@ -303,7 +226,6 @@
           title="Feedback Form"
         ></iframe>
       </div>
-    </div>
       <!-- Embedded changelog section -->
       <div id="changelog" class="content-section hidden w-full h-full">
         <iframe src="https://login.nexusclimate.co/changelog.html" class="w-full h-full min-h-[600px]" loading="lazy" frameborder="0"></iframe>
