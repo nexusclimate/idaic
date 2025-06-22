@@ -16,38 +16,41 @@
     .delete-btn:hover { background: #f43f5e; color: #fff; }
     .search-bar input { border: 1.5px solid #d1d5db; }
     .search-bar input:focus { outline: 2px solid #f97316; border-color: #f97316; }
-    .description-box {
+    .description-box,
+    .description-static {
       border: 2px solid #f97316;
       background: #fffbe8;
       border-radius: 0.5rem;
       min-height: 60px;
+      min-width: 100%;
+      width: 100%;
+      max-width: 100%;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      color: #374151;
       resize: vertical;
       transition: border 0.2s;
+      box-sizing: border-box;
+      padding: 0.75rem 1.25rem;
+      white-space: pre-wrap;
     }
     .description-box:focus {
       outline: 2px solid #f97316;
       background: #fffde7;
     }
-    /* Description styled when saved (display mode) */
-    .description-static {
-      border: 2px solid #f97316;
-      background: #fffbe8;
-      border-radius: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      min-height: 48px;
-      margin-bottom: 0.5rem;
-      white-space: pre-wrap;
-      font-size: 1rem;
-      color: #374151;
-      margin-top: 0.5rem;
-    }
-    /* Compact card */
+    /* Wide and consistent project card */
     .project-card {
-      max-width: 380px;
+      max-width: 760px;
       min-width: 0;
+      width: 100%;
       padding: 1.25rem 1.1rem 1.1rem 1.1rem;
       margin: 0 auto;
       height: auto;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
     @media (max-width: 900px) {
       #projectsList { grid-template-columns: 1fr !important; }
@@ -57,20 +60,20 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-0 m-0">
   <div class="w-full min-h-screen flex flex-col">
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center p-8 pb-4 pt-8 gap-4">
-      <h1 class="text-3xl font-bold text-gray-900">Projects</h1>
-      <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-        <div class="flex items-center gap-2 search-bar w-full md:w-auto">
-          <input type="text" id="searchInput" placeholder="Search projects..." class="px-3 py-2 rounded w-full md:w-64 text-sm" />
+    <div class="p-8 pb-4 pt-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">Projects</h1>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
+        <div class="flex flex-col sm:flex-row items-center gap-2 search-bar w-full sm:w-auto">
+          <input type="text" id="searchInput" placeholder="Search projects..." class="px-3 py-2 rounded w-full sm:w-64 text-sm" />
           <select id="sortSelect" class="px-2 py-2 rounded border text-sm">
             <option value="title">Sort: Title (A-Z)</option>
             <option value="date">Sort: Due Date</option>
             <option value="company">Sort: Company (A-Z)</option>
           </select>
+          <button id="addProject" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow edit-btn flex items-center gap-1">
+            <span class="text-lg font-bold">+</span> Add Project
+          </button>
         </div>
-        <button id="addProject" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow edit-btn flex items-center gap-1">
-          <span class="text-lg font-bold">+</span> Add Project
-        </button>
       </div>
     </div>
     <div id="projectsContainer" class="flex-1 w-full px-8 pb-8">
