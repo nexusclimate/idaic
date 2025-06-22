@@ -46,22 +46,41 @@
       outline: none;
     }
     .sidebar-section-title {
-      font-weight: bold !important;
-      font-size: 0.97rem;
+      font-weight: 700 !important;
+      font-size: 1rem;
       letter-spacing: 0.01em;
-      margin-bottom: 0.7rem;
-      margin-top: 2.5rem;
+      margin-bottom: 0.6rem;
+      margin-top: 1.4rem;
     }
     .sidebar-section-title:first-of-type {
       margin-top: 0;
     }
     .sidebar-divider {
       border-top: 2px solid #f97316;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
       opacity: 0.9;
     }
     .sidebar-section {
-      margin-bottom: 2rem !important;
+      margin-bottom: 1.2rem !important;
+    }
+    /* Make the Asana embed responsive */
+    .asana-embed-container {
+      max-width: 100%;
+      overflow: auto;
+    }
+    .asana-embed-iframe {
+      width: 100% !important;
+      max-width: 800px;
+      min-width: 320px;
+      border: none;
+      margin: 0 auto;
+      display: block;
+    }
+    @media (max-width: 900px) {
+      .asana-embed-iframe {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
     }
   </style>
 </head>
@@ -106,7 +125,7 @@
 
         <!-- NEWS -->
         <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">Other Climate News</h3>
+          <h3 class="uppercase sidebar-section-title sidebar-text">Climate News</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav class="space-y-2 mb-4">
             <a href="#" onclick="showContent('news')" class="sidebar-link sidebar-text">Climate Solution News</a>
@@ -172,8 +191,17 @@
       </div>
 
       <div id="feedback" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Feedback</h2>
-        <p>Let us know how we can improve this portal.</p>
+        <h2 class="text-xl font-bold mb-4">Feedback</h2>
+        <div class="asana-embed-container">
+          <link rel="stylesheet" href="https://form.asana.com/static/asana-form-embed-style.css"/>
+          <iframe class="asana-embed-iframe" height="533" src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"></iframe>
+          <div class="asana-embed-footer">
+            <a rel="nofollow noopener" target="_blank" class="asana-embed-footer-link" href="https://asana.com/?utm_source=embedded_form">
+              <span class="asana-embed-footer-text">Form powered by</span>
+              <div class="asana-embed-footer-logo" role="img" aria-label="Logo of Asana"></div>
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Embedded changelog section -->
