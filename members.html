@@ -157,8 +157,8 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <!-- CHANGELOG VERSION LINK -->
-        <a href="https://login.nexusclimate.co/changelog.html" target="_blank" rel="noopener" class="sidebar-version-link">v0.4.3</a>
+        <!-- CHANGELOG VERSION LINK (shows changelog section, not new tab) -->
+        <a href="#" class="sidebar-version-link" onclick="showContent('changelog'); return false;">v0.4.3</a>
       </div>
     </aside>
     <!-- Sidebar toggle button -->
@@ -193,7 +193,7 @@
       <div id="uaeNews" class="content-section hidden w-full h-full">
         <iframe src="https://news.nexusclimate.co/ae" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
-      <!-- FEEDBACK: left-aligned, fills pane -->
+      <!-- FEEDBACK: only shown when tab is selected -->
       <div id="feedback" class="content-section hidden" style="padding:0;margin:0;width:100%;height:100vh;max-width:100%;max-height:100vh;display:block;background:#f3f4f6;box-sizing:border-box;">
         <iframe 
           id="feedback-iframe"
