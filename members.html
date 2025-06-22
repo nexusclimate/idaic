@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IDAIC Member Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Roboto', sans-serif; }
     html, body { height: 100%; margin: 0; }
@@ -33,11 +33,12 @@
       border-radius: 0.375rem;
       color: #fff;
       font-size: 1rem;
-      font-weight: 500;
+      font-weight: 400;
       margin-bottom: 0.1rem;
       cursor: pointer;
       opacity: 0.95;
       transition: background 0.18s, color 0.18s;
+      letter-spacing: 0;
     }
     .sidebar-link:hover, .sidebar-link:focus {
       background: #222;
@@ -63,11 +64,11 @@
     .sidebar-section {
       margin-bottom: 0.7rem !important;
     }
-    /* Make the Asana embed responsive and page colored */
+    /* Asana styling */
     .asana-embed-container {
       max-width: 100%;
       overflow: auto;
-      background: #f3f4f6 !important; /* bg-gray-100 */
+      background: #f3f4f6 !important;
       padding: 0;
       border-radius: 0.5rem;
     }
@@ -76,7 +77,7 @@
       min-width: 0 !important;
       min-height: 80vh !important;
       height: 80vh !important;
-      background: #f3f4f6 !important; /* bg-gray-100 */
+      background: #f3f4f6 !important;
       border: none;
       margin: 0 auto;
       display: block;
@@ -86,8 +87,6 @@
     }
     @media (max-width: 900px) {
       .asana-embed-iframe {
-        width: 100% !important;
-        min-width: 0 !important;
         min-height: 65vh !important;
         height: 65vh !important;
       }
@@ -97,8 +96,7 @@
 <body class="bg-gray-100 text-gray-800">
   <!-- Version code at the very top for easy maintenance -->
   <script>
-    // To update version, just edit here and below
-    const currentVersion = "v0.4.1";
+    const currentVersion = "v4.1.0";
     window.addEventListener('DOMContentLoaded', function () {
       const verEls = document.querySelectorAll('.sidebar-version');
       verEls.forEach(el => el.textContent = currentVersion);
@@ -111,7 +109,6 @@
         <a href="/index.html">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
-
         <!-- MAIN SECTION -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
@@ -122,7 +119,6 @@
             <a href="#" onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
           </nav>
         </div>
-
         <!-- CHAPTERS -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
@@ -132,7 +128,6 @@
             <a href="#" onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
           </nav>
         </div>
-
         <!-- EVENTS -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
@@ -141,7 +136,6 @@
             <a href="#" onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
           </nav>
         </div>
-
         <!-- NEWS -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
@@ -151,7 +145,6 @@
             <a href="#" onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
           </nav>
         </div>
-
         <!-- OTHER -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">OTHER</h3>
@@ -163,54 +156,42 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <span id="sidebarVersion" class="sidebar-version" tabindex="0" title="Show Change Log">v0.4.1</span>
+        <span id="sidebarVersion" class="sidebar-version" tabindex="0" title="Show Change Log">v4.1.0</span>
       </div>
     </aside>
-
     <!-- Sidebar toggle button -->
     <button onclick="toggleSidebar()" id="sidebarToggle" class="absolute bottom-4 left-64 bg-orange-500 text-white px-2 py-1 text-xs rounded shadow z-50 transition-all duration-300">☰</button>
-
     <!-- Main Content -->
     <main class="flex-1 h-screen overflow-y-auto">
       <div id="dashboard" class="content-section p-6">
         <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
         <p>This is your main dashboard. Customize with summaries or widgets here.</p>
       </div>
-
       <div id="content" class="content-section hidden w-full h-full">
         <iframe src="https://members.nexusclimate.co" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
-
-      <div id="projects" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Projects</h2>
-        <p>Project details and management will appear here.</p>
+      <div id="projects" class="content-section hidden w-full h-full">
+        <iframe src="https://nexusclimate.github.io/idaic/projects.html" class="w-full min-h-[80vh]" loading="lazy" frameborder="0"></iframe>
       </div>
-
       <div id="uk" class="content-section hidden p-6">
         <h2 class="text-xl font-bold mb-2">UK Chapter</h2>
         <p>Information and updates for the UK chapter.</p>
       </div>
-
       <div id="mena" class="content-section hidden p-6">
         <h2 class="text-xl font-bold mb-2">MENA Chapter</h2>
         <p>Information and updates for the MENA chapter.</p>
       </div>
-
       <div id="events" class="content-section hidden p-6">
         <h2 class="text-xl font-bold mb-2">Upcoming Events</h2>
         <p>Stay tuned for upcoming climate events and workshops.</p>
       </div>
-
       <div id="news" class="content-section hidden w-full h-full">
         <iframe src="https://climatesolutions.news/" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
-
       <div id="uaeNews" class="content-section hidden w-full h-full">
         <iframe src="https://news.nexusclimate.co/ae" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
-
-      <div id="feedback" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-4">Feedback</h2>
+      <div id="feedback" class="content-section hidden pt-4 pb-8">
         <div class="asana-embed-container">
           <link rel="stylesheet" href="https://form.asana.com/static/asana-form-embed-style.css"/>
           <iframe class="asana-embed-iframe" src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"></iframe>
@@ -222,21 +203,18 @@
           </div>
         </div>
       </div>
-
       <!-- Embedded changelog section -->
       <div id="changelog" class="content-section hidden w-full h-full">
         <iframe src="https://login.nexusclimate.co/changelog.html" class="w-full h-full min-h-[600px]" loading="lazy" frameborder="0"></iframe>
       </div>
     </main>
   </div>
-
   <script>
     function showContent(section) {
       const sections = document.querySelectorAll('.content-section');
       sections.forEach(s => s.classList.add('hidden'));
       document.getElementById(section).classList.remove('hidden');
     }
-
     function toggleSidebar() {
       const container = document.getElementById('mainContainer');
       const toggleBtn = document.getElementById('sidebarToggle');
@@ -247,7 +225,6 @@
         toggleBtn.style.left = '16rem';
       }
     }
-
     // Sidebar version click - open changelog embedded
     document.getElementById('sidebarVersion').addEventListener('click', function(e) {
       e.preventDefault();
