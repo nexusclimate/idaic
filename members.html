@@ -12,24 +12,30 @@
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     main, .content-section, .prose, .prose * { color: #000 !important; }
-    .sidebar-version-field {
-      background: transparent;
-      border: none;
+    .sidebar-version-text, .sidebar-version-field {
       color: #f97316 !important;
       font-weight: bold;
       font-size: 0.82rem;
-      width: 58px;
+      width: 60px;
       outline: none;
       padding: 2px 10px;
       border-radius: 5px;
-      cursor: pointer;
-      transition: box-shadow 0.15s;
       text-align: center;
+      background: transparent;
+      border: none;
+      transition: box-shadow 0.15s, background 0.15s;
+      cursor: pointer;
     }
-    .sidebar-version-field:focus {
+    .sidebar-version-field {
+      border: 1px solid #f97316;
       background: #fff7ed;
-      box-shadow: 0 0 0 2px #f97316;
       cursor: text;
+    }
+    .sidebar-version-text:hover,
+    .sidebar-version-text:focus {
+      text-decoration: underline;
+      background: transparent;
+      cursor: pointer;
     }
     .sidebar-link {
       display: block;
@@ -89,17 +95,41 @@
     .asana-embed-footer {
       background: #f3f4f6 !important;
     }
+    /* Make the projects iframe always fill its content section */
+    #projects.content-section {
+      padding: 0 !important;
+      margin: 0 !important;
+      height: 100vh;
+      width: 100vw;
+      max-width: 100%;
+      max-height: 100%;
+      background: #f3f4f6;
+    }
+    #projects-iframe {
+      width: 100vw;
+      height: 100vh;
+      min-height: 100vh;
+      min-width: 100vw;
+      border: none;
+      display: block;
+      background: #f3f4f6;
+    }
     @media (max-width: 900px) {
       .asana-embed-iframe {
         min-height: 65vh !important;
         height: 65vh !important;
       }
+      #projects-iframe {
+        min-height: 80vh;
+        height: 80vh;
+        min-width: 100vw;
+      }
     }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <!-- Version code at the very top for easy maintenance -->
   <script>
+    // Version: get and set from localStorage
     function getStoredVersion() {
       return localStorage.getItem('sidebarVersion') || "v4.1.0";
     }
@@ -107,34 +137,73 @@
       localStorage.setItem('sidebarVersion', val);
     }
     window.addEventListener('DOMContentLoaded', function () {
-      const versionField = document.getElementById('sidebarVersionField');
-      versionField.value = getStoredVersion();
-      versionField.addEventListener('change', function() {
-        let val = versionField.value.trim();
-        if (!val.startsWith('v')) val = 'v' + val;
-        setStoredVersion(val);
-        versionField.value = val;
-      });
-      versionField.addEventListener('blur', function() {
-        let val = versionField.value.trim();
-        if (!val.startsWith('v')) val = 'v' + val;
-        setStoredVersion(val);
-        versionField.value = val;
-      });
-      versionField.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') versionField.blur();
-      });
-      // Show changelog when version is clicked or focused and Enter is pressed
-      versionField.addEventListener('click', function(e) {
+      // Sidebar Version Field Logic
+      let versionVal = getStoredVersion();
+      let versionDiv = document.getElementById('sidebarVersionWrapper');
+      renderVersionText();
+
+      function renderVersionText() {
+        versionDiv.innerHTML = `<span class="sidebar-version-text" tabindex="0" id="sidebarVersionText">${versionVal}</span>`;
+        document.getElementById('sidebarVersionText').onclick = function(e) {
+          e.stopPropagation();
+          renderVersionInput();
+        };
+        document.getElementById('sidebarVersionText').onkeydown = function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            showContent('changelog');
+          }
+        };
+        document.getElementById('sidebarVersionText').ondblclick = function(e) {
+          renderVersionInput();
+        };
+        document.getElementById('sidebarVersionText').addEventListener('click', function(e) {
+          // Also open changelog if not editing
+          showContent('changelog');
+        });
+      }
+
+      function renderVersionInput() {
+        versionDiv.innerHTML = `<input id="sidebarVersionField" class="sidebar-version-field" value="${versionVal}" spellcheck="false" autofocus />`;
+        const versionField = document.getElementById('sidebarVersionField');
+        versionField.focus();
         versionField.select();
-      });
-      versionField.addEventListener('dblclick', function(e) {
-        e.stopPropagation();
-      });
-      versionField.addEventListener('focus', function(e) {
-        versionField.select();
-      });
+
+        versionField.onblur = finishEdit;
+        versionField.onkeydown = function(e) {
+          if (e.key === 'Enter') {
+            versionField.blur();
+          }
+          if (e.key === 'Escape') {
+            renderVersionText();
+          }
+        };
+        function finishEdit() {
+          let val = versionField.value.trim();
+          if (!val.startsWith('v')) val = 'v' + val;
+          setStoredVersion(val);
+          versionVal = val;
+          renderVersionText();
+        }
+      }
     });
+
+    // Show/hide content
+    function showContent(section) {
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(s => s.classList.add('hidden'));
+      document.getElementById(section).classList.remove('hidden');
+    }
+    function toggleSidebar() {
+      const container = document.getElementById('mainContainer');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      container.classList.toggle('sidebar-collapsed');
+      if (container.classList.contains('sidebar-collapsed')) {
+        toggleBtn.style.left = '4rem';
+      } else {
+        toggleBtn.style.left = '16rem';
+      }
+    }
   </script>
   <div id="mainContainer" class="flex h-screen relative">
     <!-- Sidebar -->
@@ -190,7 +259,7 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <input id="sidebarVersionField" class="sidebar-version-field" spellcheck="false" />
+        <span id="sidebarVersionWrapper"></span>
       </div>
     </aside>
     <!-- Sidebar toggle button -->
@@ -204,8 +273,8 @@
       <div id="content" class="content-section hidden w-full h-full">
         <iframe src="https://members.nexusclimate.co" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
-      <div id="projects" class="content-section hidden w-full h-full">
-        <iframe src="https://login.nexusclimate.co/projects.html" class="w-full min-h-[80vh]" loading="lazy" frameborder="0"></iframe>
+      <div id="projects" class="content-section hidden" style="padding:0;margin:0;height:100vh;width:100vw;max-width:100%;max-height:100%;">
+        <iframe id="projects-iframe" src="https://login.nexusclimate.co/projects.html" frameborder="0"></iframe>
       </div>
       <div id="uk" class="content-section hidden p-6">
         <h2 class="text-xl font-bold mb-2">UK Chapter</h2>
@@ -243,43 +312,5 @@
       </div>
     </main>
   </div>
-  <script>
-    function showContent(section) {
-      const sections = document.querySelectorAll('.content-section');
-      sections.forEach(s => s.classList.add('hidden'));
-      document.getElementById(section).classList.remove('hidden');
-    }
-    function toggleSidebar() {
-      const container = document.getElementById('mainContainer');
-      const toggleBtn = document.getElementById('sidebarToggle');
-      container.classList.toggle('sidebar-collapsed');
-      if (container.classList.contains('sidebar-collapsed')) {
-        toggleBtn.style.left = '4rem';
-      } else {
-        toggleBtn.style.left = '16rem';
-      }
-    }
-    // Sidebar version field opens changelog on Enter/Space, or if you blur/click out
-    document.addEventListener('DOMContentLoaded', function () {
-      const versionField = document.getElementById('sidebarVersionField');
-      versionField.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          versionField.blur();
-          showContent('changelog');
-        }
-      });
-      versionField.addEventListener('blur', function(e) {
-        // Save on blur, but don't change page
-      });
-      versionField.addEventListener('dblclick', function(e) {
-        e.stopPropagation();
-      });
-      versionField.addEventListener('keyup', function(e) {
-        if (e.key === ' ' && document.activeElement === versionField) {
-          showContent('changelog');
-        }
-      });
-    });
-  </script>
 </body>
 </html>
