@@ -14,8 +14,6 @@
     }
     .edit-btn:hover, .save-btn:hover { background: #f97316; color: #fff; }
     .delete-btn:hover { background: #f43f5e; color: #fff; }
-    .search-bar input { border: 1.5px solid #d1d5db; }
-    .search-bar input:focus { outline: 2px solid #f97316; border-color: #f97316; }
     .description-box,
     .description-static {
       border: 2px solid #f97316;
@@ -39,7 +37,6 @@
       outline: 2px solid #f97316;
       background: #fffde7;
     }
-    /* Wide and consistent project card */
     .project-card {
       max-width: 760px;
       min-width: 0;
@@ -62,18 +59,16 @@
   <div class="w-full min-h-screen flex flex-col">
     <div class="p-8 pb-4 pt-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-4">Projects</h1>
-      <div class="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
-        <div class="flex flex-col sm:flex-row items-center gap-2 search-bar w-full sm:w-auto">
-          <input type="text" id="searchInput" placeholder="Search projects..." class="px-3 py-2 rounded w-full sm:w-64 text-sm" />
-          <select id="sortSelect" class="px-2 py-2 rounded border text-sm">
-            <option value="title">Sort: Title (A-Z)</option>
-            <option value="date">Sort: Due Date</option>
-            <option value="company">Sort: Company (A-Z)</option>
-          </select>
-          <button id="addProject" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow edit-btn flex items-center gap-1">
-            <span class="text-lg font-bold">+</span> Add Project
-          </button>
-        </div>
+      <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mb-2">
+        <button id="addProject" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow edit-btn flex items-center gap-1">
+          <span class="text-lg font-bold">+</span> Add Project
+        </button>
+        <select id="sortSelect" class="px-2 py-2 rounded border text-sm w-48">
+          <option value="title">Sort: Title (A-Z)</option>
+          <option value="date">Sort: Due Date</option>
+          <option value="company">Sort: Company (A-Z)</option>
+        </select>
+        <input type="text" id="searchInput" placeholder="Search projects..." class="px-3 py-2 rounded w-full sm:w-64 text-sm border border-gray-300" />
       </div>
     </div>
     <div id="projectsContainer" class="flex-1 w-full px-8 pb-8">
@@ -83,32 +78,25 @@
     </div>
   </div>
   <script>
-    // Utilities for localStorage
     function getProjects() {
       return JSON.parse(localStorage.getItem('projects') || '[]');
     }
     function saveProjects(projects) {
       localStorage.setItem('projects', JSON.stringify(projects));
     }
-
-    // DOM references
     const projectsList = document.getElementById('projectsList');
     const addProjectBtn = document.getElementById('addProject');
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
-
-    // Render all projects
     function renderProjects() {
       const projects = getProjects();
       const query = (searchInput.value || '').toLowerCase();
       let sortBy = sortSelect.value;
-
       let filtered = projects.filter(proj =>
         (proj.title || '').toLowerCase().includes(query) ||
         (proj.company || '').toLowerCase().includes(query) ||
         (proj.description || '').toLowerCase().includes(query)
       );
-
       filtered.sort((a, b) => {
         if (sortBy === 'title') {
           return (a.title || '').localeCompare(b.title || '');
@@ -119,21 +107,15 @@
         }
         return 0;
       });
-
       projectsList.innerHTML = '';
       filtered.forEach((project, idx) => {
         projectsList.appendChild(createProjectCard(project, idx, filtered, projects));
       });
     }
-
-    // Create a card (edit mode if new or editing)
     function createProjectCard(project, idx, filtered, allProjects) {
       const div = document.createElement('div');
       div.className = 'bg-white shadow-md rounded-lg project-card relative flex flex-col';
-
-      // Map idx in filtered to idx in allProjects
       let realIdx = allProjects.indexOf(project);
-
       if (project.editing) {
         div.innerHTML = `
           <div class="flex justify-between items-center mb-2">
@@ -164,8 +146,6 @@
           </div>
         `;
       }
-
-      // Add event listeners
       setTimeout(() => {
         if (project.editing) {
           div.querySelector(`#save-${realIdx}`).onclick = () => saveEdit(realIdx);
@@ -174,27 +154,20 @@
         }
         div.querySelector(`#delete-${realIdx}`).onclick = () => deleteProject(realIdx);
       });
-
       return div;
     }
-
-    // Add new project (goes into edit mode)
     addProjectBtn.onclick = function() {
       const projects = getProjects();
       projects.push({ title: '', company: '', description: '', due: '', editing: true });
       saveProjects(projects);
       renderProjects();
     };
-
-    // Edit project
     function editProject(idx) {
       const projects = getProjects();
       projects[idx].editing = true;
       saveProjects(projects);
       renderProjects();
     }
-
-    // Save project edit
     function saveEdit(idx) {
       const title = document.getElementById(`title-${idx}`).value.trim();
       const company = document.getElementById(`company-${idx}`).value.trim();
@@ -205,20 +178,14 @@
       saveProjects(projects);
       renderProjects();
     }
-
-    // Delete project
     function deleteProject(idx) {
       const projects = getProjects();
       projects.splice(idx, 1);
       saveProjects(projects);
       renderProjects();
     }
-
-    // Filter and sort events
     searchInput.addEventListener('input', renderProjects);
     sortSelect.addEventListener('change', renderProjects);
-
-    // Initial load
     renderProjects();
   </script>
 </body>
