@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IDAIC Member Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Roboto', sans-serif; }
     html, body { height: 100%; margin: 0; }
@@ -29,12 +29,12 @@
     }
     .sidebar-link {
       display: block;
-      padding: 0.5rem 0.75rem;
+      padding: 0.45rem 0.75rem;
       border-radius: 0.375rem;
       color: #fff;
       font-size: 1rem;
       font-weight: 500;
-      margin-bottom: 2px;
+      margin-bottom: 0.1rem;
       cursor: pointer;
       opacity: 0.95;
       transition: background 0.18s, color 0.18s;
@@ -46,10 +46,10 @@
       outline: none;
     }
     .sidebar-section-title {
-      font-weight: 700 !important;
-      font-size: 1rem;
+      font-weight: 900 !important;
+      font-size: 1.07rem;
       letter-spacing: 0.01em;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.4rem;
       margin-top: 1.4rem;
     }
     .sidebar-section-title:first-of-type {
@@ -57,34 +57,53 @@
     }
     .sidebar-divider {
       border-top: 2px solid #f97316;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.2rem;
       opacity: 0.9;
     }
     .sidebar-section {
-      margin-bottom: 1.2rem !important;
+      margin-bottom: 0.7rem !important;
     }
-    /* Make the Asana embed responsive */
+    /* Make the Asana embed responsive and page colored */
     .asana-embed-container {
       max-width: 100%;
       overflow: auto;
+      background: #f3f4f6 !important; /* bg-gray-100 */
+      padding: 0;
+      border-radius: 0.5rem;
     }
     .asana-embed-iframe {
       width: 100% !important;
-      max-width: 800px;
-      min-width: 320px;
+      min-width: 0 !important;
+      min-height: 80vh !important;
+      height: 80vh !important;
+      background: #f3f4f6 !important; /* bg-gray-100 */
       border: none;
       margin: 0 auto;
       display: block;
+    }
+    .asana-embed-footer {
+      background: #f3f4f6 !important;
     }
     @media (max-width: 900px) {
       .asana-embed-iframe {
         width: 100% !important;
         min-width: 0 !important;
+        min-height: 65vh !important;
+        height: 65vh !important;
       }
     }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
+  <!-- Version code at the very top for easy maintenance -->
+  <script>
+    // To update version, just edit here and below
+    const currentVersion = "v0.4.1";
+    window.addEventListener('DOMContentLoaded', function () {
+      const verEls = document.querySelectorAll('.sidebar-version');
+      verEls.forEach(el => el.textContent = currentVersion);
+    });
+  </script>
   <div id="mainContainer" class="flex h-screen relative">
     <!-- Sidebar -->
     <aside id="sidebar" class="w-64 bg-black text-white flex flex-col transition-all duration-300">
@@ -95,9 +114,9 @@
 
         <!-- MAIN SECTION -->
         <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">Main</h3>
+          <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
           <div class="sidebar-divider sidebar-text"></div>
-          <nav class="space-y-2 mb-4">
+          <nav class="mb-1">
             <a href="#" onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
             <a href="#" onclick="showContent('content')" class="sidebar-link sidebar-text">Content</a>
             <a href="#" onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
@@ -106,9 +125,9 @@
 
         <!-- CHAPTERS -->
         <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">Chapters</h3>
+          <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
           <div class="sidebar-divider sidebar-text"></div>
-          <nav class="space-y-2 mb-4">
+          <nav class="mb-1">
             <a href="#" onclick="showContent('uk')" class="sidebar-link sidebar-text">UK</a>
             <a href="#" onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
           </nav>
@@ -116,18 +135,18 @@
 
         <!-- EVENTS -->
         <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">Events</h3>
+          <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
           <div class="sidebar-divider sidebar-text"></div>
-          <nav class="space-y-2 mb-4">
+          <nav class="mb-1">
             <a href="#" onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
           </nav>
         </div>
 
         <!-- NEWS -->
         <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">Climate News</h3>
+          <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
           <div class="sidebar-divider sidebar-text"></div>
-          <nav class="space-y-2 mb-4">
+          <nav class="mb-1">
             <a href="#" onclick="showContent('news')" class="sidebar-link sidebar-text">Climate Solution News</a>
             <a href="#" onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
           </nav>
@@ -135,16 +154,16 @@
 
         <!-- OTHER -->
         <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">Other</h3>
+          <h3 class="uppercase sidebar-section-title sidebar-text">OTHER</h3>
           <div class="sidebar-divider sidebar-text"></div>
-          <nav class="space-y-2 mb-4">
+          <nav class="mb-1">
             <a href="#" onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
           </nav>
         </div>
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <span id="sidebarVersion" class="sidebar-version" tabindex="0" title="Show Change Log">v0.4.0</span>
+        <span id="sidebarVersion" class="sidebar-version" tabindex="0" title="Show Change Log">v0.4.1</span>
       </div>
     </aside>
 
@@ -194,7 +213,7 @@
         <h2 class="text-xl font-bold mb-4">Feedback</h2>
         <div class="asana-embed-container">
           <link rel="stylesheet" href="https://form.asana.com/static/asana-form-embed-style.css"/>
-          <iframe class="asana-embed-iframe" height="533" src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"></iframe>
+          <iframe class="asana-embed-iframe" src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"></iframe>
           <div class="asana-embed-footer">
             <a rel="nofollow noopener" target="_blank" class="asana-embed-footer-link" href="https://asana.com/?utm_source=embedded_form">
               <span class="asana-embed-footer-text">Form powered by</span>
