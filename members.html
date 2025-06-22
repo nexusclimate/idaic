@@ -71,14 +71,12 @@
     .sidebar-section {
       margin-bottom: 0.7rem !important;
     }
-    /* Projects iframe */
     #projects.content-section {
       padding:0;margin:0;height:100vh;width:100vw;max-width:100%;max-height:100%;
     }
     #projects-iframe {
       width:100vw;height:100vh;min-height:100vh;min-width:100vw;border:none;display:block;background:#f3f4f6;
     }
-    /* Feedback form styling for left alignment */
     #feedback.content-section {
       padding: 0 !important;
       margin: 0 !important;
@@ -105,26 +103,6 @@
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <script>
-    // Show/hide content
-    function showContent(section) {
-      const sections = document.querySelectorAll('.content-section');
-      sections.forEach(s => s.classList.add('hidden'));
-      document.getElementById(section).classList.remove('hidden');
-    }
-    function toggleSidebar() {
-      const container = document.getElementById('mainContainer');
-      const toggleBtn = document.getElementById('sidebarToggle');
-      container.classList.toggle('sidebar-collapsed');
-      if (container.classList.contains('sidebar-collapsed')) {
-        toggleBtn.style.left = '4rem';
-      } else {
-        toggleBtn.style.left = '16rem';
-      }
-    }
-    // Version variable
-    const sidebarVersion = "v0.4.3";
-  </script>
   <div id="mainContainer" class="flex h-screen relative">
     <!-- Sidebar -->
     <aside id="sidebar" class="w-64 bg-black text-white flex flex-col transition-all duration-300">
@@ -137,9 +115,9 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav class="mb-1">
-            <a href="#" onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
-            <a href="#" onclick="showContent('content')" class="sidebar-link sidebar-text">Content</a>
-            <a href="#" onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
+            <a href="#" onclick="showContent('dashboard'); return false;" class="sidebar-link sidebar-text">Dashboard</a>
+            <a href="#" onclick="showContent('content'); return false;" class="sidebar-link sidebar-text">Content</a>
+            <a href="#" onclick="showContent('projects'); return false;" class="sidebar-link sidebar-text">Projects</a>
           </nav>
         </div>
         <!-- CHAPTERS -->
@@ -147,8 +125,8 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav class="mb-1">
-            <a href="#" onclick="showContent('uk')" class="sidebar-link sidebar-text">UK</a>
-            <a href="#" onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
+            <a href="#" onclick="showContent('uk'); return false;" class="sidebar-link sidebar-text">UK</a>
+            <a href="#" onclick="showContent('mena'); return false;" class="sidebar-link sidebar-text">MENA</a>
           </nav>
         </div>
         <!-- EVENTS -->
@@ -156,7 +134,7 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav class="mb-1">
-            <a href="#" onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
+            <a href="#" onclick="showContent('events'); return false;" class="sidebar-link sidebar-text">Upcoming Events</a>
           </nav>
         </div>
         <!-- NEWS -->
@@ -164,8 +142,8 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav class="mb-1">
-            <a href="#" onclick="showContent('news')" class="sidebar-link sidebar-text">Climate Solution News</a>
-            <a href="#" onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
+            <a href="#" onclick="showContent('news'); return false;" class="sidebar-link sidebar-text">Climate Solution News</a>
+            <a href="#" onclick="showContent('uaeNews'); return false;" class="sidebar-link sidebar-text">UAE Climate News</a>
           </nav>
         </div>
         <!-- OTHER -->
@@ -173,14 +151,14 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">OTHER</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav class="mb-1">
-            <a href="#" onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
+            <a href="#" onclick="showContent('feedback'); return false;" class="sidebar-link sidebar-text">Feedback</a>
           </nav>
         </div>
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
         <!-- CHANGELOG VERSION LINK -->
-        <a href="#" class="sidebar-version-link" onclick="showContent('changelog');return false;">v0.4.3</a>
+        <a href="https://login.nexusclimate.co/changelog.html" target="_blank" rel="noopener" class="sidebar-version-link">v0.4.3</a>
       </div>
     </aside>
     <!-- Sidebar toggle button -->
@@ -232,5 +210,25 @@
       </div>
     </main>
   </div>
+  <script>
+    function showContent(section) {
+      // Hide all content sections
+      var sections = document.querySelectorAll('.content-section');
+      sections.forEach(function(s) { s.classList.add('hidden'); });
+      // Show only the selected section
+      var el = document.getElementById(section);
+      if (el) el.classList.remove('hidden');
+    }
+    function toggleSidebar() {
+      const container = document.getElementById('mainContainer');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      container.classList.toggle('sidebar-collapsed');
+      if (container.classList.contains('sidebar-collapsed')) {
+        toggleBtn.style.left = '4rem';
+      } else {
+        toggleBtn.style.left = '16rem';
+      }
+    }
+  </script>
 </body>
 </html>
