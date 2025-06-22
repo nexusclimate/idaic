@@ -28,13 +28,30 @@
       outline: 2px solid #f97316;
       background: #fffde7;
     }
-    /* Make grid responsive and fit container, not viewport */
-    #projectsList {
-      width: 100%;
+    /* Description styled when saved (display mode) */
+    .description-static {
+      border: 2px solid #f97316;
+      background: #fffbe8;
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      min-height: 48px;
+      margin-bottom: 0.5rem;
+      white-space: pre-wrap;
+      font-size: 1rem;
+      color: #374151;
+      margin-top: 0.5rem;
+    }
+    /* Compact card */
+    .project-card {
+      max-width: 380px;
+      min-width: 0;
+      padding: 1.25rem 1.1rem 1.1rem 1.1rem;
       margin: 0 auto;
+      height: auto;
     }
     @media (max-width: 900px) {
       #projectsList { grid-template-columns: 1fr !important; }
+      .project-card { max-width: 100%; }
     }
   </style>
 </head>
@@ -109,20 +126,22 @@
     // Create a card (edit mode if new or editing)
     function createProjectCard(project, idx, filtered, allProjects) {
       const div = document.createElement('div');
-      div.className = 'bg-white shadow-md rounded-lg p-5 relative flex flex-col';
+      div.className = 'bg-white shadow-md rounded-lg project-card relative flex flex-col';
 
       // Map idx in filtered to idx in allProjects
       let realIdx = allProjects.indexOf(project);
 
       if (project.editing) {
         div.innerHTML = `
-          <input type="text" class="editable-field text-xl font-semibold mb-2 block w-full rounded border-gray-300 px-2 py-1" placeholder="Project Title" value="${project.title || ''}" id="title-${realIdx}">
+          <div class="flex justify-between items-center mb-2">
+            <input type="text" class="editable-field text-xl font-semibold block w-full rounded border-gray-300 px-2 py-1" placeholder="Project Title" value="${project.title || ''}" id="title-${realIdx}">
+            <input type="date" class="editable-field text-gray-700 ml-2 w-36 rounded border-gray-300 px-2 py-1" value="${project.due || ''}" id="due-${realIdx}" style="flex:0 0 auto;">
+          </div>
           <div class="flex items-center mb-2">
             <span class="text-gray-700 font-semibold mr-2">Company:</span>
             <input type="text" class="editable-field text-gray-700 flex-1 rounded border-gray-300 px-2 py-1" placeholder="Company Name" value="${project.company || ''}" id="company-${realIdx}">
           </div>
-          <textarea class="editable-field description-box text-gray-700 mb-2 block w-full px-2 py-1" rows="2" placeholder="Description" id="desc-${realIdx}">${project.description || ''}</textarea>
-          <input type="date" class="editable-field text-gray-700 mb-3 block w-full rounded border-gray-300 px-2 py-1" value="${project.due || ''}" id="due-${realIdx}">
+          <textarea class="editable-field description-box text-gray-700 block w-full px-2 py-1 mb-3" rows="2" placeholder="Description" id="desc-${realIdx}">${project.description || ''}</textarea>
           <div class="flex gap-2">
             <button class="save-btn bg-green-500 text-white px-3 py-1 rounded" id="save-${realIdx}">Save</button>
             <button class="delete-btn bg-gray-200 text-gray-700 px-3 py-1 rounded" id="delete-${realIdx}">Delete</button>
@@ -130,11 +149,13 @@
         `;
       } else {
         div.innerHTML = `
-          <h2 class="text-xl font-semibold mb-1">${project.title || '(Untitled Project)'}</h2>
-          ${project.company ? `<span class="text-gray-600 text-base mb-2 block"><span class="font-semibold">Company:</span> ${project.company}</span>` : ''}
-          <p class="text-gray-700 mb-2">${project.description || ''}</p>
-          <span class="text-sm text-gray-500 block mb-2">${project.due ? 'Due Date: ' + project.due : ''}</span>
-          <div class="flex gap-2">
+          <div class="flex justify-between items-start mb-2">
+            <h2 class="text-xl font-semibold">${project.title || '(Untitled Project)'}</h2>
+            <span class="text-xs text-gray-500 ml-2 whitespace-nowrap">${project.due ? 'Due: ' + project.due : ''}</span>
+          </div>
+          ${project.company ? `<span class="text-gray-600 text-base mb-1 block"><span class="font-semibold">Company:</span> ${project.company}</span>` : ''}
+          <div class="description-static">${project.description || ''}</div>
+          <div class="flex gap-2 mt-2">
             <button class="edit-btn bg-orange-100 text-orange-600 px-3 py-1 rounded" id="edit-${realIdx}">Edit</button>
             <button class="delete-btn bg-gray-200 text-gray-700 px-3 py-1 rounded" id="delete-${realIdx}">Delete</button>
           </div>
