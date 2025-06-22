@@ -12,20 +12,24 @@
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     main, .content-section, .prose, .prose * { color: #000 !important; }
-    .sidebar-version {
+    .sidebar-version-field {
+      background: transparent;
+      border: none;
       color: #f97316 !important;
       font-weight: bold;
-      cursor: pointer;
       font-size: 0.82rem;
-      padding-left: 0.25rem;
-      transition: color 0.18s;
-      user-select: none;
-      border-radius: 5px;
-      padding: 2px 10px;
+      width: 58px;
       outline: none;
+      padding: 2px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+      text-align: center;
     }
-    .sidebar-version:active, .sidebar-version:focus {
+    .sidebar-version-field:focus {
       background: #fff7ed;
+      box-shadow: 0 0 0 2px #f97316;
+      cursor: text;
     }
     .sidebar-link {
       display: block;
@@ -37,14 +41,14 @@
       margin-bottom: 0.1rem;
       cursor: pointer;
       opacity: 0.95;
-      transition: background 0.18s, color 0.18s;
+      transition: color 0.18s;
       letter-spacing: 0;
+      background: transparent;
     }
     .sidebar-link:hover, .sidebar-link:focus {
-      background: #222;
       color: #f97316 !important;
-      opacity: 1;
       outline: none;
+      background: transparent;
     }
     .sidebar-section-title {
       font-weight: 900 !important;
@@ -96,10 +100,40 @@
 <body class="bg-gray-100 text-gray-800">
   <!-- Version code at the very top for easy maintenance -->
   <script>
-    const currentVersion = "v4.1.0";
+    function getStoredVersion() {
+      return localStorage.getItem('sidebarVersion') || "v4.1.0";
+    }
+    function setStoredVersion(val) {
+      localStorage.setItem('sidebarVersion', val);
+    }
     window.addEventListener('DOMContentLoaded', function () {
-      const verEls = document.querySelectorAll('.sidebar-version');
-      verEls.forEach(el => el.textContent = currentVersion);
+      const versionField = document.getElementById('sidebarVersionField');
+      versionField.value = getStoredVersion();
+      versionField.addEventListener('change', function() {
+        let val = versionField.value.trim();
+        if (!val.startsWith('v')) val = 'v' + val;
+        setStoredVersion(val);
+        versionField.value = val;
+      });
+      versionField.addEventListener('blur', function() {
+        let val = versionField.value.trim();
+        if (!val.startsWith('v')) val = 'v' + val;
+        setStoredVersion(val);
+        versionField.value = val;
+      });
+      versionField.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') versionField.blur();
+      });
+      // Show changelog when version is clicked or focused and Enter is pressed
+      versionField.addEventListener('click', function(e) {
+        versionField.select();
+      });
+      versionField.addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+      });
+      versionField.addEventListener('focus', function(e) {
+        versionField.select();
+      });
     });
   </script>
   <div id="mainContainer" class="flex h-screen relative">
@@ -156,7 +190,7 @@
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <span id="sidebarVersion" class="sidebar-version" tabindex="0" title="Show Change Log">v4.1.0</span>
+        <input id="sidebarVersionField" class="sidebar-version-field" spellcheck="false" />
       </div>
     </aside>
     <!-- Sidebar toggle button -->
@@ -171,7 +205,7 @@
         <iframe src="https://members.nexusclimate.co" class="w-full h-full" loading="lazy" frameborder="0"></iframe>
       </div>
       <div id="projects" class="content-section hidden w-full h-full">
-        <iframe src="https://nexusclimate.github.io/idaic/projects.html" class="w-full min-h-[80vh]" loading="lazy" frameborder="0"></iframe>
+        <iframe src="https://login.nexusclimate.co/projects.html" class="w-full min-h-[80vh]" loading="lazy" frameborder="0"></iframe>
       </div>
       <div id="uk" class="content-section hidden p-6">
         <h2 class="text-xl font-bold mb-2">UK Chapter</h2>
@@ -225,17 +259,26 @@
         toggleBtn.style.left = '16rem';
       }
     }
-    // Sidebar version click - open changelog embedded
-    document.getElementById('sidebarVersion').addEventListener('click', function(e) {
-      e.preventDefault();
-      showContent('changelog');
-    });
-    // For accessibility: allow keyboard Enter/Space to trigger changelog
-    document.getElementById('sidebarVersion').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        showContent('changelog');
-      }
+    // Sidebar version field opens changelog on Enter/Space, or if you blur/click out
+    document.addEventListener('DOMContentLoaded', function () {
+      const versionField = document.getElementById('sidebarVersionField');
+      versionField.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          versionField.blur();
+          showContent('changelog');
+        }
+      });
+      versionField.addEventListener('blur', function(e) {
+        // Save on blur, but don't change page
+      });
+      versionField.addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+      });
+      versionField.addEventListener('keyup', function(e) {
+        if (e.key === ' ' && document.activeElement === versionField) {
+          showContent('changelog');
+        }
+      });
     });
   </script>
 </body>
