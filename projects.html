@@ -42,7 +42,7 @@
       min-width: 0;
       width: 100%;
       padding: 1.25rem 1.1rem 1.1rem 1.1rem;
-      margin: 0 auto;
+      margin: 0;
       height: auto;
       box-sizing: border-box;
       display: flex;
@@ -57,7 +57,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-0 m-0">
   <div class="w-full min-h-screen flex flex-col">
-    <div class="p-8 pb-4 pt-8">
+    <div class="p-8 pb-4 pt-8 pl-8">
       <h1 class="text-3xl font-bold text-gray-900 mb-4">Projects</h1>
       <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto mb-2">
         <button id="addProject" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2 rounded-lg shadow edit-btn flex items-center gap-1">
@@ -71,8 +71,8 @@
         <input type="text" id="searchInput" placeholder="Search projects..." class="px-3 py-2 rounded w-full sm:w-64 text-sm border border-gray-300" />
       </div>
     </div>
-    <div id="projectsContainer" class="flex-1 w-full px-8 pb-8">
-      <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-full">
+    <div id="projectsContainer" class="flex-1 w-full pb-8">
+      <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-full ml-8 justify-start">
         <!-- Projects will be rendered here -->
       </div>
     </div>
