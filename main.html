@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IDAIC Member Portal</title>
+
+  <!-- Override Portal so magic-link emails land right back on this page -->
   <script>
     window.ghostPortalConfig = {
       signInUrl: 'https://login.nexusclimate.co/members.html'
     };
   </script>
   <script defer src="https://members.nexusclimate.co/portal.min.js"></script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
@@ -17,15 +20,47 @@
     html, body { height: 100%; margin: 0; }
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
-    iframe { border: 0; width: 100%; height: 100vh; display: block; background: #f3f4f6; }
-    .sidebar-link { display: block; padding: 0.45rem 0.75rem; color: #fff; margin-bottom: 0.1rem; border-radius: 0.375rem; transition: color .18s; cursor: pointer; }
+    main, .content-section, .prose, .prose * { color: #000 !important; }
+    iframe {
+      border: 0;
+      width: 100%;
+      height: 100vh;
+      display: block;
+      background: #f3f4f6;
+    }
+    #sidebar { width: 16rem; }
+    .sidebar-link {
+      display: block;
+      padding: 0.45rem 0.75rem;
+      color: #fff;
+      margin-bottom: 0.1rem;
+      border-radius: 0.375rem;
+      transition: color .18s;
+      cursor: pointer;
+    }
     .sidebar-link:hover { color: #f97316 !important; }
-    .sidebar-section-title { font-weight: 900; font-size: 1.07rem; margin-top: 1.4rem; }
-    .sidebar-divider { border-top: 2px solid #f97316; margin-bottom: 0.2rem; opacity: 0.9; }
-    .sidebar-version-link { color: #f97316; font-weight: bold; font-size: 0.82rem; text-decoration: underline; padding: 2px 10px; border: none; background: transparent; cursor: pointer; }
+    .sidebar-section-title {
+      font-weight: 900;
+      font-size: 1.07rem;
+      margin-top: 1.4rem;
+    }
+    .sidebar-divider {
+      border-top: 2px solid #f97316;
+      margin-bottom: 0.2rem;
+      opacity: 0.9;
+    }
+    .sidebar-version-link {
+      color: #f97316;
+      font-weight: bold;
+      font-size: 0.82rem;
+      text-decoration: underline;
+      padding: 2px 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
   </style>
 </head>
-
 <body class="bg-gray-100 text-gray-800">
   <div id="mainContainer" class="flex h-screen relative">
     <aside id="sidebar" class="bg-black text-white flex flex-col transition-all duration-300">
@@ -33,61 +68,17 @@
         <a href="#" onclick="showContent('dashboard')">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
-
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
             <a onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
-            <a onclick="showContent('content')"   class="sidebar-link sidebar-text">Content</a>
-            <a onclick="showContent('projects')"  class="sidebar-link sidebar-text">Projects</a>
-          </nav>
-        </div>
-
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('uk')" class="sidebar-link sidebar-text">UK</a>
-            <a onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
-          </nav>
-        </div>
-
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
-          </nav>
-        </div>
-
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('news')" class="sidebar-link sidebar-text">Climate Solution News</a>
-            <a onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
-          </nav>
-        </div>
-
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">MEMBERS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('members')" class="sidebar-link sidebar-text">Members</a>
-            <a onclick="showContent('contacts')" class="sidebar-link sidebar-text">Contacts</a>
-          </nav>
-        </div>
-
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">OTHER</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
+            <a onclick="showContent('content')" class="sidebar-link sidebar-text">Content</a>
+            <a onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
+            <a onclick="showContent('members')" class="sidebar-link sidebar-text">Our Members</a>
           </nav>
         </div>
       </div>
-
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
         <a href="/index.html" class="text-orange-500 hover:font-bold">Log out</a>
         <button class="sidebar-version-link" onclick="showContent('changelog')">v0.4.5</button>
@@ -101,51 +92,15 @@
         <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
         <p>This is your main dashboard. Customize with summaries or widgets here.</p>
       </div>
-
       <div id="content" class="content-section hidden">
-        <iframe src="https://members.nexusclimate.co"></iframe>
+        <iframe id="ghostFrame" src="https://members.nexusclimate.co"></iframe>
       </div>
-
       <div id="projects" class="content-section hidden">
         <iframe src="https://login.nexusclimate.co/projects.html"></iframe>
       </div>
-
-      <div id="uk" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">UK Chapter</h2>
-        <p>Information and updates for the UK chapter.</p>
-      </div>
-
-      <div id="mena" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">MENA Chapter</h2>
-        <p>Information and updates for the MENA chapter.</p>
-      </div>
-
-      <div id="events" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Upcoming Events</h2>
-        <p>Stay tuned for upcoming climate events and workshops.</p>
-      </div>
-
-      <div id="news" class="content-section hidden">
-        <iframe src="https://climatesolutions.news/"></iframe>
-      </div>
-
-      <div id="uaeNews" class="content-section hidden">
-        <iframe src="https://news.nexusclimate.co/ae"></iframe>
-      </div>
-
       <div id="members" class="content-section hidden">
-        <iframe src="https://github.com/nexusclimate/idaic/blob/main/members.html"></iframe>
+        <iframe src="https://login.nexusclimate.co/members.html"></iframe>
       </div>
-
-      <div id="contacts" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Contact Directory</h2>
-        <p>Important contact information or internal stakeholder list.</p>
-      </div>
-
-      <div id="feedback" class="content-section hidden">
-        <iframe src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true" title="Feedback Form"></iframe>
-      </div>
-
       <div id="changelog" class="content-section hidden">
         <iframe src="https://login.nexusclimate.co/changelog.html"></iframe>
       </div>
@@ -163,6 +118,14 @@
       c.classList.toggle('sidebar-collapsed');
       btn.style.left = c.classList.contains('sidebar-collapsed') ? '4rem' : '16rem';
     }
+    window.addEventListener('message', (evt) => {
+      if (evt.origin === 'https://login.nexusclimate.co' && evt.data.type === 'signedIn') {
+        const url = evt.data.data.redirectUrl;
+        const frame = document.getElementById('ghostFrame');
+        frame.src = url;
+        showContent('content');
+      }
+    });
   </script>
 </body>
 </html>
