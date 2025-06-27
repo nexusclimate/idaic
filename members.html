@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>IDAIC Member Portal</title>
-  <!-- Tailwind and fonts -->
+
+  <!-- Tailwind + Roboto -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+
   <style>
     body { font-family: 'Roboto', sans-serif; }
     html, body { height: 100%; margin: 0; }
@@ -14,44 +16,43 @@
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     main, .content-section, .prose, .prose * { color: #000 !important; }
 
-    /* Sidebar styles */
-    .sidebar-link { /* your existing styles here */ }
-    .sidebar-section-title { /* ... */ }
-    .sidebar-divider { /* ... */ }
-    .sidebar-version-link { /* ... */ }
-    /* (keep any other existing CSS rules you had) */
+    /* Sidebar core */
+    #sidebar { width: 16rem; }
+    .sidebar-link { display:block; padding:0.45rem 0.75rem; color:#fff; margin-bottom:0.1rem; border-radius:0.375rem; transition:color .18s; cursor:pointer; }
+    .sidebar-link:hover { color:#f97316 !important; }
+    .sidebar-section-title { font-weight:900; font-size:1.07rem; margin-top:1.4rem; }
+    .sidebar-divider { border-top:2px solid #f97316; margin-bottom:0.2rem; opacity:0.9; }
+    .sidebar-version-link { color:#f97316; font-weight:bold; font-size:0.82rem; text-decoration:underline; padding:2px 10px; border:none; background:transparent; cursor:pointer; }
 
-    /* Iframe should fill its section */
+    /* Iframes fill area */
     iframe {
-      border: 0;
-      width: 100%;
-      height: 100vh;
-      display: block;
-      background: #f3f4f6;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+      border:0;
+      width:100%;
+      height:100vh;
+      display:block;
+      background:#f3f4f6;
     }
   </style>
 </head>
+
 <body class="bg-gray-100 text-gray-800">
   <div id="mainContainer" class="flex h-screen relative">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 bg-black text-white flex flex-col transition-all duration-300">
+    <aside id="sidebar" class="bg-black text-white flex flex-col transition-all duration-300">
       <div class="p-4 flex-grow">
         <a href="/index.html">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png"
                alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
-        <!-- MAIN SECTION -->
+        <!-- MAIN -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
-            <a href="#" onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
-            <a href="#" onclick="showContent('content')"   class="sidebar-link sidebar-text">Content</a>
-            <a href="#" onclick="showContent('projects')"  class="sidebar-link sidebar-text">Projects</a>
+            <a onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
+            <a onclick="showContent('content')"   class="sidebar-link sidebar-text">Content</a>
+            <a onclick="showContent('projects')"  class="sidebar-link sidebar-text">Projects</a>
           </nav>
         </div>
         <!-- CHAPTERS -->
@@ -59,8 +60,8 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
-            <a href="#" onclick="showContent('uk')"  class="sidebar-link sidebar-text">UK</a>
-            <a href="#" onclick="showContent('mena')"class="sidebar-link sidebar-text">MENA</a>
+            <a onclick="showContent('uk')"   class="sidebar-link sidebar-text">UK</a>
+            <a onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
           </nav>
         </div>
         <!-- EVENTS -->
@@ -68,16 +69,16 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
-            <a href="#" onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
+            <a onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
           </nav>
         </div>
-        <!-- NEWS -->
+        <!-- CLIMATE NEWS -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
-            <a href="#" onclick="showContent('news')"    class="sidebar-link sidebar-text">Climate Solution News</a>
-            <a href="#" onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
+            <a onclick="showContent('news')"    class="sidebar-link sidebar-text">Climate Solution News</a>
+            <a onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
           </nav>
         </div>
         <!-- OTHER -->
@@ -85,18 +86,18 @@
           <h3 class="uppercase sidebar-section-title sidebar-text">OTHER</h3>
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
-            <a href="#" onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
+            <a onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
           </nav>
         </div>
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
-        <a href="/index.html" class="text-orange-500 text-base hover:font-bold">Log out</a>
-        <a href="#" class="sidebar-version-link" onclick="showContent('changelog')">v0.4.5</a>
+        <a href="/index.html" class="text-orange-500 hover:font-bold">Log out</a>
+        <button class="sidebar-version-link" onclick="showContent('changelog')">v0.4.5</button>
       </div>
     </aside>
 
-    <!-- Sidebar toggle button -->
-    <button onclick="toggleSidebar()" id="sidebarToggle"
+    <!-- Toggle Sidebar -->
+    <button id="sidebarToggle" onclick="toggleSidebar()"
             class="absolute bottom-4 left-64 bg-orange-500 text-white px-2 py-1 text-xs rounded shadow z-50 transition-all duration-300">
       ☰
     </button>
@@ -109,8 +110,8 @@
         <p>This is your main dashboard. Customize with summaries or widgets here.</p>
       </div>
 
-      <!-- Ghost Content (blog) -->
-      <div id="content" class="content-section hidden w-full h-full">
+      <!-- Ghost Blog -->
+      <div id="content" class="content-section hidden">
         <iframe src="https://members.nexusclimate.co"></iframe>
       </div>
 
@@ -149,7 +150,8 @@
 
       <!-- Feedback Form -->
       <div id="feedback" class="content-section hidden">
-        <iframe src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true" title="Feedback Form"></iframe>
+        <iframe src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"
+                title="Feedback Form"></iframe>
       </div>
 
       <!-- Changelog -->
@@ -160,25 +162,21 @@
   </div>
 
   <script>
-    // Show/hide sections
     function showContent(section) {
       document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
       const el = document.getElementById(section);
       if (el) el.classList.remove('hidden');
     }
-
-    // Toggle sidebar collapse
     function toggleSidebar() {
-      const container = document.getElementById('mainContainer');
+      const c = document.getElementById('mainContainer');
       const btn = document.getElementById('sidebarToggle');
-      container.classList.toggle('sidebar-collapsed');
-      btn.style.left = container.classList.contains('sidebar-collapsed') ? '4rem' : '16rem';
+      c.classList.toggle('sidebar-collapsed');
+      btn.style.left = c.classList.contains('sidebar-collapsed') ? '4rem' : '16rem';
     }
 
-    // Listen for magic-link callback success
+    // Listen for magic-link callback success and reload the Ghost iframe
     window.addEventListener('message', (evt) => {
       if (evt.origin === 'https://login.nexusclimate.co' && evt.data.type === 'ghost-auth-success') {
-        // Reload the Ghost iframe and show it
         const frame = document.querySelector('#content iframe');
         if (frame) {
           frame.contentWindow.location.reload();
