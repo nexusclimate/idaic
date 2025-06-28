@@ -27,10 +27,10 @@
     <!-- Sidebar -->
     <aside id="sidebar" class="bg-black text-white flex flex-col transition-all duration-300 w-64">
       <div class="p-4 flex-grow">
-        <a href="/index.html">
+        <a href="/index.html"><!-- logout page -->
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_trans.png" alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
-        <!-- MAIN -->
+        <!-- NAV -->
         <div class="sidebar-section">
           <h3 class="uppercase sidebar-section-title sidebar-text">MAIN</h3>
           <div class="sidebar-divider sidebar-text"></div>
@@ -38,41 +38,6 @@
             <a onclick="showContent('dashboard')" class="sidebar-link sidebar-text">Dashboard</a>
             <a onclick="showContent('content')" class="sidebar-link sidebar-text">Content</a>
             <a onclick="showContent('projects')" class="sidebar-link sidebar-text">Projects</a>
-          </nav>
-        </div>
-        <!-- CHAPTERS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">CHAPTERS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('uk')" class="sidebar-link sidebar-text">UK</a>
-            <a onclick="showContent('mena')" class="sidebar-link sidebar-text">MENA</a>
-          </nav>
-        </div>
-        <!-- EVENTS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">EVENTS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('events')" class="sidebar-link sidebar-text">Upcoming Events</a>
-          </nav>
-        </div>
-        <!-- CLIMATE NEWS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">CLIMATE NEWS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('news')" class="sidebar-link sidebar-text">Climate Solution News</a>
-            <a onclick="showContent('uaeNews')" class="sidebar-link sidebar-text">UAE Climate News</a>
-          </nav>
-        </div>
-        <!-- MEMBERS -->
-        <div class="sidebar-section">
-          <h3 class="uppercase sidebar-section-title sidebar-text">MEMBERS</h3>
-          <div class="sidebar-divider sidebar-text"></div>
-          <nav>
-            <a onclick="showContent('members')" class="sidebar-link sidebar-text">Our Members</a>
-            <a onclick="showContent('contacts')" class="sidebar-link sidebar-text">Contacts</a>
           </nav>
         </div>
         <!-- OTHER -->
@@ -85,7 +50,7 @@
         </div>
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
-        <a href="/index.html" class="text-orange-500 hover:font-bold">Log out</a>
+        <button onclick="logout()" class="text-orange-500 hover:font-bold">Log out</button>
         <button class="sidebar-version-link" onclick="showContent('changelog')">v0.4.5</button>
       </div>
     </aside>
@@ -97,40 +62,15 @@
     <main class="flex-1 h-screen overflow-y-auto">
       <div id="dashboard" class="content-section p-6">
         <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
-        <p>This is your main dashboard. Customize with summaries or widgets here.</p>
+        <p>This is your main dashboard.</p>
       </div>
       <div id="content" class="content-section hidden">
-        <iframe id="ghostFrame" src="https://members.nexusclimate.co"></iframe>
+        <iframe src="https://members.nexusclimate.co"></iframe>
       </div>
       <div id="projects" class="content-section hidden">
-        <iframe src="https://login.nexusclimate.co/projects.html"></iframe>
+        <h2 class="text-xl font-bold mb-2">Projects & Comments</h2>
+        <div id="project-list"></div>
       </div>
-      <div id="uk" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">UK Chapter</h2>
-        <p>Information and updates for the UK chapter.</p>
-      </div>
-      <div id="mena" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">MENA Chapter</h2>
-        <p>Information and updates for the MENA chapter.</p>
-      </div>
-      <div id="events" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Upcoming Events</h2>
-        <p>Stay tuned for upcoming climate events and workshops.</p>
-      </div>
-      <div id="news" class="content-section hidden">
-        <iframe src="https://climatesolutions.news/"></iframe>
-      </div>
-      <div id="uaeNews" class="content-section hidden">
-        <iframe src="https://news.nexusclimate.co/ae"></iframe>
-      </div>
-      <div id="members" class="content-section hidden">
-        <iframe src="https://login.nexusclimate.co/members.html"></iframe>
-      </div>
-      <div id="contacts" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Contacts</h2>
-        <p>Relevant contact information can be added here.</p>
-      </div>
-
       <!-- Feedback with Asana embed -->
       <div id="feedback" class="content-section hidden p-6">
         <form class="asana-form"
@@ -139,25 +79,43 @@
         </form>
         <script async defer src="https://form.asana.com/static/embed.js"></script>
       </div>
-
       <div id="changelog" class="content-section hidden">
         <iframe src="https://login.nexusclimate.co/changelog.html"></iframe>
       </div>
     </main>
   </div>
 
-  <script>
-    function showContent(section) {
+  <!-- Toast live region -->
+  <div aria-live="assertive" class="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6">
+    <div id="toast-container" class="flex w-full flex-col items-center space-y-4 sm:items-end"></div>
+  </div>
+
+  <script type="module">
+    import { sendOtp, verifyOtp, isLoggedIn } from './ABC.js';
+    import { loadProjects, setupProjects } from './projects.js';
+
+    // Authentication check
+    if (!isLoggedIn()) {
+      window.location.href = '/login.html';
+    }
+
+    // Load projects/comments
+    setupProjects();
+    loadProjects();
+
+    // Show sections
+    window.showContent = section => {
       document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-      const el = document.getElementById(section);
-      if (el) el.classList.remove('hidden');
-    }
-    function toggleSidebar() {
-      const c = document.getElementById('mainContainer');
-      const btn = document.getElementById('sidebarToggle');
-      c.classList.toggle('sidebar-collapsed');
-      btn.style.left = c.classList.contains('sidebar-collapsed') ? '4rem' : '16rem';
-    }
+      document.getElementById(section).classList.remove('hidden');
+    };
+    window.toggleSidebar = () => {
+      const c = document.getElementById('mainContainer'); const b = document.getElementById('sidebarToggle');
+      c.classList.toggle('sidebar-collapsed'); b.style.left = c.classList.contains('sidebar-collapsed') ? '4rem' : '16rem';
+    };
+    window.logout = () => {
+      localStorage.removeItem('nexus_jwt');
+      window.location.href = '/login.html';
+    };
   </script>
 </body>
 </html>
