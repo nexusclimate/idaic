@@ -3,120 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Changelog</title>
+  <title>Changelog – Nexus Climate</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Roboto', sans-serif; }
-    .editable-area {
-      min-height: 200px;
-      outline: none;
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+    iframe {
       border: none;
-      background: transparent;
       width: 100%;
-      font-size: 1.05rem;
-      line-height: 1.7;
-    }
-    .editable-area[contenteditable="true"] {
-      border: 1.5px solid #F97316;
-      background: #fffbe8;
-      border-radius: 8px;
-      padding: 12px;
-    }
-    .edit-btn, .save-btn {
-      transition: background 0.2s, color 0.2s;
-    }
-    .footer-nexus {
-      position: fixed;
-      bottom: 24px;
-      left: 32px;
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-      font-size: 0.93rem;
-    }
-    .footer-nexus-text {
-      color: #222;
-      font-weight: 400;
-      font-size: 0.95rem;
-    }
-    .footer-nexus-link {
-      color: #f97316;
-      text-decoration: underline;
-      font-weight: 400;
-      margin-left: 3px;
-    }
-    .footer-nexus-logo {
-      max-height: 28px;
-      height: 28px;
-      width: auto;
-      margin-top: 2px;
-    }
-    @media (max-width: 700px) {
-      .footer-nexus { left: 12px; bottom: 10px; }
-      .footer-nexus-logo { max-height: 22px; }
+      height: 100vh;
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-900 p-8 flex flex-col min-h-screen">
-  <!-- Changelog box -->
-  <div class="w-full max-w-5xl bg-white p-8 rounded border border-gray-200" style="margin-left:0;">
-    <h1 class="text-2xl font-bold pb-2 mb-4 text-black border-b border-gray-200">
-      Welcome to the Minimal Viable Version Change log
-    </h1>
-    <div class="mb-4 flex gap-2">
-      <button id="editBtn" class="edit-btn bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 text-sm">Edit</button>
-      <button id="saveBtn" class="save-btn bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm hidden">Save</button>
-    </div>
-    <div id="editableChangelog" class="editable-area prose prose-sm max-w-none text-gray-900" contenteditable="false">
-      <h2 class="text-xl font-semibold text-black mb-1">v0.3.12 – Integration of External News Websites <span class="text-xs text-gray-500">(Latest – 21 June 2025)</span></h2>
-      <ul>
-        <li><strong>12.1</strong> – Improvements to change log</li>
-        <li><strong>11</strong> – Updates to sidebar</li>
-        <li><strong>10</strong> – Improved section headers</li>
-      </ul>
-      <h2 class="text-xl font-semibold text-black mb-1 mt-4">v0.2 – Integration of Blog post hosted by Ghost</h2>
-      <ul>
-        <li>Blog content integrated via Ghost platform</li>
-      </ul>
-      <h2 class="text-xl font-semibold text-black mb-1 mt-4">v0.1 – IDAIC Members page deployment</h2>
-      <ul>
-        <li>Initial MVP of the IDAIC members portal</li>
-      </ul>
-    </div>
-  </div>
-  <!-- Fixed footer bottom left -->
-  <div class="footer-nexus">
-    <span class="footer-nexus-text">
-      Build by
-      <a href="https://www.nexusclimate.vc" target="_blank" class="footer-nexus-link">Nexus Climate</a>
-    </span>
-    <img src="https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png" alt="Nexus Climate Logo" class="footer-nexus-logo">
-  </div>
-  <script>
-    const editBtn = document.getElementById('editBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const changelog = document.getElementById('editableChangelog');
-
-    editBtn.onclick = function() {
-      changelog.setAttribute('contenteditable', 'true');
-      changelog.focus();
-      editBtn.classList.add('hidden');
-      saveBtn.classList.remove('hidden');
-    };
-    saveBtn.onclick = function() {
-      changelog.setAttribute('contenteditable', 'false');
-      editBtn.classList.remove('hidden');
-      saveBtn.classList.add('hidden');
-      // Optional: persist to localStorage
-      localStorage.setItem('changelog', changelog.innerHTML);
-    };
-    // On page load, try to load from localStorage
-    if (localStorage.getItem('changelog')) {
-      changelog.innerHTML = localStorage.getItem('changelog');
-    }
-  </script>
+<body>
+  <iframe src="https://members.nexusclimate.co/release-notes/" title="Changelog – Nexus Climate"></iframe>
 </body>
 </html>
