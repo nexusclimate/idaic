@@ -28,7 +28,7 @@
     <aside id="sidebar" class="bg-black text-white flex flex-col transition-all duration-300 w-64">
       <div class="p-4 flex-grow">
         <a href="/index.html">
-          <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
+          <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_trans.png" alt="IDAIC Logo" class="w-36 mb-6"/>
         </a>
         <!-- MAIN -->
         <div class="sidebar-section">
@@ -130,14 +130,22 @@
         <h2 class="text-xl font-bold mb-2">Contacts</h2>
         <p>Relevant contact information can be added here.</p>
       </div>
-      <div id="feedback" class="content-section hidden">
-        <iframe src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true" title="Feedback Form"></iframe>
+
+      <!-- Feedback with Asana embed -->
+      <div id="feedback" class="content-section hidden p-6">
+        <form class="asana-form"
+              data-asana-form-id="1210566681423806"
+              data-asana-form-public-url-key="7T2LDaogOEHUOjHXfzKXng">
+        </form>
+        <script async defer src="https://form.asana.com/static/embed.js"></script>
       </div>
+
       <div id="changelog" class="content-section hidden">
         <iframe src="https://login.nexusclimate.co/changelog.html"></iframe>
       </div>
     </main>
   </div>
+
   <script>
     function showContent(section) {
       document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
