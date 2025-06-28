@@ -7,22 +7,22 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Roboto', sans-serif; background: #f9fafb; }
-    .container { max-width: 600px; margin: 3rem auto; padding: 1rem; }
-    .back-link { color: #1f2937; text-decoration: underline; margin-bottom: 1rem; display: inline-block; }
+    body { font-family: 'Roboto', sans-serif; background: #f9fafb; margin: 0; padding: 0; }
+    .container { width: 100%; margin: 0; padding: 0; }
+    .embedded-form { width: 100vw; height: 100vh; border: none; }
   </style>
 </head>
 <body>
-  <div class="container bg-white rounded-lg shadow-lg p-6">
-    <a href="main.html" class="back-link">&larr; Back to portal</a>
-    <h1 class="text-2xl font-bold mb-4">Feedback</h1>
-
-    <!-- Asana embed -->
-    <form class="asana-form"
-          data-asana-form-id="1210566681423806"
-          data-asana-form-public-url-key="7T2LDaogOEHUOjHXfzKXng">
-    </form>
-    <script async defer src="https://form.asana.com/static/embed.js"></script>
+  <div class="container">
+    <!-- Asana embed full form -->
+    <link rel="stylesheet" href="https://form.asana.com/static/asana-form-embed-style.css"/>
+    <iframe class="embedded-form" src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"></iframe>
+    <div class="asana-embed-footer">
+      <a rel="nofollow noopener" target="_blank" class="asana-embed-footer-link" href="https://asana.com/?utm_source=embedded_form">
+        <span class="asana-embed-footer-text">Form powered by</span>
+        <div class="asana-embed-footer-logo" role="img" aria-label="Logo of Asana"></div>
+      </a>
+    </div>
   </div>
 </body>
 </html>
