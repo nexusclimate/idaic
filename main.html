@@ -15,17 +15,17 @@
     .sidebar-collapsed .sidebar-text { display: none; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     iframe { border: 0; width: 100%; height: 100vh; display: block; background: #f3f4f6; }
-    .sidebar-link { display: block; padding: 0.5rem 0.75rem; color: #fff; margin-bottom: 0.2rem; border-radius: 0.375rem; transition: color .18s; cursor: pointer; }
+    .sidebar-link { display: block; padding: 0.45rem 0.75rem; color: #fff; margin-bottom: 0.1rem; border-radius: 0.375rem; transition: color .18s; cursor: pointer; }
     .sidebar-link:hover { color: #f97316 !important; }
     .sidebar-section-title { font-weight: 900; font-size: 1.07rem; margin-top: 1.4rem; }
-    .sidebar-divider { border-top: 2px solid #f97316; margin-bottom: 0.5rem; opacity: 0.9; }
+    .sidebar-divider { border-top: 2px solid #f97316; margin-bottom: 0.2rem; opacity: 0.9; }
     .sidebar-version-link { color: #f97316; font-weight: bold; font-size: 0.82rem; text-decoration: underline; padding: 2px 10px; border: none; background: transparent; cursor: pointer; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
   <div id="mainContainer" class="flex h-screen relative">
     <!-- Sidebar -->
-    <aside id="sidebar" class="bg-black text-white flex flex-col w-64 transition-all duration-300">
+    <aside id="sidebar" class="bg-black text-white flex flex-col transition-all duration-300 w-64">
       <div class="p-4 flex-grow">
         <a href="/index.html">
           <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="w-36 mb-6"/>
@@ -81,13 +81,12 @@
           <div class="sidebar-divider sidebar-text"></div>
           <nav>
             <a onclick="showContent('feedback')" class="sidebar-link sidebar-text">Feedback</a>
-            <a onclick="showContent('changelog')" class="sidebar-link sidebar-text">Changelog</a>
           </nav>
         </div>
       </div>
       <div class="p-4 flex justify-between items-center text-sm sidebar-text">
-        <button onclick="logout()" class="text-orange-500 hover:font-bold">Log out</button>
-        <span class="sidebar-version-link">v0.4.5</span>
+        <a href="/index.html" class="text-orange-500 hover:font-bold">Log out</a>
+        <button class="sidebar-version-link" onclick="showContent('changelog')">v0.4.5</button>
       </div>
     </aside>
 
@@ -100,13 +99,11 @@
         <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
         <p>This is your main dashboard. Customize with summaries or widgets here.</p>
       </div>
-
       <div id="content" class="content-section hidden">
-        <iframe src="https://members.nexusclimate.co"></iframe>
+        <iframe id="ghostFrame" src="https://members.nexusclimate.co"></iframe>
       </div>
-      <div id="projects" class="content-section hidden p-6">
-        <h2 class="text-xl font-bold mb-2">Projects & Comments</h2>
-        <div id="project-list" class="space-y-4"></div>
+      <div id="projects" class="content-section hidden">
+        <iframe src="https://login.nexusclimate.co/projects.html"></iframe>
       </div>
       <div id="uk" class="content-section hidden p-6">
         <h2 class="text-xl font-bold mb-2">UK Chapter</h2>
@@ -143,30 +140,24 @@
         <script async defer src="https://form.asana.com/static/embed.js"></script>
       </div>
 
-      <div id="changelog" class="content-section hidden p-6">
+      <div id="changelog" class="content-section hidden">
         <iframe src="https://login.nexusclimate.co/changelog.html"></iframe>
       </div>
     </main>
   </div>
 
-  <!-- Toast live region -->
-  <div aria-live="assertive" class="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6">
-    <div id="toast-container" class="flex w-full flex-col items-center space-y-4 sm:items-end"></div>
-  </div>
-
-  <script type="module">
-    import { loadProjects, setupProjects } from './projects.js';
-    import { logout, toggleSidebar, showContent } from './ui.js';
-
-    // Auth guard (if desired)
-    // if (!localStorage.getItem('nexus_jwt')) window.location.href = '/login.html';
-
-    // Initialize projects
-    setupProjects();
-    loadProjects();
-
-    // Wire UI controls
-    // logout(), toggleSidebar(), showContent() imported above
+  <script>
+    function showContent(section) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+      const el = document.getElementById(section);
+      if (el) el.classList.remove('hidden');
+    }
+    function toggleSidebar() {
+      const c = document.getElementById('mainContainer');
+      const btn = document.getElementById('sidebarToggle');
+      c.classList.toggle('sidebar-collapsed');
+      btn.style.left = c.classList.contains('sidebar-collapsed') ? '4rem' : '16rem';
+    }
   </script>
 </body>
 </html>
