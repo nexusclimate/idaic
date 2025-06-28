@@ -10,9 +10,9 @@ const nodemailer = require('nodemailer');
 const app = express();
 
 // ─── CORS ───────────────────────────────────────────────────────────────────────
-// Allow requests from your GitHub Pages site
+// Allow your GitHub Pages or front-end origin
 app.use(cors({
-  origin: 'https://yourusername.github.io',  // ← replace
+  origin: 'https://yourusername.github.io',  // replace as needed
   methods: ['POST'],
   allowedHeaders: ['Content-Type'],
 }));
@@ -46,15 +46,21 @@ app.post('/api/send-otp', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email required' });
 
-    // Upsert user in membership.users
-    const { data: [user], error: upsertErr } = await db
+    // 1️⃣ Upsert user (no return needed here)
+    const { error: upsertErr } = await db
       .from('membership.users')
-      .upsert({ email })
-      .select('id')
-      .single();
+      .upsert({ email });
     if (upsertErr) throw upsertErr;
 
-    // Generate & store code
+    // 2️⃣ Fetch the user’s ID
+    const { data: user, error: fetchErr } = await db
+      .from('membership.users')
+      .select('id')
+      .eq('email', email)
+      .single();
+    if (fetchErr || !user) throw fetchErr || new Error('User fetch failed');
+
+    // 3️⃣ Generate & store code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     await db.from('membership.otps').insert({
       user_id:    user.id,
@@ -62,7 +68,7 @@ app.post('/api/send-otp', async (req, res) => {
       expires_at: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    // Send via Mailgun
+    // 4️⃣ Send via Mailgun
     await mailer.sendMail({
       from:    process.env.EMAIL_FROM,
       to:      email,
@@ -72,7 +78,7 @@ app.post('/api/send-otp', async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error('send-otp error', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -83,22 +89,29 @@ app.post('/api/verify-otp', async (req, res) => {
     const { email, code } = req.body;
     if (!email || !code) return res.status(400).json({ error: 'Email & code required' });
 
-    // Lookup user
-    const { data: [user] } = await db
+    // Find user
+    const { data: userData } = await db
       .from('membership.users')
       .select('id')
-      .eq('email', email);
+      .eq('email', email)
+      .single();
+    const user = userData;
     if (!user) return res.status(400).json({ error: 'Unknown email' });
 
-    // Lookup latest unused OTP
-    const { data: [otp] } = await db
+    // Fetch latest unused OTP
+    const { data: otpData } = await db
       .from('membership.otps')
       .select('*')
       .eq('user_id', user.id)
       .eq('used', false)
       .order('id', { ascending: false })
       .limit(1);
-    if (!otp || new Date(otp.expires_at) < new Date() || hashCode(code) !== otp.code_hash) {
+    const otp = otpData;
+    if (
+      !otp ||
+      new Date(otp.expires_at) < new Date() ||
+      hashCode(code) !== otp.code_hash
+    ) {
       return res.status(400).json({ error: 'Invalid or expired code' });
     }
 
@@ -109,7 +122,7 @@ app.post('/api/verify-otp', async (req, res) => {
     const token = jwt.sign({ sub: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token });
   } catch (err) {
-    console.error(err);
+    console.error('verify-otp error', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
