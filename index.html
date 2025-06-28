@@ -13,19 +13,21 @@
 <body class="bg-black text-[#FAFAFA] min-h-screen flex flex-col items-center justify-start pt-16">
   <!-- Logo -->
   <div class="mb-10">
-    <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="h-28">
+    <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png"
+         alt="IDAIC Logo" class="h-28">
   </div>
 
   <!-- Login Box -->
   <div class="w-full max-w-md p-8 space-y-6 bg-[#1a1a1a] rounded-xl shadow-xl mt-4">
     <h2 class="text-center text-2xl font-bold">IDAIC Members</h2>
 
-    <!-- Step 1: Request OTP -->
+    <!-- ① Request OTP -->
     <form id="otp-request-form" class="space-y-5">
       <div>
         <label for="email" class="block mb-1">Email</label>
         <input id="email" type="email" required
-               class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
+               class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA]
+                      focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
                placeholder="you@example.com" />
       </div>
       <button type="submit"
@@ -34,12 +36,13 @@
       </button>
     </form>
 
-    <!-- Step 2: Verify OTP -->
+    <!-- ② Verify OTP -->
     <form id="otp-verify-form" class="space-y-5 hidden">
       <div>
         <label for="code" class="block mb-1">Enter code</label>
         <input id="code" type="text" maxlength="6" required
-               class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
+               class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA]
+                      focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
                placeholder="123456" />
       </div>
       <button type="submit"
@@ -52,102 +55,58 @@
       <span class="text-[#DCDCDC] text-sm">or</span>
     </div>
 
-    <!-- Google Button -->
+    <!-- Google -->
     <div>
       <button onclick="signInWithGoogle()"
-              class="w-full py-2 bg-white text-black hover:bg-gray-100 rounded-lg font-semibold flex items-center justify-center">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5 mr-2" alt="Google logo" />
+              class="w-full py-2 bg-white text-black hover:bg-gray-100 rounded-lg font-semibold
+                     flex items-center justify-center">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg"
+             class="w-5 h-5 mr-2" alt="Google logo" />
         Sign in with Google
       </button>
     </div>
   </div>
 
-  <!-- Notification live region -->
+  <!-- Toast live region -->
   <div aria-live="assertive"
        class="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6">
     <div id="toast-container" class="flex w-full flex-col items-center space-y-4 sm:items-end"></div>
   </div>
 
-  <script>
-    const API = 'https://api.nexusclimate.co/otp';
+  <!-- OTP wiring -->
+  <script type="module">
+    import { sendOtp, verifyOtp, isLoggedIn } from './otp.js';
 
-    function showToast(message) {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = 'pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5';
-      toast.innerHTML = `
-        <div class="p-4 flex items-start">
-          <svg class="w-6 h-6 text-[#FF9900] shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-          </svg>
-          <div class="ml-3 w-0 flex-1 pt-0.5">
-            <p class="text-sm font-medium text-gray-900">${message}</p>
-          </div>
-          <button onclick="this.closest('div').remove()"
-                  class="ml-4 inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-[#FF9900] focus:outline-none">
-            <span class="sr-only">Close</span>
-            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1
-                         0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1
-                         0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0
-                         0-1.06-1.06L10 8.94 6.28 5.22Z" />
-            </svg>
-          </button>
-        </div>`;
-      container.appendChild(toast);
-      // Auto-remove after 4s
-      setTimeout(() => toast.remove(), 4000);
+    // If already logged in, skip to main
+    if (isLoggedIn()) {
+      window.location.href = '/main.html';
     }
 
-    // Step 1: Send OTP
     document.getElementById('otp-request-form').addEventListener('submit', async e => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
-      if (!email) return alert('Please enter your email');
-
-      const res = await fetch(`${API}/api/send-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) {
-        const { error } = await res.json();
-        return alert('Error sending code: ' + error);
+      try {
+        await sendOtp(email);
+        document.getElementById('otp-request-form').classList.add('hidden');
+        document.getElementById('otp-verify-form').classList.remove('hidden');
+        document.getElementById('code').focus();
+      } catch (err) {
+        alert(err.message);
       }
-
-      showToast('OTP sent! Check your inbox.');
-      document.getElementById('otp-request-form').classList.add('hidden');
-      document.getElementById('otp-verify-form').classList.remove('hidden');
-      document.getElementById('code').focus();
     });
 
-    // Step 2: Verify OTP
     document.getElementById('otp-verify-form').addEventListener('submit', async e => {
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const code  = document.getElementById('code').value.trim();
-
-      const res = await fetch(`${API}/api/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
-      });
-      const body = await res.json();
-      if (!res.ok) {
-        return alert('Verification failed: ' + body.error);
+      try {
+        await verifyOtp(email, code);
+      } catch (err) {
+        alert(err.message);
       }
-
-      localStorage.setItem('nexus_jwt', body.token);
-      window.location.href = '/main.html';
     });
 
     function signInWithGoogle() {
-      window.location.href = '/main.html';
-    }
-
-    // Redirect if already logged in
-    if (localStorage.getItem('nexus_jwt')) {
       window.location.href = '/main.html';
     }
   </script>
