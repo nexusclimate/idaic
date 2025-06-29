@@ -1,25 +1,10 @@
-// login.js
-
 const API_BASE = "https://api.nexusclimate.co/otp/api";
-
-fetch(`${API_BASE}/send-otp`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email }),
-});
-function isLoggedIn() {
-  return !!localStorage.getItem('idaic-token');
-}
-
-if (isLoggedIn()) {
-  window.location.href = '/main.html';
-}
 
 document.getElementById('otp-request-form').addEventListener('submit', async e => {
   e.preventDefault();
   const email = document.getElementById('email').value.trim();
   try {
-    const res = await fetch(`${API_BASE}/otp/api/send-otp`, {
+    const res = await fetch(`${API_BASE}/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
@@ -40,7 +25,7 @@ document.getElementById('otp-verify-form').addEventListener('submit', async e =>
   const email = document.getElementById('email').value.trim();
   const code  = document.getElementById('code').value.trim();
   try {
-    const res = await fetch(`${API_BASE}/otp/api/verify-otp`, {
+    const res = await fetch(`${API_BASE}/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, code })
