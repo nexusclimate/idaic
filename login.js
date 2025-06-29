@@ -1,8 +1,12 @@
 // login.js
 
-const API_BASE = 'https://api.nexusclimate.co/otp/api';
-fetch(`${API_BASE}/send-otp`, { method: 'POST', ... });
+const API_BASE = "https://api.nexusclimate.co/otp/api";
 
+fetch(`${API_BASE}/send-otp`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email }),
+});
 function isLoggedIn() {
   return !!localStorage.getItem('idaic-token');
 }
