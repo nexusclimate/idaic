@@ -50,7 +50,4 @@ app.post('/api/send-otp', async (req, res) => {
       [email]
     );
 
-    // Fetch user ID
-                                            [ Read 127 lines ]
-^G Help        ^O Write Out   ^W Where Is    ^K Cut         ^T Execute     ^C Location    M-U Undo
-^X Exit        ^R Read File   ^\ Replace     ^U Paste       ^J Justify     ^/ Go To Line  M-E Redo
+ 
