@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       type:    form.type.value,
       comment: form.comment.value
     };
-   const res = await fetch('https://api.nexusclimate.co/api/createFeedbackTask', {
+ const res = await fetch('https://api.nexusclimate.co:48765/api/createFeedbackTask', {
   method: 'POST',
   headers: {'Content-Type':'application/json'},
   body: JSON.stringify(data)
