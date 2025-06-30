@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
       type:    form.type.value,
       comment: form.comment.value
     };
-    const res = await fetch('/feedback/api/createFeedbackTask', {
-      method: 'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(data)
-    });
+   const res = await fetch('https://api.nexusclimate.co/api/createFeedbackTask', {
+  method: 'POST',
+  headers: {'Content-Type':'application/json'},
+  body: JSON.stringify(data)
+});
     const status = document.getElementById('status');
     if (res.ok) {
       status.textContent = 'Thanks for your feedback!';
