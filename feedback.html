@@ -65,30 +65,6 @@
     </form>
   </div>
 
-  <script>
-    document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const form = e.target;
-      const data = {
-        name: form.name.value,
-        email: form.email.value,
-        subject: form.subject.value,
-        type: form.type.value,
-        comment: form.comment.value
-      };
-      const res = await fetch('/api/createFeedbackTask', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
-      });
-      const status = document.getElementById('status');
-      if (res.ok) {
-        status.textContent = 'Thanks for your feedback!';
-        form.reset();
-      } else {
-        status.textContent = 'Submission failed. Please try again.';
-      }
-    });
-  </script>
+  <script src="/js/feedback-form.js" defer></script>
 </body>
 </html>
