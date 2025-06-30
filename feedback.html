@@ -1,24 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Feedback – IDAIC Members</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-    .asana-form { width: 100vw; height: 100vh; border: none; }
-  </style>
+  <title>Feedback</title>
 </head>
-<body>
-  <!-- Asana JS embed for cross-domain support without needing cookies -->
-  <link rel="stylesheet" href="https://form.asana.com/static/asana-form-embed-style.css"/>
-  <form class="asana-form"
-        data-asana-form-id="1210566681423806"
-        data-asana-form-public-url-key="7T2LDaogOEHUOjHXfzKXng">
-    Loading form...
-  </form>
-  <script async defer src="https://form.asana.com/static/embed.js"></script>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6 max-w-lg">
+    <form id="feedbackForm" class="space-y-4 bg-white p-6 rounded-lg shadow" style="border: 2px solid #FF9900;">
+      <!-- Name field -->
+      <div class="relative">
+        <label for="name" class="absolute -top-2 left-2 inline-block rounded-lg bg-white px-1 text-xs font-medium text-gray-900">Name</label>
+        <input type="text" name="name" id="name" placeholder="Jane Smith"
+               class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border-2 border-[#FF9900] focus:border-[#FF9900] placeholder:text-gray-400 sm:text-sm/6"
+               required>
+      </div>
+
+      <!-- Email field -->
+      <div class="relative">
+        <label for="email" class="absolute -top-2 left-2 inline-block rounded-lg bg-white px-1 text-xs font-medium text-gray-900">Email</label>
+        <input type="email" name="email" id="email" placeholder="you@example.com"
+               class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border-2 border-[#FF9900] focus:border-[#FF9900] placeholder:text-gray-400 sm:text-sm/6"
+               required>
+      </div>
+
+      <!-- Type dropdown -->
+      <div>
+        <label for="type" class="block text-sm/6 font-medium text-gray-900">Type</label>
+        <div class="mt-2 grid grid-cols-1">
+          <select id="type" name="type"
+            class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 border-2 border-[#FF9900] focus:border-[#FF9900] sm:text-sm/6">
+            <option value="enhancement">Enhancement</option>
+            <option value="bug">Bug</option>
+            <option value="feedback">Feedback</option>
+          </select>
+          <svg class="pointer-events-none col-start-1 row-start-1 mr-2 h-5 self-center justify-self-end text-gray-500 sm:h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Comment box -->
+      <div>
+        <label for="comment" class="block text-sm/6 font-medium text-gray-900">Add your comment</label>
+        <div class="mt-2">
+          <textarea rows="4" name="comment" id="comment" placeholder="Your feedback..."
+            class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border-2 border-[#FF9900] focus:border-[#FF9900] placeholder:text-gray-400 sm:text-sm/6"
+            required></textarea>
+        </div>
+      </div>
+
+      <!-- Submit button -->
+      <div>
+        <button type="submit"
+          class="inline-flex justify-center rounded-md py-2 px-4 text-white focus:outline-none"
+          style="background-color: #FF9900;">
+          Submit
+        </button>
+      </div>
+
+      <p id="status" class="mt-4 text-center text-gray-700"></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        name: form.name.value,
+        email: form.email.value,
+        type: form.type.value,
+        comment: form.comment.value
+      };
+      const res = await fetch('/api/createFeedbackTask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      const status = document.getElementById('status');
+      if (res.ok) {
+        status.textContent = 'Thanks for your feedback!';
+        form.reset();
+      } else {
+        status.textContent = 'Submission failed. Please try again.';
+      }
+    });
+  </script>
 </body>
 </html>
