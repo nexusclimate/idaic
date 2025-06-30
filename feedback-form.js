@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       type:    form.type.value,
       comment: form.comment.value
     };
-    const res = await fetch('api/createFeedbackTask', {
+    const res = await fetch('/feedback/api/createFeedbackTask', {
       method: 'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(data)
