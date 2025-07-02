@@ -3,21 +3,50 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Feedback</title>
-  <script defer src="feedback-form.js"></script>
+  <title>Send Us Feedback</title>
+  <!-- Asana embed CSS -->
+  <link
+    rel="stylesheet"
+    href="https://form.asana.com/static/asana-form-embed-style.css"
+  />
+  <style>
+    body { margin:0; font-family:sans-serif; }
+    #asana-form-container {
+      max-width:600px;
+      margin:2rem auto;
+      padding:1rem;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      border-radius:8px;
+    }
+  </style>
 </head>
 <body>
-  <form id="feedbackForm">
-    <input name="name" placeholder="Name" required><br>
-    <input name="email" type="email" placeholder="Email" required><br>
-    <input name="subject" placeholder="Subject" required><br>
-    <select name="type">
-      <option value="bug">Bug</option>
-      <option value="feedback">Feedback</option>
-    </select><br>
-    <textarea name="comment" placeholder="Your comments" required></textarea><br>
-    <button type="submit">Submit</button>
-    <p id="status"></p>
-  </form>
+  <h1 style="text-align:center; margin-top:2rem;">We’d Love Your Feedback</h1>
+  <div id="asana-form-container"></div>
+
+  <!-- Asana embed script -->
+  <script src="https://form.asana.com/static/asana-form-embed.js"></script>
+  <script>
+    AsanaFormEmbed.render({
+      selector: '#asana-form-container',
+      formKey: '7T2LDaogOEHUOjHXfzKXng',   // ← your Asana “Embed Key”
+      project:  '1210566681423806',         // ← your Asana Project GID
+      embed:    true,
+      width:    '100%',
+      height:   650
+    });
+  </script>
+
+  <footer style="text-align:center; margin:2rem 0;">
+    <small>
+      <a
+        href="https://asana.com/?utm_source=embedded_form"
+        target="_blank"
+        rel="noopener nofollow"
+      >
+        Powered by Asana
+      </a>
+    </small>
+  </footer>
 </body>
 </html>
