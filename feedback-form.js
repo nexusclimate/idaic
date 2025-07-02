@@ -1,28 +1,24 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('feedbackForm');
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    const data = {
-      name:    form.name.value,
-      email:   form.email.value,
-      subject: form.subject.value,
-      type:    form.type.value,
-      comment: form.comment.value
+import Asana from "asana";
+
+const client = Asana.Client.create().useAccessToken(process.env.ASANA_TOKEN);
+const PROJECT_GID = process.env.ASANA_PROJECT_GID;
+
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
+  }
+  const { name, email, subject, type, comment } = JSON.parse(event.body);
+  try {
+    await client.tasks.createTask({
+      projects: [PROJECT_GID],
+      name: `${type.charAt(0).toUpperCase() + type.slice(1)}: ${subject}`,
+      notes: `From: ${name} <${email}>\n\nType: ${type}\n\n${comment}`,
+    });
+    return { statusCode: 201, body: "Created" };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message }),
     };
- const res = await fetch('/feedback-api/createFeedbackTask', {
-  method: 'POST',
-  headers: {'Content-Type':'application/json'},
-  body: JSON.stringify(data)
-});
-    const status = document.getElementById('status');
-    if (res.ok) {
-      status.textContent = 'Thanks for your feedback!';
-      form.reset();
-    } else {
-      const err = await res.json().catch(()=>null);
-      status.textContent = err?.details 
-        ? `Error: ${err.details}` 
-        : 'Submission failed. Please try again.';
-    }
-  });
-});
+  }
+};
