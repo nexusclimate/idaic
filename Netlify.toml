@@ -1,3 +1,9 @@
 [build]
-  publish   = "public"
-  functions = "."   
+  publish = "."             # or "public" if that’s your static folder
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/createFeedbackTask"
+  to   = "/.netlify/functions/createFeedbackTask"
+  status = 200
+  force = true

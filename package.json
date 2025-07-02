@@ -1,0 +1,23 @@
+{
+  "name": "idaic",
+  "version": "1.0.0",
+  "main": "login.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexusclimate/idaic.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nexusclimate/idaic/issues"
+  },
+  "homepage": "https://github.com/nexusclimate/idaic#readme",
+  "description": "",
+  "dependencies": {
+    "asana": "^3.1.0"
+  }
+}
