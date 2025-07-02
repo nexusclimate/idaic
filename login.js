@@ -56,21 +56,25 @@ document
     e.preventDefault()
     const email = document.getElementById('email').value.trim()
 
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
+// Immediate UI & optimistic toast
+    document.getElementById('otp-request-form').classList.add('hidden')
+    document.getElementById('otp-verify-form').classList.remove('hidden')
+    createNotification({ message: 'Sending OTP…', success: true })
+
+    
+    const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
       })
       if (error) throw error
 
-      // flip forms
+      createNotification({ message: 'OTP sent! Check your email.', success: true })
+      document.getElementById('code').focus()
+
+    
+    } catch (err) {
       document.getElementById('otp-request-form').classList.add('hidden')
       document.getElementById('otp-verify-form').classList.remove('hidden')
-      document.getElementById('code').focus()
-      createNotification({ message: 'OTP sent! Check your email.', success: true })
-    } catch (err) {
       createNotification({ message: err.message, success: false })
     }
   })
