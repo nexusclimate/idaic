@@ -3,55 +3,53 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Asana Embed Debug</title>
+  <title>Send Us Feedback</title>
 
-  <!-- Asana embed styles -->
+  <!-- 1a: Asana embed styles -->
   <link
     rel="stylesheet"
     href="https://form.asana.com/static/asana-form-embed-style.css"
   />
 
+  <!-- 1b: Asana embed script (must be before your <asana-form-embed> tag) -->
+  <script
+    async
+    src="https://form.asana.com/static/asana-form-embed.js"
+  ></script>
+
+  <!-- Optional: Simple logger so you know it fired -->
+  <script>
+    console.log("📦 loading Asana embed script…");
+    window.addEventListener("asana-form-embed-loaded", () =>
+      console.log("✅ Asana embed loaded ✔")
+    );
+    window.addEventListener("error", e => {
+      console.error("❌ failed to load Asana script", e);
+    });
+  </script>
+
   <style>
-    html, body { margin:0; height:100%; }
-    .asana-embed-container {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      background: #f5f5f5;
-    }
-    .asana-embed-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
+    /* full-screen container */
+    body, html { margin:0; padding:0; height:100%; }
+    asana-form-embed { display: block; width:100%; height:100%; }
   </style>
 </head>
 
 <body>
-  <div class="asana-embed-container">
-    <p id="status">⏳ waiting for Asana embed…</p>
+  <!-- 1c: The custom element that will draw the form -->
+  <asana-form-embed
+    k="7T2LDaogOEHUOjHXfzKXng"
+    d="1210566681423806"
+    embed
+  ></asana-form-embed>
 
-    <!-- this will be replaced by Asana -->
-    <div
-      class="asana-embed"
-      data-key="7T2LDaogOEHUOjHXfzKXng"
-      data-project-id="1210566681423806"
-    ></div>
-  </div>
-
-  <script>
-    console.log("📦 loading Asana embed script…");
-    window.addEventListener("asanaEmbedLoaded", () => {
-      console.log("✅ Asana embed loaded ✔");
-      document.getElementById("status").textContent = "✅ embed initialized";
-    });
-  </script>
-
-  <script
-    src="https://form.asana.com/static/asana-form-embed.js"
-    async
-    onload="document.dispatchEvent(new Event('asanaEmbedLoaded'))"
-    onerror="console.error('❌ failed to load Asana script')"
-  ></script>
+  <!-- 1d: fallback if JS disabled -->
+  <noscript>
+    <iframe
+      src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"
+      style="border:none;width:100%;height:100%"
+      title="Feedback form"
+    ></iframe>
+  </noscript>
 </body>
 </html>
