@@ -1,0 +1,2 @@
+/feedback.html
+  Content-Security-Policy: default-src 'self' https://form.asana.com; script-src 'self' https://form.asana.com; style-src 'self' https://form.asana.com 'unsafe-inline'; frame-src 'self' https://form.asana.com https://*.asana.com; connect-src 'self' https://form.asana.com
