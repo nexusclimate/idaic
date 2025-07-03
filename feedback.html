@@ -5,41 +5,36 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Send Us Feedback</title>
 
-  <!-- 1) Asana embed styles -->
+  <!-- Asana’s embed styles -->
   <link
     rel="stylesheet"
     href="https://form.asana.com/static/asana-form-embed-style.css"
   />
 
   <style>
-    /* make sure the iframe fills the viewport */
-    body, html { margin: 0; height: 100%; }
+    /* make the embed fill the viewport */
+    body, html { margin:0; height:100%; }
     .asana-embed-container {
-      position: relative;
       width: 100%;
       height: 100%;
-    }
-    .asana-embed-iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      /* allow cookies + scripts + forms + popups inside the sandbox */
-      sandbox: allow-scripts allow-same-origin allow-forms allow-popups;
     }
   </style>
 </head>
 
 <body>
   <div class="asana-embed-container">
-    <!-- 2) sandboxed iframe with the right flags -->
-    <iframe
-      class="asana-embed-iframe"
-      src="https://form.asana.com/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"
-      title="Feedback form"
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-    ></iframe>
+    <!--
+      Asana will inject its own sandboxed iframe here.
+      data-key   = your embed key
+      data-project-id = your project GID
+    -->
+    <div
+      class="asana-embed"
+      data-key="7T2LDaogOEHUOjHXfzKXng"
+      data-project-id="1210566681423806"
+    ></div>
 
-    <!-- 3) Asana embed script to initialize the form -->
+    <!-- This script dynamically builds the iframe for you -->
     <script
       src="https://form.asana.com/static/asana-form-embed.js"
       async
