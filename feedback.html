@@ -1,28 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Send Us Feedback</title>
   <style>
-    html, body { margin:0; height:100%; }
-    iframe { width:100%; height:100%; border:none; }
+    body { font-family: sans-serif; padding: 1rem; }
+    form { max-width: 500px; margin: auto; display: grid; gap: .75rem; }
+    label { display: flex; flex-direction: column; }
+    button { padding: .5rem; }
   </style>
 </head>
 <body>
-
-  <!--
-    1) We use Asana's direct embed URL with embed=true
-    2) We sandbox it, but explicitly allow the kinds of things
-       Asana needs: same-origin (so cookies work), scripts,
-       forms, popups (they sometimes open thank-you page).
-  -->
-  <iframe
-  src="/feedback-form/?k=7T2LDaogOEHUOjHXfzKXng&d=1210566681423806&embed=true"
-  style="width:100%; height:100%; border:none;"
-  allow="autoplay; fullscreen; cookies"
-  title="Feedback form">
-</iframe>
-
+  <h1>Send Us Feedback</h1>
+  <form id="feedbackForm">
+    <label>Your name<input name="name" required></label>
+    <label>Your email<input name="email" type="email" required></label>
+    <label>Subject<input name="subject" required></label>
+    <label>Type
+      <select name="type" required>
+        <option value="feedback">Feedback</option>
+        <option value="bug">Bug</option>
+      </select>
+    </label>
+    <label>Comment<textarea name="comment" rows="5" required></textarea></label>
+    <button type="submit">Submit</button>
+    <p id="msg" aria-live="polite"></p>
+  </form>
+  <script>
+    document.getElementById("feedbackForm").onsubmit = async e => {
+      e.preventDefault();
+      const f = e.target, msg = document.getElementById("msg");
+      const data = {
+        name: f.name.value, email: f.email.value,
+        subject: f.subject.value, type: f.type.value,
+        comment: f.comment.value
+      };
+      msg.textContent = "Sending…";
+      try {
+        const res = await fetch("/.netlify/functions/createFeedbackTask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (res.ok) {
+          msg.textContent = "Thanks—your feedback is in Asana!";
+          f.reset();
+        } else {
+          msg.textContent = "Oops, something went wrong.";
+        }
+      } catch {
+        msg.textContent = "Network error.";
+      }
+    };
+  </script>
 </body>
 </html>
