@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-white">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IDAIC Member Portal</title>
 
-  <!-- Ghost Portal ---------------------------------------------------- -->
+  <!-- Ghost Portal (unchanged) -->
   <script>
     window.ghostPortalConfig = {
       signInUrl: "https://login.nexusclimate.co/members.html"
@@ -13,125 +13,141 @@
   </script>
   <script defer src="https://members.nexusclimate.co/portal.min.js"></script>
 
-  <!-- Fonts + compiled Tailwind -------------------------------------- -->
+  <!-- Fonts & compiled Tailwind -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles.css">
 
+  <!-- Minor global tweaks -->
   <style>
-    body,html { height:100%;margin:0;font-family:Inter,system-ui,sans-serif }
-    .sidebar-collapsed #sidebar { width:4rem!important }
-    .sidebar-collapsed .collapse-label { display:none }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,sans-serif}
+    iframe{border:0;width:100%;height:100vh;display:block;background:#f3f4f6}
+    .sidebar-collapsed #sidebar{width:4rem!important}
+    .sidebar-collapsed .collapse-label{display:none}
   </style>
 </head>
 
-<body class="bg-neutral-100 text-neutral-800">
-  <div id="mainContainer" class="flex h-screen">
+<body class="h-full text-neutral-900 bg-neutral-100">
+<div id="mainContainer" class="flex h-full">
 
-    <!-- ───── SIDEBAR ───── -->
-    <aside id="sidebar"
-           class="flex flex-col w-64 shrink-0 bg-black text-white"
-           x-data="{ collapsed:false, active:'dashboard' }">
+  <!-- ────────── SIDEBAR ────────── -->
+  <aside id="sidebar"
+         class="flex flex-col w-72 shrink-0 bg-black text-white"
+         x-data="{active:'dashboard'}">
 
-      <!-- logo -->
-      <div class="flex items-center h-16 px-6">
-        <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png"
-             alt="IDAIC" class="w-32"/>
-      </div>
+    <!-- Logo -->
+    <div class="flex items-center h-16 px-6 border-b border-white/10">
+      <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png"
+           alt="IDAIC" class="w-32">
+    </div>
 
-      <!-- navigation -->
-      <nav class="flex-1 overflow-y-auto px-2 py-4">
-        <ul class="space-y-1">
+    <!-- Nav -->
+    <nav class="flex-1 overflow-y-auto px-4 py-6">
+      <ul class="space-y-1 text-sm font-semibold">
 
-          <!-- link -->
-          <li>
-            <a href="#"
-               @click.prevent="active='dashboard'; showContent('dashboard')"
-               :class="active==='dashboard'
-                 ? 'bg-orange-500/20 text-orange-400'
-                 : 'hover:bg-white/10 text-white/80'"
-               class="group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium">
-              <!-- icon -->
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor"
-                   stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 12l2-2m0 0l7-7 7 7 2 2M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/>
-              </svg>
-              <span class="collapse-label">Dashboard</span>
-            </a>
-          </li>
+        <!-- Dashboard -->
+        <li>
+          <a href="#"
+             @click.prevent="active='dashboard';showContent('dashboard')"
+             :class="active==='dashboard'
+               ? 'bg-orange-500/25 text-orange-400'
+               : 'hover:bg-white/10 text-white/80'"
+             class="flex items-center gap-x-3 rounded-md px-3 py-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+                 d="M3 12l2-2m0 0l7-7 7 7 2 2M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>
+            <span class="collapse-label">Dashboard</span>
+          </a>
+        </li>
 
-          <!-- add more links the same way -->
-          <!-- example: Content -->
-          <li>
-            <a href="#"
-               @click.prevent="active='content'; showContent('content')"
-               :class="active==='content'
-                 ? 'bg-orange-500/20 text-orange-400'
-                 : 'hover:bg-white/10 text-white/80'"
-               class="group flex items-center gap-x-3 rounded-md px-3 py-2 text-sm font-medium">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
-                   viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M19 11H5m14 4H5m14-8H5m14-4H5"/>
-              </svg>
-              <span class="collapse-label">Content</span>
-            </a>
-          </li>
+        <!-- Content -->
+        <li>
+          <a href="#"
+             @click.prevent="active='content';showContent('content')"
+             :class="active==='content'
+               ? 'bg-orange-500/25 text-orange-400'
+               : 'hover:bg-white/10 text-white/80'"
+             class="flex items-center gap-x-3 rounded-md px-3 py-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+                 d="M4 6h16M4 12h16M4 18h16"/></svg>
+            <span class="collapse-label">Content</span>
+          </a>
+        </li>
 
-        </ul>
-      </nav>
+        <!-- Projects -->
+        <li>
+          <a href="#"
+             @click.prevent="active='projects';showContent('projects')"
+             :class="active==='projects'
+               ? 'bg-orange-500/25 text-orange-400'
+               : 'hover:bg-white/10 text-white/80'"
+             class="flex items-center gap-x-3 rounded-md px-3 py-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
+                 d="M12 8v4l3 3M18.364 5.636a9 9 0 11-12.728 0"/></svg>
+            <span class="collapse-label">Projects</span>
+          </a>
+        </li>
 
-      <!-- footer -->
-      <div class="border-t border-white/10 py-4 px-6 flex justify-between text-xs">
-        <a href="/index.html" class="text-orange-400 hover:underline">Log out</a>
-        <button class="underline text-orange-400"
-                @click="showContent('changelog')">v0.4.5</button>
-      </div>
+        <!-- Add more links exactly like above… -->
 
-      <!-- collapse button -->
-      <button id="sidebarToggle"
-              @click="collapsed=!collapsed;
-                      document.getElementById('mainContainer')
-                        .classList.toggle('sidebar-collapsed');
-                      $nextTick(()=>repositionToggle());"
-              class="absolute -right-3 top-4 w-6 h-6 rounded-full bg-orange-500
-                     text-white flex items-center justify-center text-sm z-50">
-        <span x-text="collapsed ? '›' : '‹'"></span>
-      </button>
-    </aside>
+      </ul>
+    </nav>
 
-    <!-- ───── MAIN PANE ───── -->
-    <main class="flex-1 overflow-y-auto">
-      <div id="dashboard" class="content-section p-8">
-        <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
-        <p>This is your main dashboard. Customise with summaries or widgets here.</p>
-      </div>
+    <!-- Footer -->
+    <div class="border-t border-white/10 px-6 py-4 text-xs flex justify-between">
+      <a href="/index.html" class="text-orange-400 hover:underline">Log&nbsp;out</a>
+      <button class="underline text-orange-400" @click="showContent('changelog')">v0.4.5</button>
+    </div>
+  </aside>
 
-      <div id="content" class="content-section hidden">
-        <iframe src="https://members.nexusclimate.co"></iframe>
-      </div>
-      <!-- add the rest of your sections/iframes here -->
-    </main>
-  </div>
+  <!-- ────────── MAIN CONTENT ────────── -->
+  <main class="flex-1 overflow-y-auto">
+    <div id="dashboard" class="content-section p-8">
+      <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
+      <p>This is your main dashboard. Customise with summaries or widgets here.</p>
+    </div>
 
-  <!-- helper JS (unchanged except null-guard) ------------------------- -->
-  <script>
-    function showContent(id) {
-      document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById(id);
-      if (target) target.classList.remove('hidden');
-    }
-    function repositionToggle() {
-      const btn = document.getElementById('sidebarToggle');
-      const sidebar = document.getElementById('sidebar');
-      if (!btn || !sidebar) return;
-      btn.style.left = sidebar.getBoundingClientRect().width + 'px';
-    }
-    document.addEventListener('DOMContentLoaded', repositionToggle);
-    window.addEventListener('resize', repositionToggle);
-  </script>
+    <div id="content"   class="content-section hidden"><iframe src="https://members.nexusclimate.co"></iframe></div>
+    <div id="projects"  class="content-section hidden"><iframe src="https://login.nexusclimate.co/projects.html"></iframe></div>
+    <!-- add other panes here -->
+  </main>
 
-  <!-- Alpine runtime -------------------------------------------------- -->
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x/dist/cdn.min.js"></script>
+  <!-- Collapse button -->
+  <button id="sidebarToggle"
+          onclick="toggleSidebar()"
+          class="absolute top-3 left-72 -ml-3 w-6 h-6 rounded-full bg-orange-500
+                 text-white flex items-center justify-center text-sm shadow">
+    ☰
+  </button>
+</div>
+
+<!-- Helper JS --------------------------------------------------------- -->
+<script>
+  function showContent(id){
+    document.querySelectorAll('.content-section').forEach(el=>el.classList.add('hidden'));
+    const target=document.getElementById(id);
+    if(target) target.classList.remove('hidden');
+  }
+
+  function toggleSidebar(){
+    const container=document.getElementById('mainContainer');
+    container.classList.toggle('sidebar-collapsed');
+    repositionToggle();
+  }
+
+  function repositionToggle(){
+    const btn=document.getElementById('sidebarToggle');
+    const sidebar=document.getElementById('sidebar');
+    if(!btn||!sidebar) return;
+    btn.style.left = sidebar.getBoundingClientRect().width + 'px';
+  }
+
+  document.addEventListener('DOMContentLoaded', repositionToggle);
+  window.addEventListener('resize', repositionToggle);
+</script>
+
+<!-- Alpine runtime ---------------------------------------------------- -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x/dist/cdn.min.js"></script>
 </body>
 </html>
