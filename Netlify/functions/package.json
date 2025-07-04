@@ -1,15 +1,7 @@
 {
-  "name": "functions",
+  "name": "idaic-netlify-functions",
   "version": "1.0.0",
-  "main": "createFeedbackTask.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "asana": "^3.1.0"
+    "asana": "^0.21.0"
   }
 }
