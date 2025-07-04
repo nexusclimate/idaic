@@ -3,7 +3,12 @@
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/api/createFeedbackTask"
-  to   = "/.netlify/functions/createFeedbackTask"
+  from = "/feedback-form/*"
+  to   = "https://form.asana.com/:splat"
   status = 200
-  force = true
+  force  = true
+  headers = { 
+    # let browsers send your site’s cookies along
+    "Access-Control-Allow-Origin" = "https://nexusclimate.co",
+    "Access-Control-Allow-Credentials" = "true"
+  }
