@@ -3,5 +3,27 @@
   "version": "1.0.0",
   "dependencies": {
     "asana": "^0.18.0"
+  },
+  "main": "feedback-form.js",
+ "scripts": {
+  "build:css": "npx tailwindcss -i src/styles.css -o public/assets/styles.css --minify",
+  "build": "npm run build:css"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nexusclimate/idaic.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nexusclimate/idaic/issues"
+  },
+  "homepage": "https://github.com/nexusclimate/idaic#readme",
+  "description": "",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11"
   }
 }
