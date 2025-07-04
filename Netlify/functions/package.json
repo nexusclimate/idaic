@@ -1,7 +1,0 @@
-{
-  "name": "idaic-netlify-functions",
-  "version": "1.0.0",
-  "dependencies": {
-    "asana": "^0.21.0"
-  }
-}
