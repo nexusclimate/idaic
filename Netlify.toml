@@ -1,15 +1,10 @@
 # netlify.toml
 [build]
-  publish = "public"    # or wherever your built site lives
-  command = "npm run build"  # if you have a build step
+  # since feedback.html is right at the root
+  publish = "."
 
 [[redirects]]
-  # force‐proxy anything under /feedback-form/ to Asana
   from = "/feedback-form/*"
   to   = "https://form.asana.com/:splat"
   status = 200
-  force  = true
-  headers = { 
-    "Access-Control-Allow-Origin"      = "https://nexusclimate.co",
-    "Access-Control-Allow-Credentials" = "true"
-  }
+  force = true
