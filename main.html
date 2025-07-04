@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IDAIC Member Portal</title>
 
-  <!-- Ghost Portal -->
+  <!-- Ghost Portal ----------------------------------------------------- -->
   <script>
     window.ghostPortalConfig = {
       signInUrl: "https://login.nexusclimate.co/members.html"
@@ -13,62 +13,102 @@
   </script>
   <script defer src="https://members.nexusclimate.co/portal.min.js"></script>
 
-  <!-- Fonts -->
+  <!-- Fonts & compiled Tailwind --------------------------------------- -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-
-  <!-- Compiled Tailwind (built by Netlify) -->
   <link rel="stylesheet" href="/assets/styles.css">
 
   <style>
-    body { font-family: 'Roboto', sans-serif; }
-    html,body { height: 100%; margin: 0; }
-
-    /* legacy helpers for toggle button */
+    body, html { height: 100%; margin: 0; font-family: 'Roboto', sans-serif; }
     .sidebar-collapsed #sidebar { width: 4rem !important; }
     .sidebar-collapsed .sidebar-text { display: none; }
-    iframe { border:0;width:100%;height:100vh;display:block;background:#f3f4f6; }
+    iframe { border: 0; width: 100%; height: 100vh; display: block; background: #f3f4f6; }
   </style>
 </head>
 
 <body class="bg-gray-100 text-gray-800">
   <div id="mainContainer" class="flex h-screen relative">
 
-    <!-- NEW SIDEBAR (Alpine) -->
-    {% include "sidebar.html" %}
+    <!-- ─── INLINE SIDEBAR (Alpine) ─────────────────────────────────── -->
+    <aside id="sidebar"
+           class="bg-black text-white flex flex-col w-64 h-full px-6 pt-6"
+           x-data="{ open:true, active:'dashboard' }">
 
-    <!-- optional toggle button you already had -->
+      <!-- Logo -->
+      <div class="flex items-center h-12 mb-4">
+        <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png"
+             alt="IDAIC logo" class="w-32">
+      </div>
+
+      <!-- Menu -->
+      <nav class="flex-1 overflow-y-auto space-y-6">
+        <div>
+          <button @click="open=!open"
+                  class="group flex w-full items-center gap-x-3 rounded-md px-2 py-2
+                         text-left text-sm font-semibold tracking-wide hover:bg-white/10">
+            <svg class="size-5 text-gray-400 transition-transform"
+                 :class="open && 'rotate-90'" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25
+                     4.25a.75.75 0 0 1 0 1.06l-4.25
+                     4.25a.75.75 0 0 1-1.06-1.06L11.94
+                     10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                clip-rule="evenodd"/>
+            </svg>
+            Main
+          </button>
+
+          <ul x-show="open" class="mt-1 pl-8 space-y-1">
+            <li>
+              <a @click.prevent="active='dashboard'; showContent('dashboard')"
+                 :class="active==='dashboard' ? 'text-orange-400' : ''"
+                 class="block rounded-md py-1 pl-3 text-sm hover:text-orange-400">
+                Dashboard
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- floating toggle button ---------------------------------------- -->
     <button id="sidebarToggle"
             onclick="toggleSidebar()"
             class="absolute bottom-4 bg-orange-500 text-white px-2 py-1
-                   text-xs rounded shadow z-50 transition-all duration-300">☰</button>
+                   text-xs rounded shadow z-50 transition-all duration-300">
+      ☰
+    </button>
 
-    <!-- main content panes -->
+    <!-- main content panes -------------------------------------------- -->
     <main class="flex-1 h-screen overflow-y-auto">
       <div id="dashboard" class="content-section p-6">
         <h1 class="text-2xl font-bold mb-4">Welcome Back</h1>
         <p>This is your main dashboard. Customise with summaries or widgets here.</p>
       </div>
-      <!-- (other iframes / sections unchanged)… -->
+      <!-- add your other panels / iframes here -->
     </main>
   </div>
 
-  <!-- existing helper JS (no edits needed) -->
+  <!-- helper JS ------------------------------------------------------- -->
   <script>
     function showContent(section) {
       document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
       const el = document.getElementById(section);
       if (el) el.classList.remove('hidden');
     }
+
     function toggleSidebar() {
       const container = document.getElementById('mainContainer');
       container.classList.toggle('sidebar-collapsed');
       repositionToggle();
     }
+
     function repositionToggle() {
       const btn = document.getElementById('sidebarToggle');
       const sidebar = document.getElementById('sidebar');
-      btn.style.left = `${sidebar.getBoundingClientRect().width}px`;
+      if (!btn || !sidebar) return;                       // null-guard
+      btn.style.left = sidebar.getBoundingClientRect().width + 'px';
     }
+
     document.addEventListener('DOMContentLoaded', repositionToggle);
     window.addEventListener('resize', repositionToggle);
     window.addEventListener('message', (evt) => {
@@ -78,7 +118,7 @@
     });
   </script>
 
-  <!-- Alpine runtime -->
+  <!-- Alpine runtime -------------------------------------------------- -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x/dist/cdn.min.js"></script>
 </body>
 </html>
