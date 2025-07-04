@@ -1,10 +1,16 @@
-# netlify.toml
 [build]
-  # since feedback.html is right at the root
   publish = "."
 
+# proxy all static files
 [[redirects]]
-  from = "/feedback-form/*"
-  to   = "https://form.asana.com/:splat"
+  from   = "/feedback-form/static/*"
+  to     = "https://form.asana.com/static/:splat"
   status = 200
-  force = true
+  force  = true
+
+# proxy everything else under /feedback-form/
+[[redirects]]
+  from   = "/feedback-form/*"
+  to     = "https://form.asana.com/:splat"
+  status = 200
+  force  = true
