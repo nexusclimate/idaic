@@ -1,14 +1,15 @@
+# netlify.toml
 [build]
-  publish = "."             # or "public" if that’s your static folder
-  functions = "netlify/functions"
+  publish = "public"    # or wherever your built site lives
+  command = "npm run build"  # if you have a build step
 
 [[redirects]]
+  # force‐proxy anything under /feedback-form/ to Asana
   from = "/feedback-form/*"
   to   = "https://form.asana.com/:splat"
   status = 200
   force  = true
   headers = { 
-    # let browsers send your site’s cookies along
-    "Access-Control-Allow-Origin" = "https://nexusclimate.co",
+    "Access-Control-Allow-Origin"      = "https://nexusclimate.co",
     "Access-Control-Allow-Credentials" = "true"
   }
