@@ -1,2 +1,4 @@
 # Local Netlify folder
 .netlify
+/node_modules
+/idaic-portal/node_modules
