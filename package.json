@@ -1,30 +1,16 @@
 {
-  "name": "idaic-netlify-functions",
-  "version": "1.0.0",
-  "dependencies": {
-    "asana": "^0.18.0"
-  },
-  "main": "feedback-form.js",
+  "name": "idaic-monorepo",
+  "private": true,
+
+
   "scripts": {
-  "build:css": "npx @tailwindcss/cli -i src/styles.css -o assets/styles.css --minify",
-  "build": "npm run build:css"
+    "build:portal": "npm --prefix idaic-portal run build",
+    "postbuild:portal": "rm -rf public/app && cp -R idaic-portal/dist public/app",
+    "build": "npm run build:portal && npm run postbuild:portal"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nexusclimate/idaic.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/nexusclimate/idaic/issues"
-  },
-  "homepage": "https://github.com/nexusclimate/idaic#readme",
-  "description": "",
-  "devDependencies": {
-    "@tailwindcss/cli": "^4.1.11",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.11"
+
+
+  "dependencies": {
+    "asana": "^0.18.0"            
   }
 }

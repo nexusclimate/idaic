@@ -1,9 +1,11 @@
 [build]
   # what gets served as your “site”
-  publish = "."
+  base = "."
+  command = "npm run build"
+  publish = "public"
   # where Netlify should look for your Lambda functions
   functions = "netlify/functions"
-  command = "npm run build"
+  
 
 
 # proxy all static requests under /feedback-form/static → Asana’s CDN
