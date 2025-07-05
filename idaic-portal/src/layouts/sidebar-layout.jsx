@@ -2,7 +2,7 @@
 
 import * as Headless from '@headlessui/react'
 import React, { useState } from 'react'
-import { NavbarItem } from './navbar'
+import { NavbarItem } from '../components/navbar'
 
 function OpenMenuIcon() {
   return (
@@ -76,4 +76,3 @@ export function SidebarLayout({ navbar, sidebar, children }) {
     </div>
   )
 }
-export default SidebarLayout
