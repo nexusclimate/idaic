@@ -6,8 +6,8 @@
   "scripts": {
     "prebuild:portal": "npm --prefix idaic-portal install",
     "build:portal": "npm --prefix idaic-portal run build",
-    "postbuild:portal": "rm -rf public/app && cp -R idaic-portal/dist public/app",
-    "build":  "npm run prebuild:portal && npm run build:portal && npm run postbuild:portal"
+    "postbuild:portal": "mkdir -p public && rm -rf public/app && cp -R idaic-portal/dist public/app",
+    "build":  "npm run prebuild:portal && npm run build:portal  && npm run postbuild:portal"
   },
 
 
