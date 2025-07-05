@@ -1,7 +1,17 @@
+import React from 'react'
+
 export function AuthLayout({ children }) {
   return (
-    <main className="flex min-h-dvh flex-col p-2">
-      <div className="flex grow items-center justify-center p-6 lg:rounded-lg lg:bg-white lg:p-10 lg:shadow-xs lg:ring-1 lg:ring-zinc-950/5 dark:lg:bg-zinc-900 dark:lg:ring-white/10">
+    <main className="bg-black min-h-screen flex flex-col items-center justify-start pt-16 font-['Roboto',sans-serif] text-[#FAFAFA]">
+      <div className="mb-10">
+        {/* You can use <Logo /> here if you want */}
+        <img
+          src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png"
+          alt="IDAIC Logo"
+          className="h-28"
+        />
+      </div>
+      <div className="w-full max-w-md p-8 space-y-6 bg-[#1a1a1a] rounded-xl shadow-xl mt-4">
         {children}
       </div>
     </main>
