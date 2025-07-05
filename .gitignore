@@ -1,4 +1,8 @@
 # Local Netlify folder
 .netlify
 /node_modules
-/idaic-portal/node_modules
+/idaic-portal/node_modulesnode_modules
+dist
+public/app
+.vite
+
