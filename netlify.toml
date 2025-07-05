@@ -1,12 +1,15 @@
 [build]
   # what gets served as your “site”
   base = "."
-  command = "npm run build"
-  publish = "public"
+  command = "cd idaic-portal && npm install && npm run build && cd .. && npm run postbuild"
+  publish = "public/app"
   # where Netlify should look for your Lambda functions
   functions = "netlify/functions"
   
-
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # proxy all static requests under /feedback-form/static → Asana’s CDN
 [[redirects]]
