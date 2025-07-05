@@ -4,9 +4,10 @@
 
 
   "scripts": {
+    "prebuild:portal": "npm --prefix idaic-portal run install",
     "build:portal": "npm --prefix idaic-portal run build",
     "postbuild:portal": "rm -rf public/app && cp -R idaic-portal/dist public/app",
-    "build": "npm run build:portal && npm run postbuild:portal"
+    "build":  "npm run prebuild:portal && npm run build:portal && npm run postbuild:portal"
   },
 
 
