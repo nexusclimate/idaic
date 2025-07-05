@@ -76,3 +76,4 @@ export function SidebarLayout({ navbar, sidebar, children }) {
     </div>
   )
 }
+export default SidebarLayout
