@@ -1,7 +1,7 @@
 [build]
   # what gets served as your “site”
   command = " "
-  publish = "public
+  publish = "public"
   # where Netlify should look for your Lambda functions
   functions = "netlify/functions"
   
