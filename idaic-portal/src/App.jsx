@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useState } from 'react'
-import SidebarLayout from './layouts/sidebar-layout'   // Catalyst layout
+import SidebarLayout from './components/sidebarlayout'   // Catalyst layout
 import './index.css'                                  // ← keep Tailwind styles
 
 /* --- stub pages you’ll swap out later --- */
