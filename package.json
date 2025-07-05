@@ -2,16 +2,14 @@
   "name": "idaic-monorepo",
   "private": true,
 
-
   "scripts": {
-    "prebuild:portal": "npm --prefix idaic-portal ci",
-    "build:portal": "npm --prefix idaic-portal run build",
+    "prebuild:portal":  "npm --prefix idaic-portal install",
+    "build:portal":     "npm --prefix idaic-portal run build",
     "postbuild:portal": "mkdir -p public && rm -rf public/app && cp -R idaic-portal/dist public/app",
-    "build":  "npm run prebuild:portal && npm run build:portal  && npm run postbuild:portal"
+    "build": "npm run prebuild:portal && npm run build:portal && npm run postbuild:portal"
   },
 
-
   "dependencies": {
-    "asana": "^0.18.0"            
+    "asana": "^0.18.0"
   }
 }
