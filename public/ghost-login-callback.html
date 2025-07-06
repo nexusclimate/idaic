@@ -1,0 +1,22 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Logging you in…</title></head>
+<body style="font-family:sans-serif;text-align:center;padding:2rem;">
+  <p>Finishing your login… please wait.</p>
+  <script type="module">
+    import {MembersAPI} from 'https://unpkg.com/@tryghost/members-api@^1/dist/members-api.js';
+
+    const params   = new URLSearchParams(location.search);
+    const token    = params.get('token');
+    const redirect = params.get('r'); // the original post URL
+
+    const api = new MembersAPI({ siteUrl: 'https://members.nexusclimate.co' });
+    api.session.authenticate({ token })
+      .then(() => {
+        // Tell your portal to reload its iframe
+        window.opener.postMessage({ type: 'ghost-auth-success' }, 'https://login.nexusclimate.co');
+        window.close();
+      })
+      .catch(() => {
+        document.body.innerHTML = '<p style="color:red;">Login failed. Please try again.</p>';
+      });
+  </script>
+</body></html>

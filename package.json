@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "asana": "^3.1.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.0.1",
+    "formidable": "^3.5.4",
+    "framer-motion": "^12.23.0",
+    "node-fetch": "^2.6.7",
+    "superagent": "^9.0.2"
+  },
+  "scripts": {
+    "dev": "netlify dev"
+  }
+}
