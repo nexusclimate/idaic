@@ -17,35 +17,29 @@ import {
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen bg-zinc-50">
-      <Sidebar>
-        <SidebarBody>
-          <SidebarSection>
-            <SidebarItem href="/" current>
-              <HomeIcon className="h-5 w-5" />
-              <SidebarLabel>Home</SidebarLabel>
-            </SidebarItem>
-            <SidebarItem href="/events">
-              <Square2StackIcon className="h-5 w-5" />
-              <SidebarLabel>Events</SidebarLabel>
-            </SidebarItem>
-            <SidebarItem href="/orders">
-              <TicketIcon className="h-5 w-5" />
-              <SidebarLabel>Orders</SidebarLabel>
-            </SidebarItem>
-            <SidebarItem href="/broadcasts">
-              <MegaphoneIcon className="h-5 w-5" />
-              <SidebarLabel>Broadcasts</SidebarLabel>
-            </SidebarItem>
-            <SidebarItem href="/settings">
-              <Cog6ToothIcon className="h-5 w-5" />
-              <SidebarLabel>Settings</SidebarLabel>
-            </SidebarItem>
-          </SidebarSection>
-        </SidebarBody>
-      </Sidebar>
-      {/* Right side: leave empty or put your main content here */}
-      <main className="flex-1" />
+    <div>
+      <h1 className="text-3xl font-bold mb-6">Welcome to IDAIC</h1>
+      <p className="text-lg text-gray-600 mb-4">
+        Welcome to the IDAIC portal. This is your central hub for managing chapters, content, and resources.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div className="bg-blue-50 p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Quick Actions</h3>
+          <ul className="space-y-2">
+            <li>• View recent content</li>
+            <li>• Check upcoming events</li>
+            <li>• Manage members</li>
+          </ul>
+        </div>
+        <div className="bg-green-50 p-6 rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">Recent Activity</h3>
+          <ul className="space-y-2">
+            <li>• New member joined</li>
+            <li>• Event scheduled</li>
+            <li>• Content updated</li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

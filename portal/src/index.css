@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+/* Custom styles for IDAIC Portal */
+
+/* Orange current indicator for sidebar - make it more prominent */
+.current-indicator {
+  background-color: #FF9900 !important;
+  width: 6px !important;
+  z-index: 10 !important;
+  opacity: 1 !important;
+}
+
+/* Ensure the current indicator is visible and orange */
+[data-current="true"] .absolute.inset-y-2 {
+  background-color: #FF9900 !important;
+  width: 6px !important;
+  opacity: 1 !important;
+}
+
+/* Make sure the motion span is visible */
+[layoutId="current-indicator"] {
+  background-color: #FF9900 !important;
+  width: 6px !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
+}

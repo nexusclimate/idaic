@@ -1,14 +1,26 @@
 import "./index.css";
-import React from "react";
-import Example from "./components/example"; // No .jsx needed
+import React, { useState } from "react";
+import Test from "./components/test";
+import PageRouter from "./components/PageRouter";
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+
   return (
     <div className="flex min-h-screen">
-      <Example />
-      {/* Optional: Add a main content area here */}
-      <main className="flex-1 bg-white p-10">
-        <h1 className="text-3xl font-bold">Welcome</h1>
+      <Test 
+        onPageChange={setCurrentPage} 
+        currentPage={currentPage}
+        isAdminAuthenticated={isAdminAuthenticated}
+        setIsAdminAuthenticated={setIsAdminAuthenticated}
+      />
+      <main className="flex-1 bg-gray-50 p-10">
+        <PageRouter 
+          currentPage={currentPage} 
+          isAdminAuthenticated={isAdminAuthenticated}
+          setIsAdminAuthenticated={setIsAdminAuthenticated}
+        />
       </main>
     </div>
   );
