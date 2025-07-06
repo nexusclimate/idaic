@@ -2,18 +2,18 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 // 1. Read the injected env
-const SUPABASE_URL     = window.ENV.SUPABASE_URL
+const SUPABASE_URL      = window.ENV.SUPABASE_URL
 const SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
-const supabase         = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// 2. Notification helper (unchanged)
+// 2. Notification helper
 function createNotification({ message, success = true }) {
   const container = document.getElementById('notification-list')
   if (!container) return
   container.innerHTML = ''
   const wrapper = document.createElement('div')
   wrapper.className =
-    'pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5'
+    'pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5 font-inter'
   wrapper.innerHTML = `
     <div class="p-4">
       <div class="flex items-start">
@@ -49,35 +49,44 @@ function createNotification({ message, success = true }) {
   wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
 }
 
-// 3. Request OTP with optimistic UI + proper try/catch
+// 3. Request OTP
 document
   .getElementById('otp-request-form')
   .addEventListener('submit', async (e) => {
     e.preventDefault()
     const email = document.getElementById('email').value.trim()
 
-    // 3a. Immediate UI flip & “Sending…” toast
+    // UI change
     document.getElementById('otp-request-form').classList.add('hidden')
     document.getElementById('otp-verify-form').classList.remove('hidden')
     createNotification({ message: 'Sending OTP…', success: true })
 
     try {
-      // 3b. Fire the Supabase call
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
       })
+
       if (error) throw error
 
-      // 3c. Success update
       createNotification({ message: 'OTP sent! Check your email.', success: true })
       document.getElementById('code').focus()
 
     } catch (err) {
-      // 3d. Revert UI on error
       document.getElementById('otp-request-form').classList.remove('hidden')
       document.getElementById('otp-verify-form').classList.add('hidden')
-      createNotification({ message: err.message, success: false })
+
+      let friendlyMessage = err.message
+
+      if (err.message.includes('Signups not allowed')) {
+        friendlyMessage = 'This email is not registered. Please register as a member or contact support.'
+      } else if (err.message.includes('Invalid login credentials')) {
+        friendlyMessage = 'Invalid login credentials. Please check your input.'
+      } else if (err.message.includes('Rate limit exceeded')) {
+        friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.'
+      }
+
+      createNotification({ message: friendlyMessage, success: false })
     }
   })
 
@@ -95,6 +104,7 @@ document
         token: code,
         type: 'email'
       })
+
       if (error) throw error
 
       localStorage.setItem('idaic-token', data.session.access_token)
@@ -102,6 +112,12 @@ document
       window.location.href = '/main.html'
 
     } catch (err) {
-      createNotification({ message: err.message, success: false })
+      let friendlyMessage = err.message
+
+      if (err.message.includes('Invalid login credentials')) {
+        friendlyMessage = 'Invalid code. Please check your email or request a new OTP.'
+      }
+
+      createNotification({ message: friendlyMessage, success: false })
     }
   })
