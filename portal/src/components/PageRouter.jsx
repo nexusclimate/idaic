@@ -17,11 +17,11 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       return <Home />;
     case 'content':
       return (
-        <div style={{ width: '100%', height: '100%' }}>
+        <div style={{ width: '100%', height: '100%', padding: 0 }}>
           <iframe
             src="https://members.nexusclimate.co/"
             title="IDAIC Changelog"
-            style={{ width: '100%', minHeight: '95vh', border: 'none' }}
+            style={{ width: '100%', minHeight: '95vh', border: 'none', padding: 0 }}
             allowFullScreen
           />
         </div>
