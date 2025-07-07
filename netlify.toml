@@ -1,8 +1,8 @@
 [build]
   base = "portal"
-  publish = "../public"  # Serve from root/public — OTP login lives here
-  command = "npm install && npm run build && cp -r dist/* ../public/"  # Copy build output to public
-  functions = "../netlify/functions"  # relative to "base"
+  command = "npm install && cd .. && npm install && cd portal && npm run build && cp -r dist/* ../public/"
+  publish = "../public"
+  functions = "../netlify/functions"
 
 [functions]
   included_files = ["node_modules/dotenv/**"]
