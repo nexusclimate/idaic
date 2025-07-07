@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { colors } from '../config/colors';
 
-const people = [
+const initialPeople = [
   { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
   // More people...
 ];
@@ -11,43 +11,53 @@ function classNames(...classes) {
 }
 
 export default function User() {
-  const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
+  const [people, setPeople] = useState(initialPeople);
+
+  // Filter and sort
+  const filtered = people
+    .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (a[sortBy] < b[sortBy]) return sortDir === 'asc' ? -1 : 1;
+      if (a[sortBy] > b[sortBy]) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+  const handleSort = (col) => {
+    if (sortBy === col) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(col);
+      setSortDir('asc');
+    }
+  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto"></div>
-      </div>
-      {/* Modal Form */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Add User</h2>
-            <form onSubmit={e => { e.preventDefault(); setShowModal(false); }} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input type="text" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                <input type="text" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <input type="text" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
-              </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button type="button" className="px-4 py-2 rounded bg-gray-200 text-gray-700" onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded text-white" style={{ backgroundColor: colors.primary.orange }}>Add</button>
-              </div>
-            </form>
+      {/* Search input */}
+      <div className="mb-4 max-w-xs">
+        <label htmlFor="search" className="block text-sm font-medium text-gray-900">Quick search</label>
+        <div className="mt-2">
+          <div className="flex rounded-md bg-white outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-orange-500">
+            <input
+              id="search"
+              name="search"
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="block min-w-0 grow px-3 py-1.5 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm"
+              placeholder="Search by name..."
+            />
+            <div className="flex py-1.5 pr-1.5">
+              <kbd className="inline-flex items-center rounded-sm border border-gray-200 px-1 font-sans text-xs text-gray-400">
+                ⌘K
+              </kbd>
+            </div>
           </div>
         </div>
-      )}
+      </div>
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle">
@@ -56,42 +66,48 @@ export default function User() {
                 <tr>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8"
+                    className="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8 cursor-pointer select-none"
+                    onClick={() => handleSort('name')}
                   >
                     Name
+                    <span className="ml-1 align-middle">{sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                   </th>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 hidden border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:table-cell"
+                    className="sticky top-0 z-10 hidden border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter sm:table-cell cursor-pointer select-none"
+                    onClick={() => handleSort('title')}
                   >
                     Title
+                    <span className="ml-1 align-middle">{sortBy === 'title' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                   </th>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 hidden border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter lg:table-cell"
+                    className="sticky top-0 z-10 hidden border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter lg:table-cell cursor-pointer select-none"
+                    onClick={() => handleSort('email')}
                   >
                     Email
+                    <span className="ml-1 align-middle">{sortBy === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                   </th>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter"
+                    className="sticky top-0 z-10 border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                    onClick={() => handleSort('role')}
                   >
                     Role
-                  </th>
-                  <th
-                    scope="col"
-                    className="sticky top-0 z-10 border-b border-gray-300 bg-white/75 py-3.5 pr-4 pl-3 backdrop-blur-sm backdrop-filter sm:pr-6 lg:pr-8"
-                  >
-                    <span className="sr-only">Edit</span>
+                    <span className="ml-1 align-middle">{sortBy === 'role' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {people.map((person, personIdx) => (
-                  <tr key={person.email}>
+                {filtered.map((person, personIdx) => (
+                  <tr
+                    key={person.email}
+                    className="hover:bg-orange-50 cursor-pointer transition"
+                    onClick={() => {/* handle row click, e.g. open details */}}
+                  >
                     <td
                       className={classNames(
-                        personIdx !== people.length - 1 ? 'border-b border-gray-200' : '',
+                        personIdx !== filtered.length - 1 ? 'border-b border-gray-200' : '',
                         'py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8',
                       )}
                     >
@@ -99,7 +115,7 @@ export default function User() {
                     </td>
                     <td
                       className={classNames(
-                        personIdx !== people.length - 1 ? 'border-b border-gray-200' : '',
+                        personIdx !== filtered.length - 1 ? 'border-b border-gray-200' : '',
                         'hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 sm:table-cell',
                       )}
                     >
@@ -107,7 +123,7 @@ export default function User() {
                     </td>
                     <td
                       className={classNames(
-                        personIdx !== people.length - 1 ? 'border-b border-gray-200' : '',
+                        personIdx !== filtered.length - 1 ? 'border-b border-gray-200' : '',
                         'hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell',
                       )}
                     >
@@ -115,26 +131,11 @@ export default function User() {
                     </td>
                     <td
                       className={classNames(
-                        personIdx !== people.length - 1 ? 'border-b border-gray-200' : '',
+                        personIdx !== filtered.length - 1 ? 'border-b border-gray-200' : '',
                         'px-3 py-4 text-sm whitespace-nowrap text-gray-500',
                       )}
                     >
                       {person.role}
-                    </td>
-                    <td
-                      className={classNames(
-                        personIdx !== people.length - 1 ? 'border-b border-gray-200' : '',
-                        'relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8',
-                      )}
-                    >
-                      <a href="#" 
-                        className="font-semibold"
-                        style={{ color: colors.primary.orange }}
-                        onMouseEnter={e => e.currentTarget.style.color = colors.primary.orangeHover}
-                        onMouseLeave={e => e.currentTarget.style.color = colors.primary.orange}
-                      >
-                        Edit<span className="sr-only">, {person.name}</span>
-                      </a>
                     </td>
                   </tr>
                 ))}
