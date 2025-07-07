@@ -16,7 +16,16 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
     case 'home':
       return <Home />;
     case 'content':
-      return <Content />;
+      return (
+        <div style={{ width: '100%', height: '100%' }}>
+          <iframe
+            src="https://members.nexusclimate.co/"
+            title="IDAIC Changelog"
+            style={{ width: '100%', minHeight: '95vh', border: 'none' }}
+            allowFullScreen
+          />
+        </div>
+      );
     case 'events':
       return <Events />;
     case 'members':

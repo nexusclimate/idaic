@@ -4,23 +4,14 @@
   publish = "../public"
   functions = "../netlify/functions"
 
-[functions]
-  included_files = ["node_modules/dotenv/**"]
-
+# Show the OTP login page at root
 [[redirects]]
-  # Serve OTP login by default
   from = "/"
   to = "/index.html"
   status = 200
 
-  # Post-login: send to the app's landing page
+# Route app manually after login
 [[redirects]]
-  from = "/dashboard"
-  to = "/index.html"
-  status = 200
-
-# Support SPA routing in app
-[[redirects]]
-  from = "/*"
+  from = "/app/*"
   to = "/index.html"
   status = 200
