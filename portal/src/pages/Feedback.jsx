@@ -22,7 +22,7 @@ export default function FeedbackForm() {
     try {
       const resp = await fetch('/.netlify/functions/createFeedbackTask', {
         method: 'POST',
-        headers:{ 'Content-Type':'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       if (resp.ok) {
