@@ -2,7 +2,7 @@
   base = "portal"
   command = "npm install && cd .. && npm install && cd portal && npm run build && mv dist/index.html dist/app.html && cp -r dist/* ../public/"
   publish = "../public"
-  functions = "../netlify/functions"
+  functions = "./netlify/functions"
 
 [[redirects]]
   from = "/"
