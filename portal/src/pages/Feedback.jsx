@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { colors, font } from '../config/colors';
+import { colors, font, form as formConfig } from '../config/colors';
 
 export default function FeedbackForm() {
   const [status, setStatus] = useState('');
@@ -65,13 +65,16 @@ export default function FeedbackForm() {
           </label>
           <input
             id="name" name="name" required
-            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
             style={{
               background: colors.background.white,
               color: colors.text.primary,
               borderColor: colors.border.light,
               fontFamily: font.primary,
+              boxShadow: 'none',
             }}
+            onFocus={e => e.target.style.outlineColor = formConfig.focus}
+            onBlur={e => e.target.style.outlineColor = ''}
           />
         </div>
 
@@ -81,13 +84,16 @@ export default function FeedbackForm() {
           </label>
           <input
             id="email" name="email" type="email" placeholder="you@example.com" required
-            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
             style={{
               background: colors.background.white,
               color: colors.text.primary,
               borderColor: colors.border.light,
               fontFamily: font.primary,
+              boxShadow: 'none',
             }}
+            onFocus={e => e.target.style.outlineColor = formConfig.focus}
+            onBlur={e => e.target.style.outlineColor = ''}
           />
         </div>
 
@@ -97,13 +103,16 @@ export default function FeedbackForm() {
           </label>
           <input
             id="subject" name="subject" required
-            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
             style={{
               background: colors.background.white,
               color: colors.text.primary,
               borderColor: colors.border.light,
               fontFamily: font.primary,
+              boxShadow: 'none',
             }}
+            onFocus={e => e.target.style.outlineColor = formConfig.focus}
+            onBlur={e => e.target.style.outlineColor = ''}
           />
         </div>
 
@@ -113,13 +122,16 @@ export default function FeedbackForm() {
           </label>
           <select
             id="type" name="type" required
-            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 focus:outline-2 focus:outline-offset-2 sm:text-sm"
             style={{
               background: colors.background.white,
               color: colors.text.primary,
               borderColor: colors.border.light,
               fontFamily: font.primary,
+              boxShadow: 'none',
             }}
+            onFocus={e => e.target.style.outlineColor = formConfig.focus}
+            onBlur={e => e.target.style.outlineColor = ''}
           >
             <option value="feedback">Feedback</option>
             <option value="bug">Bug</option>
@@ -132,13 +144,16 @@ export default function FeedbackForm() {
           </label>
           <textarea
             id="comment" name="comment" rows="4" required
-            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
             style={{
               background: colors.background.white,
               color: colors.text.primary,
               borderColor: colors.border.light,
               fontFamily: font.primary,
+              boxShadow: 'none',
             }}
+            onFocus={e => e.target.style.outlineColor = formConfig.focus}
+            onBlur={e => e.target.style.outlineColor = ''}
           />
         </div>
 

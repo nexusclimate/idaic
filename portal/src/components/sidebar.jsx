@@ -103,7 +103,7 @@ export const SidebarItem = forwardRef(function SidebarItem(
       {current && (
         <motion.span
           layoutId="current-indicator"
-          className="absolute inset-y-2 -left-4 w-1 rounded-full current-indicator"
+          className="absolute inset-y-2 -left-2 w-1 rounded-full current-indicator"
           style={{ 
             backgroundColor: '#FF9900',
             width: '6px',

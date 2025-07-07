@@ -60,4 +60,9 @@ export const colorVariations = {
 // Add font family for consistency
 export const font = {
   primary: 'Inter, sans-serif',
+};
+
+// Add form focus color for consistent use
+export const form = {
+  focus: colors.primary.orange,
 }; 
