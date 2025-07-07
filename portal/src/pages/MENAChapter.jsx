@@ -1,7 +1,11 @@
 export default function MENAChapter() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">MENA Chapter</h1>
+      <div className="mb-8 border-b border-gray-200">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">MENA Chapter</h1>
+        </div>
+      </div>
       <p className="text-lg text-gray-600 mb-4">
         Manage the MENA (Middle East and North Africa) chapter activities and members.
       </p>

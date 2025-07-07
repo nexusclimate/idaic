@@ -1,7 +1,11 @@
 export default function UKChapter() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">UK Chapter</h1>
+      <div className="mb-8 border-b border-gray-200">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">UK Chapter</h1>
+        </div>
+      </div>
       <p className="text-lg text-gray-600 mb-4">
         Manage the UK chapter activities and members.
       </p>

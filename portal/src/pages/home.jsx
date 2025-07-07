@@ -18,7 +18,11 @@ import {
 export default function Home() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Welcome to IDAIC</h1>
+      <div className="mb-8 border-b border-gray-200">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">Welcome to IDAIC</h1>
+        </div>
+      </div>
       <p className="text-lg text-gray-600 mb-4">
         Welcome to the IDAIC portal. This is your central hub for managing chapters, content, and resources.
       </p>
