@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { colors } from '../config/colors';
 
 const people = [
@@ -10,15 +11,12 @@ function classNames(...classes) {
 }
 
 export default function User() {
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-base font-semibold text-gray-900">Users</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            A list of all the users in your account including their name, title, email and role.
-          </p>
-        </div>
+        <div className="sm:flex-auto"></div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
             type="button"
@@ -31,11 +29,42 @@ export default function User() {
             onMouseLeave={e => e.currentTarget.style.backgroundColor = colors.primary.orange}
             onFocus={e => e.currentTarget.style.backgroundColor = colors.primary.orangeHover}
             onBlur={e => e.currentTarget.style.backgroundColor = colors.primary.orange}
+            onClick={() => setShowModal(true)}
           >
             Add user
           </button>
         </div>
       </div>
+      {/* Modal Form */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Add User</h2>
+            <form onSubmit={e => { e.preventDefault(); setShowModal(false); }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input type="text" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input type="text" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <input type="text" className="block w-full rounded-md border border-gray-300 px-3 py-2" required />
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <button type="button" className="px-4 py-2 rounded bg-gray-200 text-gray-700" onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded text-white" style={{ backgroundColor: colors.primary.orange }}>Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle">

@@ -48,7 +48,7 @@ export default function FeedbackForm() {
 
   return (
     <div
-      className="max-w-md mx-auto p-4 rounded-lg shadow"
+      className="max-w-2xl mx-auto p-8 rounded-lg shadow"
       style={{
         background: colors.background.white,
         fontFamily: font.primary,
