@@ -63,7 +63,7 @@ export default function Test({ onPageChange, currentPage, isAdminAuthenticated, 
   };
 
   return (
-    <nav className="h-screen w-64 bg-zinc-950 text-zinc-100 flex flex-col py-8 pl-10 pr-6" style={{ overflow: 'hidden' }}>
+    <nav className="h-screen w-64 bg-zinc-950 text-zinc-100 flex flex-col py-8 pl-1 pr-1" style={{ overflow: 'hidden' }}>
       {/* Logo at the top, bigger */}
       <div className="flex items-center justify-center mb-10">
         <img src={idaicLogo} alt="IDAIC Logo" className="h-24 w-auto object-contain" />
