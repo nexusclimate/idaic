@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html, body {
+  font-family: 'Inter', sans-serif;
+}
+
 /* Custom styles for IDAIC Portal */
 
 /* Orange current indicator for sidebar - make it more prominent */

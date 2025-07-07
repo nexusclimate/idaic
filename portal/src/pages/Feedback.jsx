@@ -1,112 +1,169 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { colors, font } from '../config/colors';
 
-export default function Feedback() {
-  const [form, setForm] = useState({ name: '', email: '', subject: '', type: 'feedback', comment: '' });
-  const [msg, setMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function FeedbackForm() {
+  const [status, setStatus] = useState('');
+  const [sending, setSending] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setMsg('Sending…');
-    setLoading(true);
+    setSending(true);
+    setStatus('Sending…');
+
+    const form = e.target;
+    const data = {
+      name:    form.name.value,
+      email:   form.email.value,
+      subject: form.subject.value,
+      type:    form.type.value,
+      comment: form.comment.value,
+    };
+
     try {
-      const res = await fetch('/.netlify/functions/createFeedbackTask', {
+      const resp = await fetch('/.netlify/functions/createFeedbackTask', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(data),
       });
-      if (res.ok) {
-        setMsg('Thanks for sharing your feedback!');
-        setForm({ name: '', email: '', subject: '', type: 'feedback', comment: '' });
+      if (resp.ok) {
+        setStatus('Thanks for sharing your feedback!');
+        form.reset();
       } else {
-        setMsg('Oops, something went wrong.');
+        let errorText = 'Oops, something went wrong.';
+        try {
+          const data = await resp.json();
+          if (data && data.error) errorText = data.error;
+        } catch {
+          const text = await resp.text();
+          if (text) errorText = text;
+        }
+        setStatus(errorText);
       }
-    } catch {
-      setMsg('Network error.');
+    } catch (err) {
+      setStatus('Network error. Please try again.');
+    } finally {
+      setSending(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-8 bg-white border rounded-lg p-6 shadow">
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Share your Feedback</h1>
-      <form onSubmit={handleSubmit} className="space-y-5">
+    <div
+      className="max-w-md mx-auto p-4 rounded-lg shadow"
+      style={{
+        background: colors.background.white,
+        fontFamily: font.primary,
+        color: colors.text.primary,
+      }}
+    >
+      <h2 className="text-xl mb-4 font-bold" style={{ color: colors.text.primary }}>
+        Share Your Feedback
+      </h2>
+      <form id="feedbackForm" onSubmit={handleSubmit} className="grid gap-4">
         <div>
-          <label htmlFor="name" className="block mb-1 font-medium text-gray-700">Your name</label>
+          <label htmlFor="name" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+            Your name
+          </label>
           <input
-            id="name"
-            name="name"
-            required
-            value={form.name}
-            onChange={handleChange}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm"
+            id="name" name="name" required
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            style={{
+              background: colors.background.white,
+              color: colors.text.primary,
+              borderColor: colors.border.light,
+              fontFamily: font.primary,
+            }}
           />
         </div>
+
         <div>
-          <label htmlFor="email" className="block mb-1 font-medium text-gray-700">Your email</label>
+          <label htmlFor="email" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+            Your email
+          </label>
           <input
-            id="email"
-            type="email"
-            name="email"
-            required
-            placeholder="you@example.com"
-            value={form.email}
-            onChange={handleChange}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm"
+            id="email" name="email" type="email" placeholder="you@example.com" required
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            style={{
+              background: colors.background.white,
+              color: colors.text.primary,
+              borderColor: colors.border.light,
+              fontFamily: font.primary,
+            }}
           />
         </div>
+
         <div>
-          <label htmlFor="subject" className="block mb-1 font-medium text-gray-700">Subject</label>
+          <label htmlFor="subject" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+            Subject
+          </label>
           <input
-            id="subject"
-            name="subject"
-            required
-            value={form.subject}
-            onChange={handleChange}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm"
+            id="subject" name="subject" required
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            style={{
+              background: colors.background.white,
+              color: colors.text.primary,
+              borderColor: colors.border.light,
+              fontFamily: font.primary,
+            }}
           />
         </div>
+
         <div>
-          <label htmlFor="type" className="block mb-1 font-medium text-gray-700">Type</label>
+          <label htmlFor="type" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+            Type
+          </label>
           <select
-            id="type"
-            name="type"
-            required
-            value={form.type}
-            onChange={handleChange}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm"
+            id="type" name="type" required
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            style={{
+              background: colors.background.white,
+              color: colors.text.primary,
+              borderColor: colors.border.light,
+              fontFamily: font.primary,
+            }}
           >
-            <option value="feedback">Improvement</option>
-            <option value="Idea">Idea</option>
+            <option value="feedback">Feedback</option>
             <option value="bug">Bug</option>
           </select>
         </div>
+
         <div>
-          <label htmlFor="comment" className="block mb-1 font-medium text-gray-700">Add your comment</label>
+          <label htmlFor="comment" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+            Add your comment
+          </label>
           <textarea
-            id="comment"
-            name="comment"
-            rows={8}
-            required
-            value={form.comment}
-            onChange={handleChange}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 sm:text-sm"
-            placeholder="Share your feedback?"
+            id="comment" name="comment" rows="4" required
+            className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 sm:text-sm"
+            style={{
+              background: colors.background.white,
+              color: colors.text.primary,
+              borderColor: colors.border.light,
+              fontFamily: font.primary,
+            }}
           />
         </div>
+
         <button
           type="submit"
-          className="w-full py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold disabled:opacity-60"
-          disabled={loading}
+          disabled={sending}
+          className="mt-2 w-full rounded-md px-4 py-2 font-medium disabled:opacity-50"
+          style={{
+            background: colors.primary.orange,
+            color: colors.text.white,
+            fontFamily: font.primary,
+          }}
         >
-          {loading ? 'Sending…' : 'Submit'}
+          {sending ? 'Sending…' : 'Submit'}
         </button>
-        {msg && <p className="text-center text-sm mt-2" aria-live="polite">{msg}</p>}
+
+        <p
+          id="status"
+          aria-live="polite"
+          className="mt-2 text-center"
+          style={{ color: colors.primary.orange, fontFamily: font.primary }}
+        >
+          {status}
+        </p>
       </form>
     </div>
   );
-} 
+}

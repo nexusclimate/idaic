@@ -55,4 +55,9 @@ export const colorVariations = {
     medium: getColorWithOpacity(colors.primary.orange, 0.15),
     dark: getColorWithOpacity(colors.primary.orange, 0.2),
   }
+};
+
+// Add font family for consistency
+export const font = {
+  primary: 'Inter, sans-serif',
 }; 
