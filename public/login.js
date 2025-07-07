@@ -109,7 +109,7 @@ document
 
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
-      window.location.href = '/main.html'
+      window.location.href = '/app'
 
     } catch (err) {
       let friendlyMessage = err.message
