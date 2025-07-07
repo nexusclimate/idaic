@@ -17,23 +17,6 @@ export default function User() {
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto"></div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            type="button"
-            className="block rounded-md px-3 py-2 text-center text-sm font-semibold text-white shadow-xs"
-            style={{
-              backgroundColor: colors.primary.orange,
-              borderColor: colors.primary.orange,
-            }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.primary.orangeHover}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = colors.primary.orange}
-            onFocus={e => e.currentTarget.style.backgroundColor = colors.primary.orangeHover}
-            onBlur={e => e.currentTarget.style.backgroundColor = colors.primary.orange}
-            onClick={() => setShowModal(true)}
-          >
-            Add user
-          </button>
-        </div>
       </div>
       {/* Modal Form */}
       {showModal && (
@@ -144,7 +127,12 @@ export default function User() {
                         'relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8',
                       )}
                     >
-                      <a href="#" className="text-indigo-600 hover:text-indigo-900">
+                      <a href="#" 
+                        className="font-semibold"
+                        style={{ color: colors.primary.orange }}
+                        onMouseEnter={e => e.currentTarget.style.color = colors.primary.orangeHover}
+                        onMouseLeave={e => e.currentTarget.style.color = colors.primary.orange}
+                      >
                         Edit<span className="sr-only">, {person.name}</span>
                       </a>
                     </td>

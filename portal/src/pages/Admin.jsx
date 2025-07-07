@@ -75,9 +75,13 @@ export default function Admin() {
         </>
       )}
       {activeTab === 'content' && (
-        <div className="bg-white border rounded-lg p-6">
-          <h3 className="text-xl font-semibold mb-4">Content Management</h3>
-          <p>Content management features coming soon.</p>
+        <div className="bg-white border rounded-lg p-6" style={{ height: '80vh' }}>
+          <iframe
+            src="https://members.nexusclimate.co/ghost/#/posts"
+            title="Content Management"
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            allowFullScreen
+          />
         </div>
       )}
     </div>
