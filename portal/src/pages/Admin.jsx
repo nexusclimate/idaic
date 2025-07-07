@@ -8,11 +8,11 @@ export default function Admin() {
     <div>
       {/* Admin Menu */}
       <div className="w-full flex">
-        <Navbar className="bg-white text-gray-700 shadow-sm w-auto min-w-0 px-2 py-2 rounded-lg mr-6">
+        <Navbar className="bg-white text-black shadow-sm w-auto min-w-0 px-2 py-2 rounded-lg mr-6">
           <NavbarSection>
-            <NavbarItem current={active === 'status'} onClick={() => setActive('status')} style={{ cursor: 'pointer' }} className="text-gray-700">System Status</NavbarItem>
-            <NavbarItem current={active === 'actions'} onClick={() => setActive('actions')} style={{ cursor: 'pointer' }} className="text-gray-700">Quick Actions</NavbarItem>
-            <NavbarItem current={active === 'config'} onClick={() => setActive('config')} style={{ cursor: 'pointer' }} className="text-gray-700">Configuration</NavbarItem>
+            <NavbarItem current={active === 'status'} onClick={() => setActive('status')} style={{ cursor: 'pointer' }} className="text-black">System Status</NavbarItem>
+            <NavbarItem current={active === 'actions'} onClick={() => setActive('actions')} style={{ cursor: 'pointer' }} className="text-black">Quick Actions</NavbarItem>
+            <NavbarItem current={active === 'config'} onClick={() => setActive('config')} style={{ cursor: 'pointer' }} className="text-black">Configuration</NavbarItem>
           </NavbarSection>
         </Navbar>
       </div>
