@@ -92,6 +92,22 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
           <p className="text-lg text-gray-600">You have been successfully signed out.</p>
         </div>
       );
+    case 'portal-admin':
+      if (isAdminAuthenticated) {
+        return <Admin />;
+      } else {
+        return (
+          <div className="flex items-center justify-center h-full bg-black">
+            <div className="text-center bg-black p-8 rounded-lg">
+              <h1 className="text-3xl font-bold mb-6 text-white">Admin Access Required</h1>
+              <p className="text-lg text-gray-300 mb-8">Please enter the admin password to access this page.</p>
+              <AdminPasswordPrompt 
+                setIsAdminAuthenticated={setIsAdminAuthenticated}
+              />
+            </div>
+          </div>
+        );
+      }
     default:
       return (
         <div>

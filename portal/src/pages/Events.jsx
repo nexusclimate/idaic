@@ -1,7 +1,11 @@
+import { colors } from '../config/colors';
+
 export default function Events() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Events</h1>
+      <div className="mb-8 border-b border-gray-200">
+        <h1 className="text-3xl font-bold text-gray-900 mb-0">Events</h1>
+      </div>
       <p className="text-lg text-gray-600 mb-4">
         Manage and view upcoming events across all chapters.
       </p>

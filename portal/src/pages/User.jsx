@@ -1,3 +1,5 @@
+import { colors } from '../config/colors';
+
 const people = [
   { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
   // More people...
@@ -20,7 +22,15 @@ export default function User() {
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
           <button
             type="button"
-            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="block rounded-md px-3 py-2 text-center text-sm font-semibold text-white shadow-xs"
+            style={{
+              backgroundColor: colors.primary.orange,
+              borderColor: colors.primary.orange,
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.primary.orangeHover}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = colors.primary.orange}
+            onFocus={e => e.currentTarget.style.backgroundColor = colors.primary.orangeHover}
+            onBlur={e => e.currentTarget.style.backgroundColor = colors.primary.orange}
           >
             Add user
           </button>
