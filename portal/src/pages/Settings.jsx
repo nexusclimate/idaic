@@ -22,6 +22,12 @@ export default function Settings() {
 
   return (
     <div className="max-w-2xl mx-auto py-10">
+      {/* Section Heading with underline */}
+      <div className="mb-8 border-b border-gray-200">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">User Settings</h1>
+        </div>
+      </div>
       {/* Section Heading with Tabs */}
       <div className="mb-8 border-b border-gray-200">
         <div className="sm:flex sm:items-center sm:justify-between">

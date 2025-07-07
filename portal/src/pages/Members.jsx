@@ -5,6 +5,7 @@ import User from './User';
 const tabs = [
   { name: 'Members', key: 'members' },
   { name: 'Users', key: 'users' },
+  { name: 'Admin', key: 'admin' },
 ];
 
 const members = [
@@ -122,6 +123,32 @@ export default function Members() {
       )}
       {activeTab === 'users' && (
         <User />
+      )}
+      {activeTab === 'admin' && (
+        <div className="bg-white border rounded-lg p-8 max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold mb-6">Add User</h2>
+          <form className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input id="name" name="name" type="text" required className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input id="title" name="title" type="text" required className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input id="email" name="email" type="email" required className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <input id="role" name="role" type="text" required className="block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-orange-500 focus:ring-orange-500" />
+            </div>
+            <div className="flex justify-end">
+              <button type="submit" className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">Add User</button>
+            </div>
+          </form>
+        </div>
       )}
 
       {/* Drawer */}
