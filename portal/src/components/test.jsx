@@ -66,7 +66,7 @@ export default function Test({ onPageChange, currentPage, isAdminAuthenticated, 
     <nav className="h-screen w-64 bg-zinc-950 text-zinc-100 flex flex-col py-8 pl-10 pr-6">
       {/* Logo at the top, bigger */}
       <div className="flex items-center justify-center mb-10">
-        <img src={idaicLogo} alt="IDAIC Logo" className="h-32 w-auto" />
+        <img src={idaicLogo} alt="IDAIC Logo" className="h-24 w-auto object-contain" />
       </div>
       <Sidebar>
         <SidebarBody>
