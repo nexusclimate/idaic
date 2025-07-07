@@ -7,13 +7,15 @@ export default function Admin() {
   return (
     <div>
       {/* Admin Menu */}
-      <Navbar>
-        <NavbarSection>
-          <NavbarItem current={active === 'status'} onClick={() => setActive('status')} style={{ cursor: 'pointer' }}>System Status</NavbarItem>
-          <NavbarItem current={active === 'actions'} onClick={() => setActive('actions')} style={{ cursor: 'pointer' }}>Quick Actions</NavbarItem>
-          <NavbarItem current={active === 'config'} onClick={() => setActive('config')} style={{ cursor: 'pointer' }}>Configuration</NavbarItem>
-        </NavbarSection>
-      </Navbar>
+      <div className="w-full flex">
+        <Navbar className="bg-white text-gray-700 shadow-sm w-auto min-w-0 px-2 py-2 rounded-lg mr-6">
+          <NavbarSection>
+            <NavbarItem current={active === 'status'} onClick={() => setActive('status')} style={{ cursor: 'pointer' }} className="text-gray-700">System Status</NavbarItem>
+            <NavbarItem current={active === 'actions'} onClick={() => setActive('actions')} style={{ cursor: 'pointer' }} className="text-gray-700">Quick Actions</NavbarItem>
+            <NavbarItem current={active === 'config'} onClick={() => setActive('config')} style={{ cursor: 'pointer' }} className="text-gray-700">Configuration</NavbarItem>
+          </NavbarSection>
+        </Navbar>
+      </div>
       <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
       <p className="text-lg text-gray-600 mb-4">
         Administrative tools and system management.

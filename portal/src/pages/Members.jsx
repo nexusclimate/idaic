@@ -41,6 +41,14 @@ export default function Members() {
   };
   const closeDrawer = () => setDrawerOpen(false);
 
+  // Update drawer content live when clicking a different member
+  const handleMemberClick = idx => {
+    if (!drawerOpen) {
+      setDrawerOpen(true);
+    }
+    setSelected(idx);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Members</h1>
@@ -55,7 +63,7 @@ export default function Members() {
           {members.map((member, idx) => (
             <button
               key={idx}
-              onClick={() => openDrawer(idx)}
+              onClick={() => handleMemberClick(idx)}
               className={`bg-gray-100 p-8 sm:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
                 selected === idx && drawerOpen
                   ? ''
@@ -64,13 +72,15 @@ export default function Members() {
               style={{
                 borderColor: selected === idx && drawerOpen ? colors.primary.orange : 'transparent',
                 boxShadow: selected === idx && drawerOpen ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                background: selected === idx && drawerOpen ? colors.primary.orange + '22' : undefined,
+                // background: selected === idx && drawerOpen ? colors.primary.orange + '22' : undefined,
               }}
             >
               <img
-                className="max-h-20 w-auto object-contain"
+                className="max-h-32 w-auto object-contain"
                 src={member.logo}
                 alt={member.alt}
+                style={{ imageRendering: 'auto' }}
+                loading="lazy"
               />
             </button>
           ))}
@@ -97,7 +107,7 @@ export default function Members() {
                 className={`pointer-events-auto w-screen max-w-2xl transform transition ease-in-out duration-500 sm:duration-700 bg-white shadow-xl flex flex-col h-full ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
               >
                 <div className="px-4 py-6 sm:px-6 flex items-start justify-between">
-                  <h2 className="text-base font-semibold text-gray-900" id="drawer-title">Profile</h2>
+                  <h2 className="text-base font-semibold text-gray-900" id="drawer-title">Member Details</h2>
                   <button
                     type="button"
                     className="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-orange-500"
@@ -113,12 +123,11 @@ export default function Members() {
                 {selected !== null && (
                   <div className="divide-y divide-gray-200 flex-1 overflow-y-auto">
                     <div className="pb-6">
-                      <div className="h-24 bg-orange-500 sm:h-20 lg:h-28"></div>
                       <div className="-mt-12 flow-root px-4 sm:-mt-8 sm:flex sm:items-end sm:px-6 lg:-mt-16">
                         <div>
                           <div className="-m-1 flex">
                             <div className="inline-flex overflow-hidden rounded-lg border-4 border-white">
-                              <img className="size-24 shrink-0 sm:size-40 lg:size-48" src={members[selected].logo} alt="" />
+                              <img className="size-32 shrink-0 sm:size-40 lg:size-48 object-contain" src={members[selected].logo} alt="" style={{ imageRendering: 'auto' }} loading="lazy" />
                             </div>
                           </div>
                         </div>
