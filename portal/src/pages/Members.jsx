@@ -1,5 +1,11 @@
 import { useState } from 'react';
 import { colors } from '../config/colors';
+import User from './User';
+
+const tabs = [
+  { name: 'Members', key: 'members' },
+  { name: 'Users', key: 'users' },
+];
 
 const members = [
   {
@@ -32,6 +38,7 @@ const members = [
 ];
 
 export default function Members() {
+  const [activeTab, setActiveTab] = useState('members');
   const [selected, setSelected] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -51,41 +58,71 @@ export default function Members() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Members</h1>
-      <p className="text-lg text-gray-600 mb-4">
-        Manage your organization's members and their profiles.
-      </p>
-      <div className="bg-white border rounded-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Member Directory</h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {members.map((member, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleMemberClick(idx)}
-              className={`bg-gray-100 p-8 sm:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
-                selected === idx && drawerOpen
-                  ? ''
-                  : 'hover:border-orange-200'
-              }`}
-              style={{
-                borderColor: selected === idx && drawerOpen ? colors.primary.orange : 'transparent',
-                boxShadow: selected === idx && drawerOpen ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                // background: selected === idx && drawerOpen ? colors.primary.orange + '22' : undefined,
-              }}
-            >
-              <img
-                className="max-h-32 w-auto object-contain"
-                src={member.logo}
-                alt={member.alt}
-                style={{ imageRendering: 'auto' }}
-                loading="lazy"
-              />
-            </button>
-          ))}
+      {/* Section Heading with Tabs */}
+      <div className="mb-8 border-b border-gray-200">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">Members</h1>
+          <nav className="mt-4 sm:mt-0">
+            <ul className="flex space-x-4" role="tablist">
+              {tabs.map(tab => (
+                <li key={tab.key}>
+                  <button
+                    type="button"
+                    className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none ${
+                      activeTab === tab.key
+                        ? 'border-orange-500 text-orange-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                    style={activeTab === tab.key ? { color: colors.primary.orange, borderColor: colors.primary.orange } : {}}
+                    onClick={() => setActiveTab(tab.key)}
+                    role="tab"
+                    aria-selected={activeTab === tab.key}
+                  >
+                    {tab.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
+      {/* Tab Content */}
+      {activeTab === 'members' && (
+        <div className="bg-white border rounded-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold">Member Directory</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {members.map((member, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleMemberClick(idx)}
+                className={`bg-gray-100 p-8 sm:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
+                  selected === idx && drawerOpen
+                    ? ''
+                    : 'hover:border-orange-200'
+                }`}
+                style={{
+                  borderColor: selected === idx && drawerOpen ? colors.primary.orange : 'transparent',
+                  boxShadow: selected === idx && drawerOpen ? `0 0 0 2px ${colors.primary.orange}` : undefined,
+                  // background: selected === idx && drawerOpen ? colors.primary.orange + '22' : undefined,
+                }}
+              >
+                <img
+                  className="max-h-32 w-auto object-contain"
+                  src={member.logo}
+                  alt={member.alt}
+                  style={{ imageRendering: 'auto' }}
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {activeTab === 'users' && (
+        <User />
+      )}
 
       {/* Drawer */}
       <div

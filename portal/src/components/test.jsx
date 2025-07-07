@@ -46,6 +46,7 @@ import {
 } from '@heroicons/react/20/solid'
 import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
+import { ComputerDesktopIcon } from '@heroicons/react/24/solid'
 
 export default function Test({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
   const handlePageChange = (page) => {
@@ -271,25 +272,46 @@ export default function Test({ onPageChange, currentPage, isAdminAuthenticated, 
               <SidebarLabel>Changelog</SidebarLabel>
             </SidebarItem>
             <SidebarItem 
-              onClick={() => handlePageChange('admin')}
-              current={currentPage === 'admin' ? true : undefined}
+              onClick={() => handlePageChange('settings')}
+              current={currentPage === 'settings' ? true : undefined}
               style={sidebarItemStyle}
               onMouseEnter={(e) => {
-                if (currentPage !== 'admin') {
+                if (currentPage !== 'settings') {
                   e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
                 }
               }}
               onMouseLeave={(e) => {
-                if (currentPage !== 'admin') {
+                if (currentPage !== 'settings') {
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
             >
               <Cog6ToothIcon />
-              <SidebarLabel>Admin</SidebarLabel>
+              <SidebarLabel>User Settings</SidebarLabel>
+            </SidebarItem>
+            <SidebarItem 
+              onClick={() => handlePageChange('portal-admin')}
+              current={currentPage === 'portal-admin' ? true : undefined}
+              style={sidebarItemStyle}
+              onMouseEnter={(e) => {
+                if (currentPage !== 'portal-admin') {
+                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== 'portal-admin') {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
+            >
+              <ComputerDesktopIcon className="h-6 w-6 text-orange-500" />
+              <SidebarLabel>Portal Admin</SidebarLabel>
             </SidebarItem>
           </SidebarSection>
         </SidebarBody>
+        
+
+
         {/* Log out at the bottom */}
         <div className="mt-auto">
           <SidebarSection>
