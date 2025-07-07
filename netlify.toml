@@ -1,22 +1,23 @@
 [build]
-  # what gets served as your “site”
-  command = " "
-  publish = "public"
-  # where Netlify should look for your Lambda functions
-  functions = "netlify/functions"
-  
+  base = "portal"
+  publish = "../public"  # Serve from root/public — OTP login lives here
+  command = "npm install && npm run build && cp -r dist/* ../public/"  # Copy build output to public
+  functions = "../netlify/functions"  # relative to "base"
 
-
-# proxy all static requests under /feedback-form/static → Asana’s CDN
 [[redirects]]
-  from   = "/feedback-form/static/*"
-  to     = "https://form.asana.com/static/:splat"
+  # Serve OTP login by default
+  from = "/"
+  to = "/index.html"
   status = 200
-  force  = true
 
-# proxy everything else under /feedback-form/ → Asana’s embed
+  # Post-login: send to the app's landing page
 [[redirects]]
-  from   = "/feedback-form/*"
-  to     = "https://form.asana.com/:splat"
+  from = "/dashboard"
+  to = "/index.html"
   status = 200
-  force  = true
+
+# Support SPA routing in app
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
