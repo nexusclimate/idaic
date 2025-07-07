@@ -4,6 +4,9 @@
   command = "npm install && npm run build && cp -r dist/* ../public/"  # Copy build output to public
   functions = "../netlify/functions"  # relative to "base"
 
+[functions]
+  included_files = ["node_modules/dotenv/**"]
+
 [[redirects]]
   # Serve OTP login by default
   from = "/"
