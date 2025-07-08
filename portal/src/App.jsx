@@ -2,7 +2,6 @@ import "./index.css";
 import React, { useState } from "react";
 import Idaic from "./components/idaic";
 import PageRouter from "./components/PageRouter";
-import Projects from "./pages/projects";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -22,7 +21,7 @@ export default function App() {
           isAdminAuthenticated={isAdminAuthenticated}
           setIsAdminAuthenticated={setIsAdminAuthenticated}
         >
-          {currentPage === 'projects' && <Projects />}
+          {/* Only render the home page welcome message by default */}
         </PageRouter>
       </main>
     </div>

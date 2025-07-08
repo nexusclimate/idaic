@@ -64,16 +64,16 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
   };
 
   return (
-    <nav className="h-screen w-64 bg-zinc-950 text-zinc-100 flex flex-col py-8 pl-1 pr-1" style={{ overflow: 'hidden' }}>
-      {/* Logo at the top, bigger */}
-      <div className="flex items-center justify-center mb-10">
-        <img src={idaicLogo} alt="IDAIC Logo" className="h-24 w-auto object-contain" />
+    <nav className="h-screen w-64 bg-zinc-950 text-zinc-100 flex flex-col py-4 pl-1 pr-1" style={{ overflow: 'hidden' }}>
+      {/* Logo at the top, smaller margin */}
+      <div className="flex items-center justify-center mb-4">
+        <img src={idaicLogo} alt="IDAIC Logo" className="h-20 w-auto object-contain" />
       </div>
       <Sidebar>
         <SidebarBody>
           {/* Main Section */}
           <SidebarSection>
-            <SidebarHeading>Main</SidebarHeading>
+            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Main</SidebarHeading>
             <SidebarItem 
               onClick={() => handlePageChange('home')}
               current={currentPage === 'home' ? true : undefined}
@@ -165,10 +165,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               <SidebarLabel>Members</SidebarLabel>
             </SidebarItem>
           </SidebarSection>
-          <SidebarDivider />
+          <SidebarDivider className="my-2" />
           {/* Chapters Section */}
           <SidebarSection>
-            <SidebarHeading>Chapters</SidebarHeading>
+            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Chapters</SidebarHeading>
             <SidebarItem 
               onClick={() => handlePageChange('uk')}
               current={currentPage === 'uk' ? true : undefined}
@@ -206,10 +206,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               <SidebarLabel>MENA</SidebarLabel>
             </SidebarItem>
           </SidebarSection>
-          <SidebarDivider />
+          <SidebarDivider className="my-2" />
           {/* Climate News Section */}
           <SidebarSection>
-            <SidebarHeading>Climate News</SidebarHeading>
+            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Climate News</SidebarHeading>
             <SidebarItem 
               onClick={() => handlePageChange('climate-solutions')}
               current={currentPage === 'climate-solutions' ? true : undefined}
@@ -247,12 +247,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               <SidebarLabel>UAE Climate News</SidebarLabel>
             </SidebarItem>
           </SidebarSection>
-          <SidebarDivider />
-          {/* Extra space before Resources */}
-          <div className="my-12" />
+          <SidebarDivider className="my-2" />
           {/* Resources Section */}
           <SidebarSection>
-            <SidebarHeading>Resources</SidebarHeading>
+            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Resources</SidebarHeading>
             <SidebarItem 
               onClick={() => handlePageChange('feedback')}
               current={currentPage === 'feedback' ? true : undefined}
