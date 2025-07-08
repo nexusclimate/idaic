@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { createClient } = require('@supabase/supabase-js')
 
@@ -8,13 +8,13 @@ console.log('SUPABASE_URL:', process.env.SUPABASE_URL);
 // Read from environment variables (set in Netlify dashboard or .env file)
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
 exports.handler = async function (event, context) {
   const { data, error } = await supabase
     .from('users')
-    .select('name, email, role')
+    .select('*')
     .order('name')
 
   if (error) {

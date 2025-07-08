@@ -81,11 +81,11 @@ export default function User() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="block min-w-0 grow px-3 py-1.5 text-base placeholder:text-gray-400 focus:outline-none sm:text-sm"
+              className="block min-w-0 grow px-3 py-1 text-base placeholder:text-gray-400 focus:outline-none sm:text-sm"
               style={{ color: colors.text.primary, fontFamily: font.primary }}
               placeholder="Search by name..."
             />
-            <div className="flex py-1.5 pr-1.5">
+            <div className="flex py-1 pr-1">
               <kbd className="inline-flex items-center rounded-sm border px-1 font-sans text-xs" style={{ borderColor: colors.border.light, color: colors.text.secondary }}>
                 ⌘K
               </kbd>
@@ -93,15 +93,15 @@ export default function User() {
           </div>
         </div>
       </div>
-      <div className="mt-8 flow-root">
-        <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle">
+      <div className="mt-4 flow-root">
+        <div className="-mx-2 -my-1 sm:-mx-4 lg:-mx-6">
+          <div className="inline-block min-w-full align-middle">
             <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
               <thead>
                 <tr>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 border-b bg-white/75 py-3.5 pr-3 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-6 lg:pl-8 cursor-pointer select-none"
+                    className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6 cursor-pointer select-none"
                     style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                     onClick={() => handleSort('name')}
                   >
@@ -110,7 +110,7 @@ export default function User() {
                   </th>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 hidden border-b bg-white/75 px-3 py-3.5 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter lg:table-cell cursor-pointer select-none"
+                    className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                     style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                     onClick={() => handleSort('email')}
                   >
@@ -119,29 +119,26 @@ export default function User() {
                   </th>
                   <th
                     scope="col"
-                    className="sticky top-0 z-10 border-b bg-white/75 px-3 py-3.5 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                    className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                     style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                    onClick={() => handleSort('role')}
+                    onClick={() => handleSort('company')}
                   >
-                    Role
-                    <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'role' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    Company
+                    <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'company' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((user, userIdx) => (
                   <tr
-                    key={user.email}
+                    key={user.email || userIdx}
                     className="hover:transition cursor-pointer"
                     style={{ backgroundColor: undefined, transition: 'background 0.2s', fontFamily: font.primary }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = colors.primary.orangeHover}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}
-                    onClick={() => {/* handle row click, e.g. open details */}}
                   >
                     <td
                       className={classNames(
                         userIdx !== filtered.length - 1 ? '' : '',
-                        'py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap sm:pl-6 lg:pl-8',
+                        'py-2 pr-2 pl-4 text-sm font-medium whitespace-nowrap sm:pl-4 lg:pl-6',
                       )}
                       style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                     >
@@ -150,23 +147,71 @@ export default function User() {
                     <td
                       className={classNames(
                         userIdx !== filtered.length - 1 ? '' : '',
-                        'hidden px-3 py-4 text-sm whitespace-nowrap lg:table-cell',
+                        'px-2 py-2 text-sm whitespace-nowrap',
                       )}
                       style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                     >
-                      {user.email}
+                      {user.email || '—'}
                     </td>
                     <td
                       className={classNames(
                         userIdx !== filtered.length - 1 ? '' : '',
-                        'px-3 py-4 text-sm whitespace-nowrap',
+                        'px-2 py-2 text-sm whitespace-nowrap',
                       )}
                       style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                     >
-                      {user.role || '—'}
+                      {user.company || '—'}
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {/* New Table: Name, Email, Status, Last Login */}
+      <div className="mt-10 flow-root">
+        <div className="-mx-2 -my-1 sm:-mx-4 lg:-mx-6">
+          <div className="inline-block min-w-full align-middle">
+            <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
+              <thead>
+                <tr>
+                  <th className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6">Name</th>
+                  <th className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter">Email</th>
+                  <th className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter">Status</th>
+                  <th className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter">Last Login</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((user, userIdx) => {
+                  // Determine badge color
+                  let badgeColor = 'bg-gray-200 text-gray-700 border-gray-300';
+                  let lastLogin = user.last_login || user.lastLogin || user.last_activity || user.lastActivity || null;
+                  let lastLoginDate = lastLogin ? new Date(lastLogin) : null;
+                  let now = new Date();
+                  let daysAgo = lastLoginDate ? Math.floor((now - lastLoginDate) / (1000 * 60 * 60 * 24)) : null;
+                  if (!lastLoginDate) {
+                    badgeColor = 'bg-red-100 text-red-800 border-red-300';
+                  } else if (daysAgo <= 7) {
+                    badgeColor = 'bg-green-100 text-green-800 border-green-300';
+                  } else if (daysAgo > 7 && daysAgo <= 15) {
+                    badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                  } else if (daysAgo > 15) {
+                    badgeColor = 'bg-orange-100 text-orange-800 border-orange-300';
+                  }
+                  return (
+                    <tr key={user.email || userIdx} className="hover:transition cursor-pointer" style={{ backgroundColor: undefined, transition: 'background 0.2s', fontFamily: font.primary }}>
+                      <td className="py-2 pr-2 pl-4 text-sm font-medium whitespace-nowrap sm:pl-4 lg:pl-6" style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>{user.name || '—'}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap" style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>{user.email || '—'}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap" style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${badgeColor}`}>{user.role || '—'}</span>
+                      </td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap" style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>
+                        {lastLoginDate ? lastLoginDate.toLocaleDateString() : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -92,6 +92,10 @@ export default function Example() {
             <Square2StackIcon />
             <SidebarLabel>Events</SidebarLabel>
           </SidebarItem>
+          <SidebarItem href="/projects">
+            <Square2StackIcon />
+            <SidebarLabel>Projects</SidebarLabel>
+          </SidebarItem>
           <SidebarItem href="/orders">
             <TicketIcon />
             <SidebarLabel>Orders</SidebarLabel>

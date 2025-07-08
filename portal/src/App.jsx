@@ -1,6 +1,6 @@
 import "./index.css";
 import React, { useState } from "react";
-import Test from "./components/test";
+import Idaic from "./components/idaic";
 import PageRouter from "./components/PageRouter";
 
 export default function App() {
@@ -9,7 +9,7 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen">
-      <Test 
+      <Idaic 
         onPageChange={setCurrentPage} 
         currentPage={currentPage}
         isAdminAuthenticated={isAdminAuthenticated}

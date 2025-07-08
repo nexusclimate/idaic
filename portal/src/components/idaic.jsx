@@ -48,7 +48,7 @@ import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
 import { ComputerDesktopIcon } from '@heroicons/react/24/solid'
 
-export default function Test({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
+export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
   const handlePageChange = (page) => {
     onPageChange(page);
   };
@@ -127,6 +127,24 @@ export default function Test({ onPageChange, currentPage, isAdminAuthenticated, 
             >
               <TicketIcon />
               <SidebarLabel>Events</SidebarLabel>
+            </SidebarItem>
+            <SidebarItem 
+              onClick={() => handlePageChange('projects')}
+              current={currentPage === 'projects' ? true : undefined}
+              style={sidebarItemStyle}
+              onMouseEnter={(e) => {
+                if (currentPage !== 'projects') {
+                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== 'projects') {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
+            >
+              <Square2StackIcon />
+              <SidebarLabel>Projects</SidebarLabel>
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('members')}
