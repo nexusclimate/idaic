@@ -11,6 +11,7 @@ import Changelog from '../pages/Changelog';
 import Admin from '../pages/Admin';
 import AdminPasswordPrompt from '../components/AdminPasswordPrompt';
 import Settings from '../pages/Settings';
+import Projects from '../pages/projects';
 
 export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
   switch (currentPage) {
@@ -111,6 +112,8 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       }
     case 'settings':
       return <Settings />;
+    case 'projects':
+      return <Projects />;
     default:
       return (
         <div>

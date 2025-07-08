@@ -230,6 +230,55 @@ export default function Admin() {
               </div>
             </div>
           </div>
+          <div className="mt-10 flow-root">
+            <div className="-mx-2 -my-1 sm:-mx-4 lg:-mx-6">
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
+                  <thead>
+                    <tr>
+                      <th className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6">Name</th>
+                      <th className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter">Email</th>
+                      <th className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter">Status</th>
+                      <th className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter">Last Login</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map((user, userIdx) => {
+                      // Determine badge color
+                      let badgeColor = 'bg-gray-200 text-gray-700 border-gray-300';
+                      let lastLogin = user.last_sign_in || user.lastLogin || user.last_activity || user.lastActivity || null;
+                      let lastLoginDate = lastLogin ? new Date(lastLogin) : null;
+                      let now = new Date();
+                      let daysAgo = lastLoginDate ? Math.floor((now - lastLoginDate) / (1000 * 60 * 60 * 24)) : null;
+                      if (!lastLoginDate) {
+                        badgeColor = 'bg-red-100 text-red-800 border-red-300';
+                      } else if (daysAgo <= 7) {
+                        badgeColor = 'bg-green-100 text-green-800 border-green-300';
+                      } else if (daysAgo > 7 && daysAgo <= 15) {
+                        badgeColor = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                      } else if (daysAgo > 15) {
+                        badgeColor = 'bg-orange-100 text-orange-800 border-orange-300';
+                      }
+                      // Format date as dd/mm/yyyy - hh:mm
+                      let formattedDate = lastLoginDate ? `${lastLoginDate.getDate().toString().padStart(2, '0')}/${(lastLoginDate.getMonth()+1).toString().padStart(2, '0')}/${lastLoginDate.getFullYear()} - ${lastLoginDate.getHours().toString().padStart(2, '0')}:${lastLoginDate.getMinutes().toString().padStart(2, '0')}` : '—';
+                      return (
+                        <tr key={user.email || userIdx} className="hover:transition cursor-pointer" style={{ backgroundColor: undefined, transition: 'background 0.2s', fontFamily: font.primary }}>
+                          <td className="py-2 pr-2 pl-4 text-sm font-medium whitespace-nowrap sm:pl-4 lg:pl-6" style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>{user.name || '—'}</td>
+                          <td className="px-2 py-2 text-sm whitespace-nowrap" style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>{user.email || '—'}</td>
+                          <td className="px-2 py-2 text-sm whitespace-nowrap" style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>
+                            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${badgeColor}`}>{user.role || '—'}</span>
+                          </td>
+                          <td className="px-2 py-2 text-sm whitespace-nowrap" style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}>
+                            {formattedDate}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       {activeTab === 'members' && (

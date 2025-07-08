@@ -2,6 +2,7 @@ import "./index.css";
 import React, { useState } from "react";
 import Idaic from "./components/idaic";
 import PageRouter from "./components/PageRouter";
+import Projects from "./pages/projects";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -20,7 +21,9 @@ export default function App() {
           currentPage={currentPage} 
           isAdminAuthenticated={isAdminAuthenticated}
           setIsAdminAuthenticated={setIsAdminAuthenticated}
-        />
+        >
+          {currentPage === 'projects' && <Projects />}
+        </PageRouter>
       </main>
     </div>
   );
