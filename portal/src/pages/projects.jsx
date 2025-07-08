@@ -90,11 +90,20 @@ export default function Projects() {
       {/* Project Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((project, idx) => (
-          <div key={idx} className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 flex flex-col">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">{project.name}</h2>
-            <div className="text-sm text-gray-500 mb-2">{project.company}</div>
-            <div className="text-xs text-gray-400 mb-4">{new Date(project.date).toLocaleDateString()}</div>
-            <div className="flex-1 text-gray-700 mb-2">{project.description}</div>
+          <div
+            key={idx}
+            className="rounded-lg shadow-sm p-6 flex flex-col"
+            style={{
+              background: colors.background.white,
+              border: `2px solid ${colors.primary.orange}`,
+              color: colors.text.primary,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            <h2 className="text-xl font-semibold mb-1" style={{ color: colors.primary.orange }}>{project.name}</h2>
+            <div className="text-sm mb-2" style={{ color: colors.text.secondary }}>{project.company}</div>
+            <div className="text-xs mb-4" style={{ color: colors.primary.orange }}>{new Date(project.date).toLocaleDateString()}</div>
+            <div className="flex-1 mb-2" style={{ color: colors.text.primary }}>{project.description}</div>
           </div>
         ))}
       </div>
