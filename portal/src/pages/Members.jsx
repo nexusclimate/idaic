@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { colors } from '../config/colors';
 import User from './User';
-import MemberAdm from './member_adm';
 
 const tabs = [
   { name: 'Members', key: 'members' },
   { name: 'Users', key: 'users' },
-  { name: 'Admin', key: 'admin' },
 ];
 
 const members = [
@@ -124,11 +122,6 @@ export default function Members() {
       )}
       {activeTab === 'users' && (
         <User />
-      )}
-      {activeTab === 'admin' && (
-        <div className="bg-white border rounded-lg p-8 max-w-4xl mx-auto">
-          <MemberAdm />
-        </div>
       )}
 
       {/* Drawer */}

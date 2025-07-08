@@ -21,8 +21,8 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10">
-      {/* Section Heading with Tabs (Members style) */}
+    <div className="py-10">
+      {/* Section Heading with Tabs (left-aligned, consistent with other pages) */}
       <div className="mb-8 border-b border-gray-200">
         <div className="sm:flex sm:items-center sm:justify-between">
           <h1 className="text-3xl font-bold text-gray-900">User Settings</h1>
@@ -51,7 +51,7 @@ export default function Settings() {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="bg-white shadow rounded-lg p-8">
+      <div className="max-w-2xl mx-auto bg-white shadow rounded-lg p-8">
         {activeTab === 'personal' && (
           <>
             <form className="space-y-6">

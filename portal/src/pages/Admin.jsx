@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navbar, NavbarItem, NavbarSection } from '../components/navbar';
 import { colors } from '../config/colors';
+import MemberAdm from './member_adm';
 
 const initialPeople = [
   { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
@@ -16,6 +17,7 @@ const tabs = [
   { name: 'Content', key: 'content' },
   { name: 'Users', key: 'users' },
   { name: 'Members', key: 'members' },
+  { name: 'Admin', key: 'admin' },
 ];
 
 export default function Admin() {
@@ -234,6 +236,11 @@ export default function Admin() {
         <div className="bg-white border rounded-lg p-8">
           <h3 className="text-xl font-semibold mb-4">Members Management</h3>
           <p>Members management features coming soon.</p>
+        </div>
+      )}
+      {activeTab === 'admin' && (
+        <div className="bg-white border rounded-lg p-8 max-w-4xl mx-auto">
+          <MemberAdm />
         </div>
       )}
     </div>
