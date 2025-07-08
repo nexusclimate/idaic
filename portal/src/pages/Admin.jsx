@@ -78,29 +78,29 @@ export default function Admin() {
       {/* Tab Content */}
       {activeTab === 'dashboard' && (
         <>
-          <p className="text-lg text-gray-600 mb-4">
+          <p className="text-base sm:text-lg text-gray-600 mb-4">
             Administrative tools and system management.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">System Status</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="bg-white border rounded-lg p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-4">System Status</h3>
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                   <span>Database:</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Online</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                   <span>API Services:</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Online</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                   <span>Email Service:</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">Online</span>
                 </div>
               </div>
             </div>
-            <div className="bg-white border rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+            <div className="bg-white border rounded-lg p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-semibold mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button className="w-full bg-blue-500 text-white px-4 py-2 rounded">Backup Database</button>
                 <button className="w-full bg-yellow-500 text-white px-4 py-2 rounded">Clear Cache</button>
