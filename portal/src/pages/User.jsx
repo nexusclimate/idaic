@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
-// import { supabase } from '../utils/supabaseClient'; // No longer needed
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -24,7 +23,6 @@ export default function User() {
         setUsers(data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching users:', err);
         setError('Failed to load users');
       }
       setLoading(false);
