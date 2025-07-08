@@ -1,0 +1,22 @@
+[build]
+  # what gets served as your “site”
+  command = " "
+  publish = "public"
+  # where Netlify should look for your Lambda functions
+  functions = "netlify/functions"
+  
+
+
+# proxy all static requests under /feedback-form/static → Asana’s CDN
+[[redirects]]
+  from   = "/feedback-form/static/*"
+  to     = "https://form.asana.com/static/:splat"
+  status = 200
+  force  = true
+
+# proxy everything else under /feedback-form/ → Asana’s embed
+[[redirects]]
+  from   = "/feedback-form/*"
+  to     = "https://form.asana.com/:splat"
+  status = 200
+  force  = true
