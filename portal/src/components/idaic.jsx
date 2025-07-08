@@ -47,8 +47,10 @@ import {
 import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
 import { ComputerDesktopIcon } from '@heroicons/react/24/solid'
+import React, { useState } from 'react'
 
 export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
+  const [collapsed, setCollapsed] = useState(false)
   const handlePageChange = (page) => {
     onPageChange(page);
   };
@@ -64,16 +66,39 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
   };
 
   return (
-    <nav className="h-screen w-64 bg-zinc-950 text-zinc-100 flex flex-col py-4 pl-1 pr-1" style={{ overflow: 'hidden' }}>
+    <nav
+      className={`h-screen ${collapsed ? 'w-16' : 'w-64'} bg-zinc-950 text-zinc-100 flex flex-col py-4 pl-1 pr-1 transition-all duration-300`}
+      style={{ overflow: 'hidden' }}
+    >
+      {/* Collapse/Expand Button */}
+      <div className="flex items-center justify-end mb-2 px-2">
+        <button
+          onClick={() => setCollapsed((c) => !c)}
+          className="p-1 rounded hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5l-7.5-7.5 7.5-7.5" />
+            </svg>
+          )}
+        </button>
+      </div>
       {/* Logo at the top, smaller margin */}
-      <div className="flex items-center justify-center mb-4">
-        <img src={idaicLogo} alt="IDAIC Logo" className="h-20 w-auto object-contain" />
+      <div className={`flex items-center justify-center mb-4 transition-all duration-300 ${collapsed ? 'h-12' : 'h-20'}`}>
+        <img src={idaicLogo} alt="IDAIC Logo" className={`${collapsed ? 'h-10' : 'h-20'} w-auto object-contain transition-all duration-300`} />
       </div>
       <Sidebar>
         <SidebarBody>
           {/* Main Section */}
           <SidebarSection>
-            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Main</SidebarHeading>
+            {!collapsed && (
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Main</SidebarHeading>
+            )}
             <SidebarItem 
               onClick={() => handlePageChange('home')}
               current={currentPage === 'home' ? true : undefined}
@@ -88,9 +113,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Home' : undefined}
             >
               <HomeIcon />
-              <SidebarLabel>Home</SidebarLabel>
+              {!collapsed && <SidebarLabel>Home</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('content')}
@@ -106,9 +132,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Content' : undefined}
             >
               <Square2StackIcon />
-              <SidebarLabel>Content</SidebarLabel>
+              {!collapsed && <SidebarLabel>Content</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('events')}
@@ -124,9 +151,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Events' : undefined}
             >
               <TicketIcon />
-              <SidebarLabel>Events</SidebarLabel>
+              {!collapsed && <SidebarLabel>Events</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('projects')}
@@ -142,9 +170,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Projects' : undefined}
             >
               <Square2StackIcon />
-              <SidebarLabel>Projects</SidebarLabel>
+              {!collapsed && <SidebarLabel>Projects</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('members')}
@@ -160,15 +189,18 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Members' : undefined}
             >
               <UserIcon />
-              <SidebarLabel>Members</SidebarLabel>
+              {!collapsed && <SidebarLabel>Members</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
           <SidebarDivider className="my-2" />
           {/* Chapters Section */}
           <SidebarSection>
-            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Chapters</SidebarHeading>
+            {!collapsed && (
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Chapters</SidebarHeading>
+            )}
             <SidebarItem 
               onClick={() => handlePageChange('uk')}
               current={currentPage === 'uk' ? true : undefined}
@@ -183,9 +215,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'UK' : undefined}
             >
               <MapPinIcon />
-              <SidebarLabel>UK</SidebarLabel>
+              {!collapsed && <SidebarLabel>UK</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('mena')}
@@ -201,15 +234,18 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'MENA' : undefined}
             >
               <GlobeAltIcon />
-              <SidebarLabel>MENA</SidebarLabel>
+              {!collapsed && <SidebarLabel>MENA</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
           <SidebarDivider className="my-2" />
           {/* Climate News Section */}
           <SidebarSection>
-            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Climate News</SidebarHeading>
+            {!collapsed && (
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Climate News</SidebarHeading>
+            )}
             <SidebarItem 
               onClick={() => handlePageChange('climate-solutions')}
               current={currentPage === 'climate-solutions' ? true : undefined}
@@ -224,9 +260,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Climate Solution News' : undefined}
             >
               <SunIcon />
-              <SidebarLabel>Climate Solution News</SidebarLabel>
+              {!collapsed && <SidebarLabel>Climate Solution News</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('uae-climate')}
@@ -242,15 +279,18 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'UAE Climate News' : undefined}
             >
               <NewspaperIcon />
-              <SidebarLabel>UAE Climate News</SidebarLabel>
+              {!collapsed && <SidebarLabel>UAE Climate News</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
           <SidebarDivider className="my-2" />
           {/* Resources Section */}
           <SidebarSection>
-            <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Resources</SidebarHeading>
+            {!collapsed && (
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Resources</SidebarHeading>
+            )}
             <SidebarItem 
               onClick={() => handlePageChange('feedback')}
               current={currentPage === 'feedback' ? true : undefined}
@@ -265,9 +305,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Feedback' : undefined}
             >
               <LightBulbIcon />
-              <SidebarLabel>Feedback</SidebarLabel>
+              {!collapsed && <SidebarLabel>Feedback</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('changelog')}
@@ -283,9 +324,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Changelog' : undefined}
             >
               <SparklesIcon />
-              <SidebarLabel>Changelog</SidebarLabel>
+              {!collapsed && <SidebarLabel>Changelog</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('settings')}
@@ -301,9 +343,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'User Settings' : undefined}
             >
               <Cog6ToothIcon />
-              <SidebarLabel>User Settings</SidebarLabel>
+              {!collapsed && <SidebarLabel>User Settings</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('portal-admin')}
@@ -319,9 +362,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Portal Admin' : undefined}
             >
               <ComputerDesktopIcon className="h-6 w-6 text-orange-500" />
-              <SidebarLabel>Portal Admin</SidebarLabel>
+              {!collapsed && <SidebarLabel>Portal Admin</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
         </SidebarBody>
@@ -345,9 +389,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
+              title={collapsed ? 'Sign out' : undefined}
             >
               <ArrowRightStartOnRectangleIcon />
-              <SidebarLabel>Sign out</SidebarLabel>
+              {!collapsed && <SidebarLabel>Sign out</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
         </div>
