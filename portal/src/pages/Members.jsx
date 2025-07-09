@@ -160,7 +160,7 @@ export default function Members() {
                 {selected !== null && (
                   <div className="divide-y divide-gray-200 flex-1 overflow-y-auto">
                     <div className="pb-4 sm:pb-6">
-                      <div className="-mt-8 sm:-mt-12 flow-root px-4 sm:-mt-8 sm:flex sm:items-end sm:px-6 lg:-mt-16">
+                      <div className="-mt-8 sm:-mt-8 flow-root px-4 sm:flex sm:items-end sm:px-6 lg:-mt-16">
                         <div>
                           <div className="-m-1 flex">
                             <div className="inline-flex overflow-hidden rounded-lg border-4 border-white">
@@ -178,20 +178,20 @@ export default function Members() {
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 py-4 sm:py-5 sm:px-0 sm:py-0">
-                      <dl className="space-y-6 sm:space-y-8 sm:space-y-0 sm:divide-y sm:divide-gray-200">
+                    <div className="px-4 py-4 sm:py-5 sm:px-0">
+                      <dl className="space-y-6 sm:space-y-8 sm:divide-y sm:divide-gray-200">
                         <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-40 sm:shrink-0 lg:w-48">Bio</dt>
+                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Bio</dt>
                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
                             <p>{members[selected].bio}</p>
                           </dd>
                         </div>
                         <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-40 sm:shrink-0 lg:w-48">Location</dt>
+                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Location</dt>
                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{members[selected].location}</dd>
                         </div>
                         <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-40 sm:shrink-0 lg:w-48">Website</dt>
+                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Website</dt>
                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{members[selected].website}</dd>
                         </div>
                       </dl>

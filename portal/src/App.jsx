@@ -9,21 +9,19 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen w-screen">
       <Idaic 
         onPageChange={setCurrentPage} 
         currentPage={currentPage}
         isAdminAuthenticated={isAdminAuthenticated}
         setIsAdminAuthenticated={setIsAdminAuthenticated}
       />
-      <main className="flex-1 bg-gray-50 p-10">
+      <main className="flex-1 bg-gray-50 p-10 h-full">
         <PageRouter 
           currentPage={currentPage} 
           isAdminAuthenticated={isAdminAuthenticated}
           setIsAdminAuthenticated={setIsAdminAuthenticated}
-        >
-          {/* Only render the home page welcome message by default */}
-        </PageRouter>
+        />
       </main>
     </div>
   );

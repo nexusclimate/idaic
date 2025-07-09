@@ -67,7 +67,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
 
   return (
     <nav
-      className={`h-screen ${collapsed ? 'w-16' : 'w-64'} bg-zinc-950 text-zinc-100 flex flex-col py-4 pl-1 pr-1 transition-all duration-300`}
+      className={`h-screen ${collapsed ? 'w-16' : 'w-56'} bg-zinc-950 text-zinc-100 flex flex-col py-4 pl-1 pr-1 transition-all duration-300`}
       style={{ overflow: 'hidden' }}
     >
       {/* Logo at the top, smaller margin */}
@@ -242,10 +242,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
-              title={collapsed ? 'Climate Solution News' : undefined}
+              title={collapsed ? 'CSN' : undefined}
             >
               <SunIcon />
-              {!collapsed && <SidebarLabel>Climate Solution News</SidebarLabel>}
+              {!collapsed && <SidebarLabel>CSN</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('uae-climate')}
@@ -261,10 +261,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
-              title={collapsed ? 'UAE Climate News' : undefined}
+              title={collapsed ? 'UAE' : undefined}
             >
               <NewspaperIcon />
-              {!collapsed && <SidebarLabel>UAE Climate News</SidebarLabel>}
+              {!collapsed && <SidebarLabel>UAE</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
           <SidebarDivider className="my-2" />
@@ -353,35 +353,14 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
         </SidebarBody>
         
         {/* Bottom section with toggle and logout */}
-        <div className="mt-auto">
-          <SidebarSection>
-            <SidebarItem 
-              onClick={() => { window.location.href = 'https://login.nexusclimate.co'; }}
-              current={currentPage === 'logout' ? true : undefined}
-              style={sidebarItemStyle}
-              onMouseEnter={(e) => {
-                if (currentPage !== 'logout') {
-                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (currentPage !== 'logout') {
-                  e.currentTarget.style.backgroundColor = '';
-                }
-              }}
-              title={collapsed ? 'Sign out' : undefined}
-            >
-              <ArrowRightStartOnRectangleIcon />
-              {!collapsed && <SidebarLabel>Sign out</SidebarLabel>}
-            </SidebarItem>
-          </SidebarSection>
-          
-          {/* Collapse/Expand Button at the bottom */}
-          <div className="flex items-center justify-center mt-2 px-2">
+        <div className="mt-auto px-2 pb-2">
+          {/* Toggle row */}
+          <div className="flex items-center w-full justify-end mb-2">
             <button
               onClick={() => setCollapsed((c) => !c)}
               className="p-1 rounded hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-zinc-100"
               aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              style={{ alignSelf: 'center' }}
             >
               {collapsed ? (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -393,6 +372,30 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                 </svg>
               )}
             </button>
+          </div>
+          {/* Sign out row */}
+          <div className="flex items-center w-full gap-2">
+            <SidebarSection className="flex">
+              <SidebarItem 
+                onClick={() => { window.location.href = 'https://login.nexusclimate.co'; }}
+                current={currentPage === 'logout' ? true : undefined}
+                style={sidebarItemStyle}
+                onMouseEnter={(e) => {
+                  if (currentPage !== 'logout') {
+                    e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== 'logout') {
+                    e.currentTarget.style.backgroundColor = '';
+                  }
+                }}
+                title={collapsed ? 'Sign out' : undefined}
+              >
+                <ArrowRightStartOnRectangleIcon />
+                {!collapsed && <SidebarLabel>Sign out</SidebarLabel>}
+              </SidebarItem>
+            </SidebarSection>
           </div>
         </div>
       </Sidebar>
