@@ -5,36 +5,51 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function UserAdm() {
+// Custom hook to fetch users once and share between components
+export function useUsers() {
   const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [sortDir, setSortDir] = useState('asc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Replace with your real endpoint or mock data
-    async function fetchUsers() {
+    let ignore = false;
+    const fetchUsers = async () => {
       setLoading(true);
       try {
-        // Example: const response = await fetch('/api/users');
-        // const data = await response.json();
-        // Mock data for demonstration:
-        const data = [
-          { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member', status: 'Active', lastLogin: '2024-06-01T10:00:00Z' },
-          { name: 'Jane Smith', title: 'Designer', email: 'jane.smith@example.com', role: 'Admin', status: 'Inactive', lastLogin: '2024-05-28T14:30:00Z' },
-          { name: 'John Doe', title: 'Manager', email: 'john.doe@example.com', role: 'Member', status: 'Active', lastLogin: '2024-06-02T08:15:00Z' },
-        ];
-        setUsers(data);
-        setError(null);
+        const response = await fetch('/.netlify/functions/userfetch');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        if (!ignore) {
+          setUsers(data);
+          setError(null);
+        }
       } catch (err) {
-        setError('Failed to load users');
+        if (!ignore) setError('Failed to load users');
       }
-      setLoading(false);
-    }
+      if (!ignore) setLoading(false);
+    };
     fetchUsers();
+    return () => { ignore = true; };
   }, []);
+
+  return { users, loading, error };
+}
+
+function getBadgeColor(lastLogin) {
+  if (!lastLogin) return 'bg-red-100 text-red-800 border-red-300';
+  const now = new Date();
+  const loginDate = new Date(lastLogin);
+  const diffDays = Math.floor((now - loginDate) / (1000 * 60 * 60 * 24));
+  if (diffDays < 2) return 'bg-green-100 text-green-800 border-green-300';
+  if (diffDays <= 15) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+  return 'bg-orange-100 text-orange-800 border-orange-300';
+}
+
+export default function UserAdm() {
+  const { users, loading, error } = useUsers();
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
 
   // Filter and sort
   const filtered = users
@@ -91,9 +106,9 @@ export default function UserAdm() {
                     <th onClick={() => handleSort('name')} className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6 cursor-pointer select-none">Name {sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
                     <th onClick={() => handleSort('title')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Title {sortBy === 'title' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
                     <th onClick={() => handleSort('email')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Email {sortBy === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-                    <th onClick={() => handleSort('role')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Role {sortBy === 'role' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-                    <th onClick={() => handleSort('status')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Status {sortBy === 'status' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-                    <th onClick={() => handleSort('lastLogin')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Last Login {sortBy === 'lastLogin' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
+                    <th onClick={() => handleSort('role')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Role</th>
+                    <th onClick={() => handleSort('status')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Status</th>
+                    <th onClick={() => handleSort('lastLogin')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Last Login</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,7 +117,9 @@ export default function UserAdm() {
                       <td className="py-2 pr-2 pl-4 text-sm font-medium whitespace-nowrap sm:pl-4 lg:pl-6">{user.name}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.title}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.email}</td>
-                      <td className="px-2 py-2 text-sm whitespace-nowrap">{user.role}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap">
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getBadgeColor(user.lastLogin)}`}>{user.role || '—'}</span>
+                      </td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.status}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '—'}</td>
                     </tr>

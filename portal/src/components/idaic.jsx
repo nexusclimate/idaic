@@ -72,7 +72,9 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
     >
       {/* Logo at the top, smaller margin */}
       <div className={`flex items-center justify-center mb-4 transition-all duration-300 ${collapsed ? 'h-12' : 'h-20'}`}>
-        <img src={idaicLogo} alt="IDAIC Logo" className={`${collapsed ? 'h-10' : 'h-20'} w-auto object-contain transition-all duration-300`} />
+        <a href="/">
+          <img src={idaicLogo} alt="IDAIC Logo" className={`${collapsed ? 'h-10' : 'h-20'} w-auto object-contain transition-all duration-300`} />
+        </a>
       </div>
       <Sidebar>
         <SidebarBody>
