@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar, NavbarItem, NavbarSection } from '../components/navbar';
 import { colors } from '../config/colors';
 import MemberAdm from './member_adm';
 import UserAdm from './user_adm';
+import { useLocation } from 'react-router-dom';
 
 const initialPeople = [
   { name: 'Lindsay Walton', title: 'Front-end Developer', email: 'lindsay.walton@example.com', role: 'Member' },
@@ -27,6 +28,26 @@ export default function Admin() {
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
   const [people, setPeople] = useState(initialPeople);
+  const [userList, setUserList] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const location = useLocation();
+
+  // Fetch all users for search
+  useEffect(() => {
+    fetch('/.netlify/functions/userfetch')
+      .then(res => res.json())
+      .then(data => setUserList(data));
+  }, []);
+
+  // If query param ?email= is present, load that user's info
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const email = params.get('email');
+    if (email && userList.length > 0) {
+      const user = userList.find(u => u.email === email);
+      if (user) setSelectedUser(user);
+    }
+  }, [location.search, userList]);
 
   // Filter and sort for Users tab
   const filtered = people
@@ -132,7 +153,31 @@ export default function Admin() {
       )}
       {activeTab === 'admin' && (
         <div className="bg-white border rounded-lg p-8 max-w-4xl mx-auto">
-          <MemberAdm />
+          {/* Search bar for users */}
+          <div className="mb-4 max-w-xs">
+            <label htmlFor="admin-user-search" className="block text-sm font-medium text-gray-900">Search users</label>
+            <input
+              id="admin-user-search"
+              name="admin-user-search"
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
+              placeholder="Search by name or email..."
+            />
+            {/* Show filtered user list */}
+            {search && (
+              <ul className="mt-2 bg-white border rounded shadow max-h-40 overflow-y-auto">
+                {userList.filter(u => u.name?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase())).map(u => (
+                  <li key={u.email} className="px-3 py-2 hover:bg-orange-50 cursor-pointer" onClick={() => setSelectedUser(u)}>
+                    <span className="font-medium">{u.name}</span> <span className="text-xs text-gray-500">{u.email}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {/* Pass selectedUser to MemberAdm as a prop */}
+          <MemberAdm user={selectedUser} />
         </div>
       )}
     </div>

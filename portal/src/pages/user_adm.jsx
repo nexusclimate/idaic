@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
+import { useNavigate } from 'react-router-dom';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -35,6 +36,17 @@ export function useUsers() {
   return { users, loading, error };
 }
 
+function formatDate(dateString) {
+  if (!dateString) return '—';
+  const date = new Date(dateString);
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${dd}/${mm}/${yyyy} - ${hh}:${min}`;
+}
+
 function getBadgeColor(lastLogin) {
   if (!lastLogin) return 'bg-red-100 text-red-800 border-red-300';
   const now = new Date();
@@ -47,6 +59,7 @@ function getBadgeColor(lastLogin) {
 
 export default function UserAdm() {
   const { users, loading, error } = useUsers();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
@@ -106,22 +119,32 @@ export default function UserAdm() {
                     <th onClick={() => handleSort('name')} className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6 cursor-pointer select-none">Name {sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
                     <th onClick={() => handleSort('title')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Title {sortBy === 'title' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
                     <th onClick={() => handleSort('email')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Email {sortBy === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
+                    <th onClick={() => handleSort('company')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Company {sortBy === 'company' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
                     <th onClick={() => handleSort('role')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Role</th>
-                    <th onClick={() => handleSort('status')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Status</th>
                     <th onClick={() => handleSort('lastLogin')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Last Login</th>
+                    <th onClick={() => handleSort('update')} className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none">Update</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((user, idx) => (
-                    <tr key={user.email || idx} className="hover:bg-orange-50 cursor-pointer transition">
+                    <tr key={user.email || idx} className="hover:bg-orange-50 cursor-pointer transition group">
                       <td className="py-2 pr-2 pl-4 text-sm font-medium whitespace-nowrap sm:pl-4 lg:pl-6">{user.name}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.title}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.email}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap">{user.company}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">
-                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getBadgeColor(user.lastLogin)}`}>{user.role || '—'}</span>
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getBadgeColor(user.last_sign_in)}`}>{user.role || '—'}</span>
                       </td>
-                      <td className="px-2 py-2 text-sm whitespace-nowrap">{user.status}</td>
-                      <td className="px-2 py-2 text-sm whitespace-nowrap">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : '—'}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap">{formatDate(user.last_sign_in)}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap text-right">
+                        <button
+                          type="button"
+                          className="text-orange-500 font-semibold hover:underline focus:outline-none"
+                          onClick={() => navigate(`/admin?email=${encodeURIComponent(user.email)}`)}
+                        >
+                          Update
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
