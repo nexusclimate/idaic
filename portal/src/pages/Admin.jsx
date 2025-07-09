@@ -111,11 +111,11 @@ export default function Admin() {
         </>
       )}
       {activeTab === 'content' && (
-        <div className="bg-white border rounded-lg p-4" style={{ height: '95vh' }}>
+        <div style={{ height: '95vh', padding: 0, margin: 0, background: 'none', border: 'none', borderRadius: 0 }}>
           <iframe
             src="https://members.nexusclimate.co/ghost/#/posts"
             title="Content Management"
-            style={{ width: '100%', height: '100%', border: 'none' }}
+            style={{ width: '100%', height: '100%', border: 'none', padding: 0, margin: 0, background: 'none' }}
             allowFullScreen
           />
         </div>

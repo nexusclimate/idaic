@@ -8,8 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "update-version": "node scripts/update-version.js",
-    "commit-version": "node scripts/commit-version.js"
+    "version": "node scripts/simple-version.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
