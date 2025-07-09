@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update-version": "node scripts/update-version.js",
+    "commit-version": "node scripts/commit-version.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
@@ -33,9 +35,17 @@
     "tailwindcss": "^4.1.11",
     "vite": "^7.0.0"
   },
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "description": "IDAIC Portal - A comprehensive portal for climate solutions and member management",
   "main": "eslint.config.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": ["portal", "climate", "solutions", "react", "vite"],
+  "author": "IDAIC Team",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nexusclimate/idaic.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
 }

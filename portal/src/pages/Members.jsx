@@ -57,11 +57,11 @@ export default function Members() {
   };
 
   return (
-    <div>
+    <div className="px-4 sm:px-6 lg:px-8">
       {/* Section Heading with Tabs */}
-      <div className="mb-8 border-b border-gray-200">
-        <div className="sm:flex sm:items-center sm:justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Members</h1>
+      <div className="mb-6 sm:mb-8 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Members</h1>
           <nav className="mt-4 sm:mt-0">
             <ul className="flex space-x-4" role="tablist">
               {tabs.map(tab => (
@@ -88,16 +88,16 @@ export default function Members() {
       </div>
       {/* Tab Content */}
       {activeTab === 'members' && (
-        <div className="bg-white border rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold">Member Directory</h3>
+        <div className="bg-white border rounded-lg p-4 sm:p-6">
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h3 className="text-lg sm:text-xl font-semibold">Member Directory</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {members.map((member, idx) => (
               <button
                 key={idx}
                 onClick={() => handleMemberClick(idx)}
-                className={`bg-gray-100 p-8 sm:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
+                className={`bg-gray-100 p-6 sm:p-8 lg:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
                   selected === idx && drawerOpen
                     ? ''
                     : 'hover:border-orange-200'
@@ -109,7 +109,7 @@ export default function Members() {
                 }}
               >
                 <img
-                  className="max-h-32 w-auto object-contain"
+                  className="max-h-24 sm:max-h-28 lg:max-h-32 w-auto object-contain"
                   src={member.logo}
                   alt={member.alt}
                   style={{ imageRendering: 'auto' }}
@@ -139,11 +139,11 @@ export default function Members() {
         {/* Slide-over panel */}
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
+            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-4 sm:pl-10 lg:pl-16">
               <div
-                className={`pointer-events-auto w-screen max-w-2xl transform transition ease-in-out duration-500 sm:duration-700 bg-white shadow-xl flex flex-col h-full ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                className={`pointer-events-auto w-screen max-w-sm sm:max-w-md lg:max-w-2xl transform transition ease-in-out duration-500 sm:duration-700 bg-white shadow-xl flex flex-col h-full ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
               >
-                <div className="px-4 py-6 sm:px-6 flex items-start justify-between">
+                <div className="px-4 py-4 sm:py-6 sm:px-6 flex items-start justify-between">
                   <h2 className="text-base font-semibold text-gray-900" id="drawer-title">Member Details</h2>
                   <button
                     type="button"
@@ -159,39 +159,39 @@ export default function Members() {
                 {/* Main content */}
                 {selected !== null && (
                   <div className="divide-y divide-gray-200 flex-1 overflow-y-auto">
-                    <div className="pb-6">
-                      <div className="-mt-12 flow-root px-4 sm:-mt-8 sm:flex sm:items-end sm:px-6 lg:-mt-16">
+                    <div className="pb-4 sm:pb-6">
+                      <div className="-mt-8 sm:-mt-12 flow-root px-4 sm:-mt-8 sm:flex sm:items-end sm:px-6 lg:-mt-16">
                         <div>
                           <div className="-m-1 flex">
                             <div className="inline-flex overflow-hidden rounded-lg border-4 border-white">
-                              <img className="size-32 shrink-0 sm:size-40 lg:size-48 object-contain" src={members[selected].logo} alt="" style={{ imageRendering: 'auto' }} loading="lazy" />
+                              <img className="size-24 sm:size-32 lg:size-40 xl:size-48 object-contain" src={members[selected].logo} alt="" style={{ imageRendering: 'auto' }} loading="lazy" />
                             </div>
                           </div>
                         </div>
-                        <div className="mt-6 sm:ml-6 sm:flex-1">
+                        <div className="mt-4 sm:mt-6 sm:ml-6 sm:flex-1">
                           <div>
                             <div className="flex items-center">
-                              <h3 className="text-xl font-bold text-gray-900 sm:text-2xl">{members[selected].name}</h3>
+                              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{members[selected].name}</h3>
                             </div>
                             <p className="text-sm text-gray-500">{members[selected].email}</p>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 py-5 sm:px-0 sm:py-0">
-                      <dl className="space-y-8 sm:space-y-0 sm:divide-y sm:divide-gray-200">
+                    <div className="px-4 py-4 sm:py-5 sm:px-0 sm:py-0">
+                      <dl className="space-y-6 sm:space-y-8 sm:space-y-0 sm:divide-y sm:divide-gray-200">
                         <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-40 sm:shrink-0 lg:w-48">Bio</dt>
+                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-40 sm:shrink-0 lg:w-48">Bio</dt>
                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
                             <p>{members[selected].bio}</p>
                           </dd>
                         </div>
                         <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-40 sm:shrink-0 lg:w-48">Location</dt>
+                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-40 sm:shrink-0 lg:w-48">Location</dt>
                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{members[selected].location}</dd>
                         </div>
                         <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-40 sm:shrink-0 lg:w-48">Website</dt>
+                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-40 sm:shrink-0 lg:w-48">Website</dt>
                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{members[selected].website}</dd>
                         </div>
                       </dl>

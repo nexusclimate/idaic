@@ -51,7 +51,7 @@ export default function User() {
   if (loading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-8 sm:py-12">
           <div className="text-gray-500">Loading users...</div>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function User() {
   if (error) {
     return (
       <div className="px-4 sm:px-6 lg:px-8" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-8 sm:py-12">
           <div className="text-red-600">{error}</div>
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function User() {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="block min-w-0 grow px-3 py-1 text-base placeholder:text-gray-400 focus:outline-none sm:text-sm"
+              className="block min-w-0 grow px-3 py-2 sm:py-1 text-base placeholder:text-gray-400 focus:outline-none sm:text-sm"
               style={{ color: colors.text.primary, fontFamily: font.primary }}
               placeholder="Search by name..."
             />
@@ -96,76 +96,78 @@ export default function User() {
       <div className="mt-4 flow-root">
         <div className="-mx-2 -my-1 sm:-mx-4 lg:-mx-6">
           <div className="inline-block min-w-full align-middle">
-            <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
-              <thead>
-                <tr>
-                  <th
-                    scope="col"
-                    className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6 cursor-pointer select-none"
-                    style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                    onClick={() => handleSort('name')}
-                  >
-                    Name
-                    <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                  </th>
-                  <th
-                    scope="col"
-                    className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
-                    style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                    onClick={() => handleSort('email')}
-                  >
-                    Email
-                    <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                  </th>
-                  <th
-                    scope="col"
-                    className="sticky top-0 z-10 border-b bg-white/75 px-2 py-2 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
-                    style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                    onClick={() => handleSort('company')}
-                  >
-                    Company
-                    <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'company' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((user, userIdx) => (
-                  <tr
-                    key={user.email || userIdx}
-                    className="hover:transition cursor-pointer"
-                    style={{ backgroundColor: undefined, transition: 'background 0.2s', fontFamily: font.primary }}
-                  >
-                    <td
-                      className={classNames(
-                        userIdx !== filtered.length - 1 ? '' : '',
-                        'py-2 pr-2 pl-4 text-sm font-medium whitespace-nowrap sm:pl-4 lg:pl-6',
-                      )}
-                      style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
+                <thead>
+                  <tr>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-2 sm:pl-4 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter lg:pl-6 cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('name')}
                     >
-                      {user.name || '—'}
-                    </td>
-                    <td
-                      className={classNames(
-                        userIdx !== filtered.length - 1 ? '' : '',
-                        'px-2 py-2 text-sm whitespace-nowrap',
-                      )}
-                      style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      Name
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-2 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('email')}
                     >
-                      {user.email || '—'}
-                    </td>
-                    <td
-                      className={classNames(
-                        userIdx !== filtered.length - 1 ? '' : '',
-                        'px-2 py-2 text-sm whitespace-nowrap',
-                      )}
-                      style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      Email
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'email' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-2 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('company')}
                     >
-                      {user.company || '—'}
-                    </td>
+                      Company
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'company' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filtered.map((user, userIdx) => (
+                    <tr
+                      key={user.email || userIdx}
+                      className="hover:transition cursor-pointer"
+                      style={{ backgroundColor: undefined, transition: 'background 0.2s', fontFamily: font.primary }}
+                    >
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'py-2 pr-2 pl-2 sm:pl-4 text-xs sm:text-sm font-medium whitespace-nowrap lg:pl-6',
+                        )}
+                        style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        {user.name || '—'}
+                      </td>
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'px-1 sm:px-2 py-2 text-xs sm:text-sm whitespace-nowrap',
+                        )}
+                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        {user.email || '—'}
+                      </td>
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'px-1 sm:px-2 py-2 text-xs sm:text-sm whitespace-nowrap',
+                        )}
+                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        {user.company || '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

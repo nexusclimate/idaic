@@ -2,6 +2,7 @@ import "./index.css";
 import React, { useState } from "react";
 import Idaic from "./components/idaic";
 import PageRouter from "./components/PageRouter";
+import { VERSION } from './config/version.js';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');

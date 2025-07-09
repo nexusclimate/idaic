@@ -70,24 +70,6 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
       className={`h-screen ${collapsed ? 'w-16' : 'w-64'} bg-zinc-950 text-zinc-100 flex flex-col py-4 pl-1 pr-1 transition-all duration-300`}
       style={{ overflow: 'hidden' }}
     >
-      {/* Collapse/Expand Button */}
-      <div className="flex items-center justify-end mb-2 px-2">
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          className="p-1 rounded hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5l-7.5-7.5 7.5-7.5" />
-            </svg>
-          )}
-        </button>
-      </div>
       {/* Logo at the top, smaller margin */}
       <div className={`flex items-center justify-center mb-4 transition-all duration-300 ${collapsed ? 'h-12' : 'h-20'}`}>
         <img src={idaicLogo} alt="IDAIC Logo" className={`${collapsed ? 'h-10' : 'h-20'} w-auto object-contain transition-all duration-300`} />
@@ -97,7 +79,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           {/* Main Section */}
           <SidebarSection>
             {!collapsed && (
-              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Main</SidebarHeading>
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-400" style={{ marginBottom: 2 }}>Main</SidebarHeading>
             )}
             <SidebarItem 
               onClick={() => handlePageChange('home')}
@@ -199,7 +181,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           {/* Chapters Section */}
           <SidebarSection>
             {!collapsed && (
-              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Chapters</SidebarHeading>
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-400" style={{ marginBottom: 2 }}>Chapters</SidebarHeading>
             )}
             <SidebarItem 
               onClick={() => handlePageChange('uk')}
@@ -244,7 +226,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           {/* Climate News Section */}
           <SidebarSection>
             {!collapsed && (
-              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Climate News</SidebarHeading>
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-400" style={{ marginBottom: 2 }}>Climate News</SidebarHeading>
             )}
             <SidebarItem 
               onClick={() => handlePageChange('climate-solutions')}
@@ -289,7 +271,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           {/* Resources Section */}
           <SidebarSection>
             {!collapsed && (
-              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-500 dark:text-zinc-400" style={{ marginBottom: 2 }}>Resources</SidebarHeading>
+              <SidebarHeading className="mb-0.5 px-2 text-xs/6 font-medium text-zinc-400" style={{ marginBottom: 2 }}>Resources</SidebarHeading>
             )}
             <SidebarItem 
               onClick={() => handlePageChange('feedback')}
@@ -370,9 +352,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           </SidebarSection>
         </SidebarBody>
         
-
-
-        {/* Log out at the bottom */}
+        {/* Bottom section with toggle and logout */}
         <div className="mt-auto">
           <SidebarSection>
             <SidebarItem 
@@ -395,6 +375,25 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               {!collapsed && <SidebarLabel>Sign out</SidebarLabel>}
             </SidebarItem>
           </SidebarSection>
+          
+          {/* Collapse/Expand Button at the bottom */}
+          <div className="flex items-center justify-center mt-2 px-2">
+            <button
+              onClick={() => setCollapsed((c) => !c)}
+              className="p-1 rounded hover:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-orange-500 text-zinc-100"
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5l-7.5-7.5 7.5-7.5" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </Sidebar>
     </nav>

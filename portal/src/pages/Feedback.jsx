@@ -47,20 +47,20 @@ export default function FeedbackForm() {
   };
 
   return (
-    <div>
-      <div className="mb-8 border-b border-gray-200">
-        <div className="sm:flex sm:items-center sm:justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Feedback</h1>
+    <div className="px-4 sm:px-6 lg:px-8">
+      <div className="mb-6 sm:mb-8 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Feedback</h1>
         </div>
       </div>
-      <div className="max-w-2xl mx-auto p-8 rounded-lg shadow"
+      <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 rounded-lg shadow"
         style={{
           background: colors.background.white,
           fontFamily: font.primary,
           color: colors.text.primary,
         }}
       >
-        <h2 className="text-xl mb-4 font-bold" style={{ color: colors.text.primary }}>
+        <h2 className="text-lg sm:text-xl mb-4 font-bold" style={{ color: colors.text.primary }}>
           Share Your Feedback
         </h2>
         <form id="feedbackForm" onSubmit={handleSubmit} className="grid gap-4">
@@ -70,7 +70,7 @@ export default function FeedbackForm() {
             </label>
             <input
               id="name" name="name" required
-              className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
+              className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
                 color: colors.text.primary,
@@ -89,7 +89,7 @@ export default function FeedbackForm() {
             </label>
             <input
               id="email" name="email" type="email" placeholder="you@example.com" required
-              className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
+              className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
                 color: colors.text.primary,
@@ -108,7 +108,7 @@ export default function FeedbackForm() {
             </label>
             <input
               id="subject" name="subject" required
-              className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
+              className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
                 color: colors.text.primary,
@@ -127,7 +127,7 @@ export default function FeedbackForm() {
             </label>
             <select
               id="type" name="type" required
-              className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 focus:outline-2 focus:outline-offset-2 sm:text-sm"
+              className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
                 color: colors.text.primary,
@@ -149,7 +149,7 @@ export default function FeedbackForm() {
             </label>
             <textarea
               id="comment" name="comment" rows="4" required
-              className="mt-1 block w-full rounded-md px-3 py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
+              className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
                 color: colors.text.primary,
@@ -165,7 +165,7 @@ export default function FeedbackForm() {
           <button
             type="submit"
             disabled={sending}
-            className="mt-2 w-full rounded-md px-4 py-2 font-medium disabled:opacity-50"
+            className="mt-2 w-full rounded-md px-4 py-3 sm:py-2 font-medium disabled:opacity-50"
             style={{
               background: colors.primary.orange,
               color: colors.text.white,
@@ -178,7 +178,7 @@ export default function FeedbackForm() {
           <p
             id="status"
             aria-live="polite"
-            className="mt-2 text-center"
+            className="mt-2 text-center text-sm sm:text-base"
             style={{ color: colors.primary.orange, fontFamily: font.primary }}
           >
             {status}
