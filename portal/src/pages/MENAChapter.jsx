@@ -5,7 +5,7 @@ export default function MENAChapter() {
   const [activeTab, setActiveTab] = useState('main');
   const tabs = [
     { name: 'Main', key: 'main' },
-    { name: 'Minutes', key: 'minutes' },
+    { name: 'MENA Updates', key: 'mena updates' },
   ];
 
   return (
@@ -71,9 +71,14 @@ export default function MENAChapter() {
           </div>
         </>
       )}
-      {activeTab === 'minutes' && (
-        <div className="bg-white border rounded-lg p-8 text-gray-500 text-center">
-          <span>Minutes will appear here.</span>
+      {activeTab === 'mena updates' && (
+        <div className="w-full h-[80vh] bg-white border rounded-lg overflow-hidden">
+          <iframe
+            src="https://members.nexusclimate.co/tag/mena/"
+            title="MENA Updates"
+            className="w-full h-full border-0"
+            allowFullScreen
+          />
         </div>
       )}
     </div>
