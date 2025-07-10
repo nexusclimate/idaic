@@ -223,9 +223,28 @@ export default function ProjectForm({
                       </button>
                       <button
                         type="button"
+                        className="px-3 sm:px-4 py-2 rounded bg-red-400 text-white cursor-not-allowed text-sm mt-2 opacity-60"
+                        title="Click Edit to enable Delete"
+                        disabled
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  {!isAdding && !readOnly && (
+                    <div className="flex flex-col items-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
+                        onClick={handleEdit}
+                        disabled
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
                         className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm mt-2"
                         onClick={handleDeleteClick}
-                        // Do not disable in readOnly mode so user can always open dialog
                       >
                         Delete
                       </button>
