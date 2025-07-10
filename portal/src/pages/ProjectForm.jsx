@@ -180,15 +180,7 @@ export default function ProjectForm({
                         >
                           Save
                         </button>
-                      ) : readOnly ? (
-                        <button
-                          type="button"
-                          className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
-                          onClick={handleEdit}
-                        >
-                          Edit
-                        </button>
-                      ) : (
+                      ) : !readOnly && (
                         <button
                           type="submit"
                           className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
@@ -198,6 +190,18 @@ export default function ProjectForm({
                       )}
                     </div>
                   </form>
+                  {/* Edit button OUTSIDE the form, only shown when readOnly */}
+                  {!isAdding && readOnly && (
+                    <div className="flex justify-end gap-2 pt-2">
+                      <button
+                        type="button"
+                        className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
+                        onClick={handleEdit}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </DialogPanel>

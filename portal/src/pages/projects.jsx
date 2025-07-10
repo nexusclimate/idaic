@@ -118,9 +118,9 @@ export default function Projects() {
       }
 
       console.log('Project deleted successfully');
-      setDrawerOpen(false);
+      setDrawerOpen(false); // Close the drawer after deletion
       setFormError('');
-      await refetch(); // Refresh the projects list
+      await refetch(); // Refresh the projects list to remove the deleted record
     } catch (err) {
       console.error('Error deleting project:', err);
       setFormError(err.message);
