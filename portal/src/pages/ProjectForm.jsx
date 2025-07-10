@@ -16,8 +16,7 @@ export default function ProjectForm({
   const [readOnly, setReadOnly] = useState(true);
   // Track local project state for editing
   const [localProject, setLocalProject] = useState(selectedProject);
-  // Track if we should show updated_at
-  const [showUpdatedAt, setShowUpdatedAt] = useState(false);
+  // Remove showUpdatedAt state, always show updated_at if present
 
   // Reset form state when drawer opens or project changes
   useEffect(() => {
@@ -28,7 +27,7 @@ export default function ProjectForm({
       setReadOnly(true);
     }
     setLocalProject(selectedProject);
-    setShowUpdatedAt(false); // Reset when opening or switching project
+    // No showUpdatedAt state needed
   }, [drawerOpen, selectedProject, isAdding]);
 
   // Handle field changes
@@ -47,7 +46,7 @@ export default function ProjectForm({
     // Lock fields after any save (add or update), but keep drawer open
     if (!result || result !== false) {
       setReadOnly(true);
-      setShowUpdatedAt(true); // Only show updated_at after a successful update
+      // No showUpdatedAt state needed, rely on updated_at from backend
     }
   };
 
@@ -136,14 +135,14 @@ export default function ProjectForm({
                         readOnly={readOnly}
                       />
                     </div>
-                    {/* Show updated_at above created_at if available */}
+                    {/* Show updated_at above created_at if available, with minimal gap */}
                     {localProject.updated_at && (
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-400 mb-0">
                         Updated at: {new Date(localProject.updated_at).toLocaleString()}
                       </div>
                     )}
                     {localProject.created_at && (
-                      <div className="text-xs text-gray-400 mt-1">
+                      <div className="text-xs text-gray-400 mt-0">
                         Created at: {new Date(localProject.created_at).toLocaleString()}
                       </div>
                     )}
