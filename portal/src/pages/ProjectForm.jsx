@@ -39,6 +39,7 @@ export default function ProjectForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (readOnly) return; // Prevent submit if not in edit mode
+    console.log('Submitting form to database (Save/Update)');
     const result = await onSubmit(localProject); // Pass the updated project object
     // Lock fields after any save (add or update), but keep drawer open
     if (!result || result !== false) {
@@ -47,7 +48,10 @@ export default function ProjectForm({
   };
 
   // Handle Edit button
-  const handleEdit = () => setReadOnly(false);
+  const handleEdit = () => {
+    console.log('Edit clicked: unlocking fields, no database action');
+    setReadOnly(false);
+  };
 
   return (
     <Dialog open={drawerOpen} onClose={onClose} className="relative z-50">
