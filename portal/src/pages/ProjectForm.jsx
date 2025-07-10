@@ -189,23 +189,6 @@ export default function ProjectForm({
                     )}
                     {formError && <div className="text-red-500 text-sm">{formError}</div>}
                     <div className="flex justify-end gap-2 pt-2">
-                      {!isAdding && (
-                        <button
-                          type="button"
-                          className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm"
-                          onClick={handleDeleteClick}
-                          disabled={readOnly}
-                        >
-                          Delete
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="px-3 sm:px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm"
-                        onClick={onClose}
-                      >
-                        Cancel
-                      </button>
                       {isAdding ? (
                         <button
                           type="submit"
