@@ -145,22 +145,18 @@ export default function Projects() {
     setFormError('');
   };
 
-  const handleFormSubmit = async (e) => {
-    console.log('Form submitted!');
-    e.preventDefault();
-    if (!selectedProject.title || !selectedProject.company_name || !selectedProject.date || !selectedProject.description) {
+  const handleFormSubmit = async (project) => {
+    if (!project.title || !project.company_name || !project.date || !project.description) {
       setFormError('All fields are required.');
-      return;
+      return false;
     }
-    console.log('Form validation passed, processing...');
     if (isAdding) {
-      console.log('Adding new project...');
-      await handleAdd(selectedProject);
+      await handleAdd(project);
     } else {
-      console.log('Updating existing project...');
-      await handleUpdate(selectedProject.id, selectedProject);
+      await handleUpdate(project.id, project);
     }
     setFormError('');
+    return true;
   };
 
   const handleProjectUpdate = (updatedProject) => {

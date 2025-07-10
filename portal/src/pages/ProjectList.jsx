@@ -119,9 +119,9 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
                   <div className="flex flex-col justify-center items-start px-6 py-6 min-w-[140px] max-w-[180px] flex-shrink-0">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 text-left">{project.title}</h2>
                     <div className="text-xs sm:text-sm text-gray-500 text-left mt-0">{project.company_name}</div>
-                    {/* Centered horizontal orange line */}
+                    {/* Centered horizontal orange line, now 60% width of the left column */}
                     <div className="flex flex-col justify-center items-center flex-1 w-full">
-                      <div className="w-10 h-1 bg-orange-500 rounded-full my-4 mx-auto" />
+                      <div className="h-1 bg-orange-500 rounded-full my-4 mx-auto" style={{ width: '60%' }} />
                     </div>
                   </div>
                   {/* Right: Empty for now, to keep layout */}

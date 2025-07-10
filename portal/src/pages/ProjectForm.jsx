@@ -19,9 +19,11 @@ export default function ProjectForm({
 
   // Reset form state when drawer opens or project changes
   useEffect(() => {
-    // Only set readOnly to false when adding, but do not reset to true on project change
+    // Only set readOnly to false when adding, otherwise lock by default
     if (isAdding) {
       setReadOnly(false);
+    } else {
+      setReadOnly(true);
     }
     setLocalProject(selectedProject);
   }, [drawerOpen, selectedProject, isAdding]);
@@ -37,7 +39,7 @@ export default function ProjectForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (readOnly) return; // Prevent submit if not in edit mode
-    const result = await onSubmit(e, localProject?.id); // Pass id for update
+    const result = await onSubmit(localProject); // Pass the updated project object
     // Lock fields after any save (add or update), but keep drawer open
     if (!result || result !== false) {
       setReadOnly(true);
