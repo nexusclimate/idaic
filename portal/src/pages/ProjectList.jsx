@@ -36,14 +36,26 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
   return (
     <div className="py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
       {/* Section Heading with Add Button on top right */}
-      <div className="mb-6 sm:mb-8 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Projects</h1>
-        <button
-          className="text-orange-600 hover:underline font-semibold text-base px-0 py-0 bg-transparent border-none shadow-none focus:outline-none focus:underline"
-          onClick={onAddClick}
-        >
-          Add project
-        </button>
+      <div className="mb-6 sm:mb-8 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Projects</h1>
+          <nav className="mt-4 sm:mt-0">
+            <ul className="flex space-x-4" role="tablist">
+              <li>
+                <button
+                  type="button"
+                  className="px-3 py-2 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none border-transparent text-orange-600 hover:text-orange-700 hover:border-orange-300 bg-transparent"
+                  style={{ color: colors.primary.orange, borderColor: colors.primary.orange }}
+                  onClick={onAddClick}
+                  role="tab"
+                  aria-selected="false"
+                >
+                  Add project
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
       {/* Search and Sort Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-4">
@@ -106,12 +118,11 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
                   {/* Left: Project Name & Company */}
                   <div className="flex flex-col justify-center items-start px-6 py-6 min-w-[140px] max-w-[180px] flex-shrink-0">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 text-left">{project.title}</h2>
-                    <div className="text-xs sm:text-sm text-gray-500 text-left">{project.company_name}</div>
+                    {/* Horizontal orange line */}
+                    <div className="w-10 h-1 bg-orange-500 rounded-full my-1" />
+                    <div className="text-xs sm:text-sm text-gray-500 text-left mt-0">{project.company_name}</div>
                   </div>
-                  {/* Divider */}
-                  <div className="flex items-stretch">
-                    <div className="w-1 bg-orange-500 rounded-full my-4 mx-2" style={{ minHeight: '60px' }}></div>
-                  </div>
+                  {/* Remove vertical divider */}
                   {/* Right: Description */}
                   <div className="flex-1 flex flex-col justify-center px-6 py-6 text-left">
                     <div className="text-xs sm:text-sm text-gray-700">{project.description}</div>

@@ -34,8 +34,11 @@ export default function ProjectForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (readOnly) return; // Prevent submit if not in edit mode
-    await onSubmit(e, localProject?.id); // Pass id for update
-    setReadOnly(true); // Lock fields after update
+    const result = await onSubmit(e, localProject?.id); // Pass id for update
+    // Only lock after update, not after add
+    if (!isAdding && (!result || result !== false)) {
+      setReadOnly(true); // Lock fields after update
+    }
   };
 
   // Handle Edit button
