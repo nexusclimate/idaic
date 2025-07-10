@@ -63,24 +63,29 @@ export default function ProjectForm({
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleDeleteClick = () => {
+    console.log('Delete button clicked. readOnly:', readOnly);
     if (readOnly) return;
     setShowDeleteConfirm(true);
     setDeleteInput('');
     setDeleteError('');
+    console.log('Delete confirmation dialog opened.');
   };
 
   const handleDeleteConfirm = async () => {
+    console.log('Confirm delete clicked. Input:', deleteInput, 'Expected:', localProject.id);
     if (deleteInput !== String(localProject.id)) {
       setDeleteError('Record ID does not match.');
       return;
     }
     setDeleteLoading(true);
     try {
+      console.log('Calling onDelete with ID:', localProject.id);
       await onDelete(localProject.id);
       setShowDeleteConfirm(false);
       onClose();
     } catch (err) {
       setDeleteError('Failed to delete. Please try again.');
+      console.error('Delete error:', err);
     } finally {
       setDeleteLoading(false);
     }
@@ -178,12 +183,12 @@ export default function ProjectForm({
                       </div>
                     )}
                     {localProject.created_at && (
-                      <div className="text-xs text-gray-400 mt-0">
+                      <div className="text-xs text-gray-400 mt-0 mb-0">
                         Created at: {new Date(localProject.created_at).toUTCString()}
                       </div>
                     )}
                     {localProject.id && localProject.created_at && (
-                      <div className="text-xs text-gray-400 mt-0">
+                      <div className="text-xs text-gray-400 mt-0 mb-0">
                         Record ID: {localProject.id}
                       </div>
                     )}
@@ -220,7 +225,7 @@ export default function ProjectForm({
                         type="button"
                         className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm mt-2"
                         onClick={handleDeleteClick}
-                        disabled={readOnly}
+                        // Do not disable in readOnly mode so user can always open dialog
                       >
                         Delete
                       </button>
