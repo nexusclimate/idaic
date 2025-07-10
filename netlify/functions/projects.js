@@ -20,6 +20,46 @@ exports.handler = async function (event, context) {
       case 'GET':
         console.log('Attempting to fetch projects...');
         
+        // If there's a test parameter, check table structure
+        if (event.queryStringParameters && event.queryStringParameters.test === 'structure') {
+          console.log('Testing table structure...');
+          try {
+            const { data: tableInfo, error: tableError } = await supabase
+              .from('projects')
+              .select('*')
+              .limit(0);
+            
+            if (tableError) {
+              console.error('Table structure error:', tableError);
+              return {
+                statusCode: 500,
+                body: JSON.stringify({ 
+                  error: 'Table structure issue',
+                  details: tableError.message 
+                })
+              }
+            }
+            
+            console.log('Table structure test passed');
+            return {
+              statusCode: 200,
+              body: JSON.stringify({ 
+                message: 'Table structure is correct',
+                tableExists: true 
+              })
+            }
+          } catch (err) {
+            console.error('Table test error:', err);
+            return {
+              statusCode: 500,
+              body: JSON.stringify({ 
+                error: 'Table test failed',
+                details: err.message 
+              })
+            }
+          }
+        }
+        
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -43,7 +83,15 @@ exports.handler = async function (event, context) {
       case 'POST':
         console.log('Attempting to add project...');
         const project = JSON.parse(event.body);
-        console.log('Project data:', project);
+        console.log('Project data received:', JSON.stringify(project, null, 2));
+        console.log('Project data keys:', Object.keys(project));
+        
+        // Check if id is present and remove it
+        if (project.id !== undefined) {
+          console.log('WARNING: id field found in project data:', project.id);
+          delete project.id;
+          console.log('Removed id field, updated project data:', JSON.stringify(project, null, 2));
+        }
         
         const { data: newProject, error: insertError } = await supabase
           .from('projects')
