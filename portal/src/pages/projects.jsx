@@ -161,6 +161,7 @@ export default function Projects() {
   };
 
   const handleProjectUpdate = (updatedProject) => {
+    // Only update local state, do not trigger DB action
     setSelectedProject(updatedProject);
   };
 

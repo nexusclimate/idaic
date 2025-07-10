@@ -135,15 +135,15 @@ export default function ProjectForm({
                         readOnly={readOnly}
                       />
                     </div>
-                    {/* Show updated_at above created_at if available, with minimal gap */}
+                    {/* Show updated_at above created_at if available, with minimal gap and UTC time */}
                     {localProject.updated_at && (
                       <div className="text-xs text-gray-400 mb-0">
-                        Updated at: {new Date(localProject.updated_at).toLocaleString()}
+                        Updated at: {new Date(localProject.updated_at).toUTCString()} (UTC)
                       </div>
                     )}
                     {localProject.created_at && (
                       <div className="text-xs text-gray-400 mt-0">
-                        Created at: {new Date(localProject.created_at).toLocaleString()}
+                        Created at: {new Date(localProject.created_at).toUTCString()} (UTC)
                       </div>
                     )}
                     {formError && <div className="text-red-500 text-sm">{formError}</div>}
