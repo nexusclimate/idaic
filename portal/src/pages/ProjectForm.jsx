@@ -174,8 +174,7 @@ export default function ProjectForm({
                         Created at: {new Date(localProject.created_at).toUTCString()}
                       </div>
                     )}
-                    {/* Show record ID under created at */}
-                    {localProject.id && (
+                    {localProject.id && localProject.created_at && (
                       <div className="text-xs text-gray-400 mt-0">
                         Record ID: {localProject.id}
                       </div>
@@ -218,7 +217,7 @@ export default function ProjectForm({
                   </form>
                   {/* Edit button OUTSIDE the form, only shown when readOnly */}
                   {!isAdding && readOnly && (
-                    <div className="flex justify-end gap-2 pt-2">
+                    <div className="flex flex-col items-end gap-2 pt-2">
                       <button
                         type="button"
                         className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
@@ -228,7 +227,7 @@ export default function ProjectForm({
                       </button>
                       <button
                         type="button"
-                        className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm"
+                        className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm mt-2"
                         onClick={handleDeleteClick}
                         disabled={readOnly}
                       >
@@ -251,13 +250,6 @@ export default function ProjectForm({
                         />
                         {deleteError && <div className="text-xs text-red-500 mb-2">{deleteError}</div>}
                         <div className="flex gap-2 w-full justify-end">
-                          <button
-                            type="button"
-                            className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-xs"
-                            onClick={handleDeleteCancel}
-                          >
-                            Cancel
-                          </button>
                           <button
                             type="button"
                             className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
