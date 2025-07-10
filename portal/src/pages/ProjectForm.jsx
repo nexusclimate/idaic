@@ -36,12 +36,16 @@ export default function ProjectForm({
               {selectedProject && (
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
                   <form
-                    onSubmit={onSubmit}
+                    onSubmit={(e) => {
+                      console.log('Form onSubmit triggered');
+                      onSubmit(e);
+                    }}
                     className="space-y-4"
                   >
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+                      <label htmlFor="project-title" className="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
                       <input
+                        id="project-title"
                         type="text"
                         name="title"
                         value={selectedProject.title}
@@ -54,8 +58,9 @@ export default function ProjectForm({
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                      <label htmlFor="project-company" className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
                       <input
+                        id="project-company"
                         type="text"
                         name="company_name"
                         value={selectedProject.company_name}
@@ -68,8 +73,9 @@ export default function ProjectForm({
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                      <label htmlFor="project-date" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                       <input
+                        id="project-date"
                         type="date"
                         name="date"
                         value={selectedProject.date}
@@ -82,8 +88,9 @@ export default function ProjectForm({
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <label htmlFor="project-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                       <textarea
+                        id="project-description"
                         name="description"
                         value={selectedProject.description}
                         onChange={e => {
@@ -120,6 +127,7 @@ export default function ProjectForm({
                       </button>
                       <button
                         type="submit"
+                        onClick={() => console.log('Save button clicked')}
                         className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
                       >
                         {isAdding ? 'Save' : 'Update'}

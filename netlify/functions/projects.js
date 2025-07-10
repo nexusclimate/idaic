@@ -12,79 +12,126 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-// Mock data for testing
-const mockProjects = [
-  {
-    id: 1,
-    title: 'Green Energy Initiative',
-    company_name: 'EcoCorp',
-    date: '2024-06-01',
-    description: 'A project focused on developing sustainable energy solutions for urban areas.',
-    created_at: '2024-06-01T00:00:00Z'
-  },
-  {
-    id: 2,
-    title: 'Ocean Cleanup',
-    company_name: 'BlueWave',
-    date: '2024-05-15',
-    description: 'Removing plastic waste from the world\'s oceans using innovative technology.',
-    created_at: '2024-05-15T00:00:00Z'
-  },
-  {
-    id: 3,
-    title: 'Urban Forest',
-    company_name: 'TreeCity',
-    date: '2024-07-10',
-    description: 'Planting trees in metropolitan areas to improve air quality and biodiversity.',
-    created_at: '2024-07-10T00:00:00Z'
-  }
-];
-
 exports.handler = async function (event, context) {
   console.log('Projects function called with method:', event.httpMethod);
   
   try {
-    // For now, let's just handle GET to test the connection
-    if (event.httpMethod === 'GET') {
-      console.log('Attempting to fetch projects...');
-      
-      // First, try with mock data to test the function
-      console.log('Returning mock data for testing');
-      return {
-        statusCode: 200,
-        body: JSON.stringify(mockProjects)
-      }
-      
-      // Uncomment this when ready to test real database connection
-      /*
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+    switch (event.httpMethod) {
+      case 'GET':
+        console.log('Attempting to fetch projects...');
+        
+        const { data, error } = await supabase
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      console.log('Supabase response:', { data: data?.length, error });
+        console.log('Supabase response:', { data: data?.length, error });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ error: error.message })
+        if (error) {
+          console.error('Supabase error:', error);
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message })
+          }
         }
-      }
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify(data || [])
-      }
-      */
+        return {
+          statusCode: 200,
+          body: JSON.stringify(data || [])
+        }
+
+      case 'POST':
+        console.log('Attempting to add project...');
+        const project = JSON.parse(event.body);
+        console.log('Project data:', project);
+        
+        const { data: newProject, error: insertError } = await supabase
+          .from('projects')
+          .insert([project])
+          .select();
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: insertError.message })
+          }
+        }
+
+        console.log('Project added successfully:', newProject[0]);
+        return {
+          statusCode: 201,
+          body: JSON.stringify(newProject[0])
+        }
+
+      case 'PUT':
+        console.log('Attempting to update project...');
+        const { id } = event.queryStringParameters || {};
+        const updates = JSON.parse(event.body);
+        
+        if (!id) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Project ID is required' })
+          }
+        }
+
+        const { data: updatedProject, error: updateError } = await supabase
+          .from('projects')
+          .update(updates)
+          .eq('id', id)
+          .select();
+
+        if (updateError) {
+          console.error('Update error:', updateError);
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: updateError.message })
+          }
+        }
+
+        console.log('Project updated successfully:', updatedProject[0]);
+        return {
+          statusCode: 200,
+          body: JSON.stringify(updatedProject[0])
+        }
+
+      case 'DELETE':
+        console.log('Attempting to delete project...');
+        const { id: deleteId } = event.queryStringParameters || {};
+        
+        if (!deleteId) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Project ID is required' })
+          }
+        }
+
+        const { error: deleteError } = await supabase
+          .from('projects')
+          .delete()
+          .eq('id', deleteId);
+
+        if (deleteError) {
+          console.error('Delete error:', deleteError);
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: deleteError.message })
+          }
+        }
+
+        console.log('Project deleted successfully');
+        return {
+          statusCode: 204,
+          body: ''
+        }
+
+      default:
+        return {
+          statusCode: 405,
+          body: JSON.stringify({ error: 'Method not allowed' })
+        }
     }
-    
-    // For other methods, return a simple response for now
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method not implemented yet' })
-    }
-    
   } catch (error) {
     console.error('Function error:', error);
     return {
