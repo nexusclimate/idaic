@@ -147,6 +147,7 @@ export default function Projects() {
   };
 
   const handleFormSubmit = async (project) => {
+    console.log('handleFormSubmit called with:', project);
     if (!project.title || !project.company_name || !project.date || !project.description) {
       setFormError('All fields are required.');
       return false;
@@ -161,7 +162,7 @@ export default function Projects() {
   };
 
   const handleProjectUpdate = (updatedProject) => {
-    // Only update local state, do not trigger DB action
+    console.log('handleProjectUpdate called with:', updatedProject);
     setSelectedProject(updatedProject);
   };
 
