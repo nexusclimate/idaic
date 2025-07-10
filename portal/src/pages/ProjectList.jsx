@@ -116,18 +116,18 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
               >
                 <div className="flex flex-row items-stretch h-full w-full">
                   {/* Left: Project Name & Company */}
-                  <div className="flex flex-col justify-center items-start px-6 py-6 min-w-[140px] max-w-[180px] flex-shrink-0 w-full">
+                  <div className="flex flex-col items-start px-6 pt-6 pb-2 min-w-[140px] max-w-[180px] flex-shrink-0 w-full">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-0 text-left w-full">{project.title}</h2>
                     <div className="text-xs sm:text-sm text-gray-500 text-left mt-1 w-full">{project.company_name}</div>
                     {/* Wide horizontal orange bar, now directly under company name */}
-                    <div className="flex justify-center w-full">
+                    <div className="flex justify-start w-full">
                       <div className="h-1 bg-orange-500 rounded-full my-2" style={{ width: '90%' }} />
                     </div>
                   </div>
                 </div>
-                {/* Description below the bar, centered and starting directly under the bar */}
-                <div className="px-6 pb-6 pt-0 text-center w-full">
-                  <div className="text-xs sm:text-sm text-gray-700 w-full">{project.description}</div>
+                {/* Description below the bar, aligned top left, fixed spacing */}
+                <div className="px-6 pb-6 pt-0 text-left w-full">
+                  <div className="text-xs sm:text-sm text-gray-700 w-full mt-0">{project.description}</div>
                 </div>
                 {/* Date in top-right corner */}
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-4 text-xs font-medium" style={{ color: colors.primary.orange }}>

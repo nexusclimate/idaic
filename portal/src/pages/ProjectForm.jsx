@@ -132,6 +132,12 @@ export default function ProjectForm({
                         readOnly={readOnly}
                       />
                     </div>
+                    {/* Show updated_at above created_at if available */}
+                    {localProject.updated_at && (
+                      <div className="text-xs text-gray-400">
+                        Updated at: {new Date(localProject.updated_at).toLocaleString()}
+                      </div>
+                    )}
                     {localProject.created_at && (
                       <div className="text-xs text-gray-400">
                         Created at: {new Date(localProject.created_at).toLocaleString()}
