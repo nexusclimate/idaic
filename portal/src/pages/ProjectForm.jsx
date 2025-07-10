@@ -221,18 +221,11 @@ export default function ProjectForm({
                       >
                         Edit
                       </button>
-                      <button
-                        type="button"
-                        className="px-3 sm:px-4 py-2 rounded bg-red-400 text-white cursor-not-allowed text-sm mt-2 opacity-60"
-                        title="Click Edit to enable Delete"
-                        disabled
-                      >
-                        Delete
-                      </button>
                     </div>
                   )}
+                  {/* Show Delete button only when not readOnly */}
                   {!isAdding && !readOnly && (
-                    <div className="flex flex-col items-end gap-2 pt-2">
+                    <div className="flex flex-col items-end gap-2 pt-2 relative">
                       <button
                         type="button"
                         className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
@@ -245,37 +238,36 @@ export default function ProjectForm({
                         type="button"
                         className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm mt-2"
                         onClick={handleDeleteClick}
+                        id="delete-btn"
                       >
                         Delete
                       </button>
-                    </div>
-                  )}
-                  {/* Delete confirmation dialog */}
-                  {showDeleteConfirm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs flex flex-col items-center">
-                        <div className="text-base font-semibold mb-2 text-gray-900">Confirm Deletion</div>
-                        <div className="text-xs text-gray-600 mb-2 text-center">To delete this record, type the ID <span className="font-mono font-bold">{localProject.id}</span> below and click Confirm.</div>
-                        <input
-                          type="text"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2"
-                          value={deleteInput}
-                          onChange={e => setDeleteInput(e.target.value)}
-                          placeholder="Enter record ID"
-                          disabled={deleteLoading}
-                        />
-                        {deleteError && <div className="text-xs text-red-500 mb-2">{deleteError}</div>}
-                        <div className="flex gap-2 w-full justify-end">
-                          <button
-                            type="button"
-                            className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs disabled:opacity-60 disabled:cursor-not-allowed"
-                            onClick={handleDeleteConfirm}
+                      {/* Delete confirmation popover */}
+                      {showDeleteConfirm && (
+                        <div className="absolute right-0 mt-2 z-50 bg-white rounded-lg shadow-lg p-4 w-64 flex flex-col items-center border border-gray-200">
+                          <div className="text-base font-semibold mb-2 text-gray-900">Confirm Deletion</div>
+                          <div className="text-xs text-gray-600 mb-2 text-center">To delete this record, type the ID <span className="font-mono font-bold">{localProject.id}</span> below and click Confirm.</div>
+                          <input
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2"
+                            value={deleteInput}
+                            onChange={e => setDeleteInput(e.target.value)}
+                            placeholder="Enter record ID"
                             disabled={deleteLoading}
-                          >
-                            {deleteLoading ? 'Deleting...' : 'Confirm'}
-                          </button>
+                          />
+                          {deleteError && <div className="text-xs text-red-500 mb-2">{deleteError}</div>}
+                          <div className="flex gap-2 w-full justify-end">
+                            <button
+                              type="button"
+                              className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                              onClick={handleDeleteConfirm}
+                              disabled={deleteLoading}
+                            >
+                              {deleteLoading ? 'Deleting...' : 'Confirm'}
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
