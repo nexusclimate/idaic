@@ -42,12 +42,23 @@ export default function Projects() {
   const handleAdd = async (project) => {
     try {
       console.log('Adding project:', project);
+      
+      // Only send the required fields for new projects
+      const projectData = {
+        title: project.title,
+        company_name: project.company_name,
+        date: project.date,
+        description: project.description
+      };
+      
+      console.log('Sending project data:', projectData);
+      
       const response = await fetch('/.netlify/functions/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(project),
+        body: JSON.stringify(projectData),
       });
 
       if (!response.ok) {
@@ -70,12 +81,23 @@ export default function Projects() {
   const handleUpdate = async (id, updates) => {
     try {
       console.log('Updating project:', id, updates);
+      
+      // Only send the updatable fields
+      const updateData = {
+        title: updates.title,
+        company_name: updates.company_name,
+        date: updates.date,
+        description: updates.description
+      };
+      
+      console.log('Sending update data:', updateData);
+      
       const response = await fetch(`/.netlify/functions/projects?id=${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {

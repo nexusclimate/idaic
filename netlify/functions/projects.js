@@ -45,14 +45,9 @@ exports.handler = async function (event, context) {
         const project = JSON.parse(event.body);
         console.log('Project data:', project);
         
-        // Remove id field if present, let Supabase auto-generate it
-        const { id: projectId, ...projectData } = project;
-        
-        console.log('Project data after removing id:', projectData);
-        
         const { data: newProject, error: insertError } = await supabase
           .from('projects')
-          .insert([projectData])
+          .insert([project])
           .select();
 
         if (insertError) {
