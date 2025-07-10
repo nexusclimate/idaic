@@ -8,32 +8,29 @@ export function useProjects() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/.netlify/functions/projects');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setProjects(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load projects');
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    let ignore = false;
-    const fetchProjects = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('/.netlify/functions/projects');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        if (!ignore) {
-          setProjects(data);
-          setError(null);
-        }
-      } catch (err) {
-        if (!ignore) setError('Failed to load projects');
-      }
-      if (!ignore) setLoading(false);
-    };
     fetchProjects();
-    return () => { ignore = true; };
   }, []);
 
-  return { projects, loading, error };
+  return { projects, loading, error, refetch: fetchProjects };
 }
 
 export default function Projects() {
-  const { projects, loading, error } = useProjects();
+  const { projects, loading, error, refetch } = useProjects();
   const [formError, setFormError] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -42,17 +39,13 @@ export default function Projects() {
   const handleAdd = async (project) => {
     try {
       console.log('Adding project:', project);
-      
-      // Only send the required fields for new projects
       const projectData = {
         title: project.title,
         company_name: project.company_name,
         date: project.date,
         description: project.description
       };
-      
       console.log('Sending project data:', projectData);
-      
       const response = await fetch('/.netlify/functions/projects', {
         method: 'POST',
         headers: {
@@ -70,8 +63,7 @@ export default function Projects() {
       console.log('Project added successfully:', newProject);
       setDrawerOpen(false);
       setFormError('');
-      // Refresh the projects list
-      window.location.reload();
+      await refetch(); // Refresh the projects list
     } catch (err) {
       console.error('Error adding project:', err);
       setFormError(err.message);
@@ -81,17 +73,13 @@ export default function Projects() {
   const handleUpdate = async (id, updates) => {
     try {
       console.log('Updating project:', id, updates);
-      
-      // Only send the updatable fields
       const updateData = {
         title: updates.title,
         company_name: updates.company_name,
         date: updates.date,
         description: updates.description
       };
-      
       console.log('Sending update data:', updateData);
-      
       const response = await fetch(`/.netlify/functions/projects?id=${id}`, {
         method: 'PUT',
         headers: {
@@ -109,8 +97,7 @@ export default function Projects() {
       console.log('Project updated successfully:', updatedProject);
       setDrawerOpen(false);
       setFormError('');
-      // Refresh the projects list
-      window.location.reload();
+      await refetch(); // Refresh the projects list
     } catch (err) {
       console.error('Error updating project:', err);
       setFormError(err.message);
@@ -132,8 +119,7 @@ export default function Projects() {
       console.log('Project deleted successfully');
       setDrawerOpen(false);
       setFormError('');
-      // Refresh the projects list
-      window.location.reload();
+      await refetch(); // Refresh the projects list
     } catch (err) {
       console.error('Error deleting project:', err);
       setFormError(err.message);
