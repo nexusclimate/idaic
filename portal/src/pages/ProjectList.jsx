@@ -118,9 +118,9 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
                   {/* Left: Project Name & Company */}
                   <div className="flex flex-col justify-center items-start px-6 py-6 min-w-[140px] max-w-[180px] flex-shrink-0">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 text-left">{project.title}</h2>
-                    {/* Horizontal orange line */}
-                    <div className="w-10 h-1 bg-orange-500 rounded-full my-1" />
                     <div className="text-xs sm:text-sm text-gray-500 text-left mt-0">{project.company_name}</div>
+                    {/* Horizontal orange line below company name */}
+                    <div className="w-10 h-1 bg-orange-500 rounded-full mt-2" />
                   </div>
                   {/* Remove vertical divider */}
                   {/* Right: Description */}

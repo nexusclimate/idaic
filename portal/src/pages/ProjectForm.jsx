@@ -35,9 +35,9 @@ export default function ProjectForm({
     e.preventDefault();
     if (readOnly) return; // Prevent submit if not in edit mode
     const result = await onSubmit(e, localProject?.id); // Pass id for update
-    // Only lock after update, not after add
-    if (!isAdding && (!result || result !== false)) {
-      setReadOnly(true); // Lock fields after update
+    // Lock fields after any save (add or update), but keep drawer open
+    if (!result || result !== false) {
+      setReadOnly(true);
     }
   };
 
@@ -79,7 +79,7 @@ export default function ProjectForm({
                         name="title"
                         value={localProject.title}
                         onChange={e => handleFieldChange('title', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                         required
                         readOnly={readOnly}
                       />
@@ -92,7 +92,7 @@ export default function ProjectForm({
                         name="company_name"
                         value={localProject.company_name}
                         onChange={e => handleFieldChange('company_name', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                         required
                         readOnly={readOnly}
                       />
@@ -105,7 +105,7 @@ export default function ProjectForm({
                         name="date"
                         value={localProject.date}
                         onChange={e => handleFieldChange('date', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                         required
                         readOnly={readOnly}
                       />
@@ -117,7 +117,7 @@ export default function ProjectForm({
                         name="description"
                         value={localProject.description}
                         onChange={e => handleFieldChange('description', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                         rows={3}
                         required
                         readOnly={readOnly}
