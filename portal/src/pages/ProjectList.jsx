@@ -39,10 +39,10 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
       <div className="mb-6 sm:mb-8 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Projects</h1>
         <button
-          className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm sm:text-base"
+          className="text-orange-600 hover:underline font-semibold text-base px-0 py-0 bg-transparent border-none shadow-none focus:outline-none focus:underline"
           onClick={onAddClick}
         >
-          Add Project
+          Add project
         </button>
       </div>
       {/* Search and Sort Bar */}
@@ -96,19 +96,31 @@ export default function ProjectList({ projects, loading, error, onProjectClick, 
                 key={project.id || idx}
                 type="button"
                 onClick={() => onProjectClick(project)}
-                className="relative bg-gray-100 p-6 sm:p-8 lg:p-10 flex flex-col rounded-lg transition border-2 focus:outline-none hover:border-orange-200 border-transparent"
+                className="relative bg-gray-100 p-0 flex flex-col rounded-lg transition border-2 focus:outline-none hover:border-orange-200 border-transparent"
                 style={{
                   color: colors.text.primary,
                   fontFamily: 'Inter, sans-serif',
                 }}
               >
+                <div className="flex flex-row items-stretch h-full w-full">
+                  {/* Left: Project Name & Company */}
+                  <div className="flex flex-col justify-center items-start px-6 py-6 min-w-[140px] max-w-[180px] flex-shrink-0">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 text-left">{project.title}</h2>
+                    <div className="text-xs sm:text-sm text-gray-500 text-left">{project.company_name}</div>
+                  </div>
+                  {/* Divider */}
+                  <div className="flex items-stretch">
+                    <div className="w-1 bg-orange-500 rounded-full my-4 mx-2" style={{ minHeight: '60px' }}></div>
+                  </div>
+                  {/* Right: Description */}
+                  <div className="flex-1 flex flex-col justify-center px-6 py-6 text-left">
+                    <div className="text-xs sm:text-sm text-gray-700">{project.description}</div>
+                  </div>
+                </div>
                 {/* Date in top-right corner */}
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-4 text-xs font-medium" style={{ color: colors.primary.orange }}>
                   {project.date ? new Date(project.date).toLocaleDateString() : ''}
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">{project.title}</h2>
-                <div className="text-xs sm:text-sm text-gray-500 mb-2">{project.company_name}</div>
-                <div className="flex-1 text-xs sm:text-sm text-gray-700 mb-2">{project.description}</div>
               </button>
             ))}
           </div>

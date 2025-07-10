@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -12,6 +12,35 @@ export default function ProjectForm({
   onDelete,
   onProjectUpdate 
 }) {
+  // Track read-only/edit mode
+  const [readOnly, setReadOnly] = useState(true);
+  // Track local project state for editing
+  const [localProject, setLocalProject] = useState(selectedProject);
+
+  // Reset form state when drawer opens or project changes
+  useEffect(() => {
+    setReadOnly(isAdding ? false : true);
+    setLocalProject(selectedProject);
+  }, [drawerOpen, selectedProject, isAdding]);
+
+  // Handle field changes
+  const handleFieldChange = (field, value) => {
+    const updated = { ...localProject, [field]: value };
+    setLocalProject(updated);
+    onProjectUpdate(updated);
+  };
+
+  // Handle submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (readOnly) return; // Prevent submit if not in edit mode
+    await onSubmit(e, localProject?.id); // Pass id for update
+    setReadOnly(true); // Lock fields after update
+  };
+
+  // Handle Edit button
+  const handleEdit = () => setReadOnly(false);
+
   return (
     <Dialog open={drawerOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/20 transition-opacity duration-500" aria-hidden="true" onClick={onClose}></div>
@@ -33,13 +62,10 @@ export default function ProjectForm({
                 </button>
               </div>
               {/* Main content */}
-              {selectedProject && (
+              {localProject && (
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
                   <form
-                    onSubmit={(e) => {
-                      console.log('Form onSubmit triggered');
-                      onSubmit(e);
-                    }}
+                    onSubmit={handleSubmit}
                     className="space-y-4"
                   >
                     <div>
@@ -48,13 +74,11 @@ export default function ProjectForm({
                         id="project-title"
                         type="text"
                         name="title"
-                        value={selectedProject.title}
-                        onChange={e => {
-                          const updatedProject = { ...selectedProject, title: e.target.value };
-                          onProjectUpdate(updatedProject);
-                        }}
+                        value={localProject.title}
+                        onChange={e => handleFieldChange('title', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                         required
+                        readOnly={readOnly}
                       />
                     </div>
                     <div>
@@ -63,13 +87,11 @@ export default function ProjectForm({
                         id="project-company"
                         type="text"
                         name="company_name"
-                        value={selectedProject.company_name}
-                        onChange={e => {
-                          const updatedProject = { ...selectedProject, company_name: e.target.value };
-                          onProjectUpdate(updatedProject);
-                        }}
+                        value={localProject.company_name}
+                        onChange={e => handleFieldChange('company_name', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                         required
+                        readOnly={readOnly}
                       />
                     </div>
                     <div>
@@ -78,13 +100,11 @@ export default function ProjectForm({
                         id="project-date"
                         type="date"
                         name="date"
-                        value={selectedProject.date}
-                        onChange={e => {
-                          const updatedProject = { ...selectedProject, date: e.target.value };
-                          onProjectUpdate(updatedProject);
-                        }}
+                        value={localProject.date}
+                        onChange={e => handleFieldChange('date', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                         required
+                        readOnly={readOnly}
                       />
                     </div>
                     <div>
@@ -92,19 +112,17 @@ export default function ProjectForm({
                       <textarea
                         id="project-description"
                         name="description"
-                        value={selectedProject.description}
-                        onChange={e => {
-                          const updatedProject = { ...selectedProject, description: e.target.value };
-                          onProjectUpdate(updatedProject);
-                        }}
+                        value={localProject.description}
+                        onChange={e => handleFieldChange('description', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
                         rows={3}
                         required
+                        readOnly={readOnly}
                       />
                     </div>
-                    {selectedProject.created_at && (
+                    {localProject.created_at && (
                       <div className="text-xs text-gray-400">
-                        Created at: {new Date(selectedProject.created_at).toLocaleString()}
+                        Created at: {new Date(localProject.created_at).toLocaleString()}
                       </div>
                     )}
                     {formError && <div className="text-red-500 text-sm">{formError}</div>}
@@ -113,7 +131,8 @@ export default function ProjectForm({
                         <button
                           type="button"
                           className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm"
-                          onClick={() => onDelete(selectedProject.id)}
+                          onClick={() => onDelete(localProject.id)}
+                          disabled={readOnly}
                         >
                           Delete
                         </button>
@@ -125,13 +144,29 @@ export default function ProjectForm({
                       >
                         Cancel
                       </button>
-                      <button
-                        type="submit"
-                        onClick={() => console.log('Save button clicked')}
-                        className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
-                      >
-                        {isAdding ? 'Save' : 'Update'}
-                      </button>
+                      {isAdding ? (
+                        <button
+                          type="submit"
+                          className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
+                        >
+                          Save
+                        </button>
+                      ) : readOnly ? (
+                        <button
+                          type="button"
+                          className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
+                          onClick={handleEdit}
+                        >
+                          Edit
+                        </button>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="px-3 sm:px-4 py-2 rounded bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 text-sm"
+                        >
+                          Update
+                        </button>
+                      )}
                     </div>
                   </form>
                 </div>
