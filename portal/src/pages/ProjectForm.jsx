@@ -60,6 +60,7 @@ export default function ProjectForm({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleDeleteClick = () => {
     if (readOnly) return;
@@ -73,9 +74,16 @@ export default function ProjectForm({
       setDeleteError('Record ID does not match.');
       return;
     }
-    await onDelete(localProject.id);
-    setShowDeleteConfirm(false);
-    onClose();
+    setDeleteLoading(true);
+    try {
+      await onDelete(localProject.id);
+      setShowDeleteConfirm(false);
+      onClose();
+    } catch (err) {
+      setDeleteError('Failed to delete. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleDeleteCancel = () => {
@@ -247,15 +255,17 @@ export default function ProjectForm({
                           value={deleteInput}
                           onChange={e => setDeleteInput(e.target.value)}
                           placeholder="Enter record ID"
+                          disabled={deleteLoading}
                         />
                         {deleteError && <div className="text-xs text-red-500 mb-2">{deleteError}</div>}
                         <div className="flex gap-2 w-full justify-end">
                           <button
                             type="button"
-                            className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
+                            className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs disabled:opacity-60 disabled:cursor-not-allowed"
                             onClick={handleDeleteConfirm}
+                            disabled={deleteLoading}
                           >
-                            Confirm
+                            {deleteLoading ? 'Deleting...' : 'Confirm'}
                           </button>
                         </div>
                       </div>
