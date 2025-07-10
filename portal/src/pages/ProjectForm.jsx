@@ -19,7 +19,10 @@ export default function ProjectForm({
 
   // Reset form state when drawer opens or project changes
   useEffect(() => {
-    setReadOnly(isAdding ? false : true);
+    // Only set readOnly to false when adding, but do not reset to true on project change
+    if (isAdding) {
+      setReadOnly(false);
+    }
     setLocalProject(selectedProject);
   }, [drawerOpen, selectedProject, isAdding]);
 
