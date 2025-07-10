@@ -35,7 +35,7 @@ export default function ProjectForm({
     console.log('Field changed:', field, value);
     const updated = { ...localProject, [field]: value };
     setLocalProject(updated);
-    onProjectUpdate(updated);
+    // Do NOT call onProjectUpdate here
   };
 
   // Handle submit
@@ -44,10 +44,9 @@ export default function ProjectForm({
     if (readOnly) return; // Prevent submit if not in edit mode
     console.log('Submitting form to database (Save/Update)');
     const result = await onSubmit(localProject); // Pass the updated project object
-    // Lock fields after any save (add or update), but keep drawer open
     if (!result || result !== false) {
       setReadOnly(true);
-      // No showUpdatedAt state needed, rely on updated_at from backend
+      onProjectUpdate(localProject); // Only update parent after save
     }
   };
 
@@ -57,11 +56,32 @@ export default function ProjectForm({
     setReadOnly(false);
   };
 
-  // Handle Delete button
-  const handleDeleteClick = async () => {
-    if (readOnly) return; // Prevent delete if not in edit mode
+  // Handle Delete button with confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteInput, setDeleteInput] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+
+  const handleDeleteClick = () => {
+    if (readOnly) return;
+    setShowDeleteConfirm(true);
+    setDeleteInput('');
+    setDeleteError('');
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteInput !== String(localProject.id)) {
+      setDeleteError('Record ID does not match.');
+      return;
+    }
     await onDelete(localProject.id);
-    onClose(); // Close the drawer after deletion
+    setShowDeleteConfirm(false);
+    onClose();
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setDeleteInput('');
+    setDeleteError('');
   };
 
   return (
@@ -154,6 +174,12 @@ export default function ProjectForm({
                         Created at: {new Date(localProject.created_at).toUTCString()}
                       </div>
                     )}
+                    {/* Show record ID under created at */}
+                    {localProject.id && (
+                      <div className="text-xs text-gray-400 mt-0">
+                        Record ID: {localProject.id}
+                      </div>
+                    )}
                     {formError && <div className="text-red-500 text-sm">{formError}</div>}
                     <div className="flex justify-end gap-2 pt-2">
                       {!isAdding && (
@@ -200,6 +226,47 @@ export default function ProjectForm({
                       >
                         Edit
                       </button>
+                      <button
+                        type="button"
+                        className="px-3 sm:px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600 text-sm"
+                        onClick={handleDeleteClick}
+                        disabled={readOnly}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                  {/* Delete confirmation dialog */}
+                  {showDeleteConfirm && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs flex flex-col items-center">
+                        <div className="text-base font-semibold mb-2 text-gray-900">Confirm Deletion</div>
+                        <div className="text-xs text-gray-600 mb-2 text-center">To delete this record, type the ID <span className="font-mono font-bold">{localProject.id}</span> below and click Confirm.</div>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2"
+                          value={deleteInput}
+                          onChange={e => setDeleteInput(e.target.value)}
+                          placeholder="Enter record ID"
+                        />
+                        {deleteError && <div className="text-xs text-red-500 mb-2">{deleteError}</div>}
+                        <div className="flex gap-2 w-full justify-end">
+                          <button
+                            type="button"
+                            className="px-3 py-1 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 text-xs"
+                            onClick={handleDeleteCancel}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
+                            onClick={handleDeleteConfirm}
+                          >
+                            Confirm
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

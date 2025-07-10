@@ -72,9 +72,15 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
     >
       {/* Logo at the top, smaller margin */}
       <div className={`flex items-center justify-center mb-4 transition-all duration-300 ${collapsed ? 'h-12' : 'h-20'}`}>
-        <a href="/">
+        <button
+          type="button"
+          onClick={() => handlePageChange('home')}
+          className="focus:outline-none"
+          aria-label="Go to home page"
+          style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer' }}
+        >
           <img src={idaicLogo} alt="IDAIC Logo" className={`${collapsed ? 'h-10' : 'h-20'} w-auto object-contain transition-all duration-300`} />
-        </a>
+        </button>
       </div>
       <Sidebar>
         <SidebarBody>
@@ -379,7 +385,21 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           <div className="flex items-center w-full gap-2">
             <SidebarSection className="flex">
               <SidebarItem 
-                onClick={() => { window.location.href = 'https://login.nexusclimate.co'; }}
+                onClick={() => {
+                  // Clear admin auth state
+                  if (typeof setIsAdminAuthenticated === 'function') {
+                    setIsAdminAuthenticated(false);
+                  }
+                  // Clear any local/session storage (if used for auth)
+                  if (window.localStorage) window.localStorage.clear();
+                  if (window.sessionStorage) window.sessionStorage.clear();
+                  // Navigate to logout page in-app
+                  handlePageChange('logout');
+                  // Redirect to login page, replacing history so back button doesn't restore
+                  setTimeout(() => {
+                    window.location.replace('https://login.nexusclimate.co');
+                  }, 200);
+                }}
                 current={currentPage === 'logout' ? true : undefined}
                 style={sidebarItemStyle}
                 onMouseEnter={(e) => {
