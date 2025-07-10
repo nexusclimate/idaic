@@ -45,16 +45,31 @@ exports.handler = async function (event, context) {
         const project = JSON.parse(event.body);
         console.log('Project data:', project);
         
+        // Remove id field if present, let Supabase auto-generate it
+        const { id: projectId, ...projectData } = project;
+        
+        console.log('Project data after removing id:', projectData);
+        
         const { data: newProject, error: insertError } = await supabase
           .from('projects')
-          .insert([project])
+          .insert([projectData])
           .select();
 
         if (insertError) {
           console.error('Insert error:', insertError);
+          console.error('Error details:', {
+            message: insertError.message,
+            details: insertError.details,
+            hint: insertError.hint,
+            code: insertError.code
+          });
           return {
             statusCode: 500,
-            body: JSON.stringify({ error: insertError.message })
+            body: JSON.stringify({ 
+              error: insertError.message,
+              details: insertError.details,
+              hint: insertError.hint 
+            })
           }
         }
 
