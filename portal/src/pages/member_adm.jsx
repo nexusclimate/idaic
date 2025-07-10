@@ -147,34 +147,34 @@ export default function MemberAdm() {
                 </div>
                 <div className="w-full">
                   <label htmlFor="title" className="block text-sm font-medium text-gray-900">Title</label>
-                  <input
+                <input
                     id="title"
                     name="title"
-                    type="text"
+                  type="text"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                  />
-                </div>
+                />
+              </div>
                 <div className="w-full">
                   <label htmlFor="profile" className="block text-sm font-medium text-gray-900">Profile</label>
-                  <input
+                <input
                     id="profile"
                     name="profile"
-                    type="text"
+                  type="text"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                  />
-                </div>
+                />
+              </div>
                 <div className="w-full">
                   <label htmlFor="expertise" className="block text-sm font-medium text-gray-900">Expertise</label>
-                  <input
+                <input
                     id="expertise"
                     name="expertise"
                     type="text"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                  />
-                </div>
+                />
+              </div>
                 <div className="w-full">
                   <label htmlFor="memberType" className="block text-sm font-medium text-gray-900">Member</label>
-                  <select
+                <select
                     id="memberType"
                     name="memberType"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
@@ -182,7 +182,7 @@ export default function MemberAdm() {
                     <option value="global">Global</option>
                     <option value="uk">UK</option>
                     <option value="mena">MENA</option>
-                  </select>
+                </select>
                 </div>
               </div>
             </div>
@@ -193,13 +193,13 @@ export default function MemberAdm() {
                 {/* Placeholder for company-specific fields */}
                 <div>
                   <label htmlFor="company" className="block text-sm font-medium text-gray-900">Company Name</label>
-                  <input
+                <input
                     id="company"
                     name="company"
-                    type="text"
+                  type="text"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                  />
-                </div>
+                />
+              </div>
                 <div>
                   <label htmlFor="position" className="block text-sm font-medium text-gray-900">Position</label>
                   <input
@@ -208,17 +208,17 @@ export default function MemberAdm() {
                     type="text"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
                   />
-                </div>
+            </div>
                 <div>
                   <label htmlFor="companyDomain" className="block text-sm font-medium text-gray-900">Company Domain</label>
-                  <input
+                <input
                     id="companyDomain"
                     name="companyDomain"
-                    type="text"
+                  type="text"
                     className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                  />
-                </div>
+                />
               </div>
+            </div>
               {/* Logo upload at the bottom */}
               <div className="mt-8">
                 <label htmlFor="companyLogo" className="block text-sm font-medium text-gray-900">Company Logo</label>
@@ -250,7 +250,7 @@ export default function MemberAdm() {
           {/* Search input */}
           <div className="mb-4 max-w-xs">
             <label htmlFor="search" className="block text-sm font-medium" style={{ color: colors.text.primary }}>Quick search</label>
-            <div className="mt-2">
+              <div className="mt-2">
               <div className="flex rounded-md bg-white outline-1 -outline-offset-1" style={{ outlineColor: colors.border.medium }}>
                 <input
                   id="search"
@@ -274,7 +274,7 @@ export default function MemberAdm() {
           {loading && (
             <div className="flex items-center justify-center py-8 sm:py-12">
               <div className="text-gray-500">Loading users...</div>
-            </div>
+        </div>
           )}
 
           {error && (
@@ -397,10 +397,10 @@ export default function MemberAdm() {
                   </div>
                 </div>
               </div>
-            </div>
+                </div>
           )}
         </div>
       )}
-    </div>
+      </div>
   );
-}
+} 

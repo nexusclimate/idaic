@@ -16,6 +16,8 @@ export default function ProjectForm({
   const [readOnly, setReadOnly] = useState(true);
   // Track local project state for editing
   const [localProject, setLocalProject] = useState(selectedProject);
+  // Track if we should show updated_at
+  const [showUpdatedAt, setShowUpdatedAt] = useState(false);
 
   // Reset form state when drawer opens or project changes
   useEffect(() => {
@@ -26,6 +28,7 @@ export default function ProjectForm({
       setReadOnly(true);
     }
     setLocalProject(selectedProject);
+    setShowUpdatedAt(false); // Reset when opening or switching project
   }, [drawerOpen, selectedProject, isAdding]);
 
   // Handle field changes
@@ -44,6 +47,7 @@ export default function ProjectForm({
     // Lock fields after any save (add or update), but keep drawer open
     if (!result || result !== false) {
       setReadOnly(true);
+      setShowUpdatedAt(true); // Only show updated_at after a successful update
     }
   };
 
@@ -139,7 +143,7 @@ export default function ProjectForm({
                       </div>
                     )}
                     {localProject.created_at && (
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-400 mt-1">
                         Created at: {new Date(localProject.created_at).toLocaleString()}
                       </div>
                     )}
