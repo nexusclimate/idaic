@@ -77,8 +77,8 @@ export default function Projects() {
         title: updates.title,
         company_name: updates.company_name,
         date: updates.date,
-        description: updates.description,
-        updated_at: new Date().toISOString(), // Always include updated_at
+        description: updates.description
+        // Do NOT include updated_at here
       };
       console.log('Sending update data:', updateData);
       const response = await fetch(`/.netlify/functions/projects?id=${id}`, {
