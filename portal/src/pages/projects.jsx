@@ -41,15 +41,10 @@ export default function Projects() {
 
   const handleAdd = async (project) => {
     try {
-      const response = await fetch('/.netlify/functions/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(project)
-      });
-      if (!response.ok) throw new Error('Failed to add project');
-      const newProject = await response.json();
-      // Refresh the projects list
-      window.location.reload();
+      console.log('Adding project:', project);
+      // For now, just close the drawer since we're using mock data
+      setDrawerOpen(false);
+      setFormError('');
     } catch (err) {
       setFormError(err.message);
     }
@@ -57,14 +52,10 @@ export default function Projects() {
 
   const handleUpdate = async (id, updates) => {
     try {
-      const response = await fetch(`/.netlify/functions/projects?id=${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
-      });
-      if (!response.ok) throw new Error('Failed to update project');
-      // Refresh the projects list
-      window.location.reload();
+      console.log('Updating project:', id, updates);
+      // For now, just close the drawer since we're using mock data
+      setDrawerOpen(false);
+      setFormError('');
     } catch (err) {
       setFormError(err.message);
     }
@@ -72,12 +63,10 @@ export default function Projects() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`/.netlify/functions/projects?id=${id}`, {
-        method: 'DELETE'
-      });
-      if (!response.ok) throw new Error('Failed to delete project');
-      // Refresh the projects list
-      window.location.reload();
+      console.log('Deleting project:', id);
+      // For now, just close the drawer since we're using mock data
+      setDrawerOpen(false);
+      setFormError('');
     } catch (err) {
       setFormError(err.message);
     }
