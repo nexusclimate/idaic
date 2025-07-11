@@ -55,6 +55,26 @@ document
   .addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
+    const domain = email.split('@')[1]?.toLowerCase();
+
+    // 1. Check if domain is approved
+    let domainApproved = false;
+    try {
+      const { data, error } = await supabase
+        .from('org_domains')
+        .select('*')
+        .eq('domain_email', domain)
+        .maybeSingle();
+      if (data) domainApproved = true;
+    } catch (err) {
+      createNotification({ message: 'Error checking organization membership. Please try again.', success: false });
+      return;
+    }
+
+    if (!domainApproved) {
+      createNotification({ message: 'Your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
+      return;
+    }
 
     async function sendOtp() {
       createNotification({ message: 'Sending OTP…', success: true });
@@ -67,6 +87,10 @@ document
     try {
       let { error } = await sendOtp();
       if (error) {
+        if (error.status === 500) {
+          createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+          return;
+        }
         // If user not found in Auth (422), try provisioning
         if (error.status === 422 || error.message.includes('Signups not allowed')) {
           try {
@@ -77,7 +101,6 @@ document
             });
             const provisionResult = await provisionRes.json();
             if (provisionRes.ok) {
-              // Optional: Wait a moment for Auth to be ready
               await new Promise(res => setTimeout(res, 500));
               let retry = await sendOtp();
               if (!retry.error) {
@@ -101,7 +124,6 @@ document
         }
         throw error;
       }
-      // Only now switch UI
       document.getElementById('otp-request-form').classList.add('hidden');
       document.getElementById('otp-verify-form').classList.remove('hidden');
       createNotification({ message: 'OTP sent! Check your email.', success: true });
