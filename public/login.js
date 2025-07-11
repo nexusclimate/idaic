@@ -49,26 +49,25 @@ function createNotification({ message, success = true }) {
   wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
 }
 
-// Onboarding check function
-async function checkAndOnboard(email) {
-  const res = await fetch('/.netlify/functions/check-and-onboard-user', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email })
-  });
-
-  const result = await res.json();
-
-  if (result.onboarded) {
-    return true;
-  } else {
-    showFallbackForm();
+// Domain check function using Supabase
+async function isDomainAllowed(email) {
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return false;
+  try {
+    const { data, error } = await supabase
+      .from('org_domains')
+      .select('*')
+      .eq('domain', domain)
+      .maybeSingle();
+    if (error) {
+      createNotification({ message: 'Error checking domain. Please try again later.', success: false });
+      return false;
+    }
+    return !!data;
+  } catch (err) {
+    createNotification({ message: 'Network error. Please check your connection or try again.', success: false });
     return false;
   }
-}
-
-function showFallbackForm() {
-  createNotification({ message: 'Your email is not recognized. Please register as a member or contact support.', success: false });
 }
 
 // 3. Request OTP
@@ -78,9 +77,10 @@ document
     e.preventDefault()
     const email = document.getElementById('email').value.trim()
 
-    // Onboarding check
-    const onboarded = await checkAndOnboard(email);
-    if (!onboarded) {
+    // Domain check
+    const allowed = await isDomainAllowed(email);
+    if (!allowed) {
+      createNotification({ message: 'Your email domain is not allowed. Please register as a member or contact support.', success: false });
       return;
     }
 
