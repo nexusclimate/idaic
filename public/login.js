@@ -74,25 +74,30 @@ document
         // If user not found in Auth (422), try provisioning
         if (error.status === 422 || error.message.includes('Signups not allowed')) {
           // Call Supabase Edge Function to provision user
-          const provisionRes = await fetch('https://<YOUR-SUPABASE-PROJECT-REF>.functions.supabase.co/provision_user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-          });
-          const provisionResult = await provisionRes.json();
-          if (provisionRes.ok) {
-            // Try sending OTP again
-            let retry = await sendOtp();
-            if (!retry.error) {
-              createNotification({ message: 'You are not a registered user but your company is already a member. Please check your email for the OTP log in.', success: true });
-              document.getElementById('code').focus();
-              return;
+          try {
+            const provisionRes = await fetch('https://<YOUR-SUPABASE-PROJECT-REF>.functions.supabase.co/provision_user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email })
+            });
+            const provisionResult = await provisionRes.json();
+            if (provisionRes.ok) {
+              // Try sending OTP again
+              let retry = await sendOtp();
+              if (!retry.error) {
+                createNotification({ message: 'You are not a registered user but your company is already a member. Please check your email for the OTP log in.', success: true });
+                document.getElementById('code').focus();
+                return;
+              } else {
+                createNotification({ message: retry.error.message, success: false });
+                return;
+              }
             } else {
-              createNotification({ message: retry.error.message, success: false });
+              createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
               return;
             }
-          } else {
-            createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
+          } catch(fetchErr) {
+            createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
             return;
           }
         }
