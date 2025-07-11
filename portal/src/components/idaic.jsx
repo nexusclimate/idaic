@@ -139,6 +139,25 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               {!collapsed && <SidebarLabel>Content</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
+              onClick={() => handlePageChange('case-studies')}
+              current={currentPage === 'case-studies' ? true : undefined}
+              style={sidebarItemStyle}
+              onMouseEnter={(e) => {
+                if (currentPage !== 'case-studies') {
+                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== 'case-studies') {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
+              title={collapsed ? 'Case Studies' : undefined}
+            >
+              <Square2StackIcon />
+              {!collapsed && <SidebarLabel>Case Studies</SidebarLabel>}
+            </SidebarItem>
+            <SidebarItem 
               onClick={() => handlePageChange('events')}
               current={currentPage === 'events' ? true : undefined}
               style={sidebarItemStyle}
