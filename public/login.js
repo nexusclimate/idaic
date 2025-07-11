@@ -49,12 +49,40 @@ function createNotification({ message, success = true }) {
   wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
 }
 
+// Onboarding check function
+async function checkAndOnboard(email) {
+  const res = await fetch('/.netlify/functions/check-and-onboard-user', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+
+  const result = await res.json();
+
+  if (result.onboarded) {
+    return true;
+  } else {
+    showFallbackForm();
+    return false;
+  }
+}
+
+function showFallbackForm() {
+  createNotification({ message: 'Your email is not recognized. Please register as a member or contact support.', success: false });
+}
+
 // 3. Request OTP
 document
   .getElementById('otp-request-form')
   .addEventListener('submit', async (e) => {
     e.preventDefault()
     const email = document.getElementById('email').value.trim()
+
+    // Onboarding check
+    const onboarded = await checkAndOnboard(email);
+    if (!onboarded) {
+      return;
+    }
 
     // UI change
     document.getElementById('otp-request-form').classList.add('hidden')
