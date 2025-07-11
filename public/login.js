@@ -49,25 +49,6 @@ function createNotification({ message, success = true }) {
   wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
 }
 
-// User existence check function using Supabase
-async function isUserRegistered(email) {
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-    if (error) {
-      createNotification({ message: 'Error checking user. Please try again later.', success: false });
-      return false;
-    }
-    return !!data;
-  } catch (err) {
-    createNotification({ message: 'Network error. Please check your connection or try again.', success: false });
-    return false;
-  }
-}
-
 // 3. Request OTP
 document
   .getElementById('otp-request-form')
@@ -80,17 +61,45 @@ document
     document.getElementById('otp-verify-form').classList.remove('hidden')
     createNotification({ message: 'Sending OTP…', success: true })
 
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
+    async function sendOtp() {
+      return await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
-      })
+      });
+    }
 
-      if (error) throw error
-
+    try {
+      let { error } = await sendOtp();
+      if (error) {
+        // If user not found in Auth (422), try provisioning
+        if (error.status === 422 || error.message.includes('Signups not allowed')) {
+          // Call Supabase Edge Function to provision user
+          const provisionRes = await fetch('https://<YOUR-SUPABASE-PROJECT-REF>.functions.supabase.co/provision_user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const provisionResult = await provisionRes.json();
+          if (provisionRes.ok) {
+            // Try sending OTP again
+            let retry = await sendOtp();
+            if (!retry.error) {
+              createNotification({ message: 'You are not a registered user but your company is already a member. Please check your email for the OTP log in.', success: true });
+              document.getElementById('code').focus();
+              return;
+            } else {
+              createNotification({ message: retry.error.message, success: false });
+              return;
+            }
+          } else {
+            createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
+            return;
+          }
+        }
+        throw error;
+      }
       createNotification({ message: 'OTP sent! Check your email.', success: true })
       document.getElementById('code').focus()
-
     } catch (err) {
       document.getElementById('otp-request-form').classList.remove('hidden')
       document.getElementById('otp-verify-form').classList.add('hidden')
