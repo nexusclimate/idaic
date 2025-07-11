@@ -35,6 +35,11 @@ export default function Events() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [locationFilter, setLocationFilter] = useState('');
+
+  // Compute unique locations for filter dropdown
+  const uniqueLocations = Array.from(new Set(events.map(e => e.location).filter(Boolean)));
+  const filteredEvents = locationFilter ? events.filter(e => e.location === locationFilter) : events;
 
   const handleAdd = async (event) => {
     try {
@@ -42,7 +47,8 @@ export default function Events() {
         title: event.title,
         event_date: event.event_date,
         location: event.location,
-        registration_link: event.registration_link
+        description: event.description, // add description
+        registration_link: event.registration_link // keep as optional
       };
       const response = await fetch('/.netlify/functions/events', {
         method: 'POST',
@@ -67,7 +73,8 @@ export default function Events() {
         title: updates.title,
         event_date: updates.event_date,
         location: updates.location,
-        registration_link: updates.registration_link
+        description: updates.description, // add description
+        registration_link: updates.registration_link // keep as optional
       };
       const response = await fetch(`/.netlify/functions/events?id=${id}`, {
         method: 'PUT',
@@ -110,7 +117,7 @@ export default function Events() {
   };
 
   const openAddDrawer = () => {
-    setSelectedEvent({ title: '', event_date: '', location: '', registration_link: '' });
+    setSelectedEvent({ title: '', event_date: '', location: '', description: '', registration_link: '' });
     setIsAdding(true);
     setDrawerOpen(true);
   };
@@ -123,8 +130,8 @@ export default function Events() {
   };
 
   const handleFormSubmit = async (event) => {
-    if (!event.title || !event.event_date || !event.location || !event.registration_link) {
-      setFormError('All fields are required.');
+    if (!event.title || !event.event_date || !event.location) {
+      setFormError('Title, date, and location are required.');
       return false;
     }
     if (isAdding) {
@@ -162,6 +169,23 @@ export default function Events() {
             </ul>
           </nav>
         </div>
+        {/* Location Filter Dropdown */}
+        {uniqueLocations.length > 1 && (
+          <div className="mt-4">
+            <label htmlFor="location-filter" className="mr-2 text-sm font-medium text-gray-700">Filter by location:</label>
+            <select
+              id="location-filter"
+              value={locationFilter}
+              onChange={e => setLocationFilter(e.target.value)}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              <option value="">All</option>
+              {uniqueLocations.map(loc => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       <div className="bg-white border rounded-lg p-4 sm:p-6">
         {loading ? (
@@ -170,7 +194,7 @@ export default function Events() {
           <div className="py-8 text-center text-red-500">{error}</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {events.map((event, idx) => (
+            {filteredEvents.map((event, idx) => (
               <button
                 key={event.id || idx}
                 type="button"
@@ -188,7 +212,18 @@ export default function Events() {
                   </div>
                 </div>
                 <div className="px-6 pb-6 pt-0 text-left w-full">
-                  <div className="text-xs sm:text-sm text-gray-700 w-full mt-0">{event.registration_link ? <a href={event.registration_link} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Registration Link</a> : ''}</div>
+                  {/* Description */}
+                  {event.description && (
+                    <div className="text-xs sm:text-sm text-gray-700 w-full mt-0 mb-2">{event.description}</div>
+                  )}
+                  {/* Horizontal line after description */}
+                  <hr className="my-2 border-gray-300" />
+                  {/* Registration Link below the line */}
+                  <div className="text-xs sm:text-sm text-gray-700 w-full mt-0">
+                    {event.registration_link ? (
+                      <a href={event.registration_link} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Registration Link</a>
+                    ) : <span className="text-gray-400">No registration link</span>}
+                  </div>
                 </div>
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-4 text-xs font-medium" style={{ color: colors.primary.orange }}>
                   {event.event_date ? new Date(event.event_date).toLocaleDateString() : ''}

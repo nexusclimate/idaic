@@ -135,6 +135,19 @@ export default function EventForm({
                       />
                     </div>
                     <div>
+                      <label htmlFor="event-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        id="event-description"
+                        name="description"
+                        value={localEvent.description || ''}
+                        onChange={e => handleFieldChange('description', e.target.value)}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+                        rows={3}
+                        readOnly={readOnly}
+                        placeholder="Enter event description"
+                      />
+                    </div>
+                    <div>
                       <label htmlFor="registration-link" className="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
                       <input
                         id="registration-link"
@@ -143,7 +156,6 @@ export default function EventForm({
                         value={localEvent.registration_link}
                         onChange={e => handleFieldChange('registration_link', e.target.value)}
                         className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
-                        required
                         readOnly={readOnly}
                         placeholder="Paste registration link here"
                       />
