@@ -43,6 +43,7 @@ import {
   GlobeAltIcon,
   NewspaperIcon,
   SunIcon,
+  BookOpenIcon,
 } from '@heroicons/react/20/solid'
 import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
@@ -154,7 +155,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               }}
               title={collapsed ? 'Case Studies' : undefined}
             >
-              <Square2StackIcon />
+              <BookOpenIcon />
               {!collapsed && <SidebarLabel>Case Studies</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
