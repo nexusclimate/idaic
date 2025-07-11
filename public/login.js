@@ -56,9 +56,8 @@ document
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
 
-    createNotification({ message: 'Sending OTP…', success: true });
-
     async function sendOtp() {
+      createNotification({ message: 'Sending OTP…', success: true });
       return await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
