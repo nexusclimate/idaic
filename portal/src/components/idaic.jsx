@@ -47,10 +47,21 @@ import {
 import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
 import { ComputerDesktopIcon } from '@heroicons/react/24/solid'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
-  const [collapsed, setCollapsed] = useState(false)
+  // Detect mobile and set collapsed true by default on mobile
+  const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+  const [collapsed, setCollapsed] = useState(isMobile);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handler = () => {
+        setCollapsed(window.matchMedia('(max-width: 640px)').matches);
+      };
+      window.addEventListener('resize', handler);
+      return () => window.removeEventListener('resize', handler);
+    }
+  }, []);
   const handlePageChange = (page) => {
     onPageChange(page);
   };
