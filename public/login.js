@@ -49,18 +49,16 @@ function createNotification({ message, success = true }) {
   wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
 }
 
-// Domain check function using Supabase
-async function isDomainAllowed(email) {
-  const domain = email.split('@')[1]?.toLowerCase();
-  if (!domain) return false;
+// User existence check function using Supabase
+async function isUserRegistered(email) {
   try {
     const { data, error } = await supabase
-      .from('org_domains')
+      .from('users')
       .select('*')
-      .eq('domain', domain)
+      .eq('email', email)
       .maybeSingle();
     if (error) {
-      createNotification({ message: 'Error checking domain. Please try again later.', success: false });
+      createNotification({ message: 'Error checking user. Please try again later.', success: false });
       return false;
     }
     return !!data;
@@ -76,13 +74,6 @@ document
   .addEventListener('submit', async (e) => {
     e.preventDefault()
     const email = document.getElementById('email').value.trim()
-
-    // Domain check
-    const allowed = await isDomainAllowed(email);
-    if (!allowed) {
-      createNotification({ message: 'Your email domain is not allowed. Please register as a member or contact support.', success: false });
-      return;
-    }
 
     // UI change
     document.getElementById('otp-request-form').classList.add('hidden')
