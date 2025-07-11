@@ -53,13 +53,10 @@ function createNotification({ message, success = true }) {
 document
   .getElementById('otp-request-form')
   .addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const email = document.getElementById('email').value.trim()
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
 
-    // UI change
-    document.getElementById('otp-request-form').classList.add('hidden')
-    document.getElementById('otp-verify-form').classList.remove('hidden')
-    createNotification({ message: 'Sending OTP…', success: true })
+    createNotification({ message: 'Sending OTP…', success: true });
 
     async function sendOtp() {
       return await supabase.auth.signInWithOtp({
@@ -73,7 +70,6 @@ document
       if (error) {
         // If user not found in Auth (422), try provisioning
         if (error.status === 422 || error.message.includes('Signups not allowed')) {
-          // Call Supabase Edge Function to provision user
           try {
             const provisionRes = await fetch('https://<YOUR-SUPABASE-PROJECT-REF>.functions.supabase.co/provision_user', {
               method: 'POST',
@@ -82,9 +78,12 @@ document
             });
             const provisionResult = await provisionRes.json();
             if (provisionRes.ok) {
-              // Try sending OTP again
+              // Optional: Wait a moment for Auth to be ready
+              await new Promise(res => setTimeout(res, 500));
               let retry = await sendOtp();
               if (!retry.error) {
+                document.getElementById('otp-request-form').classList.add('hidden');
+                document.getElementById('otp-verify-form').classList.remove('hidden');
                 createNotification({ message: 'You are not a registered user but your company is already a member. Please check your email for the OTP log in.', success: true });
                 document.getElementById('code').focus();
                 return;
@@ -96,32 +95,30 @@ document
               createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
               return;
             }
-          } catch(fetchErr) {
+          } catch (fetchErr) {
             createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
             return;
           }
         }
         throw error;
       }
-      createNotification({ message: 'OTP sent! Check your email.', success: true })
-      document.getElementById('code').focus()
+      // Only now switch UI
+      document.getElementById('otp-request-form').classList.add('hidden');
+      document.getElementById('otp-verify-form').classList.remove('hidden');
+      createNotification({ message: 'OTP sent! Check your email.', success: true });
+      document.getElementById('code').focus();
     } catch (err) {
-      document.getElementById('otp-request-form').classList.remove('hidden')
-      document.getElementById('otp-verify-form').classList.add('hidden')
-
-      let friendlyMessage = err.message
-
+      let friendlyMessage = err.message;
       if (err.message.includes('Signups not allowed')) {
-        friendlyMessage = 'This email is not registered. Please register as a member or contact support.'
+        friendlyMessage = 'This email is not registered. Please register as a member or contact support.';
       } else if (err.message.includes('Invalid login credentials')) {
-        friendlyMessage = 'Invalid login credentials. Please check your input.'
+        friendlyMessage = 'Invalid login credentials. Please check your input.';
       } else if (err.message.includes('Rate limit exceeded')) {
-        friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.'
+        friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
       }
-
-      createNotification({ message: friendlyMessage, success: false })
+      createNotification({ message: friendlyMessage, success: false });
     }
-  })
+  });
 
 // 4. Verify OTP
 document
