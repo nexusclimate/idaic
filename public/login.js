@@ -56,6 +56,7 @@ document
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     const domain = email.split('@')[1]?.toLowerCase();
+    console.log('Checking domain:', domain);
 
     // 1. Check if domain is approved
     let domainApproved = false;
@@ -63,8 +64,9 @@ document
       const { data, error } = await supabase
         .from('org_domains')
         .select('*')
-        .eq('domain_email', domain)
+        .ilike('domain_email', domain)
         .maybeSingle();
+      console.log('Supabase org_domains result:', data, error);
       if (data) domainApproved = true;
     } catch (err) {
       createNotification({ message: 'Error checking organization membership. Please try again.', success: false });
