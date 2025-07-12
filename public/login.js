@@ -113,7 +113,10 @@ document
           console.log('🔍 Debug - Calling UserLogin function');
           const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
             body: JSON.stringify({ email })
           });
           const provisionResult = await provisionRes.json();
