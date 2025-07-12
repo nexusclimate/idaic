@@ -28,7 +28,7 @@ function createNotification({ message, success = true }) {
                 </svg>`
               : `<svg class="size-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M18 6L6 18M6 6l12 12"/>
+                        d="M18 6L6 18M6 6l12 18"/>
                 </svg>`
           }
         </div>
@@ -82,8 +82,14 @@ document
 
     async function sendOtp() {
       createNotification({ message: 'Sending OTP…', success: true });
-      
-      // Check if user exists in public.users table
+      return await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+      });
+    }
+
+    try {
+      // Check if user exists in public.users table first
       console.log('🔍 Debug - Checking if user exists in public.users...');
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -92,13 +98,87 @@ document
         .maybeSingle();
       console.log('🔍 Debug - User exists in public.users:', !!userData, userError);
       
-      return await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
-      });
-    }
+      // If user doesn't exist, provision them first
+      if (!userData) {
+        console.log('🔍 Debug - User not found, starting provisioning flow');
+        createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
+        
+        try {
+          // Extract project reference from SUPABASE_URL
+          const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+          if (!projectRef) {
+            throw new Error('Invalid Supabase URL format');
+          }
+          
+          console.log('🔍 Debug - Calling provision_user function');
+          const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/provision_user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const provisionResult = await provisionRes.json();
+          console.log('🔍 Debug - Provision result:', provisionResult);
+          
+          if (provisionRes.ok) {
+            // Send notification directly to n8n
+            try {
+              console.log('🔍 Debug - N8N_URL:', N8N_URL);
+              console.log('🔍 Debug - N8N_AUTH:', N8N_AUTH ? '***' + N8N_AUTH.slice(-4) : 'undefined');
+              console.log('🔍 Debug - Sending webhook for:', email, domain);
+              
+              const webhookUrl = `${N8N_URL}/webhook/user-notifications`;
+              console.log('🔍 Debug - Full webhook URL:', webhookUrl);
+              
+              const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': N8N_AUTH
+                },
+                body: JSON.stringify({
+                  email,
+                  domain,
+                  user_id: provisionResult.user_id || null
+                })
+              });
+              
+              console.log('🔍 Debug - Response status:', response.status);
+              const responseText = await response.text();
+              console.log('🔍 Debug - Response body:', responseText);
+              
+              if (response.ok) {
+                console.log('✅ Notification sent to n8n for:', email);
+              } else {
+                console.error('❌ Webhook failed with status:', response.status);
+              }
+            } catch (notifyErr) {
+              // Log error but don't block the user
+              console.error('❌ Notification error:', notifyErr);
+            }
 
-    try {
+            await new Promise(res => setTimeout(res, 500));
+            let retry = await sendOtp();
+            if (!retry.error) {
+              document.getElementById('otp-request-form').classList.add('hidden');
+              document.getElementById('otp-verify-form').classList.remove('hidden');
+              createNotification({ message: '✅ OTP sent! Please check your email for the login code.', success: true });
+              document.getElementById('code').focus();
+              return;
+            } else {
+              createNotification({ message: retry.error.message, success: false });
+              return;
+            }
+          } else {
+            createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
+            return;
+          }
+        } catch (fetchErr) {
+          createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
+          return;
+        }
+      }
+      
+      // If user exists, send OTP normally
       let { error } = await sendOtp();
       if (error) {
         console.log('🔍 Debug - OTP error status:', error.status);
@@ -108,87 +188,9 @@ document
           createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
           return;
         }
-        // If user not found in Auth (422), try provisioning
-        if (error.status === 422 || error.message.includes('Signups not allowed')) {
-          console.log('🔍 Debug - User not found, starting provisioning flow');
-          // Show orange warning first
-          createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
-          
-          try {
-            // Extract project reference from SUPABASE_URL
-            const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
-            if (!projectRef) {
-              throw new Error('Invalid Supabase URL format');
-            }
-            
-            console.log('🔍 Debug - Calling provision_user function');
-            const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/provision_user`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email })
-            });
-            const provisionResult = await provisionRes.json();
-            console.log('🔍 Debug - Provision result:', provisionResult);
-            if (provisionRes.ok) {
-              // Send notification directly to n8n
-              try {
-                console.log('🔍 Debug - N8N_URL:', N8N_URL);
-                console.log('🔍 Debug - N8N_AUTH:', N8N_AUTH ? '***' + N8N_AUTH.slice(-4) : 'undefined');
-                console.log('🔍 Debug - Sending webhook for:', email, domain);
-                
-                const webhookUrl = `${N8N_URL}/webhook/user-notifications`;
-                console.log('🔍 Debug - Full webhook URL:', webhookUrl);
-                
-                const response = await fetch(webhookUrl, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': N8N_AUTH
-                  },
-                  body: JSON.stringify({
-                    email,
-                    domain,
-                    user_id: provisionResult.user_id || null
-                  })
-                });
-                
-                console.log('🔍 Debug - Response status:', response.status);
-                const responseText = await response.text();
-                console.log('🔍 Debug - Response body:', responseText);
-                
-                if (response.ok) {
-                  console.log('✅ Notification sent to n8n for:', email);
-                } else {
-                  console.error('❌ Webhook failed with status:', response.status);
-                }
-              } catch (notifyErr) {
-                // Log error but don't block the user
-                console.error('❌ Notification error:', notifyErr);
-              }
-
-              await new Promise(res => setTimeout(res, 500));
-              let retry = await sendOtp();
-              if (!retry.error) {
-                document.getElementById('otp-request-form').classList.add('hidden');
-                document.getElementById('otp-verify-form').classList.remove('hidden');
-                createNotification({ message: '✅ OTP sent! Please check your email for the login code.', success: true });
-                document.getElementById('code').focus();
-                return;
-              } else {
-                createNotification({ message: retry.error.message, success: false });
-                return;
-              }
-            } else {
-              createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
-              return;
-            }
-          } catch (fetchErr) {
-            createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
-            return;
-          }
-        }
         throw error;
       }
+      
       document.getElementById('otp-request-form').classList.add('hidden');
       document.getElementById('otp-verify-form').classList.remove('hidden');
       createNotification({ message: 'OTP sent! Check your email.', success: true });
