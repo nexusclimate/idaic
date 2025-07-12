@@ -99,7 +99,13 @@ document
           createNotification({ message: 'You are not a registered user yet but your company domain is already approved!', success: false });
           
           try {
-            const provisionRes = await fetch('https://<YOUR-SUPABASE-PROJECT-REF>.functions.supabase.co/provision_user', {
+            // Extract project reference from SUPABASE_URL
+            const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+            if (!projectRef) {
+              throw new Error('Invalid Supabase URL format');
+            }
+            
+            const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/provision_user`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email })
