@@ -112,6 +112,25 @@ document
             });
             const provisionResult = await provisionRes.json();
             if (provisionRes.ok) {
+              // Call the notification Edge Function
+              try {
+                await fetch('https://xnjpbkcqfuvegiwdxypw.supabase.co/functions/v1/New-User-Notification', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                  },
+                  body: JSON.stringify({
+                    email,
+                    domain,
+                    user_id: provisionResult.user_id || null // If your provision function returns the user id
+                  })
+                });
+              } catch (notifyErr) {
+                // Optionally log or show a notification error, but don't block the user
+                console.error('Notification error:', notifyErr);
+              }
+
               await new Promise(res => setTimeout(res, 500));
               let retry = await sendOtp();
               if (!retry.error) {
