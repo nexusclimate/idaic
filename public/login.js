@@ -95,6 +95,9 @@ document
         }
         // If user not found in Auth (422), try provisioning
         if (error.status === 422 || error.message.includes('Signups not allowed')) {
+          // Show orange warning first
+          createNotification({ message: 'You are not a registered user yet but your company domain is already approved!', success: false });
+          
           try {
             const provisionRes = await fetch('https://<YOUR-SUPABASE-PROJECT-REF>.functions.supabase.co/provision_user', {
               method: 'POST',
