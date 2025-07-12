@@ -110,8 +110,8 @@ document
             throw new Error('Invalid Supabase URL format');
           }
           
-          console.log('🔍 Debug - Calling provision_user function');
-          const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/provision_user`, {
+          console.log('🔍 Debug - Calling UserLogin function');
+          const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
