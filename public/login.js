@@ -116,7 +116,14 @@ document
             if (provisionRes.ok) {
               // Send notification directly to n8n
               try {
-                await fetch(`${N8N_URL}/webhook/user-notifications`, {
+                console.log('🔍 Debug - N8N_URL:', N8N_URL);
+                console.log('🔍 Debug - N8N_AUTH:', N8N_AUTH ? '***' + N8N_AUTH.slice(-4) : 'undefined');
+                console.log('🔍 Debug - Sending webhook for:', email, domain);
+                
+                const webhookUrl = `${N8N_URL}/webhook/user-notifications`;
+                console.log('🔍 Debug - Full webhook URL:', webhookUrl);
+                
+                const response = await fetch(webhookUrl, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
@@ -128,7 +135,16 @@ document
                     user_id: provisionResult.user_id || null
                   })
                 });
-                console.log('✅ Notification sent to n8n for:', email);
+                
+                console.log('🔍 Debug - Response status:', response.status);
+                const responseText = await response.text();
+                console.log('🔍 Debug - Response body:', responseText);
+                
+                if (response.ok) {
+                  console.log('✅ Notification sent to n8n for:', email);
+                } else {
+                  console.error('❌ Webhook failed with status:', response.status);
+                }
               } catch (notifyErr) {
                 // Log error but don't block the user
                 console.error('❌ Notification error:', notifyErr);
