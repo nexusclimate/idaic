@@ -96,7 +96,7 @@ document
         // If user not found in Auth (422), try provisioning
         if (error.status === 422 || error.message.includes('Signups not allowed')) {
           // Show orange warning first
-          createNotification({ message: 'You are not a registered user yet but your company domain is already approved!', success: false });
+          createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
           
           try {
             // Extract project reference from SUPABASE_URL
@@ -112,23 +112,24 @@ document
             });
             const provisionResult = await provisionRes.json();
             if (provisionRes.ok) {
-              // Call the notification Edge Function
+              // Send notification directly to n8n
               try {
-                await fetch('https://xnjpbkcqfuvegiwdxypw.supabase.co/functions/v1/New-User-Notification', {
+                await fetch('https://n8n.nexusclimate.co/webhook/user-notifications', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    'Authorization': 'e5362baf-c777-4d57-a609-6eaf1f9e87f6'
                   },
                   body: JSON.stringify({
                     email,
                     domain,
-                    user_id: provisionResult.user_id || null // If your provision function returns the user id
+                    user_id: provisionResult.user_id || null
                   })
                 });
+                console.log('✅ Notification sent to n8n for:', email);
               } catch (notifyErr) {
-                // Optionally log or show a notification error, but don't block the user
-                console.error('Notification error:', notifyErr);
+                // Log error but don't block the user
+                console.error('❌ Notification error:', notifyErr);
               }
 
               await new Promise(res => setTimeout(res, 500));
@@ -136,7 +137,7 @@ document
               if (!retry.error) {
                 document.getElementById('otp-request-form').classList.add('hidden');
                 document.getElementById('otp-verify-form').classList.remove('hidden');
-                createNotification({ message: 'You are not a registered user but your company is already a member. Please check your email for the OTP log in.', success: true });
+                createNotification({ message: '✅ OTP sent! Please check your email for the login code.', success: true });
                 document.getElementById('code').focus();
                 return;
               } else {
