@@ -4,6 +4,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 // 1. Read the injected env
 const SUPABASE_URL      = window.ENV.SUPABASE_URL
 const SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
+const N8N_URL  = window.ENV.N8N_URL
+const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // 2. Notification helper
@@ -114,11 +116,11 @@ document
             if (provisionRes.ok) {
               // Send notification directly to n8n
               try {
-                await fetch('https://n8n.nexusclimate.co/webhook/user-notifications', {
+                await fetch(`${N8N_URL}/webhook/user-notifications`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'e5362baf-c777-4d57-a609-6eaf1f9e87f6'
+                    'Authorization': N8N_AUTH
                   },
                   body: JSON.stringify({
                     email,
