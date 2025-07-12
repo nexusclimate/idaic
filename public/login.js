@@ -82,6 +82,16 @@ document
 
     async function sendOtp() {
       createNotification({ message: 'Sending OTP…', success: true });
+      
+      // Check if user exists in public.users table
+      console.log('🔍 Debug - Checking if user exists in public.users...');
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+      console.log('🔍 Debug - User exists in public.users:', !!userData, userError);
+      
       return await supabase.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
@@ -91,12 +101,16 @@ document
     try {
       let { error } = await sendOtp();
       if (error) {
+        console.log('🔍 Debug - OTP error status:', error.status);
+        console.log('🔍 Debug - OTP error message:', error.message);
+        
         if (error.status === 500) {
           createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
           return;
         }
         // If user not found in Auth (422), try provisioning
         if (error.status === 422 || error.message.includes('Signups not allowed')) {
+          console.log('🔍 Debug - User not found, starting provisioning flow');
           // Show orange warning first
           createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
           
@@ -107,12 +121,14 @@ document
               throw new Error('Invalid Supabase URL format');
             }
             
+            console.log('🔍 Debug - Calling provision_user function');
             const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/provision_user`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email })
             });
             const provisionResult = await provisionRes.json();
+            console.log('🔍 Debug - Provision result:', provisionResult);
             if (provisionRes.ok) {
               // Send notification directly to n8n
               try {
