@@ -111,11 +111,12 @@ document
           }
           
           console.log('🔍 Debug - Calling UserLogin function');
+          console.log('🔍 Debug - Calling UserLogin function without auth headers');
+          
           const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
             method: 'POST',
             headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email })
           });
