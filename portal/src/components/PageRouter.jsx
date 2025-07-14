@@ -18,6 +18,16 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
     case 'home':
       return <Home />;
     case 'content':
+      return (
+        <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
+          <iframe
+            src="https://members.nexusclimate.co/"
+            title="IDAIC Content"
+            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
+            allowFullScreen
+          />
+        </div>
+      );
     case 'case-studies':
       return (
         <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
