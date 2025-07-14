@@ -190,6 +190,13 @@ document
           .then(res => res.json())
           .then(data => data.ip);
 
+        let geo = {};
+        try {
+          geo = await fetch(`http://ip-api.com/json/${ip}`).then(res => res.json());
+        } catch (geoErr) {
+          console.error('❌ Failed to fetch geo info:', geoErr);
+        }
+
         const user = data.user || {}; // data.user may be undefined, fallback to empty object
         const userId = data.user?.id || null;
 
@@ -197,6 +204,9 @@ document
           user_id: userId, // Store the Auth UUID
           email: user.email || document.getElementById('email').value.trim(),
           ip_address: ip,
+          country: geo.country || 'Unknown',
+          city: geo.city || 'Unknown',
+          region: geo.regionName || 'Unknown',
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
           browser: navigator.userAgentData?.brands?.[0]?.brand || 'Unknown',
           os: navigator.userAgentData?.platform || 'Unknown',
