@@ -184,6 +184,38 @@ document
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
 
+      // Improved browser detection
+      function detectBrowser() {
+        if (navigator.userAgentData && navigator.userAgentData.brands) {
+          const brands = navigator.userAgentData.brands.map(b => b.brand);
+          if (brands.includes('Google Chrome')) return 'Chrome';
+          if (brands.includes('Microsoft Edge')) return 'Edge';
+          if (brands.includes('Chromium')) return 'Chromium';
+          return brands[0] || 'Unknown';
+        }
+        const ua = navigator.userAgent;
+        if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
+        if (/firefox|fxios/i.test(ua)) return 'Firefox';
+        if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
+        if (/edg/i.test(ua)) return 'Edge';
+        if (/opr\//i.test(ua)) return 'Opera';
+        return 'Unknown';
+      }
+
+      // Improved OS detection
+      function detectOS() {
+        if (navigator.userAgentData && navigator.userAgentData.platform) {
+          return navigator.userAgentData.platform;
+        }
+        const ua = navigator.userAgent;
+        if (/windows/i.test(ua)) return 'Windows';
+        if (/macintosh|mac os x/i.test(ua)) return 'Mac';
+        if (/linux/i.test(ua)) return 'Linux';
+        if (/android/i.test(ua)) return 'Android';
+        if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+        return 'Unknown';
+      }
+
       // Track user login stats
       try {
         const ip = await fetch('https://api.ipify.org?format=json')
@@ -192,7 +224,8 @@ document
 
         let geo = {};
         try {
-          geo = await fetch(`http://ip-api.com/json/${ip}`).then(res => res.json());
+          // Use HTTPS for geolocation API
+          geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
         } catch (geoErr) {
           console.error('❌ Failed to fetch geo info:', geoErr);
         }
@@ -206,10 +239,11 @@ document
           ip_address: ip,
           country: geo.country || 'Unknown',
           city: geo.city || 'Unknown',
-          region: geo.regionName || 'Unknown',
+          // Prefer regionName, fallback to region
+          region: geo.regionName || geo.region || 'Unknown',
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-          browser: navigator.userAgentData?.brands?.[0]?.brand || 'Unknown',
-          os: navigator.userAgentData?.platform || 'Unknown',
+          browser: detectBrowser(),
+          os: detectOS(),
           user_agent: navigator.userAgent,
           login_time: new Date().toISOString()
         };

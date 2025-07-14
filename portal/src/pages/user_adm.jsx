@@ -17,11 +17,35 @@ export function useUsers() {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/.netlify/functions/userfetch');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
+        // Fetch users
+        const usersRes = await fetch('/.netlify/functions/userfetch');
+        if (!usersRes.ok) throw new Error('Network response was not ok');
+        const usersData = await usersRes.json();
+
+        // Fetch all user_logins
+        const loginsRes = await fetch('/.netlify/functions/userlogins');
+        if (!loginsRes.ok) throw new Error('Network response was not ok');
+        const loginsData = await loginsRes.json();
+
+        // Build a map of user_id -> latest login_time
+        const latestLoginMap = {};
+        for (const login of loginsData) {
+          if (
+            !latestLoginMap[login.user_id] ||
+            new Date(login.login_time) > new Date(latestLoginMap[login.user_id])
+          ) {
+            latestLoginMap[login.user_id] = login.login_time;
+          }
+        }
+
+        // Attach last_login to each user
+        const usersWithLogin = usersData.map(user => ({
+          ...user,
+          last_login: latestLoginMap[user.id] || null,
+        }));
+
         if (!ignore) {
-          setUsers(data);
+          setUsers(usersWithLogin);
           setError(null);
         }
       } catch (err) {
@@ -133,9 +157,9 @@ export default function UserAdm() {
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.email}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">{user.company}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap">
-                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getBadgeColor(user.last_sign_in)}`}>{user.role || '—'}</span>
+                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${getBadgeColor(user.last_login)}`}>{user.role || '—'}</span>
                       </td>
-                      <td className="px-2 py-2 text-sm whitespace-nowrap">{formatDate(user.last_sign_in)}</td>
+                      <td className="px-2 py-2 text-sm whitespace-nowrap">{formatDate(user.last_login)}</td>
                       <td className="px-2 py-2 text-sm whitespace-nowrap text-right">
                         <button
                           type="button"

@@ -12,20 +12,50 @@ const supabase = createClient(
 )
 
 exports.handler = async function (event, context) {
-  const { data, error } = await supabase
+  // Fetch all users
+  const { data: users, error: userError } = await supabase
     .from('users')
     .select('*')
     .order('name')
 
-  if (error) {
+  if (userError) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: userError.message })
     }
   }
 
+  // Fetch all user_logins (only user_id and login_time)
+  const { data: logins, error: loginError } = await supabase
+    .from('user_logins')
+    .select('user_id,login_time');
+
+  if (loginError) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: loginError.message })
+    }
+  }
+
+  // Build a map of user_id -> latest login_time
+  const latestLoginMap = {};
+  for (const login of logins) {
+    if (
+      !latestLoginMap[login.user_id] ||
+      new Date(login.login_time) > new Date(latestLoginMap[login.user_id])
+    ) {
+      latestLoginMap[login.user_id] = login.login_time;
+    }
+  }
+
+  // Attach last_login to each user
+  const usersWithLogin = users.map(user => ({
+    ...user,
+    last_login: latestLoginMap[user.id] || null,
+  }));
+
   return {
     statusCode: 200,
-    body: JSON.stringify(data)
+    body: JSON.stringify(usersWithLogin)
   }
 }
