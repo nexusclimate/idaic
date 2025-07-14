@@ -124,7 +124,7 @@ document
           console.log('🔍 Debug - Provision result:', provisionResult);
           
           if (provisionRes.ok) {
-            console.log('✅ User provisioned successfully');
+            console.log(' User provisioned successfully');
 
             await new Promise(res => setTimeout(res, 500));
             let retry = await sendOtp();
@@ -197,6 +197,31 @@ document
 
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
+
+      // Track user login stats
+      try {
+        const ip = await fetch('https://api.ipify.org?format=json')
+          .then(res => res.json())
+          .then(data => data.ip);
+
+        const user = data.user || {}; // data.user may be undefined, fallback to empty object
+
+        const metadata = {
+          email: user.email || document.getElementById('email').value.trim(),
+          ip_address: ip,
+          device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+          browser: navigator.userAgentData?.brands?.[0]?.brand || 'Unknown',
+          os: navigator.userAgentData?.platform || 'Unknown',
+          user_agent: navigator.userAgent,
+          login_time: new Date().toISOString()
+        };
+
+        await supabase.from('user_logins').insert([metadata]);
+        console.log('✅ User login tracked:', metadata);
+      } catch (trackErr) {
+        console.error('❌ Failed to track user login:', trackErr);
+      }
+
       window.location.href = '/app'
 
     } catch (err) {
