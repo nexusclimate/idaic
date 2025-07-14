@@ -102,6 +102,8 @@ document
       if (error.status === 422 || error.message.includes('Signups not allowed')) {
         console.log('🔍 Debug - User not found, starting provisioning flow');
         createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
+        // Add a pause for user experience
+        await new Promise(res => setTimeout(res, 1500));
         try {
           // Extract project reference from SUPABASE_URL
           const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
