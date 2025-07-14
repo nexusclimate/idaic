@@ -89,43 +89,35 @@ document
     }
 
     try {
-      // Check if user exists in public.users table first
-      console.log('🔍 Debug - Checking if user exists in public.users...');
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .maybeSingle();
-      console.log('🔍 Debug - User exists in public.users:', !!userData, userError);
-      
-      // If user doesn't exist, provision them first
-      if (!userData) {
+      // Try to send OTP first
+      let { error } = await sendOtp();
+      if (!error) {
+        document.getElementById('otp-request-form').classList.add('hidden');
+        document.getElementById('otp-verify-form').classList.remove('hidden');
+        createNotification({ message: 'OTP sent! Check your email.', success: true });
+        document.getElementById('code').focus();
+        return;
+      }
+      // If OTP fails with not found, try provisioning
+      if (error.status === 422 || error.message.includes('Signups not allowed')) {
         console.log('🔍 Debug - User not found, starting provisioning flow');
         createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
-        
         try {
           // Extract project reference from SUPABASE_URL
           const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
           if (!projectRef) {
             throw new Error('Invalid Supabase URL format');
           }
-          
-          console.log('🔍 Debug - Calling UserLogin function');
           console.log('🔍 Debug - Calling UserLogin function without auth headers');
-          
           const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
             method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
           });
           const provisionResult = await provisionRes.json();
           console.log('🔍 Debug - Provision result:', provisionResult);
-          
           if (provisionRes.ok) {
             console.log(' User provisioned successfully');
-
             await new Promise(res => setTimeout(res, 500));
             let retry = await sendOtp();
             if (!retry.error) {
@@ -146,25 +138,19 @@ document
           createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
           return;
         }
-      }
-      
-      // If user exists, send OTP normally
-      let { error } = await sendOtp();
-      if (error) {
-        console.log('🔍 Debug - OTP error status:', error.status);
-        console.log('🔍 Debug - OTP error message:', error.message);
-        
-        if (error.status === 500) {
-          createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
-          return;
+      } else if (error.status === 500) {
+        createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+        return;
+      } else {
+        let friendlyMessage = error.message;
+        if (error.message.includes('Invalid login credentials')) {
+          friendlyMessage = 'Invalid login credentials. Please check your input.';
+        } else if (error.message.includes('Rate limit exceeded')) {
+          friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
         }
-        throw error;
+        createNotification({ message: friendlyMessage, success: false });
+        return;
       }
-      
-      document.getElementById('otp-request-form').classList.add('hidden');
-      document.getElementById('otp-verify-form').classList.remove('hidden');
-      createNotification({ message: 'OTP sent! Check your email.', success: true });
-      document.getElementById('code').focus();
     } catch (err) {
       let friendlyMessage = err.message;
       if (err.message.includes('Signups not allowed')) {
