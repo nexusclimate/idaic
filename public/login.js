@@ -191,8 +191,10 @@ document
           .then(data => data.ip);
 
         const user = data.user || {}; // data.user may be undefined, fallback to empty object
+        const userId = data.user?.id || null;
 
         const metadata = {
+          user_id: userId, // Store the Auth UUID
           email: user.email || document.getElementById('email').value.trim(),
           ip_address: ip,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
