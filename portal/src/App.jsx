@@ -1,6 +1,5 @@
 import "./index.css";
 import { VERSION } from './config/version.js';
-import { VERSION } from './config/version.js';
 import React, { useState } from "react";
 import Idaic from "./components/idaic";
 import PageRouter from "./components/PageRouter";
