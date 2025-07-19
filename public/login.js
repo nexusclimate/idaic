@@ -9,7 +9,7 @@ const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // 2. Notification helper
-function createNotification({ message, success = true }) {
+function createNotification({ message, success = true, warning = false }) {
   const container = document.getElementById('notification-list')
   if (!container) return
   container.innerHTML = ''
@@ -19,6 +19,15 @@ function createNotification({ message, success = true }) {
   wrapper.innerHTML = `
     <div class="p-4">
       <div class="flex items-start">
+        <div class="shrink-0">
+          ${
+            success && !warning
+              ? `<svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4" /></svg>`
+              : warning
+                ? `<svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" /></svg>`
+                : `<svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6m0-6l6 6" /></svg>`
+          }
+        </div>
         <div class="ml-3 w-0 flex-1 pt-0.5">
           <p class="text-sm font-medium text-gray-900">${message}</p>
         </div>
@@ -63,7 +72,7 @@ document
     }
 
     if (!domainApproved) {
-      createNotification({ message: 'Your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
+      createNotification({ message: 'Your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false, warning: true });
       return;
     }
 
@@ -91,7 +100,7 @@ document
 
     if (!userExists) {
       createNotification({ message: '⚠️ You are not a registered user yet, but your organization is a member. We are setting you up now. Expect an OTP soon!', success: false });
-      await new Promise(res => setTimeout(res, 1500));
+      await new Promise(res => setTimeout(res, 700)); // was 1500ms, now 700ms
       try {
         // Extract project reference from SUPABASE_URL
         const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
@@ -105,9 +114,9 @@ document
         });
         const provisionResult = await provisionRes.json();
         if (provisionRes.ok) {
-          // Wait for user to appear in users table (poll up to 2s)
+          // Wait for user to appear in users table (poll up to 1s)
           let userRowExists = false;
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 5; i++) { // was 10, now 5
             const { data: userData } = await supabase
               .from('users')
               .select('id')
@@ -123,7 +132,7 @@ document
             createNotification({ message: 'Provisioned, but user record not found. Please try again in a moment.', success: false });
             return;
           }
-          await new Promise(res => setTimeout(res, 500));
+          await new Promise(res => setTimeout(res, 200)); // was 500ms, now 200ms
           let retry = await sendOtp();
           if (!retry.error) {
             document.getElementById('otp-request-form').classList.add('hidden');
