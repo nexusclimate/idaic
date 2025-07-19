@@ -19,19 +19,6 @@ function createNotification({ message, success = true }) {
   wrapper.innerHTML = `
     <div class="p-4">
       <div class="flex items-start">
-        <div class="shrink-0">
-          ${
-            success
-              ? `<svg class="size-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                </svg>`
-              : `<svg class="size-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M18 6L6 18M6 6l12 18"/>
-                </svg>`
-          }
-        </div>
         <div class="ml-3 w-0 flex-1 pt-0.5">
           <p class="text-sm font-medium text-gray-900">${message}</p>
         </div>
@@ -80,6 +67,20 @@ document
       return;
     }
 
+    // 2. Check if user exists in users table
+    let userExists = false;
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      if (userData) userExists = true;
+    } catch (err) {
+      createNotification({ message: 'Error checking user database. Please try again.', success: false });
+      return;
+    }
+
     async function sendOtp() {
       createNotification({ message: 'Sending OTP…', success: true });
       return await supabase.auth.signInWithOtp({
@@ -88,81 +89,94 @@ document
       });
     }
 
-    try {
-      // Try to send OTP first
-      let { error } = await sendOtp();
-      if (!error) {
-        document.getElementById('otp-request-form').classList.add('hidden');
-        document.getElementById('otp-verify-form').classList.remove('hidden');
-        createNotification({ message: 'OTP sent! Check your email.', success: true });
-        document.getElementById('code').focus();
-        return;
-      }
-      // If OTP fails with not found, try provisioning
-      if (error.status === 422 || error.message.includes('Signups not allowed')) {
-        console.log('🔍 Debug - User not found, starting provisioning flow');
-        createNotification({ message: '⚠️ You are not a registered user yet, but some colleagues from your company are already members. We are setting you up now. Expect an OTP soon!', success: false });
-        // Add a pause for user experience
-        await new Promise(res => setTimeout(res, 1500));
-        try {
-          // Extract project reference from SUPABASE_URL
-          const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
-          if (!projectRef) {
-            throw new Error('Invalid Supabase URL format');
-          }
-          console.log('🔍 Debug - Calling UserLogin function without auth headers');
-          const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-          });
-          const provisionResult = await provisionRes.json();
-          console.log('🔍 Debug - Provision result:', provisionResult);
-          if (provisionRes.ok) {
-            console.log(' User provisioned successfully');
-            await new Promise(res => setTimeout(res, 500));
-            let retry = await sendOtp();
-            if (!retry.error) {
-              document.getElementById('otp-request-form').classList.add('hidden');
-              document.getElementById('otp-verify-form').classList.remove('hidden');
-              createNotification({ message: '✅ OTP sent! Please check your email for the login code.', success: true });
-              document.getElementById('code').focus();
-              return;
-            } else {
-              createNotification({ message: retry.error.message, success: false });
-              return;
+    if (!userExists) {
+      createNotification({ message: '⚠️ You are not a registered user yet, but your organization is a member. We are setting you up now. Expect an OTP soon!', success: false });
+      await new Promise(res => setTimeout(res, 1500));
+      try {
+        // Extract project reference from SUPABASE_URL
+        const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+        if (!projectRef) {
+          throw new Error('Invalid Supabase URL format');
+        }
+        const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const provisionResult = await provisionRes.json();
+        if (provisionRes.ok) {
+          // Wait for user to appear in users table (poll up to 2s)
+          let userRowExists = false;
+          for (let i = 0; i < 10; i++) {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('id')
+              .eq('email', email)
+              .maybeSingle();
+            if (userData) {
+              userRowExists = true;
+              break;
             }
-          } else {
-            createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
+            await new Promise(res => setTimeout(res, 200));
+          }
+          if (!userRowExists) {
+            createNotification({ message: 'Provisioned, but user record not found. Please try again in a moment.', success: false });
             return;
           }
-        } catch (fetchErr) {
-          createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
+          await new Promise(res => setTimeout(res, 500));
+          let retry = await sendOtp();
+          if (!retry.error) {
+            document.getElementById('otp-request-form').classList.add('hidden');
+            document.getElementById('otp-verify-form').classList.remove('hidden');
+            createNotification({ message: '✅ OTP sent! Please check your email for the login code.', success: true });
+            document.getElementById('code').focus();
+            return;
+          } else {
+            createNotification({ message: retry.error.message, success: false });
+            return;
+          }
+        } else {
+          createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
           return;
         }
-      } else if (error.status === 500) {
-        createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+      } catch (fetchErr) {
+        createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
         return;
-      } else {
-        let friendlyMessage = error.message;
-        if (error.message.includes('Invalid login credentials')) {
+      }
+    } else {
+      // User exists, send OTP as normal
+      try {
+        let { error } = await sendOtp();
+        if (!error) {
+          document.getElementById('otp-request-form').classList.add('hidden');
+          document.getElementById('otp-verify-form').classList.remove('hidden');
+          createNotification({ message: 'OTP sent! Check your email.', success: true });
+          document.getElementById('code').focus();
+          return;
+        } else if (error.status === 500) {
+          createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+          return;
+        } else {
+          let friendlyMessage = error.message;
+          if (error.message.includes('Invalid login credentials')) {
+            friendlyMessage = 'Invalid login credentials. Please check your input.';
+          } else if (error.message.includes('Rate limit exceeded')) {
+            friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+          }
+          createNotification({ message: friendlyMessage, success: false });
+          return;
+        }
+      } catch (err) {
+        let friendlyMessage = err.message;
+        if (err.message.includes('Signups not allowed')) {
+          friendlyMessage = 'This email is not registered. Please register as a member or contact support.';
+        } else if (err.message.includes('Invalid login credentials')) {
           friendlyMessage = 'Invalid login credentials. Please check your input.';
-        } else if (error.message.includes('Rate limit exceeded')) {
+        } else if (err.message.includes('Rate limit exceeded')) {
           friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
         }
         createNotification({ message: friendlyMessage, success: false });
-        return;
       }
-    } catch (err) {
-      let friendlyMessage = err.message;
-      if (err.message.includes('Signups not allowed')) {
-        friendlyMessage = 'This email is not registered. Please register as a member or contact support.';
-      } else if (err.message.includes('Invalid login credentials')) {
-        friendlyMessage = 'Invalid login credentials. Please check your input.';
-      } else if (err.message.includes('Rate limit exceeded')) {
-        friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
-      }
-      createNotification({ message: friendlyMessage, success: false });
     }
   });
 
