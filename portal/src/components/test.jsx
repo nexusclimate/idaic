@@ -316,7 +316,7 @@ export default function Test({ onPageChange, currentPage, isAdminAuthenticated, 
         <div className="mt-auto">
           <SidebarSection>
             <SidebarItem 
-              onClick={() => { window.location.href = 'https://login.nexusclimate.co'; }}
+              onClick={() => { window.location.href = 'https://idaic.nexusclimate.co'; }}
               current={currentPage === 'logout' ? true : undefined}
               style={sidebarItemStyle}
               onMouseEnter={(e) => {

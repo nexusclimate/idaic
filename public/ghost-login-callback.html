@@ -12,7 +12,7 @@
     api.session.authenticate({ token })
       .then(() => {
         // Tell your portal to reload its iframe
-        window.opener.postMessage({ type: 'ghost-auth-success' }, 'https://login.nexusclimate.co');
+        window.opener.postMessage({ type: 'ghost-auth-success' }, 'https://idaic.nexusclimate.co');
         window.close();
       })
       .catch(() => {

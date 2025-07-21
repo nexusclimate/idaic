@@ -428,7 +428,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   handlePageChange('logout');
                   // Redirect to login page, replacing history so back button doesn't restore
                   setTimeout(() => {
-                    window.location.replace('https://login.nexusclimate.co');
+                    window.location.replace('https://idaic.nexusclimate.co');
                   }, 200);
                 }}
                 current={currentPage === 'logout' ? true : undefined}
