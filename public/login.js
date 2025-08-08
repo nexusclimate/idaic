@@ -99,7 +99,7 @@ document
     }
 
     if (!userExists) {
-      createNotification({ message: '⚠️ You are not a registered user yet, but your organization is a member. We are setting you up now. Expect an OTP soon!', success: false });
+      createNotification({ message: 'You are not a registered user yet, but your organization is a member. We are setting you up now. Expect an OTP soon!', success: false });
       await new Promise(res => setTimeout(res, 700)); // was 1500ms, now 700ms
       try {
         // Extract project reference from SUPABASE_URL
@@ -137,7 +137,7 @@ document
           if (!retry.error) {
             document.getElementById('otp-request-form').classList.add('hidden');
             document.getElementById('otp-verify-form').classList.remove('hidden');
-            createNotification({ message: '✅ OTP sent! Please check your email for the login code.', success: true });
+            createNotification({ message: 'OTP sent! Please check your email for the login code.', success: true });
             document.getElementById('code').focus();
             return;
           } else {

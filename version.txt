@@ -1,1 +1,5 @@
-0.7.3.0
+0.7.4.0
+
+ node portal/scripts/increment-version.cjs patch   # Increments X (0.7.3.2 → 0.7.3.3)
+node portal/scripts/increment-version.cjs minor   # Increments W, resets X (0.7.3.2 → 0.7.4.0)
+node portal/scripts/increment-version.cjs major   # Increments M, resets W and X (0.7.3.2 → 0.8.0.0)
