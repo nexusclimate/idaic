@@ -139,6 +139,9 @@ export default function Admin() {
             title="Content Management"
             style={{ width: '100%', height: '100%', border: 'none', padding: 0, margin: 0, background: 'none' }}
             allowFullScreen
+            onLoad={() => console.log('Admin iframe loaded successfully')}
+            onError={(e) => console.error('Admin iframe failed to load', e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
         </div>
       )}

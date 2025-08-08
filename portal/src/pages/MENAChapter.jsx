@@ -78,6 +78,9 @@ export default function MENAChapter() {
             title="MENA Updates"
             className="w-full h-full border-0"
             allowFullScreen
+            onLoad={() => console.log('MENA iframe loaded successfully')}
+            onError={(e) => console.error('MENA iframe failed to load', e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
         </div>
       )}

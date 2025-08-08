@@ -14,6 +14,14 @@ import Settings from '../pages/Settings';
 import Projects from '../pages/projects';
 
 export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
+  const handleIframeLoad = (title) => {
+    console.log(`Iframe loaded successfully: ${title}`);
+  };
+
+  const handleIframeError = (title, error) => {
+    console.error(`Iframe failed to load: ${title}`, error);
+  };
+
   switch (currentPage) {
     case 'home':
       return <Home />;
@@ -25,6 +33,9 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
             title="IDAIC Content"
             style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
             allowFullScreen
+            onLoad={() => handleIframeLoad("IDAIC Content")}
+            onError={(e) => handleIframeError("IDAIC Content", e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
         </div>
       );
@@ -36,6 +47,9 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
             title="IDAIC Case Studies"
             style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
             allowFullScreen
+            onLoad={() => handleIframeLoad("IDAIC Case Studies")}
+            onError={(e) => handleIframeError("IDAIC Case Studies", e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
         </div>
       );
@@ -55,6 +69,9 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
             title="Climate Solutions News"
             style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
             allowFullScreen
+            onLoad={() => handleIframeLoad("Climate Solutions News")}
+            onError={(e) => handleIframeError("Climate Solutions News", e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
         </div>
       );
@@ -62,10 +79,13 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         return (
             <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
               <iframe
-                src="https://news.nexusclimate.co/ae/"
+                src="https://news.nexusclimate.vc/ae/"
                 title="Climate Solutions News"
                 style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
                 allowFullScreen
+                onLoad={() => handleIframeLoad("Climate Solutions News")}
+                onError={(e) => handleIframeError("Climate Solutions News", e)}
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
               />
             </div>
           );
@@ -79,6 +99,9 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
             title="IDAIC Changelog"
             style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
             allowFullScreen
+            onLoad={() => handleIframeLoad("IDAIC Changelog")}
+            onError={(e) => handleIframeError("IDAIC Changelog", e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
         </div>
       );
