@@ -7,6 +7,13 @@
 [dev]
   functions = "../netlify/functions"
 
+# Global headers to allow iframe embedding
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "ALLOWALL"
+    Content-Security-Policy = "frame-ancestors 'self' https://members.nexusclimate.co https://climatesolutions.news https://news.nexusclimate.vc"
+
 [[redirects]]
   from = "/"
   to = "/login.html"
