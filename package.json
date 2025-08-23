@@ -3,7 +3,6 @@
   "version": "0.7.3.1",
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
-    "asana": "^3.1.0",
     "axios": "^1.10.0",
     "clsx": "^2.1.1",
     "dotenv": "^17.0.1",
