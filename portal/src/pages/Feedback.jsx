@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { colors, font, form as formConfig } from '../config/colors';
-import { PaperClipIcon } from '@heroicons/react/24/outline';
+import { PaperClipIcon, PhotoIcon, DocumentIcon } from '@heroicons/react/24/outline';
 
 export default function FeedbackForm() {
   const [status, setStatus] = useState('');
@@ -14,6 +14,17 @@ export default function FeedbackForm() {
 
   const removeFile = (index) => {
     setSelectedFiles(files => files.filter((_, i) => i !== index));
+  };
+
+  const getFileIcon = (file) => {
+    const type = file.type.toLowerCase();
+    if (type.includes('image')) {
+      return <PhotoIcon className="h-4 w-4 text-blue-500 mr-2" />;
+    } else if (type.includes('pdf') || type.includes('document') || type.includes('text')) {
+      return <DocumentIcon className="h-4 w-4 text-red-500 mr-2" />;
+    } else {
+      return <PaperClipIcon className="h-4 w-4 text-gray-400 mr-2" />;
+    }
   };
 
   const handleSubmit = async e => {
@@ -235,16 +246,27 @@ export default function FeedbackForm() {
             />
           </div>
 
-          {/* File Upload Section */}
-          <div>
-            <label htmlFor="attachments" className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-              Attachments (optional)
+          {/* Enhanced File Upload Section */}
+          <div className="border rounded-lg p-4" style={{ borderColor: colors.border.light, backgroundColor: '#fafafa' }}>
+            <label htmlFor="attachments" className="block text-sm font-medium mb-3" style={{ color: colors.text.primary }}>
+              <div className="flex items-center">
+                <PhotoIcon className="h-5 w-5 mr-2" style={{ color: colors.primary.orange }} />
+                Upload Files or Screenshots
+              </div>
+              <span className="text-xs font-normal text-gray-500 mt-1 block">
+                Help us understand your feedback better by including screenshots, documents, or other relevant files
+              </span>
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md"
+            
+            <div className="mt-3 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-gray-400"
               style={{ borderColor: colors.border.light }}
             >
               <div className="space-y-1 text-center">
-                <PaperClipIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="flex justify-center space-x-2 mb-3">
+                  <PhotoIcon className="h-8 w-8 text-blue-400" />
+                  <DocumentIcon className="h-8 w-8 text-red-400" />
+                  <PaperClipIcon className="h-8 w-8 text-gray-400" />
+                </div>
                 <div className="flex text-sm" style={{ color: colors.text.primary }}>
                   <label htmlFor="attachments" className="relative cursor-pointer rounded-md font-medium focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2"
                     style={{ 
@@ -258,7 +280,7 @@ export default function FeedbackForm() {
                       name="attachments"
                       type="file"
                       multiple
-                      accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.csv,.xlsx"
+                      accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.gif,.csv,.xlsx,.xls"
                       className="sr-only"
                       onChange={handleFileChange}
                     />
@@ -266,35 +288,46 @@ export default function FeedbackForm() {
                   <p className="pl-1" style={{ color: colors.text.primary }}>or drag and drop</p>
                 </div>
                 <p className="text-xs" style={{ color: colors.text.secondary }}>
-                  PDF, DOC, PNG, JPG, CSV up to 10MB each
+                  Screenshots (PNG, JPG), Documents (PDF, DOC), Spreadsheets (CSV, XLSX)
+                </p>
+                <p className="text-xs" style={{ color: colors.text.secondary }}>
+                  Up to 10MB per file, 5 files maximum
                 </p>
               </div>
             </div>
             
             {/* Selected Files Display */}
             {selectedFiles.length > 0 && (
-              <div className="mt-3">
-                <p className="text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
-                  Selected files:
+              <div className="mt-4 p-3 bg-white rounded-md border" style={{ borderColor: colors.border.light }}>
+                <p className="text-sm font-medium mb-3" style={{ color: colors.text.primary }}>
+                  Selected files ({selectedFiles.length}):
                 </p>
                 <div className="space-y-2">
                   {selectedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
-                      <div className="flex items-center">
-                        <PaperClipIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm" style={{ color: colors.text.primary }}>
-                          {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                        </span>
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-md border" style={{ borderColor: colors.border.light }}>
+                      <div className="flex items-center flex-1 min-w-0">
+                        {getFileIcon(file)}
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-medium truncate block" style={{ color: colors.text.primary }}>
+                            {file.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type || 'Unknown type'}
+                          </span>
+                        </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => removeFile(index)}
-                        className="text-red-500 hover:text-red-700 text-sm font-medium"
+                        className="ml-3 text-red-500 hover:text-red-700 text-sm font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
                       >
                         Remove
                       </button>
                     </div>
                   ))}
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  💡 Tip: Screenshots help us understand visual issues, while documents can provide additional context
                 </div>
               </div>
             )}
@@ -303,14 +336,14 @@ export default function FeedbackForm() {
           <button
             type="submit"
             disabled={sending}
-            className="mt-2 w-full rounded-md px-4 py-3 sm:py-2 font-medium disabled:opacity-50"
+            className="mt-4 w-full rounded-md px-4 py-3 sm:py-2 font-medium disabled:opacity-50 transition-all hover:shadow-md"
             style={{
               background: colors.primary.orange,
               color: colors.text.white,
               fontFamily: font.primary,
             }}
           >
-            {sending ? 'Sending…' : 'Submit'}
+            {sending ? 'Sending…' : 'Submit Feedback'}
           </button>
 
           <p
