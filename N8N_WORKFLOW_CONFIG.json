@@ -1,0 +1,288 @@
+{
+  "name": "Slack Receipt to QBO Automation",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "events": ["file_shared"],
+        "additionalFields": {
+          "channel": "#receipts"
+        }
+      },
+      "id": "slack-trigger",
+      "name": "Slack Receipt Upload",
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $node['Slack Receipt Upload'].json.file.url_private }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "slackApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-receipt",
+      "name": "Download Receipt File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "operation": "textDetection",
+        "options": {
+          "imageTypes": {
+            "imageType": "binaryData"
+          }
+        }
+      },
+      "id": "ocr-processing",
+      "name": "OCR Processing",
+      "type": "n8n-nodes-base.googleCloudVision",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract receipt data from OCR text\nconst ocrText = $input.first().json.textAnnotations?.[0]?.description || '';\nconst lines = ocrText.split('\\n').filter(line => line.trim());\n\n// Extract vendor name (usually first meaningful line)\nlet vendor = '';\nfor (const line of lines) {\n  if (line.length > 3 && !line.match(/^[0-9\\s\\$\\.,]+$/)) {\n    vendor = line.trim();\n    break;\n  }\n}\n\n// Extract amount (look for currency patterns)\nconst amountMatches = ocrText.match(/\\$?([0-9,]+\\.?[0-9]*)/g);\nlet amount = 0;\nif (amountMatches) {\n  // Take the largest amount found (likely the total)\n  const amounts = amountMatches.map(match => \n    parseFloat(match.replace(/[\\$,]/g, ''))\n  ).filter(num => !isNaN(num));\n  amount = Math.max(...amounts);\n}\n\n// Extract date (various formats)\nconst datePatterns = [\n  /([0-9]{1,2}[\\/\\-][0-9]{1,2}[\\/\\-][0-9]{2,4})/,\n  /([0-9]{4}[\\/\\-][0-9]{1,2}[\\/\\-][0-9]{1,2})/,\n  /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\s+[0-9]{1,2},?\\s+[0-9]{4}/i\n];\n\nlet receiptDate = new Date().toISOString().split('T')[0]; // Default to today\nfor (const pattern of datePatterns) {\n  const match = ocrText.match(pattern);\n  if (match) {\n    const parsedDate = new Date(match[1]);\n    if (!isNaN(parsedDate.getTime())) {\n      receiptDate = parsedDate.toISOString().split('T')[0];\n      break;\n    }\n  }\n}\n\n// Determine category based on vendor name\nlet category = 'Office Expenses'; // Default\nconst vendorLower = vendor.toLowerCase();\nif (vendorLower.includes('restaurant') || vendorLower.includes('cafe') || vendorLower.includes('food')) {\n  category = 'Meals & Entertainment';\n} else if (vendorLower.includes('gas') || vendorLower.includes('fuel') || vendorLower.includes('shell') || vendorLower.includes('exxon')) {\n  category = 'Travel & Vehicle';\n} else if (vendorLower.includes('hotel') || vendorLower.includes('airline') || vendorLower.includes('uber') || vendorLower.includes('lyft')) {\n  category = 'Travel & Entertainment';\n} else if (vendorLower.includes('office') || vendorLower.includes('supply') || vendorLower.includes('staples')) {\n  category = 'Office Supplies';\n}\n\nreturn [{\n  vendor_name: vendor,\n  amount: amount,\n  transaction_date: receiptDate,\n  category: category,\n  raw_ocr_text: ocrText,\n  confidence: vendor && amount > 0 ? 0.8 : 0.3\n}];"
+      },
+      "id": "extract-data",
+      "name": "Extract Receipt Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "resource": "vendor",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 20,
+        "additionalFields": {
+          "where": "Name LIKE '%{{ $node['Extract Receipt Data'].json.vendor_name }}%'"
+        }
+      },
+      "id": "search-vendors",
+      "name": "Search QBO Vendors",
+      "type": "n8n-nodes-base.quickBooksOnline",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Vendor matching logic with fuzzy search\nconst extractedVendor = $node['Extract Receipt Data'].json.vendor_name.toLowerCase();\nconst qboVendors = $input.first().json || [];\n\n// Levenshtein distance function\nfunction levenshteinDistance(str1, str2) {\n  const matrix = [];\n  for (let i = 0; i <= str2.length; i++) {\n    matrix[i] = [i];\n  }\n  for (let j = 0; j <= str1.length; j++) {\n    matrix[0][j] = j;\n  }\n  for (let i = 1; i <= str2.length; i++) {\n    for (let j = 1; j <= str1.length; j++) {\n      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {\n        matrix[i][j] = matrix[i - 1][j - 1];\n      } else {\n        matrix[i][j] = Math.min(\n          matrix[i - 1][j - 1] + 1,\n          matrix[i][j - 1] + 1,\n          matrix[i - 1][j] + 1\n        );\n      }\n    }\n  }\n  return matrix[str2.length][str1.length];\n}\n\n// Calculate similarity score\nfunction calculateSimilarity(str1, str2) {\n  const longer = str1.length > str2.length ? str1 : str2;\n  const shorter = str1.length > str2.length ? str2 : str1;\n  if (longer.length === 0) return 1.0;\n  const editDistance = levenshteinDistance(longer, shorter);\n  return (longer.length - editDistance) / longer.length;\n}\n\n// Find best match\nlet bestMatch = null;\nlet bestScore = 0;\n\nfor (const vendor of qboVendors) {\n  const vendorName = vendor.Name.toLowerCase();\n  \n  // Check exact match first\n  if (vendorName === extractedVendor) {\n    bestMatch = vendor;\n    bestScore = 1.0;\n    break;\n  }\n  \n  // Check partial matches\n  if (vendorName.includes(extractedVendor) || extractedVendor.includes(vendorName)) {\n    const score = 0.9;\n    if (score > bestScore) {\n      bestMatch = vendor;\n      bestScore = score;\n    }\n  }\n  \n  // Fuzzy matching\n  const similarity = calculateSimilarity(extractedVendor, vendorName);\n  if (similarity > bestScore && similarity > 0.7) {\n    bestMatch = vendor;\n    bestScore = similarity;\n  }\n}\n\nreturn [{\n  matched_vendor: bestMatch,\n  confidence_score: bestScore,\n  should_create_new: bestScore < 0.8,\n  extracted_vendor: extractedVendor\n}];"
+      },
+      "id": "match-vendor",
+      "name": "Match Vendor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $node['Match Vendor'].json.should_create_new }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-create-vendor",
+      "name": "Need New Vendor?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "resource": "vendor",
+        "name": "={{ $node['Extract Receipt Data'].json.vendor_name }}",
+        "additionalFields": {
+          "companyName": "={{ $node['Extract Receipt Data'].json.vendor_name }}"
+        }
+      },
+      "id": "create-vendor",
+      "name": "Create New Vendor",
+      "type": "n8n-nodes-base.quickBooksOnline",
+      "typeVersion": 1,
+      "position": [1780, 200]
+    },
+    {
+      "parameters": {
+        "resource": "purchase",
+        "additionalFields": {
+          "vendorRef": "={{ $node['Match Vendor'].json.matched_vendor?.Id || $node['Create New Vendor'].json.Id }}",
+          "totalAmt": "={{ $node['Extract Receipt Data'].json.amount }}",
+          "txnDate": "={{ $node['Extract Receipt Data'].json.transaction_date }}",
+          "memo": "Auto-processed from Slack receipt: {{ $node['Slack Receipt Upload'].json.file.name }}"
+        }
+      },
+      "id": "create-expense",
+      "name": "Create QBO Expense",
+      "type": "n8n-nodes-base.quickBooksOnline",
+      "typeVersion": 1,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "channel": "={{ $node['Slack Receipt Upload'].json.channel }}",
+        "text": "✅ *Receipt Processed Successfully!*\\n\\n📄 **Vendor:** {{ $node['Extract Receipt Data'].json.vendor_name }}\\n💰 **Amount:** ${{ $node['Extract Receipt Data'].json.amount }}\\n📅 **Date:** {{ $node['Extract Receipt Data'].json.transaction_date }}\\n🏷️ **Category:** {{ $node['Extract Receipt Data'].json.category }}\\n🔗 **QBO ID:** {{ $node['Create QBO Expense'].json.Id }}\\n\\n_Confidence: {{ Math.round($node['Match Vendor'].json.confidence_score * 100) }}%_",
+        "additionalFields": {
+          "thread_ts": "={{ $node['Slack Receipt Upload'].json.ts }}"
+        }
+      },
+      "id": "slack-success",
+      "name": "Send Success Message",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [2220, 300]
+    },
+    {
+      "parameters": {
+        "channel": "={{ $node['Slack Receipt Upload'].json.channel }}",
+        "text": "❌ *Receipt Processing Failed*\\n\\n📄 **File:** {{ $node['Slack Receipt Upload'].json.file.name }}\\n⚠️ **Error:** {{ $node['Create QBO Expense'].json.error || 'Unknown error occurred' }}\\n\\n_Please try uploading again or contact support._",
+        "additionalFields": {
+          "thread_ts": "={{ $node['Slack Receipt Upload'].json.ts }}"
+        }
+      },
+      "id": "slack-error",
+      "name": "Send Error Message",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [2220, 500]
+    }
+  ],
+  "connections": {
+    "Slack Receipt Upload": {
+      "main": [
+        [
+          {
+            "node": "Download Receipt File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Receipt File": {
+      "main": [
+        [
+          {
+            "node": "OCR Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR Processing": {
+      "main": [
+        [
+          {
+            "node": "Extract Receipt Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Receipt Data": {
+      "main": [
+        [
+          {
+            "node": "Search QBO Vendors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search QBO Vendors": {
+      "main": [
+        [
+          {
+            "node": "Match Vendor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Vendor": {
+      "main": [
+        [
+          {
+            "node": "Need New Vendor?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Need New Vendor?": {
+      "main": [
+        [
+          {
+            "node": "Create New Vendor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create QBO Expense",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Vendor": {
+      "main": [
+        [
+          {
+            "node": "Create QBO Expense",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create QBO Expense": {
+      "main": [
+        [
+          {
+            "node": "Send Success Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-15T10:00:00.000Z",
+      "updatedAt": "2024-01-15T10:00:00.000Z",
+      "id": "slack-qbo-automation",
+      "name": "Slack QBO Automation"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-15T10:00:00.000Z",
+  "versionId": "1"
+}

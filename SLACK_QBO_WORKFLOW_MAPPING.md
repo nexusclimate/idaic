@@ -17,6 +17,10 @@ Automate the process of:
 4. Creating expense entries in QBO automatically
 5. Providing feedback and status updates in Slack
 
+## ⚡ SIMPLIFIED APPROACH (RECOMMENDED)
+
+**Key Insight:** We can eliminate Supabase entirely and go direct Slack → QBO via N8N or simple Netlify functions. Data flows directly to QBO via its API without intermediate storage.
+
 ## 🏗️ Current System Analysis
 
 ### Existing Infrastructure
