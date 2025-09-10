@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import EventForm from './EventForm';
-import MainEventImage from '../components/MainEventImage';
+import PortalAssets from '../components/MainEventImage';
+import Favicon from '../components/Favicon';
 import { colors } from '../config/colors';
 
 // Custom hook to fetch events
@@ -189,8 +190,8 @@ export default function Events({ isAdminAuthenticated = false }) {
         )}
       </div>
       
-      {/* Main Event Image Section */}
-      <MainEventImage isAdmin={isAdminAuthenticated} />
+      {/* Portal Assets Section */}
+      <PortalAssets isAdmin={isAdminAuthenticated} />
       
       <div className="bg-white border rounded-lg p-4 sm:p-6">
         {loading ? (
@@ -207,6 +208,12 @@ export default function Events({ isAdminAuthenticated = false }) {
                 className="relative bg-gray-100 p-0 flex flex-col rounded-lg transition border-2 focus:outline-none hover:border-orange-200 border-transparent"
                 style={{ color: colors.text.primary, fontFamily: 'Inter, sans-serif' }}
               >
+                {/* Favicon in top-left corner */}
+                {event.website_url && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <Favicon url={event.website_url} size={20} />
+                  </div>
+                )}
                 <div className="flex flex-row items-stretch h-full w-full">
                   <div className="flex flex-col items-start px-6 pt-6 pb-2 min-w-[140px] max-w-[180px] flex-shrink-0 w-full">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-0 text-left w-full">{event.title}</h2>
