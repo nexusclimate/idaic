@@ -67,6 +67,7 @@ export default function Settings() {
     };
 
     try {
+      // Submit to database
       const response = await fetch('/.netlify/functions/userProfile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,6 +80,35 @@ export default function Settings() {
       }
 
       const result = await response.json();
+
+      // Also send email notification
+      const emailData = {
+        to: 'info@idaic.org',
+        subject: `New User Profile Submission - ${formData.name}`,
+        from: formData.email,
+        name: formData.name,
+        category: formData.category,
+        otherCategory: formData.otherCategory || '',
+        organizationDescription: formData.organizationDescription,
+        aiDecarbonisation: formData.aiDecarbonisation,
+        challenges: formData.challenges,
+        contribution: formData.contribution,
+        projects: formData.projects,
+        shareProjects: formData.shareProjects,
+        aiTools: formData.aiTools,
+        content: formData.content,
+        approval: formData.approval
+      };
+
+      // Send email via Netlify function
+      await fetch('/.netlify/functions/sendUserProfileEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+      }).catch(emailError => {
+        console.warn('Email notification failed, but form was saved:', emailError);
+      });
+
       alert(result.message || 'Form submitted successfully! Your information will be reviewed.');
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -117,12 +147,12 @@ export default function Settings() {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="max-w-2xl mx-auto bg-white shadow rounded-lg p-8">
+      <div className="max-w-6xl mx-auto bg-white shadow rounded-lg p-8">
         {activeTab === 'personal' && (
           <>
             <form onSubmit={handleFormSubmit} className="space-y-6">
               {/* Personal Information */}
-              <div className="border-b border-gray-200 pb-4">
+              <div className="border-b border-gray-200 pb-4 mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div>
@@ -136,11 +166,12 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Organization Information */}
-              <div className="border-b border-gray-200 pb-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Organization Information</h3>
-
+              {/* Organization Information - Split into two columns */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column */}
                 <div className="space-y-6">
+                  <h3 className="text-lg font-medium text-gray-900">Organization Information</h3>
+
                   <div>
                     <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">What Category fits best:</label>
                     <select
@@ -151,8 +182,11 @@ export default function Settings() {
                       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
                     >
                       <option value="">Select a category</option>
-                      <option value="Represent">Represent</option>
-                      <option value="Other">Other (please specify)</option>
+                      <option value="Represent industrial company">Represent industrial company</option>
+                      <option value="Represent AI developer / provider">Represent AI developer / provider</option>
+                      <option value="Represent research centre / university">Represent research centre / university</option>
+                      <option value="Represent investor">Represent investor</option>
+                      <option value="Other">Other: (please specify)</option>
                     </select>
                   </div>
 
@@ -209,6 +243,11 @@ export default function Settings() {
                       placeholder="Describe the challenges you want to address"
                     />
                   </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-medium text-gray-900">&nbsp;</h3> {/* Spacer for alignment */}
 
                   <div>
                     <label htmlFor="contribution" className="block text-sm font-medium text-gray-700 mb-2">How might you contribute to addressing those challenges?</label>

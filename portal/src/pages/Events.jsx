@@ -206,10 +206,10 @@ export default function Events({ isAdminAuthenticated = false }) {
                 className="relative bg-gray-100 p-0 flex flex-col rounded-lg transition border-2 focus:outline-none hover:border-orange-200 border-transparent"
                 style={{ color: colors.text.primary, fontFamily: 'Inter, sans-serif' }}
               >
-                {/* Favicon in top-left corner */}
+                {/* Favicon in bottom-right corner */}
                 {event.registration_link && (
-                  <div className="absolute top-2 left-2 z-10">
-                    <Favicon url={event.registration_link} size={20} />
+                  <div className="absolute bottom-2 right-2 z-10">
+                    <Favicon url={event.registration_link} size={28} />
                   </div>
                 )}
                 <div className="flex flex-row items-stretch h-full w-full">
