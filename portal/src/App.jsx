@@ -45,12 +45,18 @@ export default function App() {
     window.location.href = '/login.html';
   };
 
+  const handleNavigateToFeedback = () => {
+    setCurrentPage('feedback');
+    setShowDisclaimer(false);
+  };
+
   return (
     <div className="flex h-screen w-screen">
       <DisclaimerPopup 
         isOpen={showDisclaimer}
         onAccept={handleDisclaimerAccept}
         onDecline={handleDisclaimerDecline}
+        onNavigateToFeedback={handleNavigateToFeedback}
       />
       <Idaic 
         onPageChange={setCurrentPage} 

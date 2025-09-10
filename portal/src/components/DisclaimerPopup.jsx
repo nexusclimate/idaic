@@ -3,7 +3,7 @@ import { Dialog, DialogTitle, DialogBody, DialogActions } from './dialog';
 import { Button } from './button';
 import { Text } from './text';
 
-export default function DisclaimerPopup({ isOpen, onAccept, onDecline }) {
+export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigateToFeedback }) {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   const handleScroll = (e) => {
@@ -24,21 +24,21 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline }) {
           onScroll={handleScroll}
         >
           <Text>
-            Welcome to the IDAIC (International Development and AI Consortium) Portal. 
+            Welcome to the International Decarbonization AI Coalition Portal. 
             By using this platform, you agree to the following terms and conditions:
           </Text>
 
-          <div className="space-y-3">
-            <div>
-              <Text className="font-semibold text-zinc-900 dark:text-white">
-                Platform Purpose
-              </Text>
-              <Text>
-                This portal is designed for IDAIC members to share information, collaborate on projects, 
-                and connect with like-minded individuals interested in international development and AI initiatives. 
-                The platform is intended for professional networking and knowledge sharing within our community.
-              </Text>
-            </div>
+        <div className="space-y-3">
+          <div>
+            <Text className="font-semibold text-zinc-900 dark:text-white">
+              Platform Purpose
+            </Text>
+            <Text>
+              This portal is designed for International Decarbonization AI Coalition members to share information, collaborate on projects, 
+              and connect with like-minded individuals interested in international development and AI initiatives. 
+              The platform is intended for professional networking and knowledge sharing within our community.
+            </Text>
+          </div>
 
             <div>
               <Text className="font-semibold text-zinc-900 dark:text-white">
@@ -82,7 +82,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline }) {
               <Text>
                 If you have any questions, concerns, or need to remove your account, please contact us at:
                 <br/>• Email: support@idaic.org
-                <br/>• Use the feedback form available in the portal
+                <br/>• Use the <button onClick={onNavigateToFeedback} className="text-orange-600 hover:text-orange-700 underline bg-transparent border-none p-0 cursor-pointer">feedback form</button> available in the portal
                 <br/>• We're here to help and ensure a positive experience for all members
               </Text>
             </div>
@@ -94,7 +94,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline }) {
               <Text>
                 By clicking "I Accept" below, you acknowledge that you have read, understood, and agree to 
                 these terms and conditions. You understand that this platform is for professional use within 
-                the IDAIC community and agree to use it responsibly.
+                the International Decarbonization AI Coalition community and agree to use it responsibly.
               </Text>
             </div>
           </div>
@@ -110,7 +110,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline }) {
           Decline & Exit
         </Button>
         <Button 
-          color="blue" 
+          color="orange" 
           onClick={onAccept}
           disabled={!hasScrolled}
         >

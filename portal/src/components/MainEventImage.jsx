@@ -136,7 +136,7 @@ export default function PortalAssets({ isAdmin = false }) {
   return (
     <div className="bg-white border rounded-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Portal Assets</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Main Upcoming Event</h2>
         {isAdmin && (
           <div className="flex gap-2">
             <Button
@@ -182,10 +182,10 @@ export default function PortalAssets({ isAdmin = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <Text className="text-gray-500 mb-2">No portal asset set</Text>
+          <Text className="text-gray-500 mb-2">No main event image set</Text>
           {isAdmin && (
             <Text className="text-sm text-gray-400">
-              Click "Add Asset" to upload a portal asset
+              Click "Add Asset" to upload a main event image
             </Text>
           )}
         </div>
@@ -193,12 +193,12 @@ export default function PortalAssets({ isAdmin = false }) {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onClose={() => setShowUploadDialog(false)} size="md">
-        <DialogTitle>Upload Portal Asset</DialogTitle>
+        <DialogTitle>Upload Main Event Image</DialogTitle>
         
         <DialogBody>
           <div className="space-y-4">
             <Text>
-              Upload an image to feature as a portal asset. 
+              Upload an image to feature as the main upcoming event. 
               The image will be displayed prominently on the events page.
             </Text>
             

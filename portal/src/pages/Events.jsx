@@ -50,6 +50,7 @@ export default function Events({ isAdminAuthenticated = false }) {
         event_date: event.event_date,
         location: event.location,
         description: event.description, // add description
+        website_url: event.website_url, // add website URL for favicon
         registration_link: event.registration_link // keep as optional
       };
       const response = await fetch('/.netlify/functions/events', {
@@ -76,6 +77,7 @@ export default function Events({ isAdminAuthenticated = false }) {
         event_date: updates.event_date,
         location: updates.location,
         description: updates.description, // add description
+        website_url: updates.website_url, // add website URL for favicon
         registration_link: updates.registration_link // keep as optional
       };
       const response = await fetch(`/.netlify/functions/events?id=${id}`, {
@@ -119,7 +121,7 @@ export default function Events({ isAdminAuthenticated = false }) {
   };
 
   const openAddDrawer = () => {
-    setSelectedEvent({ title: '', event_date: '', location: '', description: '', registration_link: '' });
+    setSelectedEvent({ title: '', event_date: '', location: '', description: '', website_url: '', registration_link: '' });
     setIsAdding(true);
     setDrawerOpen(true);
   };
@@ -190,10 +192,8 @@ export default function Events({ isAdminAuthenticated = false }) {
         )}
       </div>
       
-      {/* Portal Assets Section */}
-      <PortalAssets isAdmin={isAdminAuthenticated} />
-      
-      <div className="bg-white border rounded-lg p-4 sm:p-6">
+      {/* Events Grid Section */}
+      <div className="bg-white border rounded-lg p-4 sm:p-6 mb-6">
         {loading ? (
           <div className="py-8 text-center text-gray-500">Loading events...</div>
         ) : error ? (
@@ -245,6 +245,10 @@ export default function Events({ isAdminAuthenticated = false }) {
           </div>
         )}
       </div>
+      
+      {/* Main Upcoming Event Section */}
+      <PortalAssets isAdmin={isAdminAuthenticated} />
+      
       <EventForm
         drawerOpen={drawerOpen}
         selectedEvent={selectedEvent}
