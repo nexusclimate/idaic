@@ -81,7 +81,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
               </Text>
               <Text>
                 If you have any questions, concerns, or need to remove your account, please contact us at:
-                <br/>• Email: support@idaic.org
+                <br/>• Email: <a href="mailto:support@idaic.org" className="text-orange-600 hover:text-orange-700 underline">support@idaic.org</a>
                 <br/>• Use the <button onClick={onNavigateToFeedback} className="text-orange-600 hover:text-orange-700 underline bg-transparent border-none p-0 cursor-pointer">feedback form</button> available in the portal
                 <br/>• We're here to help and ensure a positive experience for all members
               </Text>

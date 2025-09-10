@@ -10,6 +10,8 @@ export default function PortalAssets({ isAdmin = false }) {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   // Fetch current portal asset
   const fetchPortalAsset = async () => {
@@ -31,9 +33,29 @@ export default function PortalAssets({ isAdmin = false }) {
     fetchPortalAsset();
   }, []);
 
-  // Handle image upload
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
+  // Handle drag and drop
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileSelection(files[0]);
+    }
+  };
+
+  // Handle file selection from input or drop
+  const handleFileSelection = (file) => {
     if (!file) return;
 
     // Validate file type
@@ -48,6 +70,20 @@ export default function PortalAssets({ isAdmin = false }) {
       return;
     }
 
+    setSelectedFile(file);
+    setUploadError('');
+  };
+
+  // Handle file input change
+  const handleFileInputChange = (event) => {
+    const file = event.target.files[0];
+    handleFileSelection(file);
+  };
+
+  // Handle image upload
+  const handleImageUpload = async () => {
+    if (!selectedFile) return;
+
     try {
       setUploading(true);
       setUploadError('');
@@ -56,14 +92,15 @@ export default function PortalAssets({ isAdmin = false }) {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64Data = e.target.result;
-        
+
         // Extract base64 string (remove data:image/...;base64, prefix)
         const base64String = base64Data.split(',')[1];
-        
+
         const imageData = {
-          title: file.name,
+          title: selectedFile.name,
           image_data: base64String,
-          image_type: file.type,
+          image_type: selectedFile.type,
+          category: 'main_event',
           description: `Main event image uploaded on ${new Date().toLocaleDateString()}`
         };
 
@@ -80,9 +117,10 @@ export default function PortalAssets({ isAdmin = false }) {
 
         await fetchPortalAsset();
         setShowUploadDialog(false);
+        setSelectedFile(null);
       };
-      
-      reader.readAsDataURL(file);
+
+      reader.readAsDataURL(selectedFile);
     } catch (err) {
       setUploadError(err.message);
     } finally {
@@ -174,6 +212,34 @@ export default function PortalAssets({ isAdmin = false }) {
               Uploaded: {new Date(portalAsset.created_at).toLocaleDateString()}
             </Text>
           </div>
+          {isAdmin && (
+            <div className="absolute top-2 right-2 flex gap-2">
+              <Button
+                color="blue"
+                outline
+                size="sm"
+                onClick={() => setShowUploadDialog(true)}
+                className="bg-white/90 hover:bg-white"
+                title="Edit image"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </Button>
+              <Button
+                color="red"
+                outline
+                size="sm"
+                onClick={handleDeleteImage}
+                className="bg-white/90 hover:bg-white"
+                title="Delete image"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </Button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
@@ -192,51 +258,113 @@ export default function PortalAssets({ isAdmin = false }) {
       )}
 
       {/* Upload Dialog */}
-      <Dialog open={showUploadDialog} onClose={() => setShowUploadDialog(false)} size="md">
-        <DialogTitle>Upload Main Event Image</DialogTitle>
-        
+      <Dialog open={showUploadDialog} onClose={() => { setShowUploadDialog(false); setSelectedFile(null); setUploadError(''); }} size="lg">
+        <DialogTitle>{portalAsset ? 'Update Main Event Image' : 'Upload Main Event Image'}</DialogTitle>
+
         <DialogBody>
           <div className="space-y-4">
             <Text>
-              Upload an image to feature as the main upcoming event. 
+              Upload an image to feature as the main upcoming event.
               The image will be displayed prominently on the events page.
             </Text>
-            
-            <div>
-              <label htmlFor="image-upload" className="block text-sm font-medium text-gray-700 mb-2">
-                Select Image
-              </label>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-              <Text className="text-xs text-gray-500 mt-1">
-                Supported formats: JPG, PNG, GIF. Max size: 5MB
-              </Text>
+
+            {/* Drag and Drop Area */}
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                dragOver
+                  ? 'border-orange-400 bg-orange-50'
+                  : selectedFile
+                  ? 'border-green-400 bg-green-50'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {selectedFile ? (
+                <div className="space-y-4">
+                  <div className="mx-auto w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <Text className="font-medium text-gray-900">{selectedFile.name}</Text>
+                    <Text className="text-sm text-gray-500">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </Text>
+                  </div>
+                  <Button
+                    color="orange"
+                    onClick={() => setSelectedFile(null)}
+                    size="sm"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <Text className="text-lg font-medium text-gray-900">Drop image here or click to browse</Text>
+                    <Text className="text-sm text-gray-500">PNG, JPG, GIF up to 5MB</Text>
+                  </div>
+                  <label htmlFor="image-upload">
+                    <Button color="blue" outline as="span">
+                      Choose File
+                    </Button>
+                  </label>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileInputChange}
+                    disabled={uploading}
+                    className="hidden"
+                  />
+                </div>
+              )}
             </div>
 
             {uploadError && (
-              <div className="text-red-500 text-sm">{uploadError}</div>
+              <div className="text-red-500 text-sm bg-red-50 border border-red-200 rounded-md p-3">
+                {uploadError}
+              </div>
             )}
 
             {uploading && (
-              <div className="text-blue-500 text-sm">Uploading image...</div>
+              <div className="text-blue-600 text-sm bg-blue-50 border border-blue-200 rounded-md p-3">
+                <div className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading image...
+                </div>
+              </div>
             )}
           </div>
         </DialogBody>
 
         <DialogActions>
-          <Button 
-            color="gray" 
-            outline 
-            onClick={() => setShowUploadDialog(false)}
+          <Button
+            color="gray"
+            outline
+            onClick={() => { setShowUploadDialog(false); setSelectedFile(null); setUploadError(''); }}
             disabled={uploading}
           >
             Cancel
+          </Button>
+          <Button
+            color="orange"
+            onClick={handleImageUpload}
+            disabled={!selectedFile || uploading}
+          >
+            {uploading ? 'Uploading...' : portalAsset ? 'Update Image' : 'Upload Image'}
           </Button>
         </DialogActions>
       </Dialog>

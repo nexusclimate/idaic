@@ -148,19 +148,6 @@ export default function EventForm({
                       />
                     </div>
                     <div>
-                      <label htmlFor="website-url" className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
-                      <input
-                        id="website-url"
-                        type="url"
-                        name="website_url"
-                        value={localEvent.website_url || ''}
-                        onChange={e => handleFieldChange('website_url', e.target.value)}
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
-                        readOnly={readOnly}
-                        placeholder="Enter website URL for favicon display"
-                      />
-                    </div>
-                    <div>
                       <label htmlFor="registration-link" className="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
                       <input
                         id="registration-link"

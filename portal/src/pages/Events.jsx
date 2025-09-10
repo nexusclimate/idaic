@@ -50,7 +50,6 @@ export default function Events({ isAdminAuthenticated = false }) {
         event_date: event.event_date,
         location: event.location,
         description: event.description, // add description
-        website_url: event.website_url, // add website URL for favicon
         registration_link: event.registration_link // keep as optional
       };
       const response = await fetch('/.netlify/functions/events', {
@@ -77,7 +76,6 @@ export default function Events({ isAdminAuthenticated = false }) {
         event_date: updates.event_date,
         location: updates.location,
         description: updates.description, // add description
-        website_url: updates.website_url, // add website URL for favicon
         registration_link: updates.registration_link // keep as optional
       };
       const response = await fetch(`/.netlify/functions/events?id=${id}`, {
@@ -121,7 +119,7 @@ export default function Events({ isAdminAuthenticated = false }) {
   };
 
   const openAddDrawer = () => {
-    setSelectedEvent({ title: '', event_date: '', location: '', description: '', website_url: '', registration_link: '' });
+    setSelectedEvent({ title: '', event_date: '', location: '', description: '', registration_link: '' });
     setIsAdding(true);
     setDrawerOpen(true);
   };
@@ -209,9 +207,9 @@ export default function Events({ isAdminAuthenticated = false }) {
                 style={{ color: colors.text.primary, fontFamily: 'Inter, sans-serif' }}
               >
                 {/* Favicon in top-left corner */}
-                {event.website_url && (
+                {event.registration_link && (
                   <div className="absolute top-2 left-2 z-10">
-                    <Favicon url={event.website_url} size={20} />
+                    <Favicon url={event.registration_link} size={20} />
                   </div>
                 )}
                 <div className="flex flex-row items-stretch h-full w-full">
