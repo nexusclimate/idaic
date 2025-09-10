@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors } from '../config/colors';
 import { ComputerDesktopIcon } from '@heroicons/react/24/solid';
 
 const tabs = [
   { name: 'Personal Info', key: 'personal' },
-  { name: 'Security', key: 'security' },
+  { name: 'Details', key: 'details' },
   { name: 'Notifications', key: 'notifications' },
 ];
 
@@ -19,6 +19,48 @@ export default function Settings() {
       setPhoto(URL.createObjectURL(e.target.files[0]));
     }
   };
+
+  // Load HubSpot form when Details tab is active
+  useEffect(() => {
+    if (activeTab === 'details') {
+      // Clear any existing form content
+      const container = document.getElementById('hubspot-form-container');
+      if (container) {
+        container.innerHTML = '';
+      }
+
+      // Load HubSpot script if not already loaded
+      if (!window.hbspt) {
+        const script = document.createElement('script');
+        script.src = '//js-eu1.hsforms.net/forms/embed/v2.js';
+        script.charset = 'utf-8';
+        script.type = 'text/javascript';
+        document.head.appendChild(script);
+        
+        script.onload = () => {
+          // Create the form once the script is loaded
+          if (window.hbspt && window.hbspt.forms) {
+            window.hbspt.forms.create({
+              portalId: "144106336",
+              formId: "02a71560-8b00-4a40-a952-69e6911fda5d",
+              region: "eu1",
+              target: '#hubspot-form-container'
+            });
+          }
+        };
+      } else {
+        // Script already loaded, create the form
+        if (window.hbspt && window.hbspt.forms) {
+          window.hbspt.forms.create({
+            portalId: "144106336",
+            formId: "02a71560-8b00-4a40-a952-69e6911fda5d",
+            region: "eu1",
+            target: '#hubspot-form-container'
+          });
+        }
+      }
+    }
+  }, [activeTab]);
 
   return (
     <div className="py-10">
@@ -85,10 +127,12 @@ export default function Settings() {
             </form>
           </>
         )}
-        {activeTab === 'security' && (
+        {activeTab === 'details' && (
           <div>
-            <h2 className="text-xl font-semibold mb-6">Security</h2>
-            <p className="text-gray-500">Security settings coming soon.</p>
+            <h2 className="text-xl font-semibold mb-6">Details</h2>
+            <div id="hubspot-form-container">
+              {/* HubSpot form will be embedded here */}
+            </div>
           </div>
         )}
         {activeTab === 'notifications' && (

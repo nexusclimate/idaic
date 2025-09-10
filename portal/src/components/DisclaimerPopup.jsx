@@ -20,7 +20,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
       
       <DialogBody>
         <div 
-          className="max-h-96 overflow-y-auto pr-2 space-y-4"
+          className="max-h-[30rem] overflow-y-auto pr-2 space-y-4"
           onScroll={handleScroll}
         >
           <Text>
