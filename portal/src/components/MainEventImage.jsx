@@ -28,7 +28,7 @@ export default function PortalAssets({ isAdmin = false }) {
   };
 
   useEffect(() => {
-    fetchMainEventImage();
+    fetchPortalAsset();
   }, []);
 
   // Handle image upload
@@ -67,7 +67,7 @@ export default function PortalAssets({ isAdmin = false }) {
           description: `Main event image uploaded on ${new Date().toLocaleDateString()}`
         };
 
-        const response = await fetch('/.netlify/functions/mainEventImage', {
+        const response = await fetch('/.netlify/functions/portalAssets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(imageData)
@@ -78,7 +78,7 @@ export default function PortalAssets({ isAdmin = false }) {
           throw new Error(errorData.error || 'Failed to upload image');
         }
 
-        await fetchMainEventImage();
+        await fetchPortalAsset();
         setShowUploadDialog(false);
       };
       
@@ -92,21 +92,21 @@ export default function PortalAssets({ isAdmin = false }) {
 
   // Handle image deletion
   const handleDeleteImage = async () => {
-    if (!mainEventImage || !window.confirm('Are you sure you want to delete this main event image?')) {
+    if (!portalAsset || !window.confirm('Are you sure you want to delete this portal asset?')) {
       return;
     }
 
     try {
-      const response = await fetch(`/.netlify/functions/mainEventImage?id=${mainEventImage.id}`, {
+      const response = await fetch(`/.netlify/functions/portalAssets?id=${portalAsset.id}`, {
         method: 'DELETE'
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete image');
+        throw new Error(errorData.error || 'Failed to delete asset');
       }
 
-      await fetchMainEventImage();
+      await fetchPortalAsset();
     } catch (err) {
       setError(err.message);
     }
@@ -127,7 +127,7 @@ export default function PortalAssets({ isAdmin = false }) {
     return (
       <div className="bg-white border rounded-lg p-6 mb-6">
         <div className="text-red-500 text-center">
-          <Text>Error loading main event image: {error}</Text>
+          <Text>Error loading portal asset: {error}</Text>
         </div>
       </div>
     );
@@ -136,7 +136,7 @@ export default function PortalAssets({ isAdmin = false }) {
   return (
     <div className="bg-white border rounded-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Main Event This Month</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Portal Assets</h2>
         {isAdmin && (
           <div className="flex gap-2">
             <Button
@@ -144,9 +144,9 @@ export default function PortalAssets({ isAdmin = false }) {
               outline
               onClick={() => setShowUploadDialog(true)}
             >
-              {mainEventImage ? 'Change Image' : 'Add Image'}
+              {portalAsset ? 'Change Asset' : 'Add Asset'}
             </Button>
-            {mainEventImage && (
+            {portalAsset && (
               <Button
                 color="red"
                 outline
@@ -159,19 +159,19 @@ export default function PortalAssets({ isAdmin = false }) {
         )}
       </div>
 
-      {mainEventImage ? (
+      {portalAsset ? (
         <div className="relative">
           <img
-            src={`data:${mainEventImage.image_type};base64,${mainEventImage.image_data}`}
-            alt={mainEventImage.title}
+            src={`data:${portalAsset.image_type};base64,${portalAsset.image_data}`}
+            alt={portalAsset.title}
             className="w-full h-64 object-cover rounded-lg shadow-md"
           />
           <div className="mt-3">
             <Text className="text-sm text-gray-600">
-              {mainEventImage.description}
+              {portalAsset.description}
             </Text>
             <Text className="text-xs text-gray-400 mt-1">
-              Uploaded: {new Date(mainEventImage.created_at).toLocaleDateString()}
+              Uploaded: {new Date(portalAsset.created_at).toLocaleDateString()}
             </Text>
           </div>
         </div>
@@ -182,10 +182,10 @@ export default function PortalAssets({ isAdmin = false }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <Text className="text-gray-500 mb-2">No main event image set</Text>
+          <Text className="text-gray-500 mb-2">No portal asset set</Text>
           {isAdmin && (
             <Text className="text-sm text-gray-400">
-              Click "Add Image" to upload a main event image for this month
+              Click "Add Asset" to upload a portal asset
             </Text>
           )}
         </div>
@@ -193,12 +193,12 @@ export default function PortalAssets({ isAdmin = false }) {
 
       {/* Upload Dialog */}
       <Dialog open={showUploadDialog} onClose={() => setShowUploadDialog(false)} size="md">
-        <DialogTitle>Upload Main Event Image</DialogTitle>
+        <DialogTitle>Upload Portal Asset</DialogTitle>
         
         <DialogBody>
           <div className="space-y-4">
             <Text>
-              Upload an image to feature as the main event for this month. 
+              Upload an image to feature as a portal asset. 
               The image will be displayed prominently on the events page.
             </Text>
             
