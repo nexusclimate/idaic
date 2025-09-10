@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import EventForm from './EventForm';
+import MainEventImage from '../components/MainEventImage';
 import { colors } from '../config/colors';
 
 // Custom hook to fetch events
@@ -29,7 +30,7 @@ function useEvents() {
   return { events, loading, error, refetch: fetchEvents };
 }
 
-export default function Events() {
+export default function Events({ isAdminAuthenticated = false }) {
   const { events, loading, error, refetch } = useEvents();
   const [formError, setFormError] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -187,6 +188,10 @@ export default function Events() {
           </div>
         )}
       </div>
+      
+      {/* Main Event Image Section */}
+      <MainEventImage isAdmin={isAdminAuthenticated} />
+      
       <div className="bg-white border rounded-lg p-4 sm:p-6">
         {loading ? (
           <div className="py-8 text-center text-gray-500">Loading events...</div>

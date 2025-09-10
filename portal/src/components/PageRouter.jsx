@@ -54,7 +54,7 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         </div>
       );
     case 'events':
-      return <Events />;
+      return <Events isAdminAuthenticated={isAdminAuthenticated} />;
     case 'members':
       return <Members />;
     case 'uk':
