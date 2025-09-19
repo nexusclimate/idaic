@@ -97,60 +97,10 @@ exports.handler = async function (event, context) {
           result = data[0];
         }
 
-        // Store submission for review
-        const { error: submissionError } = await supabase
-          .from('user_profile_submissions')
-          .insert([{
-            user_profile_id: result.id,
-            submission_data: profileData,
-            status: 'pending',
-            email_status: 'pending' // Ready for email processing
-          }]);
-
-        if (submissionError) {
-          console.error('Error creating submission record:', submissionError);
-          // Don't fail the request for this, just log it
-        }
-
-        // EXPLORATION MODE: Just save to database, no external calls
-        // When ready to send emails, uncomment the code below or use Supabase webhooks
-
-        console.log('✅ Profile saved successfully - ready for email processing');
-        console.log('📧 Email data prepared for:', profileData.email);
+        console.log('✅ Profile saved successfully');
         console.log('📝 Profile ID:', result.id);
-
-        // FUTURE: Uncomment when ready to send emails
-        /*
-        try {
-          const emailResponse = await fetch(process.env.URL + '/.netlify/functions/sendUserProfileEmail', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: 'info@idaic.org',
-              subject: `New User Profile Submission - ${profileData.name}`,
-              from: profileData.email,
-              name: profileData.name,
-              category: profileData.category,
-              otherCategory: profileData.otherCategory || '',
-              organizationDescription: profileData.organizationDescription,
-              aiDecarbonisation: profileData.aiDecarbonisation,
-              challenges: profileData.challenges,
-              contribution: profileData.contribution,
-              projects: profileData.projects,
-              shareProjects: profileData.shareProjects,
-              aiTools: profileData.aiTools,
-              content: profileData.content,
-              approval: profileData.approval
-            })
-          });
-
-          if (!emailResponse.ok) {
-            console.warn('Email notification failed, but profile was saved successfully');
-          }
-        } catch (emailError) {
-          console.warn('Email service unavailable, but profile was saved successfully:', emailError.message);
-        }
-        */
+        console.log('👤 User:', profileData.name, '(' + profileData.email + ')');
+        console.log('🏢 Category:', profileData.category);
 
         return {
           statusCode: 200,
