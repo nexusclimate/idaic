@@ -81,34 +81,6 @@ export default function Settings() {
 
       const result = await response.json();
 
-      // Also send email notification
-      const emailData = {
-        to: 'info@idaic.org',
-        subject: `New User Profile Submission - ${formData.name}`,
-        from: formData.email,
-        name: formData.name,
-        category: formData.category,
-        otherCategory: formData.otherCategory || '',
-        organizationDescription: formData.organizationDescription,
-        aiDecarbonisation: formData.aiDecarbonisation,
-        challenges: formData.challenges,
-        contribution: formData.contribution,
-        projects: formData.projects,
-        shareProjects: formData.shareProjects,
-        aiTools: formData.aiTools,
-        content: formData.content,
-        approval: formData.approval
-      };
-
-      // Send email via Netlify function
-      await fetch('/.netlify/functions/sendUserProfileEmail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailData)
-      }).catch(emailError => {
-        console.warn('Email notification failed, but form was saved:', emailError);
-      });
-
       alert(result.message || 'Form submitted successfully! Your information will be reviewed.');
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -117,9 +89,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="py-10">
+    <div className="py-6">
       {/* Section Heading with Tabs (left-aligned, consistent with other pages) */}
-      <div className="mb-8 border-b border-gray-200">
+      <div className="mb-6 border-b border-gray-200">
         <div className="sm:flex sm:items-center sm:justify-between">
           <h1 className="text-3xl font-bold text-gray-900">User Settings</h1>
           <nav className="mt-4 sm:mt-0">
@@ -147,33 +119,33 @@ export default function Settings() {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="max-w-6xl mx-auto bg-white shadow rounded-lg p-8">
+      <div className="max-w-6xl mx-auto bg-white shadow rounded-lg p-6">
         {activeTab === 'personal' && (
           <>
-            <form onSubmit={handleFormSubmit} className="space-y-6">
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               {/* Personal Information */}
-              <div className="border-b border-gray-200 pb-4 mb-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="border-b border-gray-200 pb-4 mb-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Personal Information</h3>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                     <input id="name" name="name" type="text" autoComplete="name" value={name} onChange={e => setName(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">Email address</label>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
                     <input id="email" name="email" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
                   </div>
                 </div>
               </div>
 
               {/* Organization Information - Split into two columns */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Left Column */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-medium text-gray-900">Organization Information</h3>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">Organization Information</h3>
 
                   <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">What Category fits best:</label>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">What Category fits best:</label>
                     <select
                       id="category"
                       name="category"
@@ -206,7 +178,7 @@ export default function Settings() {
                   )}
 
                   <div>
-                    <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-700 mb-2">What does the organization you represent do?</label>
+                      <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-700 mb-1">What does the organization you represent do?</label>
                     <textarea
                       id="organizationDescription"
                       name="organizationDescription"
@@ -219,7 +191,7 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label htmlFor="aiDecarbonisation" className="block text-sm font-medium text-gray-700 mb-2">In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?</label>
+                    <label htmlFor="aiDecarbonisation" className="block text-sm font-medium text-gray-700 mb-1">In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?</label>
                     <textarea
                       id="aiDecarbonisation"
                       name="aiDecarbonisation"
@@ -232,7 +204,7 @@ export default function Settings() {
                   </div>
 
                   <div>
-                    <label htmlFor="challenges" className="block text-sm font-medium text-gray-700 mb-2">What industrial decarbonisation challenges would you like to address through AI?</label>
+                    <label htmlFor="challenges" className="block text-sm font-medium text-gray-700 mb-1">What industrial decarbonisation challenges would you like to address through AI?</label>
                     <textarea
                       id="challenges"
                       name="challenges"
@@ -246,7 +218,7 @@ export default function Settings() {
                 </div>
 
                 {/* Right Column */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <h3 className="text-lg font-medium text-gray-900">&nbsp;</h3> {/* Spacer for alignment */}
 
                   <div>
@@ -332,7 +304,7 @@ export default function Settings() {
               </div>
 
               {/* Approval */}
-              <div className="border-b border-gray-200 pb-4">
+              <div className="border-b border-gray-200 pb-3 pt-2">
                 <div className="flex items-start">
                   <div className="flex items-center h-5">
                     <input
@@ -352,7 +324,7 @@ export default function Settings() {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex justify-end pt-2">
                 <button
                   type="submit"
                   className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"

@@ -50,8 +50,8 @@ export default function User() {
 
   if (loading) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
-        <div className="flex items-center justify-center py-8 sm:py-12">
+      <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
+        <div className="flex items-center justify-center py-6 sm:py-8">
           <div className="text-gray-500">Loading users...</div>
         </div>
       </div>
@@ -60,8 +60,8 @@ export default function User() {
 
   if (error) {
     return (
-      <div className="px-4 sm:px-6 lg:px-8" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
-        <div className="flex items-center justify-center py-8 sm:py-12">
+      <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
+        <div className="flex items-center justify-center py-6 sm:py-8">
           <div className="text-red-600">{error}</div>
         </div>
       </div>
@@ -69,11 +69,11 @@ export default function User() {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
+    <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
       {/* Search input */}
-      <div className="mb-4 max-w-xs">
-        <label htmlFor="search" className="block text-sm font-medium" style={{ color: colors.text.primary }}>Quick search</label>
-        <div className="mt-2">
+      <div className="mb-3 max-w-xs">
+        <label htmlFor="search" className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>Quick search</label>
+        <div className="mt-1">
           <div className="flex rounded-md bg-white outline-1 -outline-offset-1" style={{ outlineColor: colors.border.medium }}>
             <input
               id="search"
@@ -93,8 +93,8 @@ export default function User() {
           </div>
         </div>
       </div>
-      <div className="mt-4 flow-root">
-        <div className="-mx-2 -my-1 sm:-mx-4 lg:-mx-6">
+      <div className="mt-2 flow-root">
+        <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-x-auto">
               <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
@@ -102,7 +102,7 @@ export default function User() {
                   <tr>
                     <th
                       scope="col"
-                      className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-2 sm:pl-4 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter lg:pl-6 cursor-pointer select-none"
+                      className="sticky top-0 z-10 border-b bg-white/75 py-1 pr-1 pl-1 sm:pl-2 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter lg:pl-3 cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                       onClick={() => handleSort('name')}
                     >
@@ -111,7 +111,7 @@ export default function User() {
                     </th>
                     <th
                       scope="col"
-                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-2 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                       onClick={() => handleSort('email')}
                     >
@@ -120,7 +120,7 @@ export default function User() {
                     </th>
                     <th
                       scope="col"
-                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-2 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                       onClick={() => handleSort('company')}
                     >
@@ -139,7 +139,7 @@ export default function User() {
                       <td
                         className={classNames(
                           userIdx !== filtered.length - 1 ? '' : '',
-                          'py-2 pr-2 pl-2 sm:pl-4 text-xs sm:text-sm font-medium whitespace-nowrap lg:pl-6',
+                          'py-1 pr-1 pl-1 sm:pl-2 text-xs sm:text-sm font-medium whitespace-nowrap lg:pl-3',
                         )}
                         style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
@@ -148,7 +148,7 @@ export default function User() {
                       <td
                         className={classNames(
                           userIdx !== filtered.length - 1 ? '' : '',
-                          'px-1 sm:px-2 py-2 text-xs sm:text-sm whitespace-nowrap',
+                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
@@ -157,7 +157,7 @@ export default function User() {
                       <td
                         className={classNames(
                           userIdx !== filtered.length - 1 ? '' : '',
-                          'px-1 sm:px-2 py-2 text-xs sm:text-sm whitespace-nowrap',
+                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >

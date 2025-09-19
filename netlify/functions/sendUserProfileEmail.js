@@ -58,16 +58,53 @@ Approval Given: ${emailData.approval ? 'Yes' : 'No'}
 This email was automatically generated from the IDAIC portal user profile submission form.
 `;
 
-    // For Netlify, we'll use a simple approach with form submission
-    // In a production environment, you'd typically use a service like SendGrid, Mailgun, etc.
-    // For now, we'll simulate email sending and log the content
+    // Option 1: SendGrid Integration (Recommended)
+    const sgMail = require('@sendgrid/mail');
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-    console.log('Email would be sent to:', emailData.to);
-    console.log('Subject:', emailData.subject);
-    console.log('Content:', emailContent);
+    const msg = {
+      to: emailData.to,
+      from: {
+        email: 'noreply@idaic.org', // Must be verified in SendGrid
+        name: 'IDAIC Portal'
+      },
+      subject: emailData.subject,
+      text: emailContent,
+      html: emailContent.replace(/\n/g, '<br>')
+    };
 
-    // You can integrate with email services here
-    // Example with a service like EmailJS, SendGrid, or Netlify's built-in email
+    await sgMail.send(msg);
+
+    // Option 2: Gmail SMTP (Alternative - Not recommended for production)
+    // Uncomment the code below and comment out SendGrid code above to use Gmail
+    /*
+    const nodemailer = require('nodemailer');
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD // Use App Password, not regular password
+      }
+    });
+
+    const mailOptions = {
+      from: `"IDAIC Portal" <${process.env.GMAIL_USER}>`,
+      to: emailData.to,
+      subject: emailData.subject,
+      text: emailContent,
+      html: emailContent.replace(/\n/g, '<br>')
+    };
+
+    await transporter.sendMail(mailOptions);
+    */
+
+    // Option 2: Alternative - Netlify's built-in email (if enabled)
+    // const response = await fetch('https://api.netlify.com/build_hooks/YOUR_BUILD_HOOK', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ emailData })
+    // });
 
     return {
       statusCode: 200,

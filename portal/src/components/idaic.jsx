@@ -48,6 +48,7 @@ import {
 import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
 import { ComputerDesktopIcon } from '@heroicons/react/24/solid'
+import { supabase } from '../config/supabase.js'
 import React, { useState, useEffect } from 'react'
 
 export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
@@ -416,20 +417,34 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
           <div className="flex items-center w-full gap-2">
             <SidebarSection className="flex">
               <SidebarItem 
-                onClick={() => {
-                  // Clear admin auth state
-                  if (typeof setIsAdminAuthenticated === 'function') {
-                    setIsAdminAuthenticated(false);
+                onClick={async () => {
+                  try {
+                    // Clear admin auth state
+                    if (typeof setIsAdminAuthenticated === 'function') {
+                      setIsAdminAuthenticated(false);
+                    }
+                    
+                    // Proper Supabase logout
+                    console.log('🔄 Signing out from Supabase...');
+                    await supabase.auth.signOut();
+                    
+                    // Clear localStorage (handled by auth state change listener in App.jsx)
+                    localStorage.removeItem('idaic-token');
+                    localStorage.removeItem('idaic-disclaimer-accepted');
+                    
+                    // Navigate to logout page in-app first
+                    handlePageChange('logout');
+                    
+                    // Redirect to login page, replacing history so back button doesn't restore
+                    setTimeout(() => {
+                      window.location.replace('/login.html');
+                    }, 500);
+                  } catch (error) {
+                    console.error('Error during logout:', error);
+                    // Fallback: still redirect to login even if Supabase logout fails
+                    localStorage.clear();
+                    window.location.replace('/login.html');
                   }
-                  // Clear any local/session storage (if used for auth)
-                  if (window.localStorage) window.localStorage.clear();
-                  if (window.sessionStorage) window.sessionStorage.clear();
-                  // Navigate to logout page in-app
-                  handlePageChange('logout');
-                  // Redirect to login page, replacing history so back button doesn't restore
-                  setTimeout(() => {
-                    window.location.replace('https://idaic.nexusclimate.co');
-                  }, 200);
                 }}
                 current={currentPage === 'logout' ? true : undefined}
                 style={sidebarItemStyle}
