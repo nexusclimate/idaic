@@ -424,13 +424,22 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                       setIsAdminAuthenticated(false);
                     }
                     
-                    // Proper Supabase logout
-                    console.log('🔄 Signing out from Supabase...');
-                    await supabase.auth.signOut();
+                    // Check if this is a password login
+                    const isPasswordLogin = localStorage.getItem('idaic-password-login');
                     
-                    // Clear localStorage (handled by auth state change listener in App.jsx)
-                    localStorage.removeItem('idaic-token');
-                    localStorage.removeItem('idaic-disclaimer-accepted');
+                    if (isPasswordLogin === 'true') {
+                      // Handle password login logout
+                      console.log('🔄 Signing out from password login...');
+                      localStorage.removeItem('idaic-token');
+                      localStorage.removeItem('idaic-disclaimer-accepted');
+                      localStorage.removeItem('idaic-password-login');
+                    } else {
+                      // Proper Supabase logout for OTP login
+                      console.log('🔄 Signing out from Supabase...');
+                      await supabase.auth.signOut();
+                      localStorage.removeItem('idaic-token');
+                      localStorage.removeItem('idaic-disclaimer-accepted');
+                    }
                     
                     // Navigate to logout page in-app first
                     handlePageChange('logout');
@@ -441,7 +450,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                     }, 500);
                   } catch (error) {
                     console.error('Error during logout:', error);
-                    // Fallback: still redirect to login even if Supabase logout fails
+                    // Fallback: still redirect to login even if logout fails
                     localStorage.clear();
                     window.location.replace('/login.html');
                   }

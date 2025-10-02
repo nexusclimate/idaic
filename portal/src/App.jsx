@@ -14,9 +14,32 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check current Supabase session on app load
-    const checkSupabaseSession = async () => {
+    // Check authentication on app load
+    const checkAuthentication = async () => {
       try {
+        // First, check if this is a password login
+        const isPasswordLogin = localStorage.getItem('idaic-password-login');
+        const localToken = localStorage.getItem('idaic-token');
+        
+        if (isPasswordLogin === 'true' && localToken) {
+          // Handle password-based authentication
+          console.log('✅ Valid password login session found');
+          setUser({
+            id: 'password_user',
+            email: 'admin@idaic.org',
+            user_metadata: { password_login: true }
+          });
+          setIsAuthenticated(true);
+          
+          // Check if user has already accepted the disclaimer
+          const disclaimerAccepted = localStorage.getItem('idaic-disclaimer-accepted');
+          if (!disclaimerAccepted) {
+            setShowDisclaimer(true);
+          }
+          return;
+        }
+        
+        // Check current Supabase session for OTP login
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -41,16 +64,16 @@ export default function App() {
           }
         } else {
           // No valid session - check if we have a stale token
-          const localToken = localStorage.getItem('idaic-token');
           if (localToken) {
             console.log('⚠️ Found stale token in localStorage, clearing...');
             localStorage.removeItem('idaic-token');
             localStorage.removeItem('idaic-disclaimer-accepted');
+            localStorage.removeItem('idaic-password-login');
           }
           handleAuthFailure();
         }
       } catch (err) {
-        console.error('Error checking Supabase session:', err);
+        console.error('Error checking authentication:', err);
         handleAuthFailure();
       }
     };
@@ -83,7 +106,7 @@ export default function App() {
       }
     });
 
-    checkSupabaseSession();
+    checkAuthentication();
 
     // Cleanup subscription
     return () => {
@@ -105,16 +128,27 @@ export default function App() {
   };
 
   const handleDisclaimerDecline = async () => {
-    // Proper Supabase logout
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
+    // Check if this is a password login
+    const isPasswordLogin = localStorage.getItem('idaic-password-login');
+    
+    if (isPasswordLogin === 'true') {
+      // Handle password login logout
+      localStorage.removeItem('idaic-token');
+      localStorage.removeItem('idaic-disclaimer-accepted');
+      localStorage.removeItem('idaic-password-login');
+      window.location.href = '/login.html';
+    } else {
+      // Proper Supabase logout for OTP login
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.error('Error signing out:', error);
+      }
+      // Clear localStorage and redirect (handled by auth state change listener)
+      localStorage.removeItem('idaic-token');
+      localStorage.removeItem('idaic-disclaimer-accepted');
+      window.location.href = '/login.html';
     }
-    // Clear localStorage and redirect (handled by auth state change listener)
-    localStorage.removeItem('idaic-token');
-    localStorage.removeItem('idaic-disclaimer-accepted');
-    window.location.href = '/login.html';
   };
 
   const handleNavigateToFeedback = () => {
