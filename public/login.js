@@ -8,6 +8,45 @@ const N8N_URL  = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+// Tab switching functionality
+window.switchTab = function(tab) {
+  const otpTab = document.getElementById('otp-tab')
+  const passwordTab = document.getElementById('password-tab')
+  const otpContent = document.getElementById('otp-content')
+  const passwordContent = document.getElementById('password-content')
+  
+  if (tab === 'otp') {
+    // Activate OTP tab
+    otpTab.classList.add('border-[#FF9900]', 'text-[#FF9900]')
+    otpTab.classList.remove('border-transparent', 'text-[#DCDCDC]')
+    passwordTab.classList.add('border-transparent', 'text-[#DCDCDC]')
+    passwordTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]')
+    
+    // Show OTP content, hide password content
+    otpContent.classList.remove('hidden')
+    passwordContent.classList.add('hidden')
+    
+    // Reset password form
+    document.getElementById('password').value = ''
+  } else if (tab === 'password') {
+    // Activate password tab
+    passwordTab.classList.add('border-[#FF9900]', 'text-[#FF9900]')
+    passwordTab.classList.remove('border-transparent', 'text-[#DCDCDC]')
+    otpTab.classList.add('border-transparent', 'text-[#DCDCDC]')
+    otpTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]')
+    
+    // Show password content, hide OTP content
+    passwordContent.classList.remove('hidden')
+    otpContent.classList.add('hidden')
+    
+    // Reset OTP forms
+    document.getElementById('email').value = ''
+    document.getElementById('code').value = ''
+    document.getElementById('otp-request-form').classList.remove('hidden')
+    document.getElementById('otp-verify-form').classList.add('hidden')
+  }
+}
+
 // 2. Notification helper
 function createNotification({ message, success = true, warning = false }) {
   const container = document.getElementById('notification-list')
@@ -289,5 +328,111 @@ document
       }
 
       createNotification({ message: friendlyMessage, success: false })
+    }
+  })
+
+// 5. Password Login
+document
+  .getElementById('password-form')
+  .addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const password = document.getElementById('password').value.trim()
+    
+    // Check if password matches IDAIC2025!
+    if (password !== 'IDAIC2025!') {
+      createNotification({ message: 'Invalid password. Please try again.', success: false })
+      return
+    }
+    
+    try {
+      // Create a temporary session for password login
+      // We'll use a special admin email for password-based login
+      const adminEmail = 'admin@idaic.org'
+      
+      // For password login, we'll create a mock session and redirect
+      // This simulates authentication without going through Supabase auth
+      const mockSession = {
+        access_token: 'password_login_' + Date.now(),
+        user: {
+          id: 'password_user',
+          email: adminEmail
+        }
+      }
+      
+      localStorage.setItem('idaic-token', mockSession.access_token)
+      localStorage.setItem('idaic-password-login', 'true')
+      
+      createNotification({ message: 'Successfully signed in with password!', success: true })
+      
+      // Track password login
+      try {
+        const ip = await fetch('https://api.ipify.org?format=json')
+          .then(res => res.json())
+          .then(data => data.ip);
+
+        let geo = {};
+        try {
+          geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
+        } catch (geoErr) {
+          console.error('❌ Failed to fetch geo info:', geoErr);
+        }
+
+        function detectBrowser() {
+          if (navigator.userAgentData && navigator.userAgentData.brands) {
+            const brands = navigator.userAgentData.brands.map(b => b.brand);
+            if (brands.includes('Google Chrome')) return 'Chrome';
+            if (brands.includes('Microsoft Edge')) return 'Edge';
+            if (brands.includes('Chromium')) return 'Chromium';
+            return brands[0] || 'Unknown';
+          }
+          const ua = navigator.userAgent;
+          if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
+          if (/firefox|fxios/i.test(ua)) return 'Firefox';
+          if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
+          if (/edg/i.test(ua)) return 'Edge';
+          if (/opr\//i.test(ua)) return 'Opera';
+          return 'Unknown';
+        }
+
+        function detectOS() {
+          if (navigator.userAgentData && navigator.userAgentData.platform) {
+            return navigator.userAgentData.platform;
+          }
+          const ua = navigator.userAgent;
+          if (/windows/i.test(ua)) return 'Windows';
+          if (/macintosh|mac os x/i.test(ua)) return 'Mac';
+          if (/linux/i.test(ua)) return 'Linux';
+          if (/android/i.test(ua)) return 'Android';
+          if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+          return 'Unknown';
+        }
+
+        const metadata = {
+          user_id: 'password_user',
+          email: adminEmail,
+          ip_address: ip,
+          country: geo.country || 'Unknown',
+          city: geo.city || 'Unknown',
+          region: geo.regionName || geo.region || 'Unknown',
+          device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+          browser: detectBrowser(),
+          os: detectOS(),
+          user_agent: navigator.userAgent,
+          login_time: new Date().toISOString(),
+          login_method: 'password'
+        };
+
+        await supabase.from('user_logins').insert([metadata]);
+        console.log('✅ Password login tracked:', metadata);
+      } catch (trackErr) {
+        console.error('❌ Failed to track password login:', trackErr);
+      }
+      
+      setTimeout(() => {
+        window.location.href = '/app'
+      }, 1000)
+      
+    } catch (err) {
+      createNotification({ message: 'Login failed. Please try again.', success: false })
     }
   })
