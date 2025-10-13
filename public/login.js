@@ -44,6 +44,9 @@ window.switchTab = function(tab) {
     document.getElementById('code').value = ''
     document.getElementById('otp-request-form').classList.remove('hidden')
     document.getElementById('otp-verify-form').classList.add('hidden')
+    
+    // Reset password form
+    document.getElementById('password-email').value = ''
   }
 }
 
@@ -336,7 +339,14 @@ document
   .getElementById('password-form')
   .addEventListener('submit', async (e) => {
     e.preventDefault()
+    const email = document.getElementById('password-email').value.trim()
     const password = document.getElementById('password').value.trim()
+    
+    // Basic validation
+    if (!email || !password) {
+      createNotification({ message: 'Please enter both email and password.', success: false })
+      return
+    }
     
     // Check if password matches IDAIC2025!
     if (password !== 'IDAIC2025!') {
@@ -345,9 +355,8 @@ document
     }
     
     try {
-      // Create a temporary session for password login
-      // We'll use a special admin email for password-based login
-      const adminEmail = 'admin@idaic.org'
+      // Use the provided email for password-based login
+      const adminEmail = email
       
       // For password login, we'll create a mock session and redirect
       // This simulates authentication without going through Supabase auth
@@ -361,6 +370,7 @@ document
       
       localStorage.setItem('idaic-token', mockSession.access_token)
       localStorage.setItem('idaic-password-login', 'true')
+      localStorage.setItem('idaic-password-email', adminEmail)
       
       createNotification({ message: 'Successfully signed in with password!', success: true })
       

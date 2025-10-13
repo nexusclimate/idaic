@@ -12,11 +12,20 @@ exports.handler = async function (event, context) {
   try {
     switch (event.httpMethod) {
       case 'GET': {
-        // Get current user's profile
-        // Note: In a real app, you'd get the user ID from authentication
+        // Get user's profile by email
+        const { email } = event.queryStringParameters || {};
+        
+        if (!email) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Email parameter is required' })
+          };
+        }
+
         const { data, error } = await supabase
           .from('user_profiles')
           .select('*')
+          .eq('email', email)
           .eq('is_active', true)
           .order('created_at', { ascending: false })
           .limit(1);
@@ -47,13 +56,28 @@ exports.handler = async function (event, context) {
           };
         }
 
-        // Check if profile already exists
-        const { data: existingProfile } = await supabase
-          .from('user_profiles')
-          .select('id')
-          .eq('email', profileData.email)
-          .eq('is_active', true)
-          .single();
+        // Check if profile already exists (by email or user_id if provided)
+        let existingProfile = null;
+        if (profileData.user_id) {
+          const { data } = await supabase
+            .from('user_profiles')
+            .select('id')
+            .eq('user_id', profileData.user_id)
+            .eq('is_active', true)
+            .single();
+          existingProfile = data;
+        }
+        
+        // If no profile found by user_id, try by email
+        if (!existingProfile) {
+          const { data } = await supabase
+            .from('user_profiles')
+            .select('id')
+            .eq('email', profileData.email)
+            .eq('is_active', true)
+            .single();
+          existingProfile = data;
+        }
 
         let result;
         if (existingProfile) {

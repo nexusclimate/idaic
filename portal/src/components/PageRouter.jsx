@@ -13,7 +13,7 @@ import AdminPasswordPrompt from '../components/AdminPasswordPrompt';
 import Settings from '../pages/Settings';
 import Projects from '../pages/projects';
 
-export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
+export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated, user }) {
   const handleIframeLoad = (title) => {
     console.log(`Iframe loaded successfully: ${title}`);
   };
@@ -145,7 +145,7 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         );
       }
     case 'settings':
-      return <Settings />;
+      return <Settings user={user} />;
     case 'projects':
       return <Projects />;
     default:

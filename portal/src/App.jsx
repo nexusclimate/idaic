@@ -24,9 +24,11 @@ export default function App() {
         if (isPasswordLogin === 'true' && localToken) {
           // Handle password-based authentication
           console.log('✅ Valid password login session found');
+          // Get the email from localStorage (stored during login)
+          const passwordEmail = localStorage.getItem('idaic-password-email') || 'admin@idaic.org';
           setUser({
             id: 'password_user',
-            email: 'admin@idaic.org',
+            email: passwordEmail,
             user_metadata: { password_login: true }
           });
           setIsAuthenticated(true);
@@ -69,6 +71,7 @@ export default function App() {
             localStorage.removeItem('idaic-token');
             localStorage.removeItem('idaic-disclaimer-accepted');
             localStorage.removeItem('idaic-password-login');
+            localStorage.removeItem('idaic-password-email');
           }
           handleAuthFailure();
         }
@@ -98,6 +101,7 @@ export default function App() {
           setIsAuthenticated(false);
           localStorage.removeItem('idaic-token');
           localStorage.removeItem('idaic-disclaimer-accepted');
+          localStorage.removeItem('idaic-password-email');
           window.location.href = '/login.html';
         } else if (event === 'TOKEN_REFRESHED' && session) {
           // Update token in localStorage
@@ -136,6 +140,7 @@ export default function App() {
       localStorage.removeItem('idaic-token');
       localStorage.removeItem('idaic-disclaimer-accepted');
       localStorage.removeItem('idaic-password-login');
+      localStorage.removeItem('idaic-password-email');
       window.location.href = '/login.html';
     } else {
       // Proper Supabase logout for OTP login
@@ -175,6 +180,7 @@ export default function App() {
           currentPage={currentPage} 
           isAdminAuthenticated={isAdminAuthenticated}
           setIsAdminAuthenticated={setIsAdminAuthenticated}
+          user={user}
         />
       </main>
     </div>

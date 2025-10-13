@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors } from '../config/colors';
 
 const tabs = [
@@ -6,11 +6,12 @@ const tabs = [
   { name: 'Notifications', key: 'notifications' },
 ];
 
-export default function Settings() {
+export default function Settings({ user }) {
   const [activeTab, setActiveTab] = useState('personal');
-  const [name, setName] = useState('Jane Doe');
-  const [email, setEmail] = useState('jane.doe@example.com');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [photo, setPhoto] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Organization form fields
   const [category, setCategory] = useState('');
@@ -24,6 +25,44 @@ export default function Settings() {
   const [aiTools, setAiTools] = useState('');
   const [content, setContent] = useState('');
   const [approval, setApproval] = useState(false);
+
+  // Load user data and existing profile on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (user) {
+        // Set email from authenticated user
+        setEmail(user.email || '');
+        
+        // Try to load existing profile data
+        try {
+          const response = await fetch(`/.netlify/functions/userProfile?email=${encodeURIComponent(user.email)}`);
+          if (response.ok) {
+            const profileData = await response.json();
+            if (profileData) {
+              // Populate form with existing data
+              setName(profileData.name || '');
+              setCategory(profileData.category || '');
+              setOtherCategory(profileData.otherCategory || '');
+              setOrganizationDescription(profileData.organizationDescription || '');
+              setAiDecarbonisation(profileData.aiDecarbonisation || '');
+              setChallenges(profileData.challenges || '');
+              setContribution(profileData.contribution || '');
+              setProjects(profileData.projects || '');
+              setShareProjects(profileData.shareProjects || '');
+              setAiTools(profileData.aiTools || '');
+              setContent(profileData.content || '');
+              setApproval(profileData.approval || false);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading profile data:', error);
+        }
+      }
+      setLoading(false);
+    };
+
+    loadUserData();
+  }, [user]);
 
   const handlePhotoChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -53,6 +92,7 @@ export default function Settings() {
     const formData = {
       name,
       email,
+      user_id: user?.id, // Link to authenticated user
       category,
       otherCategory: category === 'Other' ? otherCategory : '',
       organizationDescription,
@@ -87,6 +127,16 @@ export default function Settings() {
       alert('Error submitting form. Please try again.');
     }
   };
+
+  if (loading) {
+    return (
+      <div className="py-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-gray-500">Loading your profile...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-6">
@@ -133,7 +183,16 @@ export default function Settings() {
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-                    <input id="email" name="email" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                    <input 
+                      id="email" 
+                      name="email" 
+                      type="email" 
+                      autoComplete="email" 
+                      value={email} 
+                      readOnly
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-500 bg-gray-50 sm:text-sm" 
+                    />
+                    <p className="mt-1 text-xs text-gray-500">Email is linked to your login account and cannot be changed here.</p>
                   </div>
                 </div>
               </div>
