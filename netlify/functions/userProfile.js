@@ -23,11 +23,9 @@ exports.handler = async function (event, context) {
         }
 
         const { data, error } = await supabase
-          .from('user_profiles')
+          .from('users')
           .select('*')
           .eq('email', email)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
           .limit(1);
 
         if (error) {
@@ -38,9 +36,40 @@ exports.handler = async function (event, context) {
           };
         }
 
+        // Map database fields to frontend format
+        const profile = data && data.length > 0 ? data[0] : null;
+        if (profile) {
+          const mappedProfile = {
+            id: profile.id,
+            name: profile.name,
+            email: profile.email,
+            role: profile.role,
+            company: profile.company,
+            title: profile.title,
+            region: profile.region,
+            linkedin_url: profile.linkedin_url,
+            category: profile.category,
+            otherCategory: profile.other_category,
+            organizationDescription: profile.organization_description,
+            aiDecarbonisation: profile.ai_decarbonisation,
+            challenges: profile.challenges,
+            contribution: profile.contribution,
+            projects: profile.projects,
+            shareProjects: profile.share_projects,
+            aiTools: profile.ai_tools,
+            content: profile.content,
+            approval: profile.approval,
+            profile_updated_at: profile.profile_updated_at
+          };
+          return {
+            statusCode: 200,
+            body: JSON.stringify(mappedProfile)
+          };
+        }
+
         return {
           statusCode: 200,
-          body: JSON.stringify(data && data.length > 0 ? data[0] : null)
+          body: JSON.stringify(null)
         };
       }
 
@@ -56,39 +85,43 @@ exports.handler = async function (event, context) {
           };
         }
 
-        // Check if profile already exists (by email or user_id if provided)
-        let existingProfile = null;
-        if (profileData.user_id) {
-          const { data } = await supabase
-            .from('user_profiles')
-            .select('id')
-            .eq('user_id', profileData.user_id)
-            .eq('is_active', true)
-            .single();
-          existingProfile = data;
-        }
-        
-        // If no profile found by user_id, try by email
-        if (!existingProfile) {
-          const { data } = await supabase
-            .from('user_profiles')
-            .select('id')
-            .eq('email', profileData.email)
-            .eq('is_active', true)
-            .single();
-          existingProfile = data;
-        }
+        // Check if user already exists by email
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', profileData.email)
+          .single();
+
+        // Map camelCase form fields to database fields
+        const mappedData = {
+          name: profileData.name,
+          email: profileData.email,
+          role: profileData.role,
+          company: profileData.company,
+          title: profileData.title,
+          region: profileData.region,
+          linkedin_url: profileData.linkedinUrl,
+          category: profileData.category,
+          other_category: profileData.otherCategory,
+          organization_description: profileData.organizationDescription,
+          ai_decarbonisation: profileData.aiDecarbonisation,
+          challenges: profileData.challenges,
+          contribution: profileData.contribution,
+          projects: profileData.projects,
+          share_projects: profileData.shareProjects,
+          ai_tools: profileData.aiTools,
+          content: profileData.content,
+          approval: profileData.approval,
+          profile_updated_at: new Date().toISOString()
+        };
 
         let result;
-        if (existingProfile) {
-          // Update existing profile
+        if (existingUser) {
+          // Update existing user
           const { data, error } = await supabase
-            .from('user_profiles')
-            .update({
-              ...profileData,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingProfile.id)
+            .from('users')
+            .update(mappedData)
+            .eq('id', existingUser.id)
             .select();
 
           if (error) {
@@ -101,13 +134,15 @@ exports.handler = async function (event, context) {
 
           result = data[0];
         } else {
-          // Create new profile
+          // Create new user (this shouldn't happen in normal flow as users are created during login)
+          // But we'll handle it gracefully
+          const insertData = {
+            ...mappedData,
+            id: profileData.user_id || null // Use the user_id if provided
+          };
           const { data, error } = await supabase
-            .from('user_profiles')
-            .insert([{
-              ...profileData,
-              submitted_at: new Date().toISOString()
-            }])
+            .from('users')
+            .insert([insertData])
             .select();
 
           if (error) {
@@ -147,12 +182,33 @@ exports.handler = async function (event, context) {
           };
         }
 
+        // Map camelCase updates to database fields
+        const mappedUpdates = {};
+        if (updates.user_id !== undefined) mappedUpdates.user_id = updates.user_id;
+        if (updates.name !== undefined) mappedUpdates.name = updates.name;
+        if (updates.email !== undefined) mappedUpdates.email = updates.email;
+        if (updates.role !== undefined) mappedUpdates.role = updates.role;
+        if (updates.company !== undefined) mappedUpdates.company = updates.company;
+        if (updates.title !== undefined) mappedUpdates.title = updates.title;
+        if (updates.region !== undefined) mappedUpdates.region = updates.region;
+        if (updates.linkedinUrl !== undefined) mappedUpdates.linkedin_url = updates.linkedinUrl;
+        if (updates.category !== undefined) mappedUpdates.category = updates.category;
+        if (updates.otherCategory !== undefined) mappedUpdates.other_category = updates.otherCategory;
+        if (updates.organizationDescription !== undefined) mappedUpdates.organization_description = updates.organizationDescription;
+        if (updates.aiDecarbonisation !== undefined) mappedUpdates.ai_decarbonisation = updates.aiDecarbonisation;
+        if (updates.challenges !== undefined) mappedUpdates.challenges = updates.challenges;
+        if (updates.contribution !== undefined) mappedUpdates.contribution = updates.contribution;
+        if (updates.projects !== undefined) mappedUpdates.projects = updates.projects;
+        if (updates.shareProjects !== undefined) mappedUpdates.share_projects = updates.shareProjects;
+        if (updates.aiTools !== undefined) mappedUpdates.ai_tools = updates.aiTools;
+        if (updates.content !== undefined) mappedUpdates.content = updates.content;
+        if (updates.approval !== undefined) mappedUpdates.approval = updates.approval;
+        
+        mappedUpdates.updated_at = new Date().toISOString();
+
         const { data: updatedProfile, error: updateError } = await supabase
-          .from('user_profiles')
-          .update({
-            ...updates,
-            updated_at: new Date().toISOString()
-          })
+          .from('users')
+          .update(mappedUpdates)
           .eq('id', id)
           .select();
 
@@ -164,9 +220,34 @@ exports.handler = async function (event, context) {
           };
         }
 
+        // Map the updated profile back to frontend format
+        const profile = updatedProfile[0];
+        const mappedProfile = {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email,
+          role: profile.role,
+          company: profile.company,
+          title: profile.title,
+          region: profile.region,
+          linkedin_url: profile.linkedin_url,
+          category: profile.category,
+          otherCategory: profile.other_category,
+          organizationDescription: profile.organization_description,
+          aiDecarbonisation: profile.ai_decarbonisation,
+          challenges: profile.challenges,
+          contribution: profile.contribution,
+          projects: profile.projects,
+          shareProjects: profile.share_projects,
+          aiTools: profile.ai_tools,
+          content: profile.content,
+          approval: profile.approval,
+          profile_updated_at: profile.profile_updated_at
+        };
+
         return {
           statusCode: 200,
-          body: JSON.stringify(updatedProfile[0])
+          body: JSON.stringify(mappedProfile)
         };
       }
 

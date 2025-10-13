@@ -12,6 +12,13 @@ export default function Settings({ user }) {
   const [email, setEmail] = useState('');
   const [photo, setPhoto] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Existing user fields from users table
+  const [role, setRole] = useState('');
+  const [company, setCompany] = useState('');
+  const [title, setTitle] = useState('');
+  const [region, setRegion] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
 
   // Organization form fields
   const [category, setCategory] = useState('');
@@ -41,6 +48,11 @@ export default function Settings({ user }) {
             if (profileData) {
               // Populate form with existing data
               setName(profileData.name || '');
+              setRole(profileData.role || '');
+              setCompany(profileData.company || '');
+              setTitle(profileData.title || '');
+              setRegion(profileData.region || '');
+              setLinkedinUrl(profileData.linkedin_url || '');
               setCategory(profileData.category || '');
               setOtherCategory(profileData.otherCategory || '');
               setOrganizationDescription(profileData.organizationDescription || '');
@@ -93,6 +105,11 @@ export default function Settings({ user }) {
       name,
       email,
       user_id: user?.id, // Link to authenticated user
+      role,
+      company,
+      title,
+      region,
+      linkedinUrl,
       category,
       otherCategory: category === 'Other' ? otherCategory : '',
       organizationDescription,
@@ -193,6 +210,22 @@ export default function Settings({ user }) {
                       className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-500 bg-gray-50 sm:text-sm" 
                     />
                     <p className="mt-1 text-xs text-gray-500">Email is linked to your login account and cannot be changed here.</p>
+                  </div>
+                  <div>
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Title/Position</label>
+                    <input id="title" name="title" type="text" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                    <input id="company" name="company" type="text" value={company} onChange={e => setCompany(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                    <input id="region" name="region" type="text" value={region} onChange={e => setRegion(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                  </div>
+                  <div>
+                    <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
+                    <input id="linkedinUrl" name="linkedinUrl" type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="https://linkedin.com/in/yourprofile" />
                   </div>
                 </div>
               </div>
