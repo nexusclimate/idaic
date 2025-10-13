@@ -490,30 +490,36 @@ export default function Settings({ user }) {
         )}
       </div>
       
-      {/* Success Popup */}
+      {/* Success Notification */}
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <div className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-50">
+          <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+            <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5">
+              <div className="p-4">
+                <div className="flex items-start">
+                  <div className="shrink-0">
+                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2l4-4" />
+                    </svg>
+                  </div>
+                  <div className="ml-3 w-0 flex-1 pt-0.5">
+                    <p className="text-sm font-medium text-gray-900">Profile saved successfully!</p>
+                    <p className="text-sm text-gray-500">Your information has been updated.</p>
+                  </div>
+                  <div className="ml-4 flex shrink-0">
+                    <button 
+                      onClick={() => setShowSuccessPopup(false)}
+                      className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                    >
+                      <span className="sr-only">Close</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-medium text-gray-900">Success!</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Your profile information has been saved successfully.
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setShowSuccessPopup(false)}
-                className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
