@@ -32,6 +32,11 @@ export default function Settings({ user }) {
   const [aiTools, setAiTools] = useState('');
   const [content, setContent] = useState('');
   const [approval, setApproval] = useState(false);
+  
+  // Edit mode and success popup states
+  const [isEditing, setIsEditing] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   // Load user data and existing profile on component mount
   useEffect(() => {
@@ -64,10 +69,19 @@ export default function Settings({ user }) {
               setAiTools(profileData.aiTools || '');
               setContent(profileData.content || '');
               setApproval(profileData.approval || false);
+              
+              // If user has existing data, they've submitted before
+              setHasSubmitted(true);
+              setIsEditing(false);
+            } else {
+              // New user, start in editing mode
+              setIsEditing(true);
             }
           }
         } catch (error) {
           console.error('Error loading profile data:', error);
+          // If there's an error, assume new user and start in editing mode
+          setIsEditing(true);
         }
       }
       setLoading(false);
@@ -138,7 +152,15 @@ export default function Settings({ user }) {
 
       const result = await response.json();
 
-      alert(result.message || 'Form submitted successfully! Your information will be reviewed.');
+      // Show success popup and set submitted state
+      setShowSuccessPopup(true);
+      setHasSubmitted(true);
+      setIsEditing(false);
+      
+      // Hide success popup after 3 seconds
+      setTimeout(() => {
+        setShowSuccessPopup(false);
+      }, 3000);
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('Error submitting form. Please try again.');
@@ -192,14 +214,25 @@ export default function Settings({ user }) {
             <form onSubmit={handleFormSubmit} className="space-y-3">
               {/* Personal Information */}
               <div className="border-b border-gray-200 pb-3 mb-3">
-                <h3 className="text-base font-medium text-gray-900 mb-2">Personal Information</h3>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-base font-medium text-gray-900">Personal Information</h3>
+                  {hasSubmitted && !isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="inline-flex items-center px-3 py-1.5 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>
-                    <label htmlFor="name" className="block text-xs font-medium text-gray-700 mb-1">Name</label>
-                    <input id="name" name="name" type="text" autoComplete="name" value={name} onChange={e => setName(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input id="name" name="name" type="text" autoComplete="name" value={name} onChange={e => setName(e.target.value)} disabled={!isEditing} className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`} />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">Email address</label>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
                     <input 
                       id="email" 
                       name="email" 
@@ -207,25 +240,25 @@ export default function Settings({ user }) {
                       autoComplete="email" 
                       value={email} 
                       readOnly
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-500 bg-gray-50 text-sm" 
+                      className="mt-1 block w-full rounded-md border border-gray-200 shadow-sm py-1.5 px-2 text-gray-500 bg-gray-50 text-sm" 
                     />
                     <p className="mt-1 text-xs text-gray-500">Email is linked to your login account and cannot be changed here.</p>
                   </div>
                   <div>
-                    <label htmlFor="title" className="block text-xs font-medium text-gray-700 mb-1">Title/Position</label>
-                    <input id="title" name="title" type="text" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Title/Position</label>
+                    <input id="title" name="title" type="text" value={title} onChange={e => setTitle(e.target.value)} disabled={!isEditing} className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`} />
                   </div>
                   <div>
-                    <label htmlFor="company" className="block text-xs font-medium text-gray-700 mb-1">Company</label>
-                    <input id="company" name="company" type="text" value={company} onChange={e => setCompany(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                    <input id="company" name="company" type="text" value={company} onChange={e => setCompany(e.target.value)} disabled={!isEditing} className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`} />
                   </div>
                   <div>
-                    <label htmlFor="region" className="block text-xs font-medium text-gray-700 mb-1">Region</label>
-                    <input id="region" name="region" type="text" value={region} onChange={e => setRegion(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
+                    <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                    <input id="region" name="region" type="text" value={region} onChange={e => setRegion(e.target.value)} disabled={!isEditing} className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`} />
                   </div>
                   <div>
-                    <label htmlFor="linkedinUrl" className="block text-xs font-medium text-gray-700 mb-1">LinkedIn URL</label>
-                    <input id="linkedinUrl" name="linkedinUrl" type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" placeholder="https://linkedin.com/in/yourprofile" />
+                    <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
+                    <input id="linkedinUrl" name="linkedinUrl" type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} disabled={!isEditing} className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`} placeholder="https://linkedin.com/in/yourprofile" />
                   </div>
                 </div>
               </div>
@@ -237,13 +270,14 @@ export default function Settings({ user }) {
                   <h3 className="text-base font-medium text-gray-900 mb-2">Organization Information</h3>
 
                   <div>
-                    <label htmlFor="category" className="block text-xs font-medium text-gray-700 mb-1">What Category fits best:</label>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">What Category fits best:</label>
                     <select
                       id="category"
                       name="category"
                       value={category}
                       onChange={e => setCategory(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                     >
                       <option value="">Select a category</option>
                       <option value="Represent industrial company">Represent industrial company</option>
@@ -256,54 +290,58 @@ export default function Settings({ user }) {
 
                   {category === 'Other' && (
                     <div>
-                      <label htmlFor="otherCategory" className="block text-xs font-medium text-gray-700 mb-1">Please specify:</label>
+                      <label htmlFor="otherCategory" className="block text-sm font-medium text-gray-700 mb-1">Please specify:</label>
                       <input
                         id="otherCategory"
                         name="otherCategory"
                         type="text"
                         value={otherCategory}
                         onChange={e => setOtherCategory(e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                        disabled={!isEditing}
+                        className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                         placeholder="Specify your category"
                       />
                     </div>
                   )}
 
                   <div>
-                      <label htmlFor="organizationDescription" className="block text-xs font-medium text-gray-700 mb-1">What does the organization you represent do?</label>
+                      <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-700 mb-1">What does the organization you represent do?</label>
                     <textarea
                       id="organizationDescription"
                       name="organizationDescription"
                       rows={2}
                       value={organizationDescription}
                       onChange={e => setOrganizationDescription(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe your organization's activities"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="aiDecarbonisation" className="block text-xs font-medium text-gray-700 mb-1">In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?</label>
+                    <label htmlFor="aiDecarbonisation" className="block text-sm font-medium text-gray-700 mb-1">In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?</label>
                     <textarea
                       id="aiDecarbonisation"
                       name="aiDecarbonisation"
                       rows={2}
                       value={aiDecarbonisation}
                       onChange={e => setAiDecarbonisation(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe your AI decarbonisation plans"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="challenges" className="block text-xs font-medium text-gray-700 mb-1">What industrial decarbonisation challenges would you like to address through AI?</label>
+                    <label htmlFor="challenges" className="block text-sm font-medium text-gray-700 mb-1">What industrial decarbonisation challenges would you like to address through AI?</label>
                     <textarea
                       id="challenges"
                       name="challenges"
                       rows={2}
                       value={challenges}
                       onChange={e => setChallenges(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe the challenges you want to address"
                     />
                   </div>
@@ -314,33 +352,35 @@ export default function Settings({ user }) {
                   <h3 className="text-base font-medium text-gray-900">&nbsp;</h3> {/* Spacer for alignment */}
 
                   <div>
-                    <label htmlFor="contribution" className="block text-xs font-medium text-gray-700 mb-1">How might you contribute to addressing those challenges?</label>
+                    <label htmlFor="contribution" className="block text-sm font-medium text-gray-700 mb-1">How might you contribute to addressing those challenges?</label>
                     <textarea
                       id="contribution"
                       name="contribution"
                       rows={2}
                       value={contribution}
                       onChange={e => setContribution(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe how you can contribute"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="projects" className="block text-xs font-medium text-gray-700 mb-1">Are you currently working on any projects—either in progress or recently completed—that you would like to showcase on our website?</label>
+                    <label htmlFor="projects" className="block text-sm font-medium text-gray-700 mb-1">Are you currently working on any projects—either in progress or recently completed—that you would like to showcase on our website?</label>
                     <textarea
                       id="projects"
                       name="projects"
                       rows={2}
                       value={projects}
                       onChange={e => setProjects(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe your projects"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Would you be open to sharing them for visibility or potential collaboration opportunities?</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Would you be open to sharing them for visibility or potential collaboration opportunities?</label>
                     <div className="flex gap-4 mt-1">
                       <label className="inline-flex items-center">
                         <input
@@ -349,6 +389,7 @@ export default function Settings({ user }) {
                           value="yes"
                           checked={shareProjects === 'yes'}
                           onChange={e => setShareProjects(e.target.value)}
+                          disabled={!isEditing}
                           className="text-orange-500 focus:ring-orange-500"
                         />
                         <span className="ml-2 text-sm">Yes</span>
@@ -360,6 +401,7 @@ export default function Settings({ user }) {
                           value="no"
                           checked={shareProjects === 'no'}
                           onChange={e => setShareProjects(e.target.value)}
+                          disabled={!isEditing}
                           className="text-orange-500 focus:ring-orange-500"
                         />
                         <span className="ml-2 text-sm">No</span>
@@ -368,27 +410,29 @@ export default function Settings({ user }) {
                   </div>
 
                   <div>
-                    <label htmlFor="aiTools" className="block text-xs font-medium text-gray-700 mb-1">Are there specific AI tools or approaches you're interested in or developing?</label>
+                    <label htmlFor="aiTools" className="block text-sm font-medium text-gray-700 mb-1">Are there specific AI tools or approaches you're interested in or developing?</label>
                     <textarea
                       id="aiTools"
                       name="aiTools"
                       rows={2}
                       value={aiTools}
                       onChange={e => setAiTools(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe AI tools or approaches"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="content" className="block text-xs font-medium text-gray-700 mb-1">Do you have a case study, perspective article or other content you could provide for the next meeting and/or the members portal?</label>
+                    <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">Do you have a case study, perspective article or other content you could provide for the next meeting and/or the members portal?</label>
                     <textarea
                       id="content"
                       name="content"
                       rows={2}
                       value={content}
                       onChange={e => setContent(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`}
                       placeholder="Describe available content"
                     />
                   </div>
@@ -405,10 +449,11 @@ export default function Settings({ user }) {
                       type="checkbox"
                       checked={approval}
                       onChange={e => setApproval(e.target.checked)}
+                      disabled={!isEditing}
                       className="h-3 w-3 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                     />
                   </div>
-                  <div className="ml-2 text-xs">
+                  <div className="ml-2 text-sm">
                     <label htmlFor="approval" className="font-medium text-gray-700">
                       I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
                     </label>
@@ -416,12 +461,22 @@ export default function Settings({ user }) {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-1">
+              <div className="flex justify-end pt-1 gap-2">
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-1.5 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button
                   type="submit"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  disabled={!isEditing && hasSubmitted}
+                  className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit Information
+                  {hasSubmitted ? 'Update Information' : 'Submit Information'}
                 </button>
               </div>
             </form>
@@ -434,6 +489,35 @@ export default function Settings({ user }) {
           </div>
         )}
       </div>
+      
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-medium text-gray-900">Success!</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Your profile information has been saved successfully.
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
