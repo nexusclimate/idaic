@@ -156,18 +156,18 @@ export default function Settings({ user }) {
   }
 
   return (
-    <div className="py-6">
+    <div className="py-4">
       {/* Section Heading with Tabs (left-aligned, consistent with other pages) */}
-      <div className="mb-6 border-b border-gray-200">
+      <div className="mb-4 border-b border-gray-200">
         <div className="sm:flex sm:items-center sm:justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">User Settings</h1>
-          <nav className="mt-4 sm:mt-0">
+          <h1 className="text-2xl font-bold text-gray-900">User Settings</h1>
+          <nav className="mt-2 sm:mt-0">
             <ul className="flex space-x-4" role="tablist">
               {tabs.map(tab => (
                 <li key={tab.key}>
                   <button
                     type="button"
-                    className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none ${
+                    className={`px-3 py-1.5 text-sm font-medium border-b-2 transition-colors duration-150 focus:outline-none ${
                       activeTab === tab.key
                         ? 'border-orange-500 text-orange-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -186,20 +186,20 @@ export default function Settings({ user }) {
         </div>
       </div>
       {/* Tab Content */}
-      <div className="max-w-6xl mx-auto bg-white shadow rounded-lg p-6">
+      <div className="max-w-7xl mx-auto bg-white shadow rounded-lg p-4">
         {activeTab === 'personal' && (
           <>
-            <form onSubmit={handleFormSubmit} className="space-y-4">
+            <form onSubmit={handleFormSubmit} className="space-y-3">
               {/* Personal Information */}
-              <div className="border-b border-gray-200 pb-4 mb-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-3">Personal Information</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="border-b border-gray-200 pb-3 mb-3">
+                <h3 className="text-base font-medium text-gray-900 mb-2">Personal Information</h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                    <input id="name" name="name" type="text" autoComplete="name" value={name} onChange={e => setName(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                    <label htmlFor="name" className="block text-xs font-medium text-gray-700 mb-1">Name</label>
+                    <input id="name" name="name" type="text" autoComplete="name" value={name} onChange={e => setName(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                    <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1">Email address</label>
                     <input 
                       id="email" 
                       name="email" 
@@ -207,43 +207,43 @@ export default function Settings({ user }) {
                       autoComplete="email" 
                       value={email} 
                       readOnly
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-500 bg-gray-50 sm:text-sm" 
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-500 bg-gray-50 text-sm" 
                     />
                     <p className="mt-1 text-xs text-gray-500">Email is linked to your login account and cannot be changed here.</p>
                   </div>
                   <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Title/Position</label>
-                    <input id="title" name="title" type="text" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                    <label htmlFor="title" className="block text-xs font-medium text-gray-700 mb-1">Title/Position</label>
+                    <input id="title" name="title" type="text" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
                   </div>
                   <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                    <input id="company" name="company" type="text" value={company} onChange={e => setCompany(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                    <label htmlFor="company" className="block text-xs font-medium text-gray-700 mb-1">Company</label>
+                    <input id="company" name="company" type="text" value={company} onChange={e => setCompany(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
                   </div>
                   <div>
-                    <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
-                    <input id="region" name="region" type="text" value={region} onChange={e => setRegion(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" />
+                    <label htmlFor="region" className="block text-xs font-medium text-gray-700 mb-1">Region</label>
+                    <input id="region" name="region" type="text" value={region} onChange={e => setRegion(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" />
                   </div>
                   <div>
-                    <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
-                    <input id="linkedinUrl" name="linkedinUrl" type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="https://linkedin.com/in/yourprofile" />
+                    <label htmlFor="linkedinUrl" className="block text-xs font-medium text-gray-700 mb-1">LinkedIn URL</label>
+                    <input id="linkedinUrl" name="linkedinUrl" type="url" value={linkedinUrl} onChange={e => setLinkedinUrl(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm" placeholder="https://linkedin.com/in/yourprofile" />
                   </div>
                 </div>
               </div>
 
               {/* Organization Information - Split into two columns */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Left Column */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Organization Information</h3>
+                <div className="space-y-3">
+                  <h3 className="text-base font-medium text-gray-900 mb-2">Organization Information</h3>
 
                   <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">What Category fits best:</label>
+                    <label htmlFor="category" className="block text-xs font-medium text-gray-700 mb-1">What Category fits best:</label>
                     <select
                       id="category"
                       name="category"
                       value={category}
                       onChange={e => setCategory(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                     >
                       <option value="">Select a category</option>
                       <option value="Represent industrial company">Represent industrial company</option>
@@ -256,92 +256,92 @@ export default function Settings({ user }) {
 
                   {category === 'Other' && (
                     <div>
-                      <label htmlFor="otherCategory" className="block text-sm font-medium text-gray-700 mb-2">Please specify:</label>
+                      <label htmlFor="otherCategory" className="block text-xs font-medium text-gray-700 mb-1">Please specify:</label>
                       <input
                         id="otherCategory"
                         name="otherCategory"
                         type="text"
                         value={otherCategory}
                         onChange={e => setOtherCategory(e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                         placeholder="Specify your category"
                       />
                     </div>
                   )}
 
                   <div>
-                      <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-700 mb-1">What does the organization you represent do?</label>
+                      <label htmlFor="organizationDescription" className="block text-xs font-medium text-gray-700 mb-1">What does the organization you represent do?</label>
                     <textarea
                       id="organizationDescription"
                       name="organizationDescription"
-                      rows={3}
+                      rows={2}
                       value={organizationDescription}
                       onChange={e => setOrganizationDescription(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe your organization's activities"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="aiDecarbonisation" className="block text-sm font-medium text-gray-700 mb-1">In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?</label>
+                    <label htmlFor="aiDecarbonisation" className="block text-xs font-medium text-gray-700 mb-1">In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?</label>
                     <textarea
                       id="aiDecarbonisation"
                       name="aiDecarbonisation"
-                      rows={3}
+                      rows={2}
                       value={aiDecarbonisation}
                       onChange={e => setAiDecarbonisation(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe your AI decarbonisation plans"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="challenges" className="block text-sm font-medium text-gray-700 mb-1">What industrial decarbonisation challenges would you like to address through AI?</label>
+                    <label htmlFor="challenges" className="block text-xs font-medium text-gray-700 mb-1">What industrial decarbonisation challenges would you like to address through AI?</label>
                     <textarea
                       id="challenges"
                       name="challenges"
-                      rows={3}
+                      rows={2}
                       value={challenges}
                       onChange={e => setChallenges(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe the challenges you want to address"
                     />
                   </div>
                 </div>
 
                 {/* Right Column */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">&nbsp;</h3> {/* Spacer for alignment */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-medium text-gray-900">&nbsp;</h3> {/* Spacer for alignment */}
 
                   <div>
-                    <label htmlFor="contribution" className="block text-sm font-medium text-gray-700 mb-2">How might you contribute to addressing those challenges?</label>
+                    <label htmlFor="contribution" className="block text-xs font-medium text-gray-700 mb-1">How might you contribute to addressing those challenges?</label>
                     <textarea
                       id="contribution"
                       name="contribution"
-                      rows={3}
+                      rows={2}
                       value={contribution}
                       onChange={e => setContribution(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe how you can contribute"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="projects" className="block text-sm font-medium text-gray-700 mb-2">Are you currently working on any projects—either in progress or recently completed—that you would like to showcase on our website?</label>
+                    <label htmlFor="projects" className="block text-xs font-medium text-gray-700 mb-1">Are you currently working on any projects—either in progress or recently completed—that you would like to showcase on our website?</label>
                     <textarea
                       id="projects"
                       name="projects"
-                      rows={3}
+                      rows={2}
                       value={projects}
                       onChange={e => setProjects(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe your projects"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Would you be open to sharing them for visibility or potential collaboration opportunities?</label>
-                    <div className="flex gap-4">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Would you be open to sharing them for visibility or potential collaboration opportunities?</label>
+                    <div className="flex gap-4 mt-1">
                       <label className="inline-flex items-center">
                         <input
                           type="radio"
@@ -351,7 +351,7 @@ export default function Settings({ user }) {
                           onChange={e => setShareProjects(e.target.value)}
                           className="text-orange-500 focus:ring-orange-500"
                         />
-                        <span className="ml-2">Yes</span>
+                        <span className="ml-2 text-sm">Yes</span>
                       </label>
                       <label className="inline-flex items-center">
                         <input
@@ -362,33 +362,33 @@ export default function Settings({ user }) {
                           onChange={e => setShareProjects(e.target.value)}
                           className="text-orange-500 focus:ring-orange-500"
                         />
-                        <span className="ml-2">No</span>
+                        <span className="ml-2 text-sm">No</span>
                       </label>
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="aiTools" className="block text-sm font-medium text-gray-700 mb-2">Are there specific AI tools or approaches you're interested in or developing?</label>
+                    <label htmlFor="aiTools" className="block text-xs font-medium text-gray-700 mb-1">Are there specific AI tools or approaches you're interested in or developing?</label>
                     <textarea
                       id="aiTools"
                       name="aiTools"
-                      rows={3}
+                      rows={2}
                       value={aiTools}
                       onChange={e => setAiTools(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe AI tools or approaches"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">Do you have a case study, perspective article or other content you could provide for the next meeting and/or the members portal?</label>
+                    <label htmlFor="content" className="block text-xs font-medium text-gray-700 mb-1">Do you have a case study, perspective article or other content you could provide for the next meeting and/or the members portal?</label>
                     <textarea
                       id="content"
                       name="content"
-                      rows={3}
+                      rows={2}
                       value={content}
                       onChange={e => setContent(e.target.value)}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-2 px-3 text-gray-900 focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm py-1.5 px-2 text-gray-900 focus:border-orange-500 focus:ring-orange-500 text-sm"
                       placeholder="Describe available content"
                     />
                   </div>
@@ -396,19 +396,19 @@ export default function Settings({ user }) {
               </div>
 
               {/* Approval */}
-              <div className="border-b border-gray-200 pb-3 pt-2">
+              <div className="border-b border-gray-200 pb-2 pt-1">
                 <div className="flex items-start">
-                  <div className="flex items-center h-5">
+                  <div className="flex items-center h-4">
                     <input
                       id="approval"
                       name="approval"
                       type="checkbox"
                       checked={approval}
                       onChange={e => setApproval(e.target.checked)}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-3 w-3 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                     />
                   </div>
-                  <div className="ml-3 text-sm">
+                  <div className="ml-2 text-xs">
                     <label htmlFor="approval" className="font-medium text-gray-700">
                       I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
                     </label>
@@ -416,10 +416,10 @@ export default function Settings({ user }) {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-1">
                 <button
                   type="submit"
-                  className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
                   Submit Information
                 </button>
@@ -429,8 +429,8 @@ export default function Settings({ user }) {
         )}
         {activeTab === 'notifications' && (
           <div>
-            <h2 className="text-xl font-semibold mb-6">Notifications</h2>
-            <p className="text-gray-500">Notification preferences coming soon.</p>
+            <h2 className="text-lg font-semibold mb-3">Notifications</h2>
+            <p className="text-gray-500 text-sm">Notification preferences coming soon.</p>
           </div>
         )}
       </div>
