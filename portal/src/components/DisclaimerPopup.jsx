@@ -24,7 +24,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
           onScroll={handleScroll}
         >
           <Text>
-            Welcome to the International Decarbonization AI Coalition Portal. 
+            Welcome to the Industrial Decarbonization AI Coalition Portal. 
             By using this platform, you agree to the following terms and conditions:
           </Text>
 
@@ -34,8 +34,8 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
               Platform Purpose
             </Text>
             <Text>
-              This portal is designed for International Decarbonization AI Coalition members to share information, collaborate on projects, 
-              and connect with like-minded individuals interested in international development and AI initiatives. 
+              This portal is designed for Industrial Decarbonization AI Coalition members to share information, collaborate on projects, 
+              and connect with like-minded individuals interested in industrial development and AI initiatives. 
               The platform is intended for professional networking and knowledge sharing within our community.
             </Text>
           </div>
@@ -94,7 +94,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
               <Text>
                 By clicking "I Accept" below, you acknowledge that you have read, understood, and agree to 
                 these terms and conditions. You understand that this platform is for professional use within 
-                the International Decarbonization AI Coalition community and agree to use it responsibly.
+                the Industrial Decarbonization AI Coalition community and agree to use it responsibly.
               </Text>
             </div>
           </div>
