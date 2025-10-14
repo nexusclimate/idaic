@@ -89,38 +89,40 @@ export default function PortalAssets({ isAdmin = false }) {
       setUploadError('');
 
       // Convert file to base64
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64Data = e.target.result;
-
-        // Extract base64 string (remove data:image/...;base64, prefix)
-        const base64String = base64Data.split(',')[1];
-
-        const imageData = {
-          title: selectedFile.name,
-          image_data: base64String,
-          image_type: selectedFile.type,
-          category: 'main_event',
-          description: `Main event image uploaded on ${new Date().toLocaleDateString()}`
+      const base64String = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64Data = e.target.result;
+          const base64String = base64Data.split(',')[1];
+          resolve(base64String);
         };
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
 
-        const response = await fetch('/.netlify/functions/portalAssets', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(imageData)
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to upload image');
-        }
-
-        await fetchPortalAsset();
-        setShowUploadDialog(false);
-        setSelectedFile(null);
+      const imageData = {
+        title: selectedFile.name,
+        image_data: base64String,
+        image_type: selectedFile.type,
+        category: 'main_event',
+        description: `Main event image uploaded on ${new Date().toLocaleDateString()}`
       };
 
-      reader.readAsDataURL(selectedFile);
+      const response = await fetch('/.netlify/functions/portalAssets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(imageData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      await fetchPortalAsset();
+      setShowUploadDialog(false);
+      setSelectedFile(null);
+      setUploadError('');
     } catch (err) {
       setUploadError(err.message);
     } finally {

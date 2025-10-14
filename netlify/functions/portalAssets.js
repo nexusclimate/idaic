@@ -112,12 +112,12 @@ exports.handler = async function (event, context) {
       
       case 'DELETE': {
         // Delete portal asset
-        const { id: deleteId } = event.queryStringParameters;
-        
+        const { id: deleteId } = event.queryStringParameters || {};
+
         if (!deleteId) {
-          return { 
-            statusCode: 400, 
-            body: JSON.stringify({ error: 'Asset ID is required' }) 
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Asset ID is required' })
           };
         }
         
