@@ -203,20 +203,13 @@ export default function PortalAssets({ isAdmin = false }) {
       </div>
 
       {portalAsset ? (
-        <div className="relative">
+        <div className="relative inline-block">
           <img
             src={`data:${portalAsset.image_type};base64,${portalAsset.image_data}`}
             alt={portalAsset.title}
-            className="w-full h-64 object-cover rounded-lg shadow-md"
+            className="max-w-full h-auto rounded-lg shadow-md"
+            style={{ maxHeight: '500px' }}
           />
-          <div className="mt-3">
-            <Text className="text-sm text-gray-600">
-              {portalAsset.title}
-            </Text>
-            <Text className="text-xs text-gray-400 mt-1">
-              Uploaded: {new Date(portalAsset.created_at).toLocaleDateString()}
-            </Text>
-          </div>
           <div className="absolute top-2 right-2 flex gap-2">
             <Button
               color="blue"
