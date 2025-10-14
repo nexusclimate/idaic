@@ -13,16 +13,23 @@ export default function PortalAssets({ isAdmin = false }) {
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  // Debug logging
+  console.log('PortalAssets rendered - loading:', loading, 'error:', error, 'portalAsset:', portalAsset);
+
   // Fetch current portal asset
   const fetchPortalAsset = async () => {
     try {
       setLoading(true);
+      console.log('Fetching portal asset...');
       const response = await fetch('/.netlify/functions/portalAssets');
+      console.log('Response status:', response.status);
       if (!response.ok) throw new Error('Failed to fetch portal asset');
       const data = await response.json();
+      console.log('Portal asset data:', data);
       setPortalAsset(data);
       setError(null);
     } catch (err) {
+      console.error('Error fetching portal asset:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -247,9 +254,16 @@ export default function PortalAssets({ isAdmin = false }) {
             </svg>
           </div>
           <Text className="text-gray-500 mb-2">No main event image set</Text>
-          <Text className="text-sm text-gray-400">
-            Click "Add Image" to upload a main event image
+          <Text className="text-sm text-gray-400 mb-4">
+            Click "Add Image" button above to upload a main event image
           </Text>
+          <Button
+            color="blue"
+            onClick={() => setShowUploadDialog(true)}
+            className="mt-2"
+          >
+            Upload Image Now
+          </Button>
         </div>
       )}
 
