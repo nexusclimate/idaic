@@ -16,7 +16,6 @@ exports.handler = async function (event, context) {
         const { data, error } = await supabase
           .from('portal_assets')
           .select('*')
-          .eq('is_active', true)
           .order('created_at', { ascending: false })
           .limit(1);
         
@@ -35,27 +34,14 @@ exports.handler = async function (event, context) {
       }
       
       case 'POST': {
-        // Create or update portal asset
+        // Create new portal asset
         const assetData = JSON.parse(event.body);
-        
-        // First, deactivate all existing portal assets
-        const { error: deactivateError } = await supabase
-          .from('portal_assets')
-          .update({ is_active: false })
-          .eq('is_active', true);
-        
-        if (deactivateError) {
-          console.error('Error deactivating existing assets:', deactivateError);
-          return { 
-            statusCode: 500, 
-            body: JSON.stringify({ error: deactivateError.message }) 
-          };
-        }
         
         // Create new portal asset
         const newAssetData = {
-          ...assetData,
-          is_active: true,
+          title: assetData.title,
+          image_data: assetData.image_data,
+          image_type: assetData.image_type,
           created_at: new Date().toISOString()
         };
         

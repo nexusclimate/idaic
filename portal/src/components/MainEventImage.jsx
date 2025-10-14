@@ -110,9 +110,7 @@ export default function PortalAssets({ isAdmin = false }) {
       const imageData = {
         title: selectedFile.name,
         image_data: base64String,
-        image_type: selectedFile.type,
-        category: 'main_event',
-        description: `Main event image uploaded on ${new Date().toLocaleDateString()}`
+        image_type: selectedFile.type
       };
 
       const response = await fetch('/.netlify/functions/portalAssets', {
@@ -213,7 +211,7 @@ export default function PortalAssets({ isAdmin = false }) {
           />
           <div className="mt-3">
             <Text className="text-sm text-gray-600">
-              {portalAsset.description}
+              {portalAsset.title}
             </Text>
             <Text className="text-xs text-gray-400 mt-1">
               Uploaded: {new Date(portalAsset.created_at).toLocaleDateString()}
