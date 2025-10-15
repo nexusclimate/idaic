@@ -144,10 +144,10 @@ exports.handler = async function (event, context) {
         } else {
           // Create new user (this shouldn't happen in normal flow as users are created during login)
           // But we'll handle it gracefully
-          // For password users, don't set the ID (let the database generate it)
+          // Let the database generate the UUID for new users
           const insertData = {
             ...mappedData,
-            id: profileData.user_id === 'password_user' ? undefined : (profileData.user_id || null)
+            id: undefined // Let the database generate a UUID
           };
           const { data, error } = await supabase
             .from('users')

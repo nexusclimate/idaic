@@ -358,15 +358,38 @@ document
       // Use the provided email for password-based login
       const adminEmail = email
       
-      // For password login, we'll create a mock session and redirect
-      // This simulates authentication without going through Supabase auth
-      const mockSession = {
-        access_token: 'password_login_' + Date.now(),
-        user: {
-          id: 'password_user',
-          email: adminEmail
+      // For password login, we'll create a proper user in the database first
+      let userId;
+      try {
+        // Check if user already exists
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', adminEmail)
+          .maybeSingle();
+
+        if (existingUser) {
+          userId = existingUser.id;
+        } else {
+          // Create new user with server-generated UUID
+          const { data: newUser, error: insertError } = await supabase
+            .from('users')
+            .insert([{ email: adminEmail }])
+            .select()
+            .single();
+            
+          if (insertError) throw insertError;
+          userId = newUser.id;
         }
-      }
+
+        // Create mock session with real UUID
+        const mockSession = {
+          access_token: 'password_login_' + Date.now(),
+          user: {
+            id: userId,
+            email: adminEmail
+          }
+        }
       
       localStorage.setItem('idaic-token', mockSession.access_token)
       localStorage.setItem('idaic-password-login', 'true')
@@ -418,7 +441,7 @@ document
         }
 
         const metadata = {
-          user_id: 'password_user',
+          user_id: userId,
           email: adminEmail,
           ip_address: ip,
           country: geo.country || 'Unknown',
