@@ -8,6 +8,45 @@ const N8N_URL = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+// 2. Notification helper
+function createNotification({ message, success = true, warning = false }) {
+  const container = document.getElementById('notification-list')
+  if (!container) return
+  container.innerHTML = ''
+  const wrapper = document.createElement('div')
+  wrapper.className =
+    'pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5 font-inter'
+  wrapper.innerHTML = `
+    <div class="p-4">
+      <div class="flex items-start">
+        <div class="shrink-0">
+          ${
+            success && !warning
+              ? `<svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4" /></svg>`
+              : warning
+                ? `<svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" /></svg>`
+                : `<svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6m0-6l6 6" /></svg>`
+          }
+        </div>
+        <div class="ml-3 w-0 flex-1 pt-0.5">
+          <p class="text-sm font-medium text-gray-900">${message}</p>
+        </div>
+        <div class="ml-4 flex shrink-0">
+          <button aria-label="Close notification">
+            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72
+                       a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72
+                       a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72
+                       a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>`
+  container.appendChild(wrapper)
+  wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
+}
+
 // Tab switching functionality
 window.switchTab = function(tab) {
   const otpTab = document.getElementById('otp-tab')
@@ -81,8 +120,10 @@ function detectOS() {
   return 'Unknown';
 }
 
-// OTP Request Form Handler
-document.getElementById('otp-request-form').addEventListener('submit', async (e) => {
+// 3. Request OTP
+document
+  .getElementById('otp-request-form')
+  .addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('email').value.trim();
   const domain = email.split('@')[1]?.toLowerCase();
@@ -221,8 +262,10 @@ document.getElementById('otp-request-form').addEventListener('submit', async (e)
   }
 });
 
-// OTP Verify Form Handler
-document.getElementById('otp-verify-form').addEventListener('submit', async (e) => {
+// 4. Verify OTP
+document
+  .getElementById('otp-verify-form')
+  .addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('email').value.trim();
   const code = document.getElementById('code').value.trim();
@@ -288,8 +331,10 @@ document.getElementById('otp-verify-form').addEventListener('submit', async (e) 
   }
 });
 
-// Password Login Form Handler
-document.getElementById('password-form').addEventListener('submit', async (e) => {
+// 5. Password Login
+document
+  .getElementById('password-form')
+  .addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('password-email').value.trim();
   const password = document.getElementById('password').value.trim();
@@ -390,45 +435,6 @@ document.getElementById('password-form').addEventListener('submit', async (e) =>
     createNotification({ message: 'Login failed. Please try again.', success: false });
   }
 });
-
-// 2. Notification helper
-function createNotification({ message, success = true, warning = false }) {
-  const container = document.getElementById('notification-list')
-  if (!container) return
-  container.innerHTML = ''
-  const wrapper = document.createElement('div')
-  wrapper.className =
-    'pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5 font-inter'
-  wrapper.innerHTML = `
-    <div class="p-4">
-      <div class="flex items-start">
-        <div class="shrink-0">
-          ${
-            success && !warning
-              ? `<svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4" /></svg>`
-              : warning
-                ? `<svg class="h-6 w-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" /></svg>`
-                : `<svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6m0-6l6 6" /></svg>`
-          }
-        </div>
-        <div class="ml-3 w-0 flex-1 pt-0.5">
-          <p class="text-sm font-medium text-gray-900">${message}</p>
-        </div>
-        <div class="ml-4 flex shrink-0">
-          <button aria-label="Close notification">
-            <svg class="size-5" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72
-                       a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72
-                       a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72
-                       a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>`
-  container.appendChild(wrapper)
-  wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
-}
 
 // 3. Request OTP
 document
