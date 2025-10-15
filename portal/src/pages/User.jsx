@@ -159,7 +159,7 @@ export default function User() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.filter(user => user.approval === 'yes').map((user, userIdx) => (
+                  {filtered.filter(user => user.data_permission === true).map((user, userIdx) => (
                     <tr
                       key={user.email || userIdx}
                       className="hover:transition cursor-pointer"
