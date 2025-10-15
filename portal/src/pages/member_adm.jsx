@@ -216,36 +216,92 @@ export default function MemberAdm() {
             {/* Right: Company Info */}
             <div className="flex-1 bg-white border rounded-lg p-6 flex flex-col justify-between">
               <div className="flex flex-col gap-6">
-                <h2 className="text-base font-semibold text-gray-900 mb-4">Company Information</h2>
-                {/* Placeholder for company-specific fields */}
+                <h2 className="text-base font-semibold text-gray-900 mb-4">Organization Information</h2>
                 <div>
-                  <label htmlFor="company" className="block text-sm font-medium text-gray-900">Company Name</label>
-                <input
+                  <label htmlFor="company" className="block text-sm font-medium text-gray-900">Organization Name</label>
+                  <input
                     id="company"
                     name="company"
-                  type="text"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                />
-              </div>
+                    type="text"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
                 <div>
                   <label htmlFor="position" className="block text-sm font-medium text-gray-900">Position</label>
                   <input
                     id="position"
                     name="position"
                     type="text"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
-            </div>
+                </div>
                 <div>
-                  <label htmlFor="companyDomain" className="block text-sm font-medium text-gray-900">Company Domain</label>
-                <input
-                    id="companyDomain"
-                    name="companyDomain"
-                  type="text"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
-                />
+                  <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-900">
+                    Please provide a brief description of your organization and its activities
+                  </label>
+                  <textarea
+                    id="organizationDescription"
+                    name="organizationDescription"
+                    rows="4"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="aiDecarbonisation" className="block text-sm font-medium text-gray-900">
+                    In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?
+                  </label>
+                  <textarea
+                    id="aiDecarbonisation"
+                    name="aiDecarbonisation"
+                    rows="4"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="challenges" className="block text-sm font-medium text-gray-900">
+                    What are the key challenges you face in implementing AI for decarbonisation?
+                  </label>
+                  <textarea
+                    id="challenges"
+                    name="challenges"
+                    rows="4"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="contribution" className="block text-sm font-medium text-gray-900">
+                    How do you see your organization contributing to and benefiting from the IDAIC community?
+                  </label>
+                  <textarea
+                    id="contribution"
+                    name="contribution"
+                    rows="4"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="projects" className="block text-sm font-medium text-gray-900">
+                    Are there any specific projects or initiatives you would like to share with the community?
+                  </label>
+                  <textarea
+                    id="projects"
+                    name="projects"
+                    rows="4"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  ></textarea>
+                </div>
+                <div>
+                  <label htmlFor="aiTools" className="block text-sm font-medium text-gray-900">
+                    What AI tools and technologies are you currently using or planning to use?
+                  </label>
+                  <textarea
+                    id="aiTools"
+                    name="aiTools"
+                    rows="4"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  ></textarea>
+                </div>
               </div>
-            </div>
               {/* Logo upload at the bottom */}
               <div className="mt-8">
                 <label htmlFor="companyLogo" className="block text-sm font-medium text-gray-900">Company Logo</label>
