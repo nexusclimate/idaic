@@ -118,6 +118,25 @@ export default function UserForm() {
         </div>
 
         <div>
+          <label htmlFor="data_permission" className="block text-sm font-medium text-gray-900">
+            Data Permission
+          </label>
+          <select
+            id="data_permission"
+            value={formData.data_permission}
+            onChange={(e) => setFormData({ ...formData, data_permission: e.target.value })}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
+          >
+            <option value="">Select Option</option>
+            <option value="yes">Yes, I Agree</option>
+            <option value="no">No, I Decline</option>
+          </select>
+          <p className="mt-2 text-sm text-gray-500">
+            I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
+          </p>
+        </div>
+
+        <div>
           <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-900">
             Please provide a brief description of your organization and its activities
           </label>
@@ -193,25 +212,6 @@ export default function UserForm() {
             rows="4"
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
-        </div>
-
-        <div>
-          <label htmlFor="data_permission" className="block text-sm font-medium text-gray-900">
-            Data Permission
-          </label>
-          <select
-            id="data_permission"
-            value={formData.data_permission}
-            onChange={(e) => setFormData({ ...formData, data_permission: e.target.value })}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
-          >
-            <option value="">Select Option</option>
-            <option value="yes">Yes, I Agree</option>
-            <option value="no">No, I Decline</option>
-          </select>
-          <p className="mt-2 text-sm text-gray-500">
-            I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
-          </p>
         </div>
 
         {error && <ErrorMessage message={error} />}
