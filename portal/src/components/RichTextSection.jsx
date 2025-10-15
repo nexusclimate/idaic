@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './button';
-import { Dialog, DialogTitle, DialogBody, DialogActions } from './dialog';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -9,8 +8,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editContent, setEditContent] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const editor = useEditor({
@@ -18,9 +16,12 @@ export default function RichTextSection({ section, isAdmin = false }) {
       StarterKit,
       Underline,
     ],
-    content: editContent,
+    content: content?.content || '',
+    editable: isEditing,
     onUpdate: ({ editor }) => {
-      setEditContent(editor.getHTML());
+      if (isEditing) {
+        handleSave(editor.getHTML());
+      }
     },
   });
 
@@ -46,13 +47,13 @@ export default function RichTextSection({ section, isAdmin = false }) {
   }, [section]);
 
   useEffect(() => {
-    if (showEditDialog && editor) {
-      editor.commands.setContent(editContent);
+    if (editor && content) {
+      editor.commands.setContent(content.content);
     }
-  }, [showEditDialog, editor]);
+  }, [editor, content]);
 
   // Handle content save
-  const handleSave = async () => {
+  const handleSave = async (newContent) => {
     try {
       setSaving(true);
       const response = await fetch('/.netlify/functions/contentSections', {
@@ -60,7 +61,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           section: section,
-          content: editContent,
+          content: newContent,
           content_type: 'rich_text'
         })
       });
@@ -71,7 +72,6 @@ export default function RichTextSection({ section, isAdmin = false }) {
       }
 
       await fetchContent();
-      setShowEditDialog(false);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -98,12 +98,9 @@ export default function RichTextSection({ section, isAdmin = false }) {
         <Button
           color="blue"
           outline
-          onClick={() => {
-            setEditContent(content?.content || '');
-            setShowEditDialog(true);
-          }}
+          onClick={() => setIsEditing(!isEditing)}
         >
-          {content ? 'Edit Content' : 'Add Content'}
+          {isEditing ? 'Done Editing' : 'Edit Content'}
         </Button>
       </div>
 
@@ -111,117 +108,99 @@ export default function RichTextSection({ section, isAdmin = false }) {
         <div className="text-red-500 text-center">
           Error: {error}
         </div>
-      ) : content ? (
-        <div 
-          className="prose max-w-none"
-          dangerouslySetInnerHTML={{ __html: content.content }}
-        />
       ) : (
         <div 
-          className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-100 transition-colors"
-          onClick={() => {
-            setEditContent('');
-            setShowEditDialog(true);
-          }}
+          className="relative group"
+          onDoubleClick={() => !isEditing && setIsEditing(true)}
         >
-          <div className="text-gray-400 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
+          {/* Floating Toolbar */}
+          {isEditing && (
+            <div className="absolute -top-12 left-0 right-0 flex justify-center">
+              <div className="bg-white shadow-lg rounded-lg border p-1 flex gap-1">
+                <Button
+                  color="gray"
+                  outline
+                  size="sm"
+                  onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                  className={editor?.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''}
+                >
+                  H1
+                </Button>
+                <Button
+                  color="gray"
+                  outline
+                  size="sm"
+                  onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                  className={editor?.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''}
+                >
+                  H2
+                </Button>
+                <Button
+                  color="gray"
+                  outline
+                  size="sm"
+                  onClick={() => editor?.chain().focus().toggleBold().run()}
+                  className={editor?.isActive('bold') ? 'bg-gray-100' : ''}
+                >
+                  B
+                </Button>
+                <Button
+                  color="gray"
+                  outline
+                  size="sm"
+                  onClick={() => editor?.chain().focus().toggleItalic().run()}
+                  className={editor?.isActive('italic') ? 'bg-gray-100' : ''}
+                >
+                  I
+                </Button>
+                <Button
+                  color="gray"
+                  outline
+                  size="sm"
+                  onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                  className={editor?.isActive('underline') ? 'bg-gray-100' : ''}
+                >
+                  U
+                </Button>
+                <Button
+                  color="gray"
+                  outline
+                  size="sm"
+                  onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                  className={editor?.isActive('bulletList') ? 'bg-gray-100' : ''}
+                >
+                  •
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {/* Editor */}
+          <div 
+            className={`prose max-w-none transition-colors ${
+              isEditing 
+                ? 'min-h-[200px] border rounded-lg p-4 bg-white' 
+                : content ? '' : 'text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
+            }`}
+          >
+            {!content && !isEditing && (
+              <div className="text-gray-400">
+                <svg className="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-sm text-gray-500">Double-click to add content</p>
+              </div>
+            )}
+            <EditorContent editor={editor} />
           </div>
-          <p className="text-sm text-gray-500">Click here to add content</p>
-          <p className="text-xs text-gray-400 mt-2">You can format text with headings, bold, italic, and lists</p>
+
+          {saving && (
+            <div className="absolute top-2 right-2 text-sm text-blue-500">
+              Saving...
+            </div>
+          )}
         </div>
       )}
-
-      {/* Edit Dialog */}
-      <Dialog 
-        open={showEditDialog} 
-        onClose={() => setShowEditDialog(false)}
-        size="xl"
-      >
-        <DialogTitle>
-          {content ? 'Edit Content' : 'Add Content'}
-        </DialogTitle>
-        <DialogBody>
-          <div className="border rounded-lg p-4 mb-12">
-            <div className="mb-4 flex gap-2">
-              <Button
-                color="gray"
-                outline
-                size="sm"
-                onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                className={editor?.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''}
-              >
-                H1
-              </Button>
-              <Button
-                color="gray"
-                outline
-                size="sm"
-                onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                className={editor?.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''}
-              >
-                H2
-              </Button>
-              <Button
-                color="gray"
-                outline
-                size="sm"
-                onClick={() => editor?.chain().focus().toggleBold().run()}
-                className={editor?.isActive('bold') ? 'bg-gray-100' : ''}
-              >
-                Bold
-              </Button>
-              <Button
-                color="gray"
-                outline
-                size="sm"
-                onClick={() => editor?.chain().focus().toggleItalic().run()}
-                className={editor?.isActive('italic') ? 'bg-gray-100' : ''}
-              >
-                Italic
-              </Button>
-              <Button
-                color="gray"
-                outline
-                size="sm"
-                onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                className={editor?.isActive('underline') ? 'bg-gray-100' : ''}
-              >
-                Underline
-              </Button>
-              <Button
-                color="gray"
-                outline
-                size="sm"
-                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                className={editor?.isActive('bulletList') ? 'bg-gray-100' : ''}
-              >
-                Bullet List
-              </Button>
-            </div>
-            <EditorContent editor={editor} className="min-h-[200px] prose max-w-none" />
-          </div>
-        </DialogBody>
-        <DialogActions>
-          <Button
-            color="gray"
-            outline
-            onClick={() => setShowEditDialog(false)}
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button
-            color="blue"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }
