@@ -3,8 +3,11 @@ import { Button } from './button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
+import { useUser } from '../hooks/useUser';
+import { supabase } from '../config/supabase';
 
 export default function RichTextSection({ section, isAdmin = false }) {
+  const { user } = useUser();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,7 +27,12 @@ export default function RichTextSection({ section, isAdmin = false }) {
     content: content?.content || '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg max-w-none focus:outline-none min-h-[100px] text-gray-900',
+        class: 'prose max-w-none focus:outline-none min-h-[100px] text-gray-900',
+        style: `
+          & h1 { font-size: 2.5em; margin-bottom: 0.5em; }
+          & h2 { font-size: 1.75em; margin-bottom: 0.5em; }
+          & p { font-size: 1.1em; margin-bottom: 0.5em; }
+        `
       },
     },
   });
@@ -69,13 +77,18 @@ export default function RichTextSection({ section, isAdmin = false }) {
 
     try {
       setSaving(true);
+      const token = await supabase.auth.getSession();
       const response = await fetch('/.netlify/functions/contentSections', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token?.data?.session?.access_token}`
+        },
         body: JSON.stringify({
           section: section,
           content: newContent,
-          content_type: 'rich_text'
+          content_type: 'rich_text',
+          user_id: user?.id
         })
       });
 
@@ -159,24 +172,37 @@ export default function RichTextSection({ section, isAdmin = false }) {
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                className={`px-2 py-1 rounded text-sm font-bold transition-colors ${
                   editor?.isActive('heading', { level: 1 })
                     ? 'bg-gray-200 text-gray-900'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                style={{ fontSize: '1.2em' }}
               >
                 H1
               </button>
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                className={`px-2 py-1 rounded text-sm font-semibold transition-colors ${
                   editor?.isActive('heading', { level: 2 })
                     ? 'bg-gray-200 text-gray-900'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
+                style={{ fontSize: '1.1em' }}
               >
                 H2
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().setParagraph().run()}
+                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                  editor?.isActive('paragraph')
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Normal
               </button>
               <div className="w-px h-6 my-auto bg-gray-200" />
               <button
@@ -266,8 +292,11 @@ export default function RichTextSection({ section, isAdmin = false }) {
                 <p className="text-sm text-gray-500">Click to add content</p>
               </div>
             )}
-            <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none">
-              <EditorContent editor={editor} className="min-h-[100px]" />
+            <div className="prose max-w-none">
+              <EditorContent 
+                editor={editor} 
+                className="min-h-[100px] [&_h1]:text-4xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mb-3 [&_p]:text-base [&_p]:mb-2" 
+              />
             </div>
           </div>
 
