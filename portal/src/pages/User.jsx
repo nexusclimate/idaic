@@ -14,7 +14,6 @@ export default function User() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const REGIONS = ['UK', 'UAE', 'EU', 'MENA', 'Global'];
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -134,19 +133,10 @@ export default function User() {
                       scope="col"
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                      onClick={() => handleSort('region')}
+                      onClick={() => handleSort('linkedin_url')}
                     >
-                      Region
-                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'region' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
-                    </th>
-                    <th
-                      scope="col"
-                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
-                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                      onClick={() => handleSort('data_permission')}
-                    >
-                      Data Permission
-                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'data_permission' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                      LinkedIn
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'linkedin_url' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                     </th>
                   </tr>
                 </thead>
@@ -191,68 +181,16 @@ export default function User() {
                         )}
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
-                        <select
-                          value={user.region || ''}
-                          onChange={async (e) => {
-                            try {
-                              const response = await fetch(`/.netlify/functions/userProfile?id=${user.id}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ region: e.target.value })
-                              });
-                              if (!response.ok) throw new Error('Failed to update region');
-                              // Update local state
-                              setUsers(users.map(u => 
-                                u.id === user.id ? { ...u, region: e.target.value } : u
-                              ));
-                            } catch (err) {
-                              console.error('Failed to update region:', err);
-                            }
-                          }}
-                          className="block w-32 rounded-md bg-white px-2 py-1 text-sm border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
-                        >
-                          <option value="">Select Region</option>
-                          {REGIONS.map(region => (
-                            <option key={region} value={region}>{region}</option>
-                          ))}
-                        </select>
-                      </td>
-                      <td
-                        className={classNames(
-                          userIdx !== filtered.length - 1 ? '' : '',
-                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
-                        )}
-                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <select
-                            value={user.data_permission ? 'yes' : 'no'}
-                            onChange={async (e) => {
-                              try {
-                                const response = await fetch(`/.netlify/functions/userProfile?id=${user.id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ data_permission: e.target.value === 'yes' })
-                                });
-                                if (!response.ok) throw new Error('Failed to update permission');
-                                // Update local state
-                                setUsers(users.map(u => 
-                                  u.id === user.id ? { ...u, data_permission: e.target.value === 'yes' } : u
-                                ));
-                              } catch (err) {
-                                console.error('Failed to update permission:', err);
-                              }
-                            }}
-                            className="block w-32 rounded-md bg-white px-2 py-1 text-sm border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
+                        {user.linkedin_url ? (
+                          <a 
+                            href={user.linkedin_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-orange-500 hover:text-orange-600"
                           >
-                            <option value="">Select Option</option>
-                            <option value="yes">Yes, I Agree</option>
-                            <option value="no">No, I Decline</option>
-                          </select>
-                          <div className="text-xs text-gray-500">
-                            <p>I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website</p>
-                          </div>
-                        </div>
+                            View Profile
+                          </a>
+                        ) : '—'}
                       </td>
                     </tr>
                   ))}

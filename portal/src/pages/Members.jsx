@@ -4,6 +4,7 @@ import User from './User';
 
 const tabs = [
   { name: 'Members', key: 'members' },
+  { name: 'Users', key: 'users' },
 ];
 
 const members = [
@@ -86,6 +87,9 @@ export default function Members() {
         </div>
       </div>
       {/* Tab Content */}
+      {activeTab === 'users' && (
+        <User />
+      )}
       {activeTab === 'members' && (
         <div className="bg-white border rounded-lg p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4 sm:mb-6">

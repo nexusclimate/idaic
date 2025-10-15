@@ -37,6 +37,7 @@ export default function Settings({ user }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   // Load user data and existing profile on component mount
   useEffect(() => {
@@ -98,6 +99,7 @@ export default function Settings({ user }) {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setError('');  // Clear any previous errors
 
     // Basic validation
     if (!name || !email) {
@@ -219,7 +221,10 @@ export default function Settings({ user }) {
                   {hasSubmitted && !isEditing && (
                     <button
                       type="button"
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => {
+                        setIsEditing(true);
+                        setError('');
+                      }}
                       className="inline-flex items-center px-3 py-1.5 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-orange-50 hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                     >
                       Edit
