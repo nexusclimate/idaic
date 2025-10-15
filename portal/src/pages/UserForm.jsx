@@ -108,7 +108,7 @@ export default function UserForm() {
             id="region"
             value={formData.region}
             onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
           >
             <option value="">Select Region</option>
             {REGIONS.map(region => (
@@ -203,7 +203,7 @@ export default function UserForm() {
             id="data_permission"
             value={formData.data_permission}
             onChange={(e) => setFormData({ ...formData, data_permission: e.target.value })}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
           >
             <option value="">Select Option</option>
             <option value="yes">Yes, I Agree</option>

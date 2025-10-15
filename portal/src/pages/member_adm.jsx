@@ -176,7 +176,7 @@ export default function MemberAdm() {
                 <select
                     id="memberType"
                     name="memberType"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
                     <option value="">Select Region</option>
                     <option value="UK">UK</option>
@@ -191,7 +191,7 @@ export default function MemberAdm() {
                   <select
                     id="data_permission"
                     name="data_permission"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
                     <option value="">Select Option</option>
                     <option value="yes">Yes, I Agree</option>
@@ -223,7 +223,7 @@ export default function MemberAdm() {
                     id="company"
                     name="company"
                     type="text"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   />
                 </div>
                 <div>
@@ -232,7 +232,7 @@ export default function MemberAdm() {
                     id="position"
                     name="position"
                     type="text"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   />
                 </div>
                 <div>
@@ -243,7 +243,7 @@ export default function MemberAdm() {
                     id="organizationDescription"
                     name="organizationDescription"
                     rows="4"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   ></textarea>
                 </div>
                 <div>
@@ -254,7 +254,7 @@ export default function MemberAdm() {
                     id="aiDecarbonisation"
                     name="aiDecarbonisation"
                     rows="4"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   ></textarea>
                 </div>
                 <div>
@@ -265,7 +265,7 @@ export default function MemberAdm() {
                     id="challenges"
                     name="challenges"
                     rows="4"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   ></textarea>
                 </div>
                 <div>
@@ -276,7 +276,7 @@ export default function MemberAdm() {
                     id="contribution"
                     name="contribution"
                     rows="4"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   ></textarea>
                 </div>
                 <div>
@@ -287,7 +287,7 @@ export default function MemberAdm() {
                     id="projects"
                     name="projects"
                     rows="4"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   ></textarea>
                 </div>
                 <div>
@@ -298,7 +298,7 @@ export default function MemberAdm() {
                     id="aiTools"
                     name="aiTools"
                     rows="4"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   ></textarea>
                 </div>
               </div>
