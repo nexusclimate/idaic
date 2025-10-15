@@ -390,7 +390,6 @@ document.getElementById('password-form').addEventListener('submit', async (e) =>
     createNotification({ message: 'Login failed. Please try again.', success: false });
   }
 });
-}
 
 // 2. Notification helper
 function createNotification({ message, success = true, warning = false }) {
