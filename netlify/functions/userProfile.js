@@ -91,7 +91,7 @@ exports.handler = async function (event, context) {
           .from('users')
           .select('id')
           .eq('email', profileData.email)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single to handle no results gracefully
 
         // Map camelCase form fields to database fields
         const mappedData = {
@@ -137,9 +137,10 @@ exports.handler = async function (event, context) {
         } else {
           // Create new user (this shouldn't happen in normal flow as users are created during login)
           // But we'll handle it gracefully
+          // For password users, don't set the ID (let the database generate it)
           const insertData = {
             ...mappedData,
-            id: profileData.user_id || null // Use the user_id if provided
+            id: profileData.user_id === 'password_user' ? undefined : (profileData.user_id || null)
           };
           const { data, error } = await supabase
             .from('users')
