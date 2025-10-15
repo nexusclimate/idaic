@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
+const REGIONS = ['UK', 'UAE', 'EU', 'MENA', 'Global'];
+
 export default function ProjectForm({ 
   drawerOpen, 
   selectedProject, 
@@ -175,6 +177,42 @@ export default function ProjectForm({
                         required
                         readOnly={readOnly}
                       />
+                    </div>
+                    <div>
+                      <label htmlFor="project-region" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                      <select
+                        id="project-region"
+                        name="region"
+                        value={localProject.region || ''}
+                        onChange={e => handleFieldChange('region', e.target.value)}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} cursor-pointer`}
+                        required
+                        disabled={readOnly}
+                      >
+                        <option value="">Select Region</option>
+                        {REGIONS.map(region => (
+                          <option key={region} value={region}>{region}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="project-data-permission" className="block text-sm font-medium text-gray-700 mb-1">Data Permission</label>
+                      <select
+                        id="project-data-permission"
+                        name="data_permission"
+                        value={localProject.data_permission || ''}
+                        onChange={e => handleFieldChange('data_permission', e.target.value)}
+                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''} cursor-pointer`}
+                        required
+                        disabled={readOnly}
+                      >
+                        <option value="">Select Option</option>
+                        <option value="yes">Yes, I Agree</option>
+                        <option value="no">No, I Decline</option>
+                      </select>
+                      <p className="mt-2 text-xs text-gray-500">
+                        I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
+                      </p>
                     </div>
                     {/* Show updated_at above created_at if available, with minimal gap and GMT time */}
                     {localProject.updated_at && (
