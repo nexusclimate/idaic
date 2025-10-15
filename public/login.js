@@ -319,25 +319,42 @@ document
       // For password login, we'll create a proper user in the database first
       let userId;
       
-      // Check if user already exists
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', adminEmail)
-        .maybeSingle();
-
-      if (existingUser) {
-        userId = existingUser.id;
-      } else {
-        // Create new user with server-generated UUID
-        const { data: newUser, error: insertError } = await supabase
+      try {
+        // Check if user already exists
+        const { data: existingUser, error: fetchError } = await supabase
           .from('users')
-          .insert([{ email: adminEmail }])
-          .select()
-          .single();
-          
-        if (insertError) throw insertError;
-        userId = newUser.id;
+          .select('id')
+          .eq('email', adminEmail)
+          .maybeSingle();
+
+        if (fetchError) {
+          console.error('Error fetching user:', fetchError);
+        }
+
+        if (existingUser) {
+          userId = existingUser.id;
+          console.log('Found existing user with ID:', userId);
+        } else {
+          // Create new user with server-generated UUID
+          console.log('Creating new user for:', adminEmail);
+          const { data: newUser, error: insertError } = await supabase
+            .from('users')
+            .insert([{ email: adminEmail }])
+            .select()
+            .single();
+            
+          if (insertError) {
+            console.error('Error creating user:', insertError);
+            throw insertError;
+          }
+          userId = newUser.id;
+          console.log('Created new user with ID:', userId);
+        }
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        createNotification({ message: 'Database error. Using temporary session.', success: false, warning: true });
+        // Use a temporary ID if database fails
+        userId = 'temp_' + Date.now();
       }
 
       // Create mock session with real UUID
@@ -419,11 +436,11 @@ document
         console.error('❌ Failed to track password login:', trackErr);
       }
       
-      setTimeout(() => {
-        window.location.href = '/app'
-      }, 1000)
+      // Redirect immediately instead of setTimeout
+      window.location.href = '/app'
       
     } catch (err) {
-      createNotification({ message: 'Login failed. Please try again.', success: false })
+      console.error('Password login error:', err);
+      createNotification({ message: `Login failed: ${err.message || 'Please try again.'}`, success: false })
     }
   })
