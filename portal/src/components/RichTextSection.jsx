@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './button';
 import { Dialog, DialogTitle, DialogBody, DialogActions } from './dialog';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 
 export default function RichTextSection({ section, isAdmin = false }) {
   const [content, setContent] = useState(null);
@@ -12,15 +13,16 @@ export default function RichTextSection({ section, isAdmin = false }) {
   const [editContent, setEditContent] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Quill editor modules configuration
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['clean']
-    ]
-  };
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+    ],
+    content: editContent,
+    onUpdate: ({ editor }) => {
+      setEditContent(editor.getHTML());
+    },
+  });
 
   // Fetch current content
   const fetchContent = async () => {
@@ -143,12 +145,65 @@ export default function RichTextSection({ section, isAdmin = false }) {
           {content ? 'Edit Content' : 'Add Content'}
         </DialogTitle>
         <DialogBody>
-          <ReactQuill
-            value={editContent}
-            onChange={setEditContent}
-            modules={modules}
-            className="h-64 mb-12"
-          />
+          <div className="border rounded-lg p-4 mb-12">
+            <div className="mb-4 flex gap-2">
+              <Button
+                color="gray"
+                outline
+                size="sm"
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                className={editor?.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''}
+              >
+                H1
+              </Button>
+              <Button
+                color="gray"
+                outline
+                size="sm"
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                className={editor?.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''}
+              >
+                H2
+              </Button>
+              <Button
+                color="gray"
+                outline
+                size="sm"
+                onClick={() => editor?.chain().focus().toggleBold().run()}
+                className={editor?.isActive('bold') ? 'bg-gray-100' : ''}
+              >
+                Bold
+              </Button>
+              <Button
+                color="gray"
+                outline
+                size="sm"
+                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                className={editor?.isActive('italic') ? 'bg-gray-100' : ''}
+              >
+                Italic
+              </Button>
+              <Button
+                color="gray"
+                outline
+                size="sm"
+                onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                className={editor?.isActive('underline') ? 'bg-gray-100' : ''}
+              >
+                Underline
+              </Button>
+              <Button
+                color="gray"
+                outline
+                size="sm"
+                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                className={editor?.isActive('bulletList') ? 'bg-gray-100' : ''}
+              >
+                Bullet List
+              </Button>
+            </div>
+            <EditorContent editor={editor} className="min-h-[200px] prose max-w-none" />
+          </div>
         </DialogBody>
         <DialogActions>
           <Button

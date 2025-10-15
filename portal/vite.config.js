@@ -11,11 +11,9 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ['react-quill'],
+      external: [],
       output: {
-        globals: {
-          'react-quill': 'ReactQuill'
-        }
+        globals: {}
       }
     }
   }
