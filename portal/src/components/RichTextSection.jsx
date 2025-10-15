@@ -137,79 +137,93 @@ export default function RichTextSection({ section, isAdmin = false }) {
           className="relative group"
           onDoubleClick={() => !isEditing && setIsEditing(true)}
         >
-          {/* Floating Toolbar */}
+          {/* Selection Toolbar */}
           {isEditing && (
-            <div className="sticky top-0 z-10 -mt-2 mb-2 flex justify-center">
-              <div className="bg-white shadow-lg rounded-lg border border-gray-300 p-1.5 flex gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
-                    editor?.isActive('heading', { level: 1 })
-                      ? 'bg-gray-200 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  H1
-                </button>
-                <button
-                  type="button"
-                  onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
-                    editor?.isActive('heading', { level: 2 })
-                      ? 'bg-gray-200 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  H2
-                </button>
-                <div className="w-px h-6 my-auto bg-gray-200" />
-                <button
-                  type="button"
-                  onClick={() => editor?.chain().focus().toggleBold().run()}
-                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
-                    editor?.isActive('bold')
-                      ? 'bg-gray-200 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  B
-                </button>
-                <button
-                  type="button"
-                  onClick={() => editor?.chain().focus().toggleItalic().run()}
-                  className={`px-2 py-1 rounded text-sm font-medium italic transition-colors ${
-                    editor?.isActive('italic')
-                      ? 'bg-gray-200 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  I
-                </button>
-                <button
-                  type="button"
-                  onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                  className={`px-2 py-1 rounded text-sm font-medium underline transition-colors ${
-                    editor?.isActive('underline')
-                      ? 'bg-gray-200 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  U
-                </button>
-                <div className="w-px h-6 my-auto bg-gray-200" />
-                <button
-                  type="button"
-                  onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
-                    editor?.isActive('bulletList')
-                      ? 'bg-gray-200 text-gray-900'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  •
-                </button>
-              </div>
+            <div 
+              className="fixed z-50 bg-white shadow-lg rounded-lg border border-gray-300 p-1.5 flex gap-1.5 invisible opacity-0 transition-opacity formatting-toolbar"
+              style={{
+                visibility: editor?.view?.state?.selection?.empty === false ? 'visible' : 'hidden',
+                opacity: editor?.view?.state?.selection?.empty === false ? 1 : 0,
+                top: typeof window !== 'undefined' ? 
+                  Math.max(
+                    10,
+                    (window.getSelection()?.getRangeAt(0)?.getBoundingClientRect()?.top || 0) - 50
+                  ) + 'px' : '0',
+                left: typeof window !== 'undefined' ? 
+                  Math.max(
+                    10,
+                    (window.getSelection()?.getRangeAt(0)?.getBoundingClientRect()?.left || 0)
+                  ) + 'px' : '0',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                  editor?.isActive('heading', { level: 1 })
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                H1
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                  editor?.isActive('heading', { level: 2 })
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                H2
+              </button>
+              <div className="w-px h-6 my-auto bg-gray-200" />
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleBold().run()}
+                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                  editor?.isActive('bold')
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                B
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                className={`px-2 py-1 rounded text-sm font-medium italic transition-colors ${
+                  editor?.isActive('italic')
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                I
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                className={`px-2 py-1 rounded text-sm font-medium underline transition-colors ${
+                  editor?.isActive('underline')
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                U
+              </button>
+              <div className="w-px h-6 my-auto bg-gray-200" />
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                  editor?.isActive('bulletList')
+                    ? 'bg-gray-200 text-gray-900'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                •
+              </button>
             </div>
           )}
           
@@ -229,7 +243,15 @@ export default function RichTextSection({ section, isAdmin = false }) {
                 }, 100);
               }
             }}
-            onBlur={() => {
+            onBlur={(e) => {
+              // Don't trigger blur when clicking formatting buttons
+              if (e.relatedTarget?.closest('.formatting-toolbar')) {
+                return;
+              }
+              // Don't save if clicking inside the editor
+              if (e.relatedTarget?.closest('.ProseMirror')) {
+                return;
+              }
               if (isEditing) {
                 setIsEditing(false);
                 handleSave(editor?.getHTML());
