@@ -22,13 +22,6 @@ export default function RichTextSection({ section, isAdmin = false }) {
     ],
     editable: true,
     content: content?.content || '',
-    onUpdate: ({ editor }) => {
-      // Debounce save to avoid too many requests
-      const timeoutId = setTimeout(() => {
-        handleSave(editor.getHTML());
-      }, 1000);
-      return () => clearTimeout(timeoutId);
-    },
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose lg:prose-lg max-w-none focus:outline-none min-h-[100px] text-gray-900',
@@ -121,9 +114,17 @@ export default function RichTextSection({ section, isAdmin = false }) {
         <Button
           color="blue"
           outline
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => {
+            if (isEditing) {
+              setIsEditing(false);
+              handleSave(editor?.getHTML());
+            } else {
+              setIsEditing(true);
+              setTimeout(() => editor?.commands.focus(), 100);
+            }
+          }}
         >
-          {isEditing ? 'Done Editing' : 'Edit Content'}
+          {isEditing ? 'Save Content' : 'Edit Content'}
         </Button>
       </div>
 
@@ -226,6 +227,12 @@ export default function RichTextSection({ section, isAdmin = false }) {
                 setTimeout(() => {
                   editor?.commands.focus();
                 }, 100);
+              }
+            }}
+            onBlur={() => {
+              if (isEditing) {
+                setIsEditing(false);
+                handleSave(editor?.getHTML());
               }
             }}
           >
