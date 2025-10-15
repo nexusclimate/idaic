@@ -20,16 +20,14 @@ export default function RichTextSection({ section, isAdmin = false }) {
       }),
       Underline,
     ],
+    editable: true,
     content: content?.content || '',
-    editable: isEditing,
     onUpdate: ({ editor }) => {
-      if (isEditing) {
-        // Debounce save to avoid too many requests
-        const timeoutId = setTimeout(() => {
-          handleSave(editor.getHTML());
-        }, 1000);
-        return () => clearTimeout(timeoutId);
-      }
+      // Debounce save to avoid too many requests
+      const timeoutId = setTimeout(() => {
+        handleSave(editor.getHTML());
+      }, 1000);
+      return () => clearTimeout(timeoutId);
     },
     editorProps: {
       attributes: {
@@ -65,6 +63,13 @@ export default function RichTextSection({ section, isAdmin = false }) {
       editor.commands.setContent(content.content);
     }
   }, [editor, content]);
+
+  // Update editor editable state
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(isEditing);
+    }
+  }, [editor, isEditing]);
 
   // Handle content save
   const handleSave = async (newContent) => {
@@ -210,16 +215,25 @@ export default function RichTextSection({ section, isAdmin = false }) {
                 ? 'min-h-[200px] border border-gray-300 rounded-lg p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500' 
                 : content ? '' : 'text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
             }`}
+            onClick={() => {
+              if (!isEditing) {
+                setIsEditing(true);
+                // Give time for editor to become editable
+                setTimeout(() => {
+                  editor?.commands.focus();
+                }, 100);
+              }
+            }}
           >
             {!content && !isEditing && (
-              <div className="text-gray-400 dark:text-gray-500">
+              <div className="text-gray-400">
                 <svg className="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Double-click to add content</p>
+                <p className="text-sm text-gray-500">Click to add content</p>
               </div>
             )}
-            <EditorContent editor={editor} />
+            <EditorContent editor={editor} className="min-h-[100px]" />
           </div>
 
           {saving && (

@@ -9,6 +9,8 @@ const supabase = createClient(
 );
 
 exports.handler = async function (event, context) {
+  // Get user ID from context
+  const userId = context.clientContext?.user?.sub;
   try {
     switch (event.httpMethod) {
       case 'GET': {
@@ -75,7 +77,10 @@ exports.handler = async function (event, context) {
             section: contentData.section,
             content: contentData.content,
             content_type: contentData.content_type || 'rich_text',
-            created_by: contentData.user_id || null,
+            created_by: userId || null,
+            updated_by: userId || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
             is_active: true
           }])
           .select();
