@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { colors } from '../config/colors';
+import RichTextSection from '../components/RichTextSection';
 
-export default function MENAChapter() {
+export default function MENAChapter({ isAdminAuthenticated = false }) {
   const [activeTab, setActiveTab] = useState('main');
   const tabs = [
     { name: 'Main', key: 'main' },
@@ -39,9 +40,7 @@ export default function MENAChapter() {
       </div>
       {activeTab === 'main' && (
         <>
-          <p className="text-base sm:text-lg text-gray-600 mb-4">
-            Manage the MENA (Middle East and North Africa) chapter activities and members.
-          </p>
+          <RichTextSection section="mena_chapter" isAdmin={isAdminAuthenticated} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="bg-white border rounded-lg p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-semibold mb-4">Chapter Stats</h3>
