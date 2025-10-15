@@ -31,8 +31,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
     },
     editorProps: {
       attributes: {
-        class: 'prose max-w-none focus:outline-none min-h-[100px] text-gray-900',
-        style: 'color: #111827;', // Ensure text is always dark
+        class: 'prose prose-sm sm:prose lg:prose-lg max-w-none focus:outline-none min-h-[100px] text-gray-900',
       },
     },
   });
@@ -71,8 +70,10 @@ export default function RichTextSection({ section, isAdmin = false }) {
     }
   }, [editor, isEditing]);
 
-  // Handle content save
+  // Handle content save with debounce
   const handleSave = async (newContent) => {
+    if (!newContent || newContent === '<p></p>') return; // Don't save empty content
+
     try {
       setSaving(true);
       const response = await fetch('/.netlify/functions/contentSections', {
@@ -90,9 +91,12 @@ export default function RichTextSection({ section, isAdmin = false }) {
         throw new Error(errorData.error || 'Failed to save content');
       }
 
-      await fetchContent();
+      const savedContent = await response.json();
+      // Update local state directly instead of refetching
+      setContent(savedContent);
       setError(null);
     } catch (err) {
+      console.error('Save error:', err);
       setError(err.message);
     } finally {
       setSaving(false);
@@ -210,7 +214,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
           
           {/* Editor */}
           <div 
-            className={`prose max-w-none transition-colors ${
+            className={`transition-colors ${
               isEditing 
                 ? 'min-h-[200px] border border-gray-300 rounded-lg p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500' 
                 : content ? '' : 'text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
@@ -233,7 +237,9 @@ export default function RichTextSection({ section, isAdmin = false }) {
                 <p className="text-sm text-gray-500">Click to add content</p>
               </div>
             )}
-            <EditorContent editor={editor} className="min-h-[100px]" />
+            <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none">
+              <EditorContent editor={editor} className="min-h-[100px]" />
+            </div>
           </div>
 
           {saving && (
