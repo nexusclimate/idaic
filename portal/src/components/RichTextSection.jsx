@@ -13,15 +13,28 @@ export default function RichTextSection({ section, isAdmin = false }) {
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2]
+        }
+      }),
       Underline,
     ],
     content: content?.content || '',
     editable: isEditing,
     onUpdate: ({ editor }) => {
       if (isEditing) {
-        handleSave(editor.getHTML());
+        // Debounce save to avoid too many requests
+        const timeoutId = setTimeout(() => {
+          handleSave(editor.getHTML());
+        }, 1000);
+        return () => clearTimeout(timeoutId);
       }
+    },
+    editorProps: {
+      attributes: {
+        class: 'prose dark:prose-invert max-w-none focus:outline-none min-h-[100px]',
+      },
     },
   });
 
@@ -115,80 +128,94 @@ export default function RichTextSection({ section, isAdmin = false }) {
         >
           {/* Floating Toolbar */}
           {isEditing && (
-            <div className="absolute -top-12 left-0 right-0 flex justify-center">
-              <div className="bg-white shadow-lg rounded-lg border p-1 flex gap-1">
-                <Button
-                  color="gray"
-                  outline
-                  size="sm"
+            <div className="sticky top-0 z-10 -mt-2 mb-2 flex justify-center">
+              <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 p-1.5 flex gap-1.5">
+                <button
+                  type="button"
                   onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                  className={editor?.isActive('heading', { level: 1 }) ? 'bg-gray-100' : ''}
+                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                    editor?.isActive('heading', { level: 1 })
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
                 >
                   H1
-                </Button>
-                <Button
-                  color="gray"
-                  outline
-                  size="sm"
+                </button>
+                <button
+                  type="button"
                   onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                  className={editor?.isActive('heading', { level: 2 }) ? 'bg-gray-100' : ''}
+                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                    editor?.isActive('heading', { level: 2 })
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
                 >
                   H2
-                </Button>
-                <Button
-                  color="gray"
-                  outline
-                  size="sm"
+                </button>
+                <div className="w-px h-6 my-auto bg-gray-200 dark:bg-gray-700" />
+                <button
+                  type="button"
                   onClick={() => editor?.chain().focus().toggleBold().run()}
-                  className={editor?.isActive('bold') ? 'bg-gray-100' : ''}
+                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                    editor?.isActive('bold')
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
                 >
                   B
-                </Button>
-                <Button
-                  color="gray"
-                  outline
-                  size="sm"
+                </button>
+                <button
+                  type="button"
                   onClick={() => editor?.chain().focus().toggleItalic().run()}
-                  className={editor?.isActive('italic') ? 'bg-gray-100' : ''}
+                  className={`px-2 py-1 rounded text-sm font-medium italic transition-colors ${
+                    editor?.isActive('italic')
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
                 >
                   I
-                </Button>
-                <Button
-                  color="gray"
-                  outline
-                  size="sm"
+                </button>
+                <button
+                  type="button"
                   onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                  className={editor?.isActive('underline') ? 'bg-gray-100' : ''}
+                  className={`px-2 py-1 rounded text-sm font-medium underline transition-colors ${
+                    editor?.isActive('underline')
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
                 >
                   U
-                </Button>
-                <Button
-                  color="gray"
-                  outline
-                  size="sm"
+                </button>
+                <div className="w-px h-6 my-auto bg-gray-200 dark:bg-gray-700" />
+                <button
+                  type="button"
                   onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                  className={editor?.isActive('bulletList') ? 'bg-gray-100' : ''}
+                  className={`px-2 py-1 rounded text-sm font-medium transition-colors ${
+                    editor?.isActive('bulletList')
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
                 >
                   •
-                </Button>
+                </button>
               </div>
             </div>
           )}
           
           {/* Editor */}
           <div 
-            className={`prose max-w-none transition-colors ${
+            className={`prose dark:prose-invert max-w-none transition-colors ${
               isEditing 
-                ? 'min-h-[200px] border rounded-lg p-4 bg-white' 
-                : content ? '' : 'text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
+                ? 'min-h-[200px] border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 focus-within:border-blue-500 dark:focus-within:border-blue-400' 
+                : content ? '' : 'text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700'
             }`}
           >
             {!content && !isEditing && (
-              <div className="text-gray-400">
+              <div className="text-gray-400 dark:text-gray-500">
                 <svg className="mx-auto h-12 w-12 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <p className="text-sm text-gray-500">Double-click to add content</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Double-click to add content</p>
               </div>
             )}
             <EditorContent editor={editor} />
