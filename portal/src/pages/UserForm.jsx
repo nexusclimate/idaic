@@ -7,7 +7,13 @@ export default function UserForm() {
     email: '',
     company: '',
     region: '',
-    data_permission: ''
+    data_permission: '',
+    organizationDescription: '',
+    aiDecarbonisation: '',
+    challenges: '',
+    contribution: '',
+    projects: '',
+    aiTools: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -37,7 +43,13 @@ export default function UserForm() {
         email: '',
         company: '',
         region: '',
-        data_permission: ''
+        data_permission: '',
+        organizationDescription: '',
+        aiDecarbonisation: '',
+        challenges: '',
+        contribution: '',
+        projects: '',
+        aiTools: ''
       });
     } catch (err) {
       setError(err.message);
@@ -77,7 +89,7 @@ export default function UserForm() {
 
         <div>
           <label htmlFor="company" className="block text-sm font-medium text-gray-900">
-            Company
+            Organization Name
           </label>
           <input
             type="text"
@@ -103,6 +115,84 @@ export default function UserForm() {
               <option key={region} value={region}>{region}</option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label htmlFor="organizationDescription" className="block text-sm font-medium text-gray-900">
+            Please provide a brief description of your organization and its activities
+          </label>
+          <textarea
+            id="organizationDescription"
+            value={formData.organizationDescription}
+            onChange={(e) => setFormData({ ...formData, organizationDescription: e.target.value })}
+            rows="4"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="aiDecarbonisation" className="block text-sm font-medium text-gray-900">
+            In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?
+          </label>
+          <textarea
+            id="aiDecarbonisation"
+            value={formData.aiDecarbonisation}
+            onChange={(e) => setFormData({ ...formData, aiDecarbonisation: e.target.value })}
+            rows="4"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="challenges" className="block text-sm font-medium text-gray-900">
+            What are the key challenges you face in implementing AI for decarbonisation?
+          </label>
+          <textarea
+            id="challenges"
+            value={formData.challenges}
+            onChange={(e) => setFormData({ ...formData, challenges: e.target.value })}
+            rows="4"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="contribution" className="block text-sm font-medium text-gray-900">
+            How do you see your organization contributing to and benefiting from the IDAIC community?
+          </label>
+          <textarea
+            id="contribution"
+            value={formData.contribution}
+            onChange={(e) => setFormData({ ...formData, contribution: e.target.value })}
+            rows="4"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="projects" className="block text-sm font-medium text-gray-900">
+            Are there any specific projects or initiatives you would like to share with the community?
+          </label>
+          <textarea
+            id="projects"
+            value={formData.projects}
+            onChange={(e) => setFormData({ ...formData, projects: e.target.value })}
+            rows="4"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="aiTools" className="block text-sm font-medium text-gray-900">
+            What AI tools and technologies are you currently using or planning to use?
+          </label>
+          <textarea
+            id="aiTools"
+            value={formData.aiTools}
+            onChange={(e) => setFormData({ ...formData, aiTools: e.target.value })}
+            rows="4"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+          />
         </div>
 
         <div>
