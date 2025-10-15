@@ -13,6 +13,8 @@ export default function User() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const REGIONS = ['UK', 'UAE', 'EU', 'MENA', 'Global'];
+
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
@@ -127,6 +129,24 @@ export default function User() {
                       Company
                       <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'company' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
                     </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('region')}
+                    >
+                      Region
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'region' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('data_permission')}
+                    >
+                      Data Permission
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'data_permission' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -162,6 +182,72 @@ export default function User() {
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.company || '—'}
+                      </td>
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                        )}
+                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        <select
+                          value={user.region || ''}
+                          onChange={async (e) => {
+                            try {
+                              const response = await fetch(`/.netlify/functions/userProfile?id=${user.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ region: e.target.value })
+                              });
+                              if (!response.ok) throw new Error('Failed to update region');
+                              // Update local state
+                              setUsers(users.map(u => 
+                                u.id === user.id ? { ...u, region: e.target.value } : u
+                              ));
+                            } catch (err) {
+                              console.error('Failed to update region:', err);
+                            }
+                          }}
+                          className="bg-transparent border-none text-xs sm:text-sm focus:ring-0 cursor-pointer"
+                          style={{ color: colors.text.secondary }}
+                        >
+                          <option value="">Select Region</option>
+                          {REGIONS.map(region => (
+                            <option key={region} value={region}>{region}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                        )}
+                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={user.data_permission || false}
+                            onChange={async (e) => {
+                              try {
+                                const response = await fetch(`/.netlify/functions/userProfile?id=${user.id}`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ data_permission: e.target.checked })
+                                });
+                                if (!response.ok) throw new Error('Failed to update permission');
+                                // Update local state
+                                setUsers(users.map(u => 
+                                  u.id === user.id ? { ...u, data_permission: e.target.checked } : u
+                                ));
+                              } catch (err) {
+                                console.error('Failed to update permission:', err);
+                              }
+                            }}
+                            className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                          />
+                          <span className="ml-2">{user.data_permission ? 'Yes' : 'No'}</span>
+                        </div>
                       </td>
                     </tr>
                   ))}

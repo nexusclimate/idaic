@@ -59,7 +59,8 @@ exports.handler = async function (event, context) {
             aiTools: profile.ai_tools,
             content: profile.content,
             approval: profile.approval,
-            profile_updated_at: profile.profile_updated_at
+            profile_updated_at: profile.profile_updated_at,
+            data_permission: profile.data_permission
           };
           return {
             statusCode: 200,
@@ -203,6 +204,7 @@ exports.handler = async function (event, context) {
         if (updates.aiTools !== undefined) mappedUpdates.ai_tools = updates.aiTools;
         if (updates.content !== undefined) mappedUpdates.content = updates.content;
         if (updates.approval !== undefined) mappedUpdates.approval = updates.approval;
+        if (updates.data_permission !== undefined) mappedUpdates.data_permission = updates.data_permission;
         
         mappedUpdates.updated_at = new Date().toISOString();
 
