@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Login - IDAIC Members</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <link
 href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
 rel="stylesheet"
@@ -36,14 +37,14 @@ class="w-full max-w-md p-8 space-y-6 bg-[#1a1a1a] rounded-xl shadow-xl mt-4"
 <button
 id="otp-tab"
 class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-[#FF9900] text-[#FF9900] transition-colors duration-200"
-onclick="switchTab('otp')"
+onclick="window.switchTab('otp')"
 >
 Email Code
 </button>
 <button
 id="password-tab"
 class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-[#DCDCDC] hover:text-[#FAFAFA] transition-colors duration-200"
-onclick="switchTab('password')"
+onclick="window.switchTab('password')"
 >
 Password
 </button>
@@ -158,8 +159,8 @@ id="notification-list"
 <!-- End cookieyes banner -->
 
 
-<!-- Load your module -->
-<script type="module" src="login.js"></script>
+<!-- Load your script -->
+<script src="login.js"></script>
 </body>
 </html>
 

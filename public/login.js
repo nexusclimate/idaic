@@ -1,5 +1,6 @@
 // login.js
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+// Load Supabase from CDN
+const { createClient } = supabase;
 
 // 1. Read the injected env
 const SUPABASE_URL      = window.ENV.SUPABASE_URL
@@ -8,8 +9,9 @@ const N8N_URL  = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// Tab switching functionality
+// Make sure switchTab is defined and exposed to window
 window.switchTab = function(tab) {
+  console.log('Switching to tab:', tab);
   const otpTab = document.getElementById('otp-tab')
   const passwordTab = document.getElementById('password-tab')
   const otpContent = document.getElementById('otp-content')
