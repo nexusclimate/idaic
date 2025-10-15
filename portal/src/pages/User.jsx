@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
+import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -64,7 +65,7 @@ export default function User() {
     return (
       <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main, color: colors.text.primary }}>
         <div className="flex items-center justify-center py-6 sm:py-8">
-          <div className="text-red-600">{error}</div>
+          <ErrorMessage message={error} />
         </div>
       </div>
     );

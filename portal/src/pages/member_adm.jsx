@@ -2,6 +2,7 @@ import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid';
 import { ChevronDownIcon } from '@heroicons/react/16/solid';
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
+import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 
 // Blocked email domains
 const BLOCKED_DOMAINS = ['gmail.com', 'yahoo.com', 'googlemail.com'];
@@ -141,9 +142,7 @@ export default function MemberAdm() {
                     placeholder="jane@corporate.com"
                     className={`mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500 ${emailError ? 'border-red-500' : ''}`}
                   />
-                  {emailError && (
-                    <p className="mt-1 text-xs text-red-600">{emailError}</p>
-                  )}
+                  <ErrorMessage message={emailError} className="mt-1" />
                 </div>
                 <div className="w-full">
                   <label htmlFor="title" className="block text-sm font-medium text-gray-900">Title</label>
@@ -183,6 +182,18 @@ export default function MemberAdm() {
                     <option value="uk">UK</option>
                     <option value="mena">MENA</option>
                 </select>
+                </div>
+                <div className="w-full">
+                  <label htmlFor="approval" className="block text-sm font-medium text-gray-900">Approval</label>
+                  <select
+                    id="approval"
+                    name="approval"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
+                  >
+                    <option value="">Select Approval Status</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
                 </div>
               </div>
             </div>

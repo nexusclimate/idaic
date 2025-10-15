@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
+import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 import { useNavigate } from 'react-router-dom';
 
 function classNames(...classes) {
@@ -132,7 +133,7 @@ export default function UserAdm() {
       {loading ? (
         <div className="py-8 text-center text-gray-500">Loading users...</div>
       ) : error ? (
-        <div className="py-8 text-center text-red-500">{error}</div>
+        <div className="py-8 text-center"><ErrorMessage message={error} /></div>
       ) : (
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
