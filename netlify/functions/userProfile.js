@@ -78,11 +78,11 @@ exports.handler = async function (event, context) {
         // Create or update user profile
         const profileData = JSON.parse(event.body);
 
-        // Validate required fields
-        if (!profileData.name || !profileData.email) {
+        // Validate email field only
+        if (!profileData.email) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'Name and email are required' })
+            body: JSON.stringify({ error: 'Email is required' })
           };
         }
 
@@ -244,7 +244,8 @@ exports.handler = async function (event, context) {
           aiTools: profile.ai_tools,
           content: profile.content,
           approval: profile.approval,
-          profile_updated_at: profile.profile_updated_at
+          profile_updated_at: profile.profile_updated_at,
+          data_permission: profile.data_permission
         };
 
         return {
