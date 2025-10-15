@@ -94,8 +94,8 @@ exports.handler = async function (event, context) {
             content_type: contentData.content_type || 'rich_text',
             created_by: userId || null,
             updated_by: userId || null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: new Date().toISOString().replace('Z', '+00:00'),
+            updated_at: new Date().toISOString().replace('Z', '+00:00'),
             is_active: true
           }])
           .select();

@@ -4,10 +4,12 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { useUser } from '../hooks/useUser';
+import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../config/supabase';
 
 export default function RichTextSection({ section, isAdmin = false }) {
   const { user } = useUser();
+  const { getAuthToken } = useAuth();
   const [content, setContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -77,12 +79,15 @@ export default function RichTextSection({ section, isAdmin = false }) {
 
     try {
       setSaving(true);
-      const token = await supabase.auth.getSession();
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('No active session found. Please log in.');
+      }
       const response = await fetch('/.netlify/functions/contentSections', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token?.data?.session?.access_token}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           section: section,

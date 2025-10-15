@@ -172,19 +172,35 @@ export default function MemberAdm() {
                 />
               </div>
                 <div className="w-full">
-                  <label htmlFor="memberType" className="block text-sm font-medium text-gray-900">Member</label>
+                  <label htmlFor="memberType" className="block text-sm font-medium text-gray-900">Region</label>
                 <select
                     id="memberType"
                     name="memberType"
-                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   >
-                    <option value="global">Global</option>
-                    <option value="uk">UK</option>
-                    <option value="mena">MENA</option>
+                    <option value="">Select Region</option>
+                    <option value="UK">UK</option>
+                    <option value="UAE">UAE</option>
+                    <option value="EU">EU</option>
+                    <option value="MENA">MENA</option>
+                    <option value="Global">Global</option>
                 </select>
                 </div>
                 <div className="w-full">
-                  <label htmlFor="approval" className="block text-sm font-medium text-gray-900">Approval</label>
+                  <label htmlFor="data_permission" className="block text-sm font-medium text-gray-900">Data Permission</label>
+                  <select
+                    id="data_permission"
+                    name="data_permission"
+                    className="mt-2 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value="">Select Option</option>
+                    <option value="yes">Yes, I Agree</option>
+                    <option value="no">No, I Decline</option>
+                  </select>
+                  <p className="mt-2 text-xs text-gray-500">I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website</p>
+                </div>
+                <div className="w-full">
+                  <label htmlFor="approval" className="block text-sm font-medium text-gray-900">Admin Approval</label>
                   <select
                     id="approval"
                     name="approval"
