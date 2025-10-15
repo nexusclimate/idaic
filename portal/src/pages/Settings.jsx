@@ -181,7 +181,7 @@ export default function Settings({ user }) {
       {/* Section Heading with Tabs (left-aligned, consistent with other pages) */}
       <div className="mb-4 border-b border-gray-200">
         <div className="sm:flex sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">User Settings</h1>
+          <h1 className="text-2xl font-bold text-gray-900">User Profile</h1>
           <nav className="mt-2 sm:mt-0">
             <ul className="flex space-x-4" role="tablist">
               {tabs.map(tab => (
@@ -453,24 +453,24 @@ export default function Settings({ user }) {
               </div>
 
               {/* Data Permission */}
-              <div className="border-b border-gray-200 pb-2 pt-1">
-                <div>
-                  <label htmlFor="approval" className="block text-sm font-medium text-gray-700 mb-1">Data Permission</label>
+              <div className="border-b border-gray-200 pb-4 pt-1">
+                <h3 className="text-base font-medium text-gray-900 mb-2">Data Permission</h3>
+                <p className="text-sm text-gray-700 mb-4">
+                  I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
+                </p>
+                <div className="border-t border-gray-200 pt-4">
                   <select
                     id="approval"
                     name="approval"
                     value={approval ? 'yes' : 'no'}
                     onChange={e => setApproval(e.target.value === 'yes')}
                     disabled={!isEditing}
-                    className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'} cursor-pointer`}
+                    className={`block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'} cursor-pointer`}
                   >
                     <option value="">Select Option</option>
                     <option value="yes">Yes, I Agree</option>
                     <option value="no">No, I Decline</option>
                   </select>
-                  <p className="mt-2 text-sm text-gray-500">
-                    I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
-                  </p>
                 </div>
               </div>
 
