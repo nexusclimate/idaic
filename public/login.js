@@ -316,46 +316,31 @@ document
       // Use the provided email for password-based login
       const adminEmail = email
       
-      // For password login, we'll create a proper user in the database first
+      // For password login, only allow existing users (authorized users only)
       let userId;
       
-      try {
-        // Check if user already exists
-        const { data: existingUser, error: fetchError } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', adminEmail)
-          .maybeSingle();
+      // Check if user exists in the database
+      const { data: existingUser, error: fetchError } = await supabase
+        .from('users')
+        .select('id, name, email')
+        .eq('email', adminEmail)
+        .maybeSingle();
 
-        if (fetchError) {
-          console.error('Error fetching user:', fetchError);
-        }
-
-        if (existingUser) {
-          userId = existingUser.id;
-          console.log('Found existing user with ID:', userId);
-        } else {
-          // Create new user with server-generated UUID
-          console.log('Creating new user for:', adminEmail);
-          const { data: newUser, error: insertError } = await supabase
-            .from('users')
-            .insert([{ email: adminEmail }])
-            .select()
-            .single();
-            
-          if (insertError) {
-            console.error('Error creating user:', insertError);
-            throw insertError;
-          }
-          userId = newUser.id;
-          console.log('Created new user with ID:', userId);
-        }
-      } catch (dbError) {
-        console.error('Database error:', dbError);
-        createNotification({ message: 'Database error. Using temporary session.', success: false, warning: true });
-        // Use a temporary ID if database fails
-        userId = 'temp_' + Date.now();
+      if (fetchError) {
+        console.error('Error fetching user:', fetchError);
+        createNotification({ message: 'Error checking user authorization. Please try again.', success: false });
+        return;
       }
+
+      // Only allow login if user exists in database
+      if (!existingUser) {
+        console.log('User not found in database:', adminEmail);
+        createNotification({ message: 'User not authorized. Please contact IDAIC admin to be added to the system.', success: false });
+        return;
+      }
+      
+      userId = existingUser.id;
+      console.log('Found authorized user with ID:', userId);
 
       // Create mock session with real UUID
       const mockSession = {
