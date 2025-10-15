@@ -209,8 +209,7 @@ export default function User() {
                               console.error('Failed to update region:', err);
                             }
                           }}
-                          className="bg-transparent border-none text-xs sm:text-sm focus:ring-0 cursor-pointer"
-                          style={{ color: colors.text.secondary }}
+                          className="block w-32 rounded-md bg-white px-2 py-1 text-sm border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                         >
                           <option value="">Select Region</option>
                           {REGIONS.map(region => (
@@ -225,7 +224,7 @@ export default function User() {
                         )}
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-3">
                           <select
                             value={user.data_permission ? 'yes' : 'no'}
                             onChange={async (e) => {
@@ -244,12 +243,15 @@ export default function User() {
                                 console.error('Failed to update permission:', err);
                               }
                             }}
-                            className="block w-24 rounded-md bg-white px-2 py-1 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
+                            className="block w-32 rounded-md bg-white px-2 py-1 text-sm border border-gray-300 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                           >
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
+                            <option value="">Select Option</option>
+                            <option value="yes">Yes, I Agree</option>
+                            <option value="no">No, I Decline</option>
                           </select>
-                          <span className="ml-2 text-xs text-gray-500">I agree that IDAIC can process my data</span>
+                          <div className="text-xs text-gray-500">
+                            <p>I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website</p>
+                          </div>
                         </div>
                       </td>
                     </tr>
