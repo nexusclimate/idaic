@@ -122,8 +122,10 @@ export default function RichTextSection({ section, isAdmin = false }) {
 
   return (
     <div className="bg-white border rounded-lg p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Chapter Information</h2>
+      <div className="flex items-center justify-end mb-4">
+        {section !== 'home_content' && (
+          <h2 className="text-xl font-semibold text-gray-900 mr-auto">Chapter Information</h2>
+        )}
         <Button
           color="blue"
           outline

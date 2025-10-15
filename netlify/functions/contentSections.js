@@ -9,8 +9,23 @@ const supabase = createClient(
 );
 
 exports.handler = async function (event, context) {
-  // Get user ID from context
-  const userId = context.clientContext?.user?.sub;
+  // Get user ID from context or Authorization header
+  let userId = context.clientContext?.user?.sub;
+  
+  // If no user ID in context, try to get it from Authorization header
+  if (!userId && event.headers.authorization) {
+    try {
+      const token = event.headers.authorization.replace('Bearer ', '');
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      if (!error && user) {
+        userId = user.id;
+      }
+    } catch (err) {
+      console.error('Error getting user from token:', err);
+    }
+  }
+  
+  console.log('User ID from context or token:', userId); // Debug logging
   try {
     switch (event.httpMethod) {
       case 'GET': {
