@@ -86,7 +86,7 @@ exports.handler = async function (event, context) {
           };
         }
 
-        if (profileData.data_permission === undefined || profileData.data_permission === '') {
+        if (profileData.approval === undefined || profileData.approval === '') {
           return {
             statusCode: 400,
             body: JSON.stringify({ error: 'Please select an option for data permission' })

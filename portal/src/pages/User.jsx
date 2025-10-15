@@ -133,6 +133,24 @@ export default function User() {
                       scope="col"
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('title')}
+                    >
+                      Title/Position
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'title' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('region')}
+                    >
+                      Region
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>{sortBy === 'region' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                       onClick={() => handleSort('linkedin_url')}
                     >
                       LinkedIn
@@ -141,7 +159,7 @@ export default function User() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((user, userIdx) => (
+                  {filtered.filter(user => user.approval === 'yes').map((user, userIdx) => (
                     <tr
                       key={user.email || userIdx}
                       className="hover:transition cursor-pointer"
@@ -173,6 +191,24 @@ export default function User() {
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.company || '—'}
+                      </td>
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                        )}
+                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        {user.title || '—'}
+                      </td>
+                      <td
+                        className={classNames(
+                          userIdx !== filtered.length - 1 ? '' : '',
+                          'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                        )}
+                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                      >
+                        {user.region || '—'}
                       </td>
                       <td
                         className={classNames(
