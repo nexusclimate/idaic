@@ -4,7 +4,6 @@ import User from './User';
 
 const tabs = [
   { name: 'Members', key: 'members' },
-  { name: 'Users', key: 'users' },
 ];
 
 const members = [
@@ -120,10 +119,6 @@ export default function Members() {
           </div>
         </div>
       )}
-      {activeTab === 'users' && (
-        <User />
-      )}
-
       {/* Drawer */}
       <div
         className={`fixed inset-0 z-40 transition-all duration-500 ${drawerOpen ? 'visible' : 'invisible pointer-events-none'}`}
