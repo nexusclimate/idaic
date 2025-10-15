@@ -1,9 +1,54 @@
 // login.js
-// Initialize Supabase client
-const supabase = window.supabase.createClient(
-  window.ENV.SUPABASE_URL,
-  window.ENV.SUPABASE_ANON_KEY
-);
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+// 1. Read the injected env
+const SUPABASE_URL = window.ENV.SUPABASE_URL
+const SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
+const N8N_URL = window.ENV.N8N_URL
+const N8N_AUTH = window.ENV.N8N_AUTH
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// Tab switching functionality
+window.switchTab = function(tab) {
+  const otpTab = document.getElementById('otp-tab')
+  const passwordTab = document.getElementById('password-tab')
+  const otpContent = document.getElementById('otp-content')
+  const passwordContent = document.getElementById('password-content')
+  
+  if (tab === 'otp') {
+    // Activate OTP tab
+    otpTab.classList.add('border-[#FF9900]', 'text-[#FF9900]')
+    otpTab.classList.remove('border-transparent', 'text-[#DCDCDC]')
+    passwordTab.classList.add('border-transparent', 'text-[#DCDCDC]')
+    passwordTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]')
+    
+    // Show OTP content, hide password content
+    otpContent.classList.remove('hidden')
+    passwordContent.classList.add('hidden')
+    
+    // Reset password form
+    document.getElementById('password').value = ''
+  } else if (tab === 'password') {
+    // Activate password tab
+    passwordTab.classList.add('border-[#FF9900]', 'text-[#FF9900]')
+    passwordTab.classList.remove('border-transparent', 'text-[#DCDCDC]')
+    otpTab.classList.add('border-transparent', 'text-[#DCDCDC]')
+    otpTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]')
+    
+    // Show password content, hide OTP content
+    passwordContent.classList.remove('hidden')
+    otpContent.classList.add('hidden')
+    
+    // Reset OTP forms
+    document.getElementById('email').value = ''
+    document.getElementById('code').value = ''
+    document.getElementById('otp-request-form').classList.remove('hidden')
+    document.getElementById('otp-verify-form').classList.add('hidden')
+    
+    // Reset password form
+    document.getElementById('password-email').value = ''
+  }
+}
 
 // Browser and OS detection functions
 function detectBrowser() {
