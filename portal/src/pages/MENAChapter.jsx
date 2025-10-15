@@ -40,8 +40,7 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
       </div>
       {activeTab === 'main' && (
         <>
-          <RichTextSection section="mena_chapter" isAdmin={isAdminAuthenticated} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
             <div className="bg-white border rounded-lg p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-semibold mb-4">Chapter Stats</h3>
               <div className="space-y-3">
@@ -68,6 +67,7 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
               </ul>
             </div>
           </div>
+          <RichTextSection section="mena_chapter" isAdmin={isAdminAuthenticated} />
         </>
       )}
       {activeTab === 'mena updates' && (
