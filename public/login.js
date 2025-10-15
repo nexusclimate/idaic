@@ -36,6 +36,213 @@ function detectOS() {
   return 'Unknown';
 }
 
+// OTP Request Form Handler
+document.getElementById('otp-request-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const domain = email.split('@')[1]?.toLowerCase();
+  console.log('Checking domain:', domain);
+
+  // 1. Check if domain is approved
+  let domainApproved = false;
+  try {
+    const { data, error } = await supabase
+      .from('org_domains')
+      .select('*')
+      .ilike('domain_email', domain)
+      .maybeSingle();
+    console.log('Supabase org_domains result:', data, error);
+    if (data) domainApproved = true;
+  } catch (err) {
+    createNotification({ message: 'Error checking organization membership. Please try again.', success: false });
+    return;
+  }
+
+  if (!domainApproved) {
+    createNotification({ message: 'Your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false, warning: true });
+    return;
+  }
+
+  // 2. Check if user exists in users table
+  let userExists = false;
+  try {
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+    if (userData) userExists = true;
+  } catch (err) {
+    createNotification({ message: 'Error checking user database. Please try again.', success: false });
+    return;
+  }
+
+  async function sendOtp() {
+    createNotification({ message: 'Sending OTP…', success: true });
+    return await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+    });
+  }
+
+  if (!userExists) {
+    createNotification({ message: 'You are not a registered user yet, but your organization is a member. We are setting you up now. Expect an OTP soon!', success: false });
+    await new Promise(res => setTimeout(res, 700));
+    try {
+      // Extract project reference from SUPABASE_URL
+      const projectRef = window.ENV.SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+      if (!projectRef) {
+        throw new Error('Invalid Supabase URL format');
+      }
+      const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const provisionResult = await provisionRes.json();
+      if (provisionRes.ok) {
+        // Wait for user to appear in users table (poll up to 1s)
+        let userRowExists = false;
+        for (let i = 0; i < 5; i++) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
+          if (userData) {
+            userRowExists = true;
+            break;
+          }
+          await new Promise(res => setTimeout(res, 200));
+        }
+        if (!userRowExists) {
+          createNotification({ message: 'Provisioned, but user record not found. Please try again in a moment.', success: false });
+          return;
+        }
+        await new Promise(res => setTimeout(res, 200));
+        let retry = await sendOtp();
+        if (!retry.error) {
+          document.getElementById('otp-request-form').classList.add('hidden');
+          document.getElementById('otp-verify-form').classList.remove('hidden');
+          createNotification({ message: 'OTP sent! Please check your email for the login code.', success: true });
+          document.getElementById('code').focus();
+          return;
+        } else {
+          createNotification({ message: retry.error.message, success: false });
+          return;
+        }
+      } else {
+        createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
+        return;
+      }
+    } catch (fetchErr) {
+      createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
+      return;
+    }
+  } else {
+    // User exists, send OTP as normal
+    try {
+      let { error } = await sendOtp();
+      if (!error) {
+        document.getElementById('otp-request-form').classList.add('hidden');
+        document.getElementById('otp-verify-form').classList.remove('hidden');
+        createNotification({ message: 'OTP sent! Check your email.', success: true });
+        document.getElementById('code').focus();
+        return;
+      } else if (error.status === 500) {
+        createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+        return;
+      } else {
+        let friendlyMessage = error.message;
+        if (error.message.includes('Invalid login credentials')) {
+          friendlyMessage = 'Invalid login credentials. Please check your input.';
+        } else if (error.message.includes('Rate limit exceeded')) {
+          friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+        }
+        createNotification({ message: friendlyMessage, success: false });
+        return;
+      }
+    } catch (err) {
+      let friendlyMessage = err.message;
+      if (err.message.includes('Signups not allowed')) {
+        friendlyMessage = 'This email is not registered. Please register as a member or contact support.';
+      } else if (err.message.includes('Invalid login credentials')) {
+        friendlyMessage = 'Invalid login credentials. Please check your input.';
+      } else if (err.message.includes('Rate limit exceeded')) {
+        friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+      }
+      createNotification({ message: friendlyMessage, success: false });
+    }
+  }
+});
+
+// OTP Verify Form Handler
+document.getElementById('otp-verify-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const code = document.getElementById('code').value.trim();
+
+  try {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: 'email'
+    });
+
+    if (error) throw error;
+
+    localStorage.setItem('idaic-token', data.session.access_token);
+    createNotification({ message: 'Successfully signed in!', success: true });
+
+    // Track user login stats
+    try {
+      const ip = await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => data.ip);
+
+      let geo = {};
+      try {
+        geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
+      } catch (geoErr) {
+        console.error('❌ Failed to fetch geo info:', geoErr);
+      }
+
+      const user = data.user || {};
+      const userId = data.user?.id || null;
+
+      const metadata = {
+        user_id: userId,
+        email: user.email || document.getElementById('email').value.trim(),
+        ip_address: ip,
+        country: geo.country || 'Unknown',
+        city: geo.city || 'Unknown',
+        region: geo.regionName || geo.region || 'Unknown',
+        device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+        browser: detectBrowser(),
+        os: detectOS(),
+        user_agent: navigator.userAgent,
+        login_time: new Date().toISOString()
+      };
+
+      await supabase.from('user_logins').insert([metadata]);
+      console.log('✅ User login tracked:', metadata);
+    } catch (trackErr) {
+      console.error('❌ Failed to track user login:', trackErr);
+    }
+
+    window.location.href = '/app';
+
+  } catch (err) {
+    let friendlyMessage = err.message;
+
+    if (err.message.includes('Invalid login credentials')) {
+      friendlyMessage = 'Invalid code. Please check your email or request a new OTP.';
+    }
+
+    createNotification({ message: friendlyMessage, success: false });
+  }
+});
+
 // Password Login Form Handler
 document.getElementById('password-form').addEventListener('submit', async (e) => {
   e.preventDefault();
