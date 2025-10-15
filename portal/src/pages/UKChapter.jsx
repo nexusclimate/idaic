@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { colors } from '../config/colors';
+import RichTextSection from '../components/RichTextSection';
 
 export default function UKChapter() {
   const [activeTab, setActiveTab] = useState('main');
@@ -68,6 +69,9 @@ export default function UKChapter() {
                 <li>• Content submission</li>
               </ul>
             </div>
+          </div>
+          <div className="mt-8">
+            <RichTextSection section="uk_chapter" />
           </div>
         </>
       )}

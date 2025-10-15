@@ -14,6 +14,7 @@ import {
   MegaphoneIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/20/solid";
+import RichTextSection from "../components/RichTextSection";
 
 export default function Home() {
   return (
@@ -43,6 +44,9 @@ export default function Home() {
             <li>• Content updated</li>
           </ul>
         </div>
+      </div>
+      <div className="mt-8">
+        <RichTextSection section="home_content" />
       </div>
     </div>
   );
