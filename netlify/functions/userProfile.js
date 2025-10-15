@@ -78,11 +78,18 @@ exports.handler = async function (event, context) {
         // Create or update user profile
         const profileData = JSON.parse(event.body);
 
-        // Validate email field only
-        if (!profileData.email) {
+        // Validate required fields
+        if (!profileData.email || !profileData.name) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'Email is required' })
+            body: JSON.stringify({ error: 'Name and email are required' })
+          };
+        }
+
+        if (profileData.data_permission === undefined || profileData.data_permission === '') {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Please select an option for data permission' })
           };
         }
 
