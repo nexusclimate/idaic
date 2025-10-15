@@ -7,7 +7,13 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Define tab switching function directly in HTML
+  // Initialize environment variables
+  window.ENV = window.ENV || {};
+  
+  // Make Supabase available globally
+  window.supabase = supabase;
+  
+  // Define tab switching function
   function switchTab(tab) {
     const otpTab = document.getElementById('otp-tab');
     const passwordTab = document.getElementById('password-tab');
@@ -196,7 +202,7 @@ id="notification-list"
 
 
 <!-- Load your script -->
-<script src="login.js"></script>
+<script src="login.js" defer></script>
 </body>
 </html>
 
