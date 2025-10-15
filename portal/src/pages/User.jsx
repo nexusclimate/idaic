@@ -179,7 +179,7 @@ export default function User() {
                           userIdx !== filtered.length - 1 ? '' : '',
                           'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
-                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.email || '—'}
                       </td>
@@ -188,7 +188,7 @@ export default function User() {
                           userIdx !== filtered.length - 1 ? '' : '',
                           'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
-                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.company || '—'}
                       </td>
@@ -197,7 +197,7 @@ export default function User() {
                           userIdx !== filtered.length - 1 ? '' : '',
                           'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
-                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.title || '—'}
                       </td>
@@ -206,7 +206,7 @@ export default function User() {
                           userIdx !== filtered.length - 1 ? '' : '',
                           'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
-                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.region || '—'}
                       </td>
@@ -215,7 +215,7 @@ export default function User() {
                           userIdx !== filtered.length - 1 ? '' : '',
                           'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
                         )}
-                        style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         {user.linkedin_url ? (
                           <a 
