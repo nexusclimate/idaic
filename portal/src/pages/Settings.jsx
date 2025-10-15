@@ -3,7 +3,6 @@ import { colors } from '../config/colors';
 
 const tabs = [
   { name: 'Personal Info', key: 'personal' },
-  { name: 'Notifications', key: 'notifications' },
 ];
 
 export default function Settings({ user }) {
@@ -254,7 +253,21 @@ export default function Settings({ user }) {
                   </div>
                   <div>
                     <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
-                    <input id="region" name="region" type="text" value={region} onChange={e => setRegion(e.target.value)} disabled={!isEditing} className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'}`} />
+                    <select
+                      id="region"
+                      name="region"
+                      value={region}
+                      onChange={e => setRegion(e.target.value)}
+                      disabled={!isEditing}
+                      className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'} cursor-pointer`}
+                    >
+                      <option value="">Select Region</option>
+                      <option value="UK">UK</option>
+                      <option value="UAE">UAE</option>
+                      <option value="EU">EU</option>
+                      <option value="MENA">MENA</option>
+                      <option value="Global">Global</option>
+                    </select>
                   </div>
                   <div>
                     <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-1">LinkedIn URL</label>
@@ -439,25 +452,25 @@ export default function Settings({ user }) {
                 </div>
               </div>
 
-              {/* Approval */}
+              {/* Data Permission */}
               <div className="border-b border-gray-200 pb-2 pt-1">
-                <div className="flex items-start">
-                  <div className="flex items-center h-4">
-                    <input
-                      id="approval"
-                      name="approval"
-                      type="checkbox"
-                      checked={approval}
-                      onChange={e => setApproval(e.target.checked)}
-                      disabled={!isEditing}
-                      className="h-3 w-3 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                    />
-                  </div>
-                  <div className="ml-2 text-sm">
-                    <label htmlFor="approval" className="font-medium text-gray-700">
-                      I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
-                    </label>
-                  </div>
+                <div>
+                  <label htmlFor="approval" className="block text-sm font-medium text-gray-700 mb-1">Data Permission</label>
+                  <select
+                    id="approval"
+                    name="approval"
+                    value={approval ? 'yes' : 'no'}
+                    onChange={e => setApproval(e.target.value === 'yes')}
+                    disabled={!isEditing}
+                    className={`mt-1 block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'} cursor-pointer`}
+                  >
+                    <option value="">Select Option</option>
+                    <option value="yes">Yes, I Agree</option>
+                    <option value="no">No, I Decline</option>
+                  </select>
+                  <p className="mt-2 text-sm text-gray-500">
+                    I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
+                  </p>
                 </div>
               </div>
 
@@ -481,12 +494,6 @@ export default function Settings({ user }) {
               </div>
             </form>
           </>
-        )}
-        {activeTab === 'notifications' && (
-          <div>
-            <h2 className="text-lg font-semibold mb-3">Notifications</h2>
-            <p className="text-gray-500 text-sm">Notification preferences coming soon.</p>
-          </div>
         )}
       </div>
       

@@ -365,10 +365,10 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                   e.currentTarget.style.backgroundColor = '';
                 }
               }}
-              title={collapsed ? 'User Settings' : undefined}
+              title={collapsed ? 'User Profile' : undefined}
             >
               <Cog6ToothIcon />
-              {!collapsed && <SidebarLabel>User Settings</SidebarLabel>}
+              {!collapsed && <SidebarLabel>User Profile</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
               onClick={() => handlePageChange('portal-admin')}
