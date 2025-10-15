@@ -9,9 +9,7 @@ const N8N_URL  = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// Make sure switchTab is defined and exposed to window
-window.switchTab = function(tab) {
-  console.log('Switching to tab:', tab);
+// Tab switching is now handled directly in HTML
   const otpTab = document.getElementById('otp-tab')
   const passwordTab = document.getElementById('password-tab')
   const otpContent = document.getElementById('otp-content')
