@@ -4,6 +4,140 @@ const supabase = window.supabase.createClient(
   window.ENV.SUPABASE_URL,
   window.ENV.SUPABASE_ANON_KEY
 );
+
+// Browser and OS detection functions
+function detectBrowser() {
+  if (navigator.userAgentData && navigator.userAgentData.brands) {
+    const brands = navigator.userAgentData.brands.map(b => b.brand);
+    if (brands.includes('Google Chrome')) return 'Chrome';
+    if (brands.includes('Microsoft Edge')) return 'Edge';
+    if (brands.includes('Chromium')) return 'Chromium';
+    return brands[0] || 'Unknown';
+  }
+  const ua = navigator.userAgent;
+  if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
+  if (/firefox|fxios/i.test(ua)) return 'Firefox';
+  if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
+  if (/edg/i.test(ua)) return 'Edge';
+  if (/opr\//i.test(ua)) return 'Opera';
+  return 'Unknown';
+}
+
+function detectOS() {
+  if (navigator.userAgentData && navigator.userAgentData.platform) {
+    return navigator.userAgentData.platform;
+  }
+  const ua = navigator.userAgent;
+  if (/windows/i.test(ua)) return 'Windows';
+  if (/macintosh|mac os x/i.test(ua)) return 'Mac';
+  if (/linux/i.test(ua)) return 'Linux';
+  if (/android/i.test(ua)) return 'Android';
+  if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+  return 'Unknown';
+}
+
+// Password Login Form Handler
+document.getElementById('password-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('password-email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  
+  // Basic validation
+  if (!email || !password) {
+    createNotification({ message: 'Please enter both email and password.', success: false });
+    return;
+  }
+  
+  // Check if password matches IDAIC2025!
+  if (password !== 'IDAIC2025!') {
+    createNotification({ message: 'Invalid password. Please try again.', success: false });
+    return;
+  }
+  
+  try {
+    // Use the provided email for password-based login
+    const adminEmail = email;
+    
+    // For password login, we'll create a proper user in the database first
+    let userId;
+    
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', adminEmail)
+      .maybeSingle();
+
+    if (existingUser) {
+      userId = existingUser.id;
+    } else {
+      // Create new user with server-generated UUID
+      const { data: newUser, error: insertError } = await supabase
+        .from('users')
+        .insert([{ email: adminEmail }])
+        .select()
+        .single();
+        
+      if (insertError) throw insertError;
+      userId = newUser.id;
+    }
+
+    // Create mock session with real UUID
+    const mockSession = {
+      access_token: 'password_login_' + Date.now(),
+      user: {
+        id: userId,
+        email: adminEmail
+      }
+    };
+  
+    localStorage.setItem('idaic-token', mockSession.access_token);
+    localStorage.setItem('idaic-password-login', 'true');
+    localStorage.setItem('idaic-password-email', adminEmail);
+  
+    createNotification({ message: 'Successfully signed in with password!', success: true });
+  
+    // Track password login
+    try {
+      const ip = await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => data.ip);
+
+      let geo = {};
+      try {
+        geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
+      } catch (geoErr) {
+        console.error('❌ Failed to fetch geo info:', geoErr);
+      }
+
+      const metadata = {
+        user_id: userId,
+        email: adminEmail,
+        ip_address: ip,
+        country: geo.country || 'Unknown',
+        city: geo.city || 'Unknown',
+        region: geo.regionName || geo.region || 'Unknown',
+        device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+        browser: detectBrowser(),
+        os: detectOS(),
+        user_agent: navigator.userAgent,
+        login_time: new Date().toISOString(),
+        login_method: 'password'
+      };
+
+      await supabase.from('user_logins').insert([metadata]);
+      console.log('✅ Password login tracked:', metadata);
+    } catch (trackErr) {
+      console.error('❌ Failed to track password login:', trackErr);
+    }
+    
+    // Redirect to app page immediately
+    window.location.href = '/app';
+    
+  } catch (err) {
+    createNotification({ message: 'Login failed. Please try again.', success: false });
+  }
+});
 }
 
 // 2. Notification helper
