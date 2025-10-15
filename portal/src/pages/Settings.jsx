@@ -31,7 +31,7 @@ export default function Settings({ user }) {
   const [shareProjects, setShareProjects] = useState('');
   const [aiTools, setAiTools] = useState('');
   const [content, setContent] = useState('');
-  const [approval, setApproval] = useState(false);
+  const [approval, setApproval] = useState('');
   
   // Edit mode and success popup states
   const [isEditing, setIsEditing] = useState(false);
@@ -69,7 +69,7 @@ export default function Settings({ user }) {
               setShareProjects(profileData.shareProjects || '');
               setAiTools(profileData.aiTools || '');
               setContent(profileData.content || '');
-              setApproval(profileData.approval || false);
+              setApproval(profileData.approval === null ? '' : profileData.approval ? 'yes' : 'no');
               
               // If user has existing data, they've submitted before
               setHasSubmitted(true);
@@ -107,7 +107,7 @@ export default function Settings({ user }) {
       return;
     }
 
-    if (!approval) {
+    if (approval === '') {
       setError('Please select an option for data permission to continue.');
       return;
     }
@@ -471,8 +471,8 @@ export default function Settings({ user }) {
                   <select
                     id="approval"
                     name="approval"
-                    value={approval ? 'yes' : 'no'}
-                    onChange={e => setApproval(e.target.value === 'yes')}
+                    value={approval}
+                    onChange={e => setApproval(e.target.value)}
                     disabled={!isEditing}
                     className={`block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'} cursor-pointer`}
                   >
