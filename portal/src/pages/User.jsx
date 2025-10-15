@@ -226,28 +226,30 @@ export default function User() {
                         style={{ color: colors.text.secondary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
                         <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={user.data_permission || false}
+                          <select
+                            value={user.data_permission ? 'yes' : 'no'}
                             onChange={async (e) => {
                               try {
                                 const response = await fetch(`/.netlify/functions/userProfile?id=${user.id}`, {
                                   method: 'PUT',
                                   headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ data_permission: e.target.checked })
+                                  body: JSON.stringify({ data_permission: e.target.value === 'yes' })
                                 });
                                 if (!response.ok) throw new Error('Failed to update permission');
                                 // Update local state
                                 setUsers(users.map(u => 
-                                  u.id === user.id ? { ...u, data_permission: e.target.checked } : u
+                                  u.id === user.id ? { ...u, data_permission: e.target.value === 'yes' } : u
                                 ));
                               } catch (err) {
                                 console.error('Failed to update permission:', err);
                               }
                             }}
-                            className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                          />
-                          <span className="ml-2">{user.data_permission ? 'Yes' : 'No'}</span>
+                            className="block w-24 rounded-md bg-white px-2 py-1 text-sm text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-orange-500"
+                          >
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                          </select>
+                          <span className="ml-2 text-xs text-gray-500">I agree that IDAIC can process my data</span>
                         </div>
                       </td>
                     </tr>
