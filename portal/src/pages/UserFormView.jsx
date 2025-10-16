@@ -127,37 +127,66 @@ export default function UserFormView({ initialUser }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ fontFamily: font.primary }}>
-      {/* Left sidebar - User list */}
-      <div className="lg:col-span-1">
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4" style={{ color: colors.text.primary }}>
-            Select User
-          </h2>
-
-          {/* Search */}
-          <div className="mb-4">
+    <div style={{ fontFamily: font.primary }}>
+      {/* Search at top */}
+      <div className="mb-6">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 max-w-md">
+            <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
+              Search User
+            </label>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search users..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Search by name, email, or company..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               style={{ color: colors.text.primary }}
             />
           </div>
+          {selectedUser && (
+            <div className="pt-7">
+              <button
+                onClick={() => {
+                  setSelectedUser(null);
+                  setSearch('');
+                  setFormData({
+                    name: '',
+                    email: '',
+                    company: '',
+                    title: '',
+                    region: '',
+                    linkedin_url: '',
+                    data_permission: false,
+                    category: '',
+                    other_category: '',
+                    organization_description: '',
+                    ai_decarbonisation: '',
+                    challenges: '',
+                    contribution: '',
+                    projects: '',
+                    ai_tools: ''
+                  });
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Clear Selection
+              </button>
+            </div>
+          )}
+        </div>
 
-          {/* User list */}
-          <div className="space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
-            {filteredUsers.map((user) => (
+        {/* User suggestions dropdown */}
+        {search && filteredUsers.length > 0 && !selectedUser && (
+          <div className="mt-2 max-w-md bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+            {filteredUsers.slice(0, 10).map((user) => (
               <div
                 key={user.id}
-                onClick={() => loadUserData(user)}
-                className={`p-3 rounded-md cursor-pointer transition ${
-                  selectedUser?.id === user.id
-                    ? 'bg-orange-50 border-2 border-orange-500'
-                    : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
-                }`}
+                onClick={() => {
+                  loadUserData(user);
+                  setSearch('');
+                }}
+                className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
               >
                 <div className="font-medium text-sm" style={{ color: colors.text.primary }}>
                   {user.name || 'Unnamed'}
@@ -172,17 +201,12 @@ export default function UserFormView({ initialUser }) {
                 )}
               </div>
             ))}
-            {filteredUsers.length === 0 && (
-              <div className="text-center py-8 text-gray-500 text-sm">
-                No users found
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Right side - User form */}
-      <div className="lg:col-span-2">
+      {/* User form */}
+      <div>
         {selectedUser ? (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-6" style={{ color: colors.text.primary }}>
@@ -399,35 +423,9 @@ export default function UserFormView({ initialUser }) {
               {/* Actions */}
               <div className="flex justify-end gap-3">
                 <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedUser(null);
-                    setFormData({
-                      name: '',
-                      email: '',
-                      company: '',
-                      title: '',
-                      region: '',
-                      linkedin_url: '',
-                      data_permission: false,
-                      category: '',
-                      other_category: '',
-                      organization_description: '',
-                      ai_decarbonisation: '',
-                      challenges: '',
-                      contribution: '',
-                      projects: '',
-                      ai_tools: ''
-                    });
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -438,14 +436,14 @@ export default function UserFormView({ initialUser }) {
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <div className="text-gray-400 mb-4">
               <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No User Selected
+              Search for a User
             </h3>
             <p className="text-gray-500">
-              Select a user from the list to view and edit their profile
+              Use the search bar above to find and edit a user profile
             </p>
           </div>
         )}

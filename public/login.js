@@ -422,15 +422,26 @@ document
           login_method: 'password'
         };
 
-        console.log('💾 Inserting password login record:', metadata);
-        const { data: insertedData, error: insertError } = await supabase.from('user_logins').insert([metadata]).select();
+        console.log('💾 Sending login tracking to server:', metadata);
         
-        if (insertError) {
-          console.error('❌ Failed to insert password login record:', insertError);
-          console.error('❌ Insert error details:', JSON.stringify(insertError));
-        } else {
-          console.log('✅ Password login tracked successfully!');
-          console.log('✅ Inserted data:', insertedData);
+        try {
+          const trackResponse = await fetch('/.netlify/functions/trackLogin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(metadata)
+          });
+          
+          if (trackResponse.ok) {
+            const trackResult = await trackResponse.json();
+            console.log('✅ Password login tracked successfully!');
+            console.log('✅ Server response:', trackResult);
+          } else {
+            const errorData = await trackResponse.json().catch(() => ({}));
+            console.error('❌ Failed to track password login:', errorData);
+            console.error('❌ Status:', trackResponse.status, trackResponse.statusText);
+          }
+        } catch (trackFetchErr) {
+          console.error('❌ Error calling track login function:', trackFetchErr);
         }
       } catch (trackErr) {
         console.error('❌ Failed to track password login:', trackErr);
