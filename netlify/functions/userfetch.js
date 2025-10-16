@@ -12,10 +12,11 @@ const supabase = createClient(
 )
 
 exports.handler = async function (event, context) {
-  // Fetch all users
+  // Fetch only users where data_permission is true
   const { data: users, error: userError } = await supabase
     .from('users')
     .select('*')
+    .eq('data_permission', true)
     .order('name')
 
   if (userError) {

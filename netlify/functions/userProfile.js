@@ -58,7 +58,6 @@ exports.handler = async function (event, context) {
             shareProjects: profile.share_projects,
             aiTools: profile.ai_tools,
             content: profile.content,
-            approval: profile.approval,
             profile_updated_at: profile.profile_updated_at,
             data_permission: profile.data_permission
           };
@@ -86,7 +85,7 @@ exports.handler = async function (event, context) {
           };
         }
 
-        if (profileData.approval === undefined || profileData.approval === '') {
+        if (profileData.data_permission === undefined || profileData.data_permission === '') {
           return {
             statusCode: 400,
             body: JSON.stringify({ error: 'Please select an option for data permission' })
@@ -119,7 +118,7 @@ exports.handler = async function (event, context) {
           share_projects: profileData.shareProjects,
           ai_tools: profileData.aiTools,
           content: profileData.content,
-          approval: profileData.approval,
+          data_permission: profileData.data_permission,
           profile_updated_at: new Date().toISOString()
         };
 
@@ -211,7 +210,6 @@ exports.handler = async function (event, context) {
         if (updates.shareProjects !== undefined) mappedUpdates.share_projects = updates.shareProjects;
         if (updates.aiTools !== undefined) mappedUpdates.ai_tools = updates.aiTools;
         if (updates.content !== undefined) mappedUpdates.content = updates.content;
-        if (updates.approval !== undefined) mappedUpdates.approval = updates.approval;
         if (updates.data_permission !== undefined) mappedUpdates.data_permission = updates.data_permission;
         
         mappedUpdates.updated_at = new Date().toISOString();
@@ -251,7 +249,6 @@ exports.handler = async function (event, context) {
           shareProjects: profile.share_projects,
           aiTools: profile.ai_tools,
           content: profile.content,
-          approval: profile.approval,
           profile_updated_at: profile.profile_updated_at,
           data_permission: profile.data_permission
         };

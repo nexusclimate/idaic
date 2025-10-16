@@ -31,7 +31,7 @@ export default function Settings({ user }) {
   const [shareProjects, setShareProjects] = useState('');
   const [aiTools, setAiTools] = useState('');
   const [content, setContent] = useState('');
-  const [approval, setApproval] = useState('');
+  const [dataPermission, setDataPermission] = useState('');
   
   // Edit mode and success popup states
   const [isEditing, setIsEditing] = useState(false);
@@ -69,7 +69,7 @@ export default function Settings({ user }) {
               setShareProjects(profileData.shareProjects || '');
               setAiTools(profileData.aiTools || '');
               setContent(profileData.content || '');
-              setApproval(profileData.approval === null ? '' : profileData.approval ? 'yes' : 'no');
+              setDataPermission(profileData.data_permission === null ? '' : profileData.data_permission ? 'yes' : 'no');
               
               // If user has existing data, they've submitted before
               setHasSubmitted(true);
@@ -107,7 +107,7 @@ export default function Settings({ user }) {
       return;
     }
 
-    if (approval === '') {
+    if (dataPermission === '') {
       setError('Please select an option for data permission to continue.');
       return;
     }
@@ -136,7 +136,7 @@ export default function Settings({ user }) {
       shareProjects,
       aiTools,
       content,
-      approval
+      data_permission: dataPermission === 'yes'
     };
 
     try {
@@ -469,10 +469,10 @@ export default function Settings({ user }) {
                 </p>
                 <div>
                   <select
-                    id="approval"
-                    name="approval"
-                    value={approval}
-                    onChange={e => setApproval(e.target.value)}
+                    id="data_permission"
+                    name="data_permission"
+                    value={dataPermission}
+                    onChange={e => setDataPermission(e.target.value)}
                     disabled={!isEditing}
                     className={`block w-full rounded-md border shadow-sm py-1.5 px-2 focus:ring-orange-500 text-sm ${isEditing ? 'border-gray-300 text-gray-900 focus:border-orange-500' : 'border-gray-200 text-gray-500 bg-gray-50'} cursor-pointer`}
                   >
