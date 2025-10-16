@@ -6,7 +6,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function UserAdmin() {
+export default function UserAdmin({ onUserSelect }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
@@ -277,8 +277,10 @@ export default function UserAdmin() {
                     return (
                       <tr
                         key={user.id || user.email || userIdx}
+                        onClick={() => onUserSelect && onUserSelect(user)}
                         className="hover:bg-gray-50 transition cursor-pointer"
                         style={{ fontFamily: font.primary }}
+                        title="Click to view/edit user details"
                       >
                         <td
                           className={classNames(

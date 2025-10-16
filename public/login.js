@@ -358,15 +358,21 @@ document
       
       createNotification({ message: 'Successfully signed in with password!', success: true })
       
-      // Track password login
+      // Track password login - MUST complete before redirect
+      console.log('📝 Starting password login tracking...');
+      
       try {
+        console.log('🌐 Fetching IP address...');
         const ip = await fetch('https://api.ipify.org?format=json')
           .then(res => res.json())
           .then(data => data.ip);
+        console.log('✅ IP address fetched:', ip);
 
         let geo = {};
         try {
+          console.log('🗺️ Fetching geo location...');
           geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
+          console.log('✅ Geo location fetched:', geo.country, geo.city);
         } catch (geoErr) {
           console.error('❌ Failed to fetch geo info:', geoErr);
         }
@@ -416,13 +422,23 @@ document
           login_method: 'password'
         };
 
-        await supabase.from('user_logins').insert([metadata]);
-        console.log('✅ Password login tracked:', metadata);
+        console.log('💾 Inserting password login record:', metadata);
+        const { data: insertedData, error: insertError } = await supabase.from('user_logins').insert([metadata]).select();
+        
+        if (insertError) {
+          console.error('❌ Failed to insert password login record:', insertError);
+          console.error('❌ Insert error details:', JSON.stringify(insertError));
+        } else {
+          console.log('✅ Password login tracked successfully!');
+          console.log('✅ Inserted data:', insertedData);
+        }
       } catch (trackErr) {
         console.error('❌ Failed to track password login:', trackErr);
+        console.error('❌ Track error details:', trackErr.message, trackErr.stack);
       }
       
-      // Redirect immediately instead of setTimeout
+      console.log('🔄 Redirecting to /app...');
+      // Redirect after tracking completes
       window.location.href = '/app'
       
     } catch (err) {

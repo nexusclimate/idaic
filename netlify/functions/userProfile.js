@@ -12,21 +12,27 @@ exports.handler = async function (event, context) {
   try {
     switch (event.httpMethod) {
       case 'GET': {
-        // Get user's profile by email
-        const { email } = event.queryStringParameters || {};
+        // Get user's profile by email or id
+        const { email, id } = event.queryStringParameters || {};
         
-        if (!email) {
+        if (!email && !id) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'Email parameter is required' })
+            body: JSON.stringify({ error: 'Email or ID parameter is required' })
           };
         }
 
-        const { data, error } = await supabase
+        let query = supabase
           .from('users')
-          .select('*')
-          .eq('email', email)
-          .limit(1);
+          .select('*');
+        
+        if (id) {
+          query = query.eq('id', id);
+        } else {
+          query = query.eq('email', email);
+        }
+        
+        const { data, error } = await query.limit(1);
 
         if (error) {
           console.error('Error fetching user profile:', error);

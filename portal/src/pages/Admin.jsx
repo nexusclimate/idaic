@@ -1,14 +1,22 @@
 import { useState } from 'react';
 import { colors } from '../config/colors';
 import UserAdmin from './UserAdmin';
+import UserFormView from './UserFormView';
 
 const tabs = [
   { name: 'Content Management', key: 'content' },
   { name: 'User Admin', key: 'user_admin' },
+  { name: 'User Form', key: 'user_form' },
 ];
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState('content');
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+    setActiveTab('user_form');
+  };
 
   return (
     <div>
@@ -59,7 +67,11 @@ export default function Admin() {
         )}
 
         {activeTab === 'user_admin' && (
-          <UserAdmin />
+          <UserAdmin onUserSelect={handleUserSelect} />
+        )}
+
+        {activeTab === 'user_form' && (
+          <UserFormView initialUser={selectedUser} />
         )}
       </div>
     </div>
