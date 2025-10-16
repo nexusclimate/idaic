@@ -184,6 +184,8 @@ export default function User() {
                         {user.email ? (
                           <a 
                             href={`mailto:${user.email}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="text-orange-500 hover:text-orange-600 hover:underline"
                           >
                             {user.email}

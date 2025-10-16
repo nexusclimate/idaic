@@ -258,6 +258,17 @@ export default function UserAdmin() {
                         {sortBy === 'last_login' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                       </span>
                     </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('last_login_method')}
+                    >
+                      Login Method
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                        {sortBy === 'last_login_method' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      </span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -352,6 +363,22 @@ export default function UserAdmin() {
                           style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
                           {formatDate(user.last_login)}
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                          )}
+                          style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        >
+                          {user.last_login_method ? (
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                              user.last_login_method === 'password' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {user.last_login_method === 'password' ? 'Password' : 'OTP'}
+                            </span>
+                          ) : '—'}
                         </td>
                       </tr>
                     );

@@ -270,11 +270,12 @@ document
           browser: detectBrowser(),
           os: detectOS(),
           user_agent: navigator.userAgent,
-          login_time: new Date().toISOString()
+          login_time: new Date().toISOString(),
+          login_method: 'otp'
         };
 
         await supabase.from('user_logins').insert([metadata]);
-        console.log('✅ User login tracked:', metadata);
+        console.log('✅ OTP login tracked:', metadata);
       } catch (trackErr) {
         console.error('❌ Failed to track user login:', trackErr);
       }

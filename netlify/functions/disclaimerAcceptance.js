@@ -67,7 +67,10 @@ exports.handler = async function (event, context) {
         // Get parameters from request body for POST requests
         const { userId, email } = JSON.parse(event.body || '{}');
 
+        console.log('📝 POST request received:', { userId, email });
+
         if (!userId && !email) {
+          console.error('❌ Missing userId and email');
           return {
             statusCode: 400,
             body: JSON.stringify({ error: 'User ID or email is required' })
@@ -82,28 +85,40 @@ exports.handler = async function (event, context) {
           .update({ disclaimer_accepted_at: now });
 
         if (userId) {
+          console.log('🔍 Updating by userId:', userId);
           query = query.eq('id', userId);
         } else {
+          console.log('🔍 Updating by email:', email);
           query = query.eq('email', email);
         }
 
         const { data, error } = await query.select();
 
         if (error) {
-          console.error('Error updating disclaimer acceptance:', error);
+          console.error('❌ Error updating disclaimer acceptance:', error);
           return {
             statusCode: 500,
             body: JSON.stringify({ error: error.message })
           };
         }
 
+        if (!data || data.length === 0) {
+          console.error('❌ No user found to update');
+          return {
+            statusCode: 404,
+            body: JSON.stringify({ error: 'User not found' })
+          };
+        }
+
         console.log('✅ Disclaimer accepted by user:', userId || email, 'at', now);
+        console.log('📊 Updated user data:', data[0]);
 
         return {
           statusCode: 200,
           body: JSON.stringify({
             success: true,
-            acceptedAt: now
+            acceptedAt: now,
+            updatedUser: data[0]
           })
         };
       }

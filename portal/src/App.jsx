@@ -91,24 +91,48 @@ export default function App() {
         if (userId && userId !== 'password_user') params.append('userId', userId);
         if (email) params.append('email', email);
 
+        console.log('🔍 Checking disclaimer status for:', { userId, email });
+
         const response = await fetch(`/.netlify/functions/disclaimerAcceptance?${params.toString()}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
 
         if (response.ok) {
-          const { needsDisclaimer } = await response.json();
-          if (needsDisclaimer) {
+          const data = await response.json();
+          console.log('📋 Disclaimer check response:', data);
+          
+          if (data.needsDisclaimer) {
             console.log('⚠️ User needs to accept disclaimer');
             setShowDisclaimer(true);
           } else {
             console.log('✅ User has accepted disclaimer within 90 days');
+            setShowDisclaimer(false);
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('❌ Disclaimer check failed:', response.status, errorData);
+          // Fallback to localStorage check if database check fails
+          const localAccepted = localStorage.getItem('idaic-disclaimer-accepted');
+          if (localAccepted === 'true') {
+            console.log('✅ Using localStorage fallback - disclaimer already accepted');
+            setShowDisclaimer(false);
+          } else {
+            console.log('⚠️ No localStorage record - showing disclaimer');
+            setShowDisclaimer(true);
           }
         }
       } catch (err) {
-        console.error('Error checking disclaimer status:', err);
-        // If check fails, show disclaimer to be safe
-        setShowDisclaimer(true);
+        console.error('❌ Error checking disclaimer status:', err);
+        // Fallback to localStorage check if request fails
+        const localAccepted = localStorage.getItem('idaic-disclaimer-accepted');
+        if (localAccepted === 'true') {
+          console.log('✅ Using localStorage fallback - disclaimer already accepted');
+          setShowDisclaimer(false);
+        } else {
+          console.log('⚠️ No localStorage record - showing disclaimer');
+          setShowDisclaimer(true);
+        }
       }
     };
 
@@ -158,6 +182,14 @@ export default function App() {
 
   const handleDisclaimerAccept = async () => {
     try {
+      // Save to localStorage as backup
+      localStorage.setItem('idaic-disclaimer-accepted', 'true');
+      
+      console.log('💾 Saving disclaimer acceptance for user:', { 
+        userId: user?.id, 
+        email: user?.email 
+      });
+      
       // Save disclaimer acceptance to database
       const response = await fetch('/.netlify/functions/disclaimerAcceptance', {
         method: 'POST',
@@ -169,16 +201,24 @@ export default function App() {
       });
 
       if (response.ok) {
-        console.log('✅ Disclaimer acceptance recorded');
+        const result = await response.json();
+        console.log('✅ Disclaimer acceptance recorded in database:', result);
         setShowDisclaimer(false);
       } else {
-        console.error('Failed to record disclaimer acceptance');
-        // Still close the modal even if save fails
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Failed to record disclaimer acceptance in database:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        console.log('✅ Disclaimer saved to localStorage as fallback');
+        // Still close the modal - localStorage backup is saved
         setShowDisclaimer(false);
       }
     } catch (err) {
-      console.error('Error saving disclaimer acceptance:', err);
-      // Still close the modal even if save fails
+      console.error('❌ Error saving disclaimer acceptance:', err);
+      console.log('✅ Disclaimer saved to localStorage as fallback');
+      // Still close the modal - localStorage backup is saved
       setShowDisclaimer(false);
     }
   };

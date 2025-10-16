@@ -25,10 +25,10 @@ exports.handler = async function (event, context) {
       }
     }
 
-    // Fetch all user_logins (only user_id and login_time)
+    // Fetch all user_logins (user_id, login_time, and login_method)
     const { data: logins, error: loginError } = await supabase
       .from('user_logins')
-      .select('user_id,login_time');
+      .select('user_id,login_time,login_method');
 
     if (loginError) {
       console.error('Error fetching logins:', loginError);
@@ -38,21 +38,25 @@ exports.handler = async function (event, context) {
       }
     }
 
-    // Build a map of user_id -> latest login_time
+    // Build a map of user_id -> latest login info (time and method)
     const latestLoginMap = {};
     for (const login of logins) {
       if (
         !latestLoginMap[login.user_id] ||
-        new Date(login.login_time) > new Date(latestLoginMap[login.user_id])
+        new Date(login.login_time) > new Date(latestLoginMap[login.user_id].login_time)
       ) {
-        latestLoginMap[login.user_id] = login.login_time;
+        latestLoginMap[login.user_id] = {
+          login_time: login.login_time,
+          login_method: login.login_method
+        };
       }
     }
 
-    // Attach last_login to each user
+    // Attach last_login and last_login_method to each user
     const usersWithLogin = users.map(user => ({
       ...user,
-      last_login: latestLoginMap[user.id] || null,
+      last_login: latestLoginMap[user.id]?.login_time || null,
+      last_login_method: latestLoginMap[user.id]?.login_method || null,
     }));
 
     return {
