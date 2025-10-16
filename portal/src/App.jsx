@@ -26,18 +26,25 @@ export default function App() {
           console.log('✅ Valid password login session found');
           // Get the email from localStorage (stored during login)
           const passwordEmail = localStorage.getItem('idaic-password-email') || 'admin@idaic.org';
+          
+          // Fetch user ID from database
+          const { data: userData } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', passwordEmail)
+            .maybeSingle();
+          
+          const userId = userData?.id || 'password_user';
+          
           setUser({
-            id: 'password_user',
+            id: userId,
             email: passwordEmail,
             user_metadata: { password_login: true }
           });
           setIsAuthenticated(true);
           
-          // Check if user has already accepted the disclaimer
-          const disclaimerAccepted = localStorage.getItem('idaic-disclaimer-accepted');
-          if (!disclaimerAccepted) {
-            setShowDisclaimer(true);
-          }
+          // Check if user needs to accept disclaimer (from database)
+          await checkDisclaimerStatus(userId, passwordEmail);
           return;
         }
         
@@ -59,17 +66,13 @@ export default function App() {
           // Update localStorage with current token (in case it was refreshed)
           localStorage.setItem('idaic-token', session.access_token);
           
-          // Check if user has already accepted the disclaimer
-          const disclaimerAccepted = localStorage.getItem('idaic-disclaimer-accepted');
-          if (!disclaimerAccepted) {
-            setShowDisclaimer(true);
-          }
+          // Check if user needs to accept disclaimer (from database)
+          await checkDisclaimerStatus(session.user.id, session.user.email);
         } else {
           // No valid session - check if we have a stale token
           if (localToken) {
             console.log('⚠️ Found stale token in localStorage, clearing...');
             localStorage.removeItem('idaic-token');
-            localStorage.removeItem('idaic-disclaimer-accepted');
             localStorage.removeItem('idaic-password-login');
             localStorage.removeItem('idaic-password-email');
           }
@@ -78,6 +81,34 @@ export default function App() {
       } catch (err) {
         console.error('Error checking authentication:', err);
         handleAuthFailure();
+      }
+    };
+
+    const checkDisclaimerStatus = async (userId, email) => {
+      try {
+        // Build query string
+        const params = new URLSearchParams();
+        if (userId && userId !== 'password_user') params.append('userId', userId);
+        if (email) params.append('email', email);
+
+        const response = await fetch(`/.netlify/functions/disclaimerAcceptance?${params.toString()}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+          const { needsDisclaimer } = await response.json();
+          if (needsDisclaimer) {
+            console.log('⚠️ User needs to accept disclaimer');
+            setShowDisclaimer(true);
+          } else {
+            console.log('✅ User has accepted disclaimer within 90 days');
+          }
+        }
+      } catch (err) {
+        console.error('Error checking disclaimer status:', err);
+        // If check fails, show disclaimer to be safe
+        setShowDisclaimer(true);
       }
     };
 
@@ -100,7 +131,6 @@ export default function App() {
           setUser(null);
           setIsAuthenticated(false);
           localStorage.removeItem('idaic-token');
-          localStorage.removeItem('idaic-disclaimer-accepted');
           localStorage.removeItem('idaic-password-email');
           window.location.href = '/login.html';
         } else if (event === 'TOKEN_REFRESHED' && session) {
@@ -126,9 +156,31 @@ export default function App() {
     return <div>Redirecting to login...</div>;
   }
 
-  const handleDisclaimerAccept = () => {
-    localStorage.setItem('idaic-disclaimer-accepted', 'true');
-    setShowDisclaimer(false);
+  const handleDisclaimerAccept = async () => {
+    try {
+      // Save disclaimer acceptance to database
+      const response = await fetch('/.netlify/functions/disclaimerAcceptance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user?.id, 
+          email: user?.email 
+        })
+      });
+
+      if (response.ok) {
+        console.log('✅ Disclaimer acceptance recorded');
+        setShowDisclaimer(false);
+      } else {
+        console.error('Failed to record disclaimer acceptance');
+        // Still close the modal even if save fails
+        setShowDisclaimer(false);
+      }
+    } catch (err) {
+      console.error('Error saving disclaimer acceptance:', err);
+      // Still close the modal even if save fails
+      setShowDisclaimer(false);
+    }
   };
 
   const handleDisclaimerDecline = async () => {
@@ -138,7 +190,6 @@ export default function App() {
     if (isPasswordLogin === 'true') {
       // Handle password login logout
       localStorage.removeItem('idaic-token');
-      localStorage.removeItem('idaic-disclaimer-accepted');
       localStorage.removeItem('idaic-password-login');
       localStorage.removeItem('idaic-password-email');
       window.location.href = '/login.html';
@@ -151,7 +202,6 @@ export default function App() {
       }
       // Clear localStorage and redirect (handled by auth state change listener)
       localStorage.removeItem('idaic-token');
-      localStorage.removeItem('idaic-disclaimer-accepted');
       window.location.href = '/login.html';
     }
   };

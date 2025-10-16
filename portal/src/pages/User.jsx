@@ -181,7 +181,14 @@ export default function User() {
                         )}
                         style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                       >
-                        {user.email || '—'}
+                        {user.email ? (
+                          <a 
+                            href={`mailto:${user.email}`}
+                            className="text-orange-500 hover:text-orange-600 hover:underline"
+                          >
+                            {user.email}
+                          </a>
+                        ) : '—'}
                       </td>
                       <td
                         className={classNames(
