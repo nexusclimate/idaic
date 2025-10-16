@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
 import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
+import { useUser } from '../hooks/useUser';
 
 export default function UserFormView({ initialUser }) {
+  const { user } = useUser();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(initialUser || null);
@@ -93,7 +95,7 @@ export default function UserFormView({ initialUser }) {
         },
         body: JSON.stringify({
           ...formData,
-          updated_at: new Date().toISOString()
+          updated_by: user?.id // Track who made the update
         })
       });
 
@@ -127,11 +129,11 @@ export default function UserFormView({ initialUser }) {
   }
 
   return (
-    <div style={{ fontFamily: font.primary }}>
-      {/* Search at top */}
-      <div className="mb-6">
+    <div className="h-full overflow-y-auto" style={{ fontFamily: font.primary }}>
+      {/* Search at top - sticky */}
+      <div className="sticky top-0 bg-gray-50 z-10 pb-4 mb-2 border-b border-gray-200">
         <div className="flex items-center gap-4">
-          <div className="flex-1 max-w-md">
+          <div className="flex-1 max-w-md relative">
             <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
               Search User
             </label>
@@ -143,6 +145,34 @@ export default function UserFormView({ initialUser }) {
               className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               style={{ color: colors.text.primary }}
             />
+            
+            {/* User suggestions dropdown */}
+            {search && filteredUsers.length > 0 && !selectedUser && (
+              <div className="absolute z-20 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {filteredUsers.slice(0, 10).map((user) => (
+                  <div
+                    key={user.id}
+                    onClick={() => {
+                      loadUserData(user);
+                      setSearch('');
+                    }}
+                    className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                  >
+                    <div className="font-medium text-sm" style={{ color: colors.text.primary }}>
+                      {user.name || 'Unnamed'}
+                    </div>
+                    <div className="text-xs" style={{ color: colors.text.secondary }}>
+                      {user.email}
+                    </div>
+                    {user.company && (
+                      <div className="text-xs mt-1" style={{ color: colors.text.secondary }}>
+                        {user.company}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           {selectedUser && (
             <div className="pt-7">
@@ -175,40 +205,12 @@ export default function UserFormView({ initialUser }) {
             </div>
           )}
         </div>
-
-        {/* User suggestions dropdown */}
-        {search && filteredUsers.length > 0 && !selectedUser && (
-          <div className="mt-2 max-w-md bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-            {filteredUsers.slice(0, 10).map((user) => (
-              <div
-                key={user.id}
-                onClick={() => {
-                  loadUserData(user);
-                  setSearch('');
-                }}
-                className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-              >
-                <div className="font-medium text-sm" style={{ color: colors.text.primary }}>
-                  {user.name || 'Unnamed'}
-                </div>
-                <div className="text-xs" style={{ color: colors.text.secondary }}>
-                  {user.email}
-                </div>
-                {user.company && (
-                  <div className="text-xs mt-1" style={{ color: colors.text.secondary }}>
-                    {user.company}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* User form */}
-      <div>
+      <div className="pb-6">
         {selectedUser ? (
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6 max-w-6xl">
             <h2 className="text-xl font-semibold mb-6" style={{ color: colors.text.primary }}>
               User Profile: {formData.name || formData.email}
             </h2>

@@ -16,7 +16,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
 
   return (
     <Dialog open={isOpen} onClose={() => {}} size="2xl">
-      <DialogTitle>Welcome to IDAIC Portal - Terms & Conditions</DialogTitle>
+      <DialogTitle>Welcome to <span className="text-orange-600">IDAIC</span> Portal - Terms & Conditions</DialogTitle>
       
       <DialogBody>
         <div 
@@ -24,7 +24,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
           onScroll={handleScroll}
         >
           <Text>
-            Welcome to the Industrial Decarbonization AI Coalition (IDAIC) Portal. 
+            Welcome to the Industrial Decarbonization AI Coalition (<span className="text-orange-600 font-semibold">IDAIC</span>) Portal. 
             By using this platform, you agree to the following terms and conditions:
           </Text>
 
@@ -34,7 +34,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
               Platform Purpose
             </Text>
             <Text>
-              This portal is designed for IDAIC members to share information, collaborate on projects, 
+              This portal is designed for <span className="text-orange-600 font-semibold">IDAIC</span> members to share information, collaborate on projects, 
               and connect with like-minded individuals interested in industrial development and AI initiatives. 
               The platform is intended for professional networking and knowledge sharing within our community.
             </Text>
@@ -46,7 +46,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
               </Text>
               <Text>
                 Your personal information and data shared on this platform are stored securely and used 
-                solely for the purpose of facilitating communication and collaboration within the IDAIC community. 
+                solely for the purpose of facilitating communication and collaboration within the <span className="text-orange-600 font-semibold">IDAIC</span> community. 
                 We respect your privacy and will not share your information with third parties without your consent.
               </Text>
             </div>
@@ -59,7 +59,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
                 • Use the platform for sharing relevant information and fostering meaningful discussions<br/>
                 • Respect other members and maintain a professional tone<br/>
                 • Do not use the platform for solicitation or commercial purposes<br/>
-                • Share content that aligns with IDAIC's mission and values<br/>
+                • Share content that aligns with <span className="text-orange-600 font-semibold">IDAIC</span>'s mission and values<br/>
                 • Report any inappropriate behavior or content
               </Text>
             </div>

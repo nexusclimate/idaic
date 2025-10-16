@@ -65,7 +65,9 @@ exports.handler = async function (event, context) {
             aiTools: profile.ai_tools,
             content: profile.content,
             profile_updated_at: profile.profile_updated_at,
-            data_permission: profile.data_permission
+            data_permission: profile.data_permission,
+            updated_at: profile.updated_at,
+            updated_by: profile.updated_by
           };
           return {
             statusCode: 200,
@@ -218,7 +220,11 @@ exports.handler = async function (event, context) {
         if (updates.content !== undefined) mappedUpdates.content = updates.content;
         if (updates.data_permission !== undefined) mappedUpdates.data_permission = updates.data_permission;
         
-        mappedUpdates.updated_at = new Date().toISOString();
+        // Track who updated this record and when (updated_at is handled by trigger)
+        if (updates.updated_by !== undefined) {
+          mappedUpdates.updated_by = updates.updated_by;
+          console.log('📝 Profile updated by user:', updates.updated_by);
+        }
 
         const { data: updatedProfile, error: updateError } = await supabase
           .from('users')
@@ -256,7 +262,9 @@ exports.handler = async function (event, context) {
           aiTools: profile.ai_tools,
           content: profile.content,
           profile_updated_at: profile.profile_updated_at,
-          data_permission: profile.data_permission
+          data_permission: profile.data_permission,
+          updated_at: profile.updated_at,
+          updated_by: profile.updated_by
         };
 
         return {

@@ -51,9 +51,9 @@ export default function Admin() {
       </div>
 
       {/* Tab Content */}
-      <div className="mt-6">
+      <div className="mt-6" style={{ height: 'calc(100vh - 220px)' }}>
         {activeTab === 'content' && (
-          <div style={{ height: '85vh', padding: 0, margin: 0, background: 'none', border: 'none', borderRadius: 0 }}>
+          <div style={{ height: '100%', padding: 0, margin: 0, background: 'none', border: 'none', borderRadius: 0 }}>
             <iframe
               src="https://members.nexusclimate.co/ghost/#/posts"
               title="Content Management"
@@ -67,11 +67,15 @@ export default function Admin() {
         )}
 
         {activeTab === 'user_admin' && (
-          <UserAdmin onUserSelect={handleUserSelect} />
+          <div style={{ height: '100%', overflow: 'hidden' }}>
+            <UserAdmin onUserSelect={handleUserSelect} />
+          </div>
         )}
 
         {activeTab === 'user_form' && (
-          <UserFormView initialUser={selectedUser} />
+          <div style={{ height: '100%', overflow: 'hidden' }}>
+            <UserFormView initialUser={selectedUser} />
+          </div>
         )}
       </div>
     </div>
