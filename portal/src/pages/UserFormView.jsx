@@ -210,7 +210,7 @@ export default function UserFormView({ initialUser }) {
       {/* User form */}
       <div className="pb-6">
         {selectedUser ? (
-          <div className="bg-white rounded-lg shadow p-6 max-w-6xl">
+          <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-6" style={{ color: colors.text.primary }}>
               User Profile: {formData.name || formData.email}
             </h2>
@@ -222,7 +222,7 @@ export default function UserFormView({ initialUser }) {
                   Basic Information
                 </h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
                       Name *
@@ -331,8 +331,8 @@ export default function UserFormView({ initialUser }) {
                   Additional Information
                 </h3>
 
-                <div className="space-y-4">
-                  <div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="lg:col-span-2">
                     <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
                       Category
                     </label>

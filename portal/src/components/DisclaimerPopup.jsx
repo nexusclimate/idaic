@@ -92,9 +92,9 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
                 Agreement
               </Text>
               <Text>
-                By clicking "I Accept" below, you acknowledge that you have read, understood, and agree to 
+                By clicking <span className="text-orange-600 font-semibold">"I Accept"</span> below, you acknowledge that you have read, understood, and agree to 
                 these terms and conditions. You understand that this platform is for professional use within 
-                the IDAIC community and agree to use it responsibly.
+                the <span className="text-orange-600 font-semibold">IDAIC</span> community and agree to use it responsibly.
               </Text>
             </div>
           </div>
