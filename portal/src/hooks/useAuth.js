@@ -21,6 +21,15 @@ export function useAuth() {
   }, []);
 
   const getAuthToken = async () => {
+    // Check for password login first
+    const isPasswordLogin = localStorage.getItem('idaic-password-login');
+    const localToken = localStorage.getItem('idaic-token');
+    
+    if (isPasswordLogin === 'true' && localToken) {
+      return localToken;
+    }
+    
+    // Otherwise, get Supabase session token for OTP login
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token;
   };
