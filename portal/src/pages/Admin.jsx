@@ -2,20 +2,30 @@ import { useState } from 'react';
 import { colors } from '../config/colors';
 import UserAdmin from './UserAdmin';
 import UserFormView from './UserFormView';
+import Organizations from './Organizations';
+import LogoManager from './LogoManager';
 
 const tabs = [
   { name: 'Content Management', key: 'content' },
   { name: 'User Admin', key: 'user_admin' },
   { name: 'User Form', key: 'user_form' },
+  { name: 'Members', key: 'members' },
 ];
 
-export default function Admin() {
+export default function Admin({ user }) {
   const [activeTab, setActiveTab] = useState('content');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [showLogoManager, setShowLogoManager] = useState(false);
 
   const handleUserSelect = (user) => {
     setSelectedUser(user);
     setActiveTab('user_form');
+  };
+
+  const handleOrgSelect = (org) => {
+    setSelectedOrg(org);
+    setShowLogoManager(true);
   };
 
   return (
@@ -77,7 +87,25 @@ export default function Admin() {
             <UserFormView initialUser={selectedUser} />
           </div>
         )}
+
+        {activeTab === 'members' && (
+          <div style={{ height: '100%', overflow: 'hidden' }}>
+            <Organizations user={user} onOrgSelect={handleOrgSelect} />
+          </div>
+        )}
       </div>
+
+      {/* Logo Manager Modal */}
+      {showLogoManager && selectedOrg && (
+        <LogoManager
+          organization={selectedOrg}
+          user={user}
+          onClose={() => {
+            setShowLogoManager(false);
+            setSelectedOrg(null);
+          }}
+        />
+      )}
     </div>
   );
 } 
