@@ -6,7 +6,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Organizations({ user, onOrgSelect }) {
+export default function Organizations({ user }) {
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,7 +15,7 @@ export default function Organizations({ user, onOrgSelect }) {
   const [showForm, setShowForm] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
   const [selectedOrg, setSelectedOrg] = useState(null);
-  const [showLogos, setShowLogos] = useState(false);
+  const [showSlider, setShowSlider] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -113,13 +113,9 @@ export default function Organizations({ user, onOrgSelect }) {
     }
   };
 
-  const handleViewLogos = (org) => {
-    if (onOrgSelect) {
-      onOrgSelect(org);
-    } else {
-      setSelectedOrg(org);
-      setShowLogos(true);
-    }
+  const handleViewDetails = (org) => {
+    setSelectedOrg(org);
+    setShowSlider(true);
   };
 
   const filteredOrganizations = organizations.filter(org =>
@@ -237,10 +233,10 @@ export default function Organizations({ user, onOrgSelect }) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button
-                      onClick={() => handleViewLogos(org)}
+                      onClick={() => handleViewDetails(org)}
                       className="text-blue-600 hover:text-blue-500"
                     >
-                      Logos
+                      View Details
                     </button>
                     <button
                       onClick={() => handleEdit(org)}
@@ -349,6 +345,137 @@ export default function Organizations({ user, onOrgSelect }) {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Right-hand Slider for Organization Details */}
+      {showSlider && selectedOrg && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            onClick={() => setShowSlider(false)}
+          ></div>
+          
+          {/* Slider Panel */}
+          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Organization Details</h3>
+                <button
+                  onClick={() => setShowSlider(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {/* Logo */}
+                  <div className="text-center">
+                    {selectedOrg.primary_logo_url ? (
+                      <img 
+                        src={selectedOrg.primary_logo_url} 
+                        alt={`${selectedOrg.name} logo`}
+                        className="mx-auto h-24 w-24 object-contain"
+                      />
+                    ) : (
+                      <div className="mx-auto h-24 w-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span className="text-gray-400 text-sm">No logo</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Organization Info */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Name</label>
+                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.name}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Domain</label>
+                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.org_id}</p>
+                    </div>
+                    
+                    {selectedOrg.bio && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Bio</label>
+                        <p className="mt-1 text-sm text-gray-900">{selectedOrg.bio}</p>
+                      </div>
+                    )}
+                    
+                    {selectedOrg.location && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Location</label>
+                        <p className="mt-1 text-sm text-gray-900">{selectedOrg.location}</p>
+                      </div>
+                    )}
+                    
+                    {selectedOrg.website && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Website</label>
+                        <a 
+                          href={selectedOrg.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="mt-1 text-sm text-orange-600 hover:text-orange-500"
+                        >
+                          {selectedOrg.website}
+                        </a>
+                      </div>
+                    )}
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Created</label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {new Date(selectedOrg.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    
+                    {selectedOrg.updated_at && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Last Updated</label>
+                        <p className="mt-1 text-sm text-gray-900">
+                          {new Date(selectedOrg.updated_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Footer Actions */}
+              <div className="border-t border-gray-200 p-6">
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowSlider(false);
+                      handleEdit(selectedOrg);
+                    }}
+                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    Edit Organization
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowSlider(false);
+                      // TODO: Add logo management functionality
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    Manage Logos
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
