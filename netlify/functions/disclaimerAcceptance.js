@@ -65,9 +65,16 @@ exports.handler = async function (event, context) {
 
       case 'POST': {
         // Get parameters from request body for POST requests
-        const { userId, email } = JSON.parse(event.body || '{}');
+        const requestBody = JSON.parse(event.body || '{}');
+        const { userId, email } = requestBody;
 
-        console.log('📝 POST request received:', { userId, email });
+        console.log('📝 POST request received:', { 
+          userId, 
+          email, 
+          fullBody: requestBody,
+          hasUserId: !!userId,
+          hasEmail: !!email
+        });
 
         if (!userId && !email) {
           console.error('❌ Missing userId and email');
@@ -79,6 +86,7 @@ exports.handler = async function (event, context) {
 
         // Record disclaimer acceptance
         const now = new Date().toISOString();
+        console.log('⏰ Setting disclaimer_accepted_at to:', now);
 
         let query = supabase
           .from('users')
@@ -92,7 +100,9 @@ exports.handler = async function (event, context) {
           query = query.eq('email', email);
         }
 
+        console.log('📊 Executing database update query...');
         const { data, error } = await query.select();
+        console.log('📊 Database update result:', { data, error });
 
         if (error) {
           console.error('❌ Error updating disclaimer acceptance:', error);

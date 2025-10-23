@@ -28,13 +28,25 @@ export default function App() {
           const passwordEmail = localStorage.getItem('idaic-password-email') || 'admin@idaic.org';
           
           // Fetch user ID from database
-          const { data: userData } = await supabase
+          const { data: userData, error: userError } = await supabase
             .from('users')
             .select('id')
             .eq('email', passwordEmail)
             .maybeSingle();
           
-          const userId = userData?.id || 'password_user';
+          if (userError) {
+            console.error('❌ Error fetching user data:', userError);
+            handleAuthFailure();
+            return;
+          }
+          
+          if (!userData?.id) {
+            console.error('❌ User not found in database for email:', passwordEmail);
+            handleAuthFailure();
+            return;
+          }
+          
+          const userId = userData.id;
           
           setUser({
             id: userId,
