@@ -136,13 +136,19 @@ export default function Settings({ user }) {
       shareProjects,
       aiTools,
       content,
-      data_permission: dataPermission === 'yes'
+      data_permission: dataPermission === 'yes',
+      updated_by: user?.id // Track who made the update
     };
 
     try {
-      // Submit to database
-      const response = await fetch('/.netlify/functions/userProfile', {
-        method: 'POST',
+      // Submit to database - use PUT for updates, POST for new users
+      const method = hasSubmitted ? 'PUT' : 'POST';
+      const url = hasSubmitted 
+        ? `/.netlify/functions/userProfile?id=${user?.id}`
+        : '/.netlify/functions/userProfile';
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });

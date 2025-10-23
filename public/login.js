@@ -274,8 +274,21 @@ document
           login_method: 'otp'
         };
 
-        await supabase.from('user_logins').insert([metadata]);
-        console.log('✅ OTP login tracked:', metadata);
+        // Use the trackLogin function for consistency
+        const trackResponse = await fetch('/.netlify/functions/trackLogin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(metadata)
+        });
+        
+        if (trackResponse.ok) {
+          const trackResult = await trackResponse.json();
+          console.log('✅ OTP login tracked successfully!');
+          console.log('✅ Server response:', trackResult);
+        } else {
+          const errorData = await trackResponse.json().catch(() => ({}));
+          console.error('❌ Failed to track OTP login:', errorData);
+        }
       } catch (trackErr) {
         console.error('❌ Failed to track user login:', trackErr);
       }
