@@ -34,13 +34,22 @@ export default function Organizations({ user }) {
   const loadOrganizations = async () => {
     try {
       setLoading(true);
+      setError('');
+      console.log('📝 Loading organizations...');
+      
       const response = await fetch('/.netlify/functions/orgs');
-      if (!response.ok) throw new Error('Failed to load organizations');
       const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ API Error:', data);
+        throw new Error(data.error || 'Failed to load organizations');
+      }
+      
+      console.log('✅ Organizations loaded:', data);
       setOrganizations(data);
     } catch (err) {
-      setError('Failed to load organizations');
-      console.error('Error loading organizations:', err);
+      console.error('❌ Error loading organizations:', err);
+      setError(err.message || 'Failed to load organizations. Please check if the database is set up correctly.');
     } finally {
       setLoading(false);
     }

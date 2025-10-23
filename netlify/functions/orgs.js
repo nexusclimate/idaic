@@ -12,23 +12,56 @@ exports.handler = async function (event, context) {
   try {
     switch (event.httpMethod) {
       case 'GET': {
-        // Get all orgs with their logos
-        const { data: organizations, error } = await supabase
+        console.log('📝 Fetching organizations...');
+        
+        // First try to get from the view, if it doesn't exist, fall back to the table
+        let { data: organizations, error } = await supabase
           .from('orgs_with_logos')
           .select('*')
           .order('name');
 
-        if (error) {
-          console.error('Error fetching organizations:', error);
+        // If view doesn't exist, try the orgs table directly
+        if (error && error.message.includes('relation "orgs_with_logos" does not exist')) {
+          console.log('⚠️ View orgs_with_logos not found, trying orgs table directly...');
+          
+          const { data: orgsData, error: orgsError } = await supabase
+            .from('orgs')
+            .select('*')
+            .order('name');
+
+          if (orgsError) {
+            console.error('❌ Error fetching from orgs table:', orgsError);
+            return {
+              statusCode: 500,
+              body: JSON.stringify({ 
+                error: 'Database tables not found. Please run the CREATE_ORGS_DATABASE.sql script first.',
+                details: orgsError.message
+              })
+            };
+          }
+
+          // Add null logo fields to match expected structure
+          organizations = orgsData.map(org => ({
+            ...org,
+            primary_logo_url: null,
+            primary_logo_name: null,
+            primary_logo_type: null
+          }));
+        } else if (error) {
+          console.error('❌ Error fetching organizations:', error);
           return {
             statusCode: 500,
-            body: JSON.stringify({ error: error.message })
+            body: JSON.stringify({ 
+              error: error.message,
+              details: error
+            })
           };
         }
 
+        console.log('✅ Successfully fetched organizations:', organizations?.length || 0);
         return {
           statusCode: 200,
-          body: JSON.stringify(organizations)
+          body: JSON.stringify(organizations || [])
         };
       }
 
