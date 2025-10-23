@@ -200,7 +200,7 @@ exports.handler = async function (event, context) {
 
         // Map camelCase updates to database fields
         const mappedUpdates = {};
-        if (updates.user_id !== undefined) mappedUpdates.user_id = updates.user_id;
+        // Note: user_id is not a column in users table - it's just 'id'
         if (updates.name !== undefined) mappedUpdates.name = updates.name;
         if (updates.email !== undefined) mappedUpdates.email = updates.email;
         if (updates.role !== undefined) mappedUpdates.role = updates.role;

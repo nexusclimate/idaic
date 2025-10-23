@@ -35,6 +35,8 @@ exports.handler = async function (event, context) {
       };
     }
 
+    const loginTime = loginData.login_time || new Date().toISOString();
+
     // Insert login record
     const { data, error } = await supabase
       .from('user_logins')
@@ -49,7 +51,7 @@ exports.handler = async function (event, context) {
         browser: loginData.browser || 'Unknown',
         os: loginData.os || 'Unknown',
         user_agent: loginData.user_agent || 'Unknown',
-        login_time: loginData.login_time || new Date().toISOString(),
+        login_time: loginTime,
         login_method: loginData.login_method || 'unknown'
       }])
       .select();
@@ -66,6 +68,19 @@ exports.handler = async function (event, context) {
     }
 
     console.log('✅ Login tracked successfully:', data[0]);
+
+    // Also update the last_login column in users table
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ last_login: loginTime })
+      .eq('id', loginData.user_id);
+
+    if (updateError) {
+      console.error('❌ Error updating users.last_login:', updateError);
+      // Don't fail the entire request, just log the error
+    } else {
+      console.log('✅ Updated users.last_login for user:', loginData.user_id);
+    }
 
     return {
       statusCode: 200,

@@ -120,7 +120,6 @@ export default function Settings({ user }) {
     const formData = {
       name,
       email,
-      user_id: user?.id, // Link to authenticated user
       role,
       company,
       title,
