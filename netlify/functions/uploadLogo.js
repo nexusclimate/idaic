@@ -18,13 +18,13 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const { domain_email, logo_name, logo_data, logo_type, is_primary, updated_by } = JSON.parse(event.body);
+    const { org_id, logo_name, logo_data, logo_type, is_primary, updated_by } = JSON.parse(event.body);
 
     // Validate required fields
-    if (!domain_email || !logo_name || !logo_data) {
+    if (!org_id || !logo_name || !logo_data) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'domain_email, logo_name, and logo_data are required' })
+        body: JSON.stringify({ error: 'org_id, logo_name, and logo_data are required' })
       };
     }
 
@@ -35,7 +35,7 @@ exports.handler = async function (event, context) {
     // Generate unique filename
     const timestamp = Date.now();
     const fileExtension = logo_name.split('.').pop() || 'png';
-    const uniqueFileName = `${domain_email}_${timestamp}.${fileExtension}`;
+    const uniqueFileName = `${org_id}_${timestamp}.${fileExtension}`;
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -65,14 +65,14 @@ exports.handler = async function (event, context) {
       await supabase
         .from('logos')
         .update({ is_primary: false })
-        .eq('domain_email', domain_email);
+        .eq('org_id', org_id);
     }
 
     // Save logo record to database
     const { data: logoRecord, error: dbError } = await supabase
       .from('logos')
       .insert([{
-        domain_email: domain_email,
+        org_id: org_id,
         logo_url: logo_url,
         logo_name: logo_name,
         logo_size: logoSize,
@@ -96,7 +96,7 @@ exports.handler = async function (event, context) {
     }
 
     console.log('✅ Logo uploaded successfully:', {
-      domain_email,
+      org_id,
       logo_name,
       logo_url,
       logo_size: logoSize

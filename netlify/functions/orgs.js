@@ -14,30 +14,50 @@ exports.handler = async function (event, context) {
       case 'GET': {
         console.log('📝 Fetching organizations...');
         
-        // Try to get from the orgs table directly (since view might not exist yet)
-        const { data: orgsData, error: orgsError } = await supabase
-          .from('orgs')
+        // Try to get from the orgs_with_logos view first, fallback to orgs table
+        let { data: organizations, error } = await supabase
+          .from('orgs_with_logos')
           .select('*')
           .order('name');
 
-        if (orgsError) {
-          console.error('❌ Error fetching from orgs table:', orgsError);
+        // If view doesn't exist, try the orgs table directly
+        if (error && (error.message.includes('relation "orgs_with_logos" does not exist') || 
+                     error.message.includes('relation "public.orgs_with_logos" does not exist'))) {
+          console.log('⚠️ View orgs_with_logos not found, trying orgs table directly...');
+          
+          const { data: orgsData, error: orgsError } = await supabase
+            .from('orgs')
+            .select('*')
+            .order('name');
+
+          if (orgsError) {
+            console.error('❌ Error fetching from orgs table:', orgsError);
+            return {
+              statusCode: 500,
+              body: JSON.stringify({ 
+                error: 'Database tables not found. Please run the CREATE_ORGS_AND_LOGOS_COMPLETE.sql script first.',
+                details: orgsError.message
+              })
+            };
+          }
+
+          // Add null logo fields to match expected structure
+          organizations = orgsData.map(org => ({
+            ...org,
+            primary_logo_url: null,
+            primary_logo_name: null,
+            primary_logo_type: null
+          }));
+        } else if (error) {
+          console.error('❌ Error fetching organizations:', error);
           return {
             statusCode: 500,
             body: JSON.stringify({ 
-              error: 'Database tables not found. Please run the CREATE_ORGS_DATABASE.sql script first.',
-              details: orgsError.message
+              error: error.message,
+              details: error
             })
           };
         }
-
-        // Add null logo fields to match expected structure
-        const organizations = orgsData.map(org => ({
-          ...org,
-          primary_logo_url: null,
-          primary_logo_name: null,
-          primary_logo_type: null
-        }));
 
         console.log('✅ Successfully fetched organizations:', organizations?.length || 0);
         return {
@@ -51,17 +71,17 @@ exports.handler = async function (event, context) {
         const orgData = JSON.parse(event.body);
 
         // Validate required fields
-        if (!orgData.domain_email || !orgData.name) {
+        if (!orgData.org_id || !orgData.name) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'domain_email and name are required' })
+            body: JSON.stringify({ error: 'org_id and name are required' })
           };
         }
 
         const { data, error } = await supabase
           .from('orgs')
           .insert([{
-            domain_email: orgData.domain_email,
+            org_id: orgData.org_id,
             name: orgData.name,
             bio: orgData.bio || '',
             location: orgData.location || '',

@@ -16,10 +16,13 @@ export default function Organizations({ user }) {
   const [editingOrg, setEditingOrg] = useState(null);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [showSlider, setShowSlider] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
-    domain_email: '',
+    org_id: '',
     name: '',
     bio: '',
     location: '',
@@ -83,7 +86,7 @@ export default function Organizations({ user }) {
       setSuccess(editingOrg ? 'Organization updated successfully!' : 'Organization created successfully!');
       setShowForm(false);
       setEditingOrg(null);
-      setFormData({ domain_email: '', name: '', bio: '', location: '', website: '' });
+      setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
       loadOrganizations();
     } catch (err) {
       setError(err.message);
@@ -93,7 +96,7 @@ export default function Organizations({ user }) {
   const handleEdit = (org) => {
     setEditingOrg(org);
     setFormData({
-      domain_email: org.domain_email,
+      org_id: org.org_id,
       name: org.name,
       bio: org.bio || '',
       location: org.location || '',
@@ -127,9 +130,97 @@ export default function Organizations({ user }) {
     setShowSlider(true);
   };
 
+  const handleLogoUpload = async (file) => {
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file (PNG, JPG, GIF, etc.)');
+      return;
+    }
+    
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size must be less than 5MB');
+      return;
+    }
+    
+    setUploadingLogo(true);
+    setError('');
+
+    try {
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Data = reader.result.split(',')[1];
+        
+        const response = await fetch('/.netlify/functions/uploadLogo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            org_id: formData.org_id,
+            logo_name: file.name,
+            logo_data: base64Data,
+            logo_type: file.type,
+            is_primary: true,
+            updated_by: user?.id
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to upload logo');
+        }
+
+        setSuccess('Logo uploaded successfully!');
+        setLogoFile(null);
+        loadOrganizations(); // Refresh the list
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      handleLogoUpload(file);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        setLogoFile(file);
+        handleLogoUpload(file);
+      } else {
+        setError('Please select an image file.');
+      }
+    }
+  };
+
   const filteredOrganizations = organizations.filter(org =>
     org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    org.domain_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    org.org_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (org.location && org.location.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -166,7 +257,7 @@ export default function Organizations({ user }) {
           onClick={() => {
             setShowForm(true);
             setEditingOrg(null);
-            setFormData({ domain_email: '', name: '', bio: '', location: '', website: '' });
+            setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
           }}
           className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
@@ -184,7 +275,7 @@ export default function Organizations({ user }) {
                   Organization
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Domain Email
+                  Organization ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Location
@@ -212,7 +303,7 @@ export default function Organizations({ user }) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.domain_email}
+                    {org.org_id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {org.location || '—'}
@@ -278,11 +369,11 @@ export default function Organizations({ user }) {
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Domain Email</label>
+                  <label className="block text-sm font-medium text-gray-700">Organization ID</label>
                   <input
                     type="text"
-                    value={formData.domain_email}
-                    onChange={(e) => setFormData({ ...formData, domain_email: e.target.value })}
+                    value={formData.org_id}
+                    onChange={(e) => setFormData({ ...formData, org_id: e.target.value })}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="company.com"
                     required
@@ -333,6 +424,73 @@ export default function Organizations({ user }) {
                     placeholder="https://company.com"
                   />
                 </div>
+
+                {/* Logo Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Organization Logo</label>
+                  
+                  {/* Current Logo Display */}
+                  {editingOrg && editingOrg.primary_logo_url && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-600 mb-2">Current Logo:</p>
+                      <img 
+                        src={editingOrg.primary_logo_url} 
+                        alt={`${editingOrg.name} logo`}
+                        className="h-16 w-16 object-contain border border-gray-200 rounded"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* File Upload */}
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+                      isDragOver 
+                        ? 'border-orange-500 bg-orange-50' 
+                        : 'border-gray-300 hover:border-orange-400'
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      id="logo-upload"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      disabled={uploadingLogo}
+                    />
+                    <label 
+                      htmlFor="logo-upload" 
+                      className={`cursor-pointer ${uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {uploadingLogo ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                          <span className="ml-2 text-sm text-gray-600">Uploading...</span>
+                        </div>
+                      ) : (
+                        <div>
+                          <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          <p className="mt-2 text-sm text-gray-600">
+                            <span className="font-medium text-orange-600 hover:text-orange-500">
+                              Click to upload
+                            </span> or drag and drop
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                  
+                  {logoFile && (
+                    <p className="mt-2 text-sm text-gray-600">
+                      Selected: {logoFile.name}
+                    </p>
+                  )}
+                </div>
                 
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
@@ -340,7 +498,9 @@ export default function Organizations({ user }) {
                     onClick={() => {
                       setShowForm(false);
                       setEditingOrg(null);
-                      setFormData({ domain_email: '', name: '', bio: '', location: '', website: '' });
+                      setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+                      setLogoFile(null);
+                      setIsDragOver(false);
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
@@ -411,8 +571,8 @@ export default function Organizations({ user }) {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Domain Email</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.domain_email}</p>
+                      <label className="block text-sm font-medium text-gray-700">Organization ID</label>
+                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.org_id}</p>
                     </div>
                     
                     {selectedOrg.bio && (
