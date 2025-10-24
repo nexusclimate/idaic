@@ -13,15 +13,15 @@ exports.handler = async function (event, context) {
     switch (event.httpMethod) {
       case 'GET': {
         // Get logos for a specific organization or all logos
-        const { org_id } = event.queryStringParameters || {};
+        const { domain_email } = event.queryStringParameters || {};
         
         let query = supabase
           .from('logos')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (org_id) {
-          query = query.eq('org_id', org_id);
+        if (domain_email) {
+          query = query.eq('domain_email', domain_email);
         }
 
         const { data: logos, error } = await query;
@@ -45,10 +45,10 @@ exports.handler = async function (event, context) {
         const logoData = JSON.parse(event.body);
 
         // Validate required fields
-        if (!logoData.org_id || !logoData.logo_url || !logoData.logo_name) {
+        if (!logoData.domain_email || !logoData.logo_url || !logoData.logo_name) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'org_id, logo_url, and logo_name are required' })
+            body: JSON.stringify({ error: 'domain_email, logo_url, and logo_name are required' })
           };
         }
 
@@ -57,13 +57,13 @@ exports.handler = async function (event, context) {
           await supabase
             .from('logos')
             .update({ is_primary: false })
-            .eq('org_id', logoData.org_id);
+            .eq('domain_email', logoData.domain_email);
         }
 
         const { data, error } = await supabase
           .from('logos')
           .insert([{
-            org_id: logoData.org_id,
+            domain_email: logoData.domain_email,
             logo_url: logoData.logo_url,
             logo_name: logoData.logo_name,
             logo_size: logoData.logo_size || 0,
@@ -106,7 +106,7 @@ exports.handler = async function (event, context) {
         if (updates.is_primary) {
           const { data: currentLogo } = await supabase
             .from('logos')
-            .select('org_id')
+            .select('domain_email')
             .eq('id', id)
             .single();
 
@@ -114,7 +114,7 @@ exports.handler = async function (event, context) {
             await supabase
               .from('logos')
               .update({ is_primary: false })
-              .eq('org_id', currentLogo.org_id)
+              .eq('domain_email', currentLogo.domain_email)
               .neq('id', id);
           }
         }

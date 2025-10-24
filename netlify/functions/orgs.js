@@ -51,17 +51,17 @@ exports.handler = async function (event, context) {
         const orgData = JSON.parse(event.body);
 
         // Validate required fields
-        if (!orgData.org_id || !orgData.name) {
+        if (!orgData.domain_email || !orgData.name) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'org_id and name are required' })
+            body: JSON.stringify({ error: 'domain_email and name are required' })
           };
         }
 
         const { data, error } = await supabase
           .from('orgs')
           .insert([{
-            org_id: orgData.org_id,
+            domain_email: orgData.domain_email,
             name: orgData.name,
             bio: orgData.bio || '',
             location: orgData.location || '',

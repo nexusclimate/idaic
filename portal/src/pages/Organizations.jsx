@@ -19,7 +19,7 @@ export default function Organizations({ user }) {
 
   // Form state
   const [formData, setFormData] = useState({
-    org_id: '',
+    domain_email: '',
     name: '',
     bio: '',
     location: '',
@@ -83,7 +83,7 @@ export default function Organizations({ user }) {
       setSuccess(editingOrg ? 'Organization updated successfully!' : 'Organization created successfully!');
       setShowForm(false);
       setEditingOrg(null);
-      setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+      setFormData({ domain_email: '', name: '', bio: '', location: '', website: '' });
       loadOrganizations();
     } catch (err) {
       setError(err.message);
@@ -93,7 +93,7 @@ export default function Organizations({ user }) {
   const handleEdit = (org) => {
     setEditingOrg(org);
     setFormData({
-      org_id: org.org_id,
+      domain_email: org.domain_email,
       name: org.name,
       bio: org.bio || '',
       location: org.location || '',
@@ -129,7 +129,7 @@ export default function Organizations({ user }) {
 
   const filteredOrganizations = organizations.filter(org =>
     org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    org.org_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    org.domain_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (org.location && org.location.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
@@ -166,7 +166,7 @@ export default function Organizations({ user }) {
           onClick={() => {
             setShowForm(true);
             setEditingOrg(null);
-            setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+            setFormData({ domain_email: '', name: '', bio: '', location: '', website: '' });
           }}
           className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
@@ -184,7 +184,7 @@ export default function Organizations({ user }) {
                   Organization
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Domain
+                  Domain Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Location
@@ -212,7 +212,7 @@ export default function Organizations({ user }) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.org_id}
+                    {org.domain_email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {org.location || '—'}
@@ -278,11 +278,11 @@ export default function Organizations({ user }) {
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Domain (org_id)</label>
+                  <label className="block text-sm font-medium text-gray-700">Domain Email</label>
                   <input
                     type="text"
-                    value={formData.org_id}
-                    onChange={(e) => setFormData({ ...formData, org_id: e.target.value })}
+                    value={formData.domain_email}
+                    onChange={(e) => setFormData({ ...formData, domain_email: e.target.value })}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                     placeholder="company.com"
                     required
@@ -340,7 +340,7 @@ export default function Organizations({ user }) {
                     onClick={() => {
                       setShowForm(false);
                       setEditingOrg(null);
-                      setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+                      setFormData({ domain_email: '', name: '', bio: '', location: '', website: '' });
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
@@ -411,8 +411,8 @@ export default function Organizations({ user }) {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Domain</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.org_id}</p>
+                      <label className="block text-sm font-medium text-gray-700">Domain Email</label>
+                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.domain_email}</p>
                     </div>
                     
                     {selectedOrg.bio && (
