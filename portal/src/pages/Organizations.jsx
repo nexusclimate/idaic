@@ -162,6 +162,13 @@ export default function Organizations({ user }) {
         
         console.log('🔄 Uploading logo for org_id:', formData.org_id);
         console.log('📁 File details:', { name: file.name, type: file.type, size: file.size });
+        console.log('📊 Upload payload:', {
+          org_id: formData.org_id,
+          logo_name: file.name,
+          logo_type: file.type,
+          is_primary: true,
+          has_logo_data: !!base64Data
+        });
         
         const response = await fetch('/.netlify/functions/uploadLogo', {
           method: 'POST',
@@ -171,8 +178,8 @@ export default function Organizations({ user }) {
             logo_name: file.name,
             logo_data: base64Data,
             logo_type: file.type,
-            is_primary: true,
-            updated_by: user?.id
+            is_primary: true
+            // Removed updated_by to avoid foreign key constraint issues
           })
         });
 

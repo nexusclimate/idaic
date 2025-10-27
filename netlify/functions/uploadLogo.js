@@ -66,40 +66,22 @@ exports.handler = async function (event, context) {
 
     const logo_url = urlData.publicUrl;
 
-    // If this is set as primary, unset other primary logos for this org
-    if (is_primary) {
-      await supabase
-        .from('logos')
-        .update({ is_primary: false })
-        .eq('org_id', org_id);
-    }
-
     // Save logo record to database with generated UUID
     const logoId = crypto.randomUUID();
     
     console.log('🆔 Generated logo UUID:', logoId);
     console.log('📊 Logo record data:', {
       id: logoId,
-      org_id: org_id,
-      logo_url: logo_url,
-      logo_name: logo_name,
-      logo_size: logoSize,
-      logo_type: logo_type || 'image/png',
-      is_primary: is_primary || false
+      org_id: org_id
     });
     
     const { data: logoRecord, error: dbError } = await supabase
       .from('logos')
       .insert([{
         id: logoId,
-        org_id: org_id,
-        logo_url: logo_url,
-        logo_name: logo_name,
-        logo_size: logoSize,
-        logo_type: logo_type || 'image/png',
-        is_primary: is_primary || false
-        // Don't include updated_by to avoid foreign key issues
-        // The database trigger will handle updated_at
+        org_id: org_id
+        // Only include columns that actually exist in the database
+        // Removed logo_url, logo_name, logo_size, logo_type, is_primary as they don't exist
       }])
       .select();
 
@@ -120,10 +102,7 @@ exports.handler = async function (event, context) {
 
     console.log('✅ Logo uploaded successfully:', {
       logo_id: logoId,
-      org_id,
-      logo_name,
-      logo_url,
-      logo_size: logoSize
+      org_id
     });
 
     return {
