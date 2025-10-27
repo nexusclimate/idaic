@@ -603,36 +603,22 @@ export default function Organizations({ user }) {
                       </div>
                     )}
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Created</label>
-                      <p className="mt-1 text-sm text-gray-900">
-                        {new Date(selectedOrg.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    
-                    {selectedOrg.updated_at && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Last Updated</label>
-                        <p className="mt-1 text-sm text-gray-900">
-                          {new Date(selectedOrg.updated_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    )}
+                    {/* Created/Updated moved to footer */}
                   </div>
                   
-                  {/* Organization ID Footnote (use UUID id), created/updated info */}
+                  {/* Organization ID Footnote (use UUID id), created/updated info with timezone */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <p className="text-xs text-gray-500">
                       <span className="font-medium">Organization UUID:</span> {selectedOrg.id}
                     </p>
                     {selectedOrg.created_at && (
                       <p className="text-xs text-gray-500 mt-1">
-                        <span className="font-medium">Created:</span> {new Date(selectedOrg.created_at).toLocaleString()}
+                        <span className="font-medium">Created:</span> {new Date(selectedOrg.created_at).toLocaleString()} ({Intl.DateTimeFormat().resolvedOptions().timeZone})
                       </p>
                     )}
                     {selectedOrg.updated_at && (
                       <p className="text-xs text-gray-500 mt-1">
-                        <span className="font-medium">Last Updated:</span> {new Date(selectedOrg.updated_at).toLocaleString()}
+                        <span className="font-medium">Last Updated:</span> {new Date(selectedOrg.updated_at).toLocaleString()} ({Intl.DateTimeFormat().resolvedOptions().timeZone})
                       </p>
                     )}
                   </div>
@@ -650,15 +636,6 @@ export default function Organizations({ user }) {
                     className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     Edit Organization
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowSlider(false);
-                      // TODO: Add logo management functionality
-                    }}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    Manage Logos
                   </button>
                 </div>
               </div>

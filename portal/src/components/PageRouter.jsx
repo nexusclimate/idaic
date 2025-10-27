@@ -9,7 +9,6 @@ import UAEClimate from '../pages/UAEClimate';
 import Feedback from '../pages/Feedback';
 import Changelog from '../pages/Changelog';
 import Admin from '../pages/Admin';
-import AdminPasswordPrompt from '../components/AdminPasswordPrompt';
 import Settings from '../pages/Settings';
 import Projects from '../pages/projects';
 
@@ -106,21 +105,17 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         </div>
       );
     case 'admin':
-      if (isAdminAuthenticated) {
+      if ((user?.role || '').toLowerCase() === 'admin') {
         return <Admin />;
-      } else {
-        return (
-          <div className="flex items-center justify-center h-full bg-black">
-            <div className="text-center bg-black p-8 rounded-lg">
-              <h1 className="text-3xl font-bold mb-6 text-white">Admin Access Required</h1>
-              <p className="text-lg text-gray-300 mb-8">Please enter the admin password to access this page.</p>
-              <AdminPasswordPrompt 
-                setIsAdminAuthenticated={setIsAdminAuthenticated}
-              />
-            </div>
-          </div>
-        );
       }
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center p-8">
+            <h1 className="text-2xl font-semibold mb-2">Admin Access Required</h1>
+            <p className="text-gray-600">You do not have permission to view this page.</p>
+          </div>
+        </div>
+      );
     case 'logout':
       return (
         <div>
@@ -129,21 +124,17 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         </div>
       );
     case 'portal-admin':
-      if (isAdminAuthenticated) {
+      if ((user?.role || '').toLowerCase() === 'admin') {
         return <Admin />;
-      } else {
-        return (
-          <div className="flex items-center justify-center h-full bg-black" style={{ margin: 0, padding: 0 }}>
-            <div className="text-center bg-black p-8 rounded-lg">
-              <h1 className="text-3xl font-bold mb-6 text-white">Admin Access Required</h1>
-              <p className="text-lg text-gray-300 mb-8">Please enter the admin password to access this page.</p>
-              <AdminPasswordPrompt 
-                setIsAdminAuthenticated={setIsAdminAuthenticated}
-              />
-            </div>
-          </div>
-        );
       }
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center p-8">
+            <h1 className="text-2xl font-semibold mb-2">Admin Access Required</h1>
+            <p className="text-gray-600">You do not have permission to view this page.</p>
+          </div>
+        </div>
+      );
     case 'settings':
       return <Settings user={user} />;
     case 'projects':
