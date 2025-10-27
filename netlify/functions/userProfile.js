@@ -163,16 +163,10 @@ exports.handler = async function (event, context) {
 
           result = data[0];
         } else {
-          // Create new user (this shouldn't happen in normal flow as users are created during login)
-          // But we'll handle it gracefully
-          // Let the database generate the UUID for new users
-          const insertData = {
-            ...mappedData,
-            id: undefined // Let the database generate a UUID
-          };
+          // Create new user - let the database generate the UUID automatically
           const { data, error } = await supabase
             .from('users')
-            .insert([insertData])
+            .insert([mappedData])
             .select();
 
           if (error) {

@@ -133,6 +133,12 @@ export default function Organizations({ user }) {
   const handleLogoUpload = async (file) => {
     if (!file) return;
     
+    // Check if org_id is available
+    if (!formData.org_id) {
+      setError('Organization ID is missing. Please save the organization first before uploading a logo.');
+      return;
+    }
+    
     // Validate file type
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file (PNG, JPG, GIF, etc.)');
@@ -154,6 +160,9 @@ export default function Organizations({ user }) {
       reader.onloadend = async () => {
         const base64Data = reader.result.split(',')[1];
         
+        console.log('🔄 Uploading logo for org_id:', formData.org_id);
+        console.log('📁 File details:', { name: file.name, type: file.type, size: file.size });
+        
         const response = await fetch('/.netlify/functions/uploadLogo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -167,33 +176,41 @@ export default function Organizations({ user }) {
           })
         });
 
+        console.log('📤 Upload response status:', response.status);
+        
         let result = null;
         if (!response.ok) {
           try {
             const errorData = await response.json();
+            console.error('❌ Upload error:', errorData);
             throw new Error(errorData.error || 'Failed to upload logo');
           } catch (e) {
+            console.error('❌ Upload failed:', e);
             throw new Error('Failed to upload logo');
           }
         } else {
           try {
             result = await response.json();
+            console.log('✅ Upload result:', result);
           } catch (_) {
-            // ignore JSON parse errors
+            console.log('⚠️ Could not parse response JSON');
           }
         }
 
         if (!result?.logo?.id) {
+          console.log('🔍 Verifying logo in database...');
           // Double-check by fetching logos for this org
           try {
             const verifyRes = await fetch(`/.netlify/functions/logos?org_id=${encodeURIComponent(formData.org_id)}`);
             const verifyList = verifyRes.ok ? await verifyRes.json() : [];
+            console.log('🔍 Verification result:', verifyList);
             if (Array.isArray(verifyList) && verifyList.length > 0) {
               setSuccess('Logo uploaded and saved to database.');
             } else {
               setError('Logo uploaded to storage but not found in database. Please try again.');
             }
           } catch (vErr) {
+            console.error('❌ Verification failed:', vErr);
             setError('Logo uploaded to storage but verification failed.');
           }
         } else {
@@ -204,6 +221,7 @@ export default function Organizations({ user }) {
       };
       reader.readAsDataURL(file);
     } catch (err) {
+      console.error('❌ Logo upload error:', err);
       setError(err.message);
     } finally {
       setUploadingLogo(false);
