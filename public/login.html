@@ -97,21 +97,13 @@ Email Code
 </button>
 <button
 id="password-tab"
-class="hidden flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-[#DCDCDC] hover:text-[#FAFAFA] transition-colors duration-200"
+class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-[#DCDCDC] hover:text-[#FAFAFA] transition-colors duration-200"
 onclick="window.switchTab('password')"
 >
-Admin Access
+Password
 </button>
 </div>
 
-<!-- Admin reveal helper -->
-<div class="-mt-4 mb-6 text-right">
-  <button id="admin-reveal" class="text-xs text-[#FF9900] hover:text-orange-400 underline">
-    Admin access
-  </button>
-  <span class="text-xs text-[#9b9b9b] ml-2">(enter your email first)</span>
-  
-</div>
 
 <!-- OTP Login Tab Content -->
 <div id="otp-content" class="space-y-5">
@@ -168,6 +160,16 @@ type="email"
 required
 class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
 placeholder="admin@idaic.org"
+/>
+</div>
+<div>
+<label for="password" class="block mb-1">Password</label>
+<input
+id="password"
+type="password"
+required
+class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
+placeholder="Enter admin password"
 />
 </div>
 <button
