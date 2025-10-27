@@ -687,8 +687,8 @@ export default function Organizations({ user }) {
       )}
 
       {/* Error and Success Messages */}
-      {error && <ErrorMessage message={error} className="mt-4" />}
-      {success && <SuccessMessage message={success} className="mt-4" />}
+      {error && <ErrorMessage message={error} className="mt-4" onClose={() => setError('')} />}
+      {success && <SuccessMessage message={success} className="mt-4" onClose={() => setSuccess('')} />}
     </div>
   );
 }

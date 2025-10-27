@@ -20,6 +20,8 @@ exports.handler = async function (event, context) {
   try {
     const { org_id, logo_name, logo_data, logo_type, is_primary, updated_by } = JSON.parse(event.body);
 
+    console.log('🔄 Logo upload request:', { org_id, logo_name, logo_type, is_primary });
+
     // Validate required fields
     if (!org_id || !logo_name || !logo_data) {
       return {
@@ -46,12 +48,14 @@ exports.handler = async function (event, context) {
       });
 
     if (uploadError) {
-      console.error('Error uploading logo to storage:', uploadError);
+      console.error('❌ Error uploading logo to storage:', uploadError);
       return {
         statusCode: 500,
         body: JSON.stringify({ error: 'Failed to upload logo to storage' })
       };
     }
+
+    console.log('✅ Logo uploaded to storage successfully:', uploadData);
 
     // Get public URL
     const { data: urlData } = supabase.storage
@@ -77,13 +81,14 @@ exports.handler = async function (event, context) {
         logo_name: logo_name,
         logo_size: logoSize,
         logo_type: logo_type || 'image/png',
-        is_primary: is_primary || false,
-        updated_by: updated_by
+        is_primary: is_primary || false
+        // Don't include updated_by to avoid foreign key issues
+        // The database trigger will handle updated_at
       }])
       .select();
 
     if (dbError) {
-      console.error('Error saving logo record:', dbError);
+      console.error('❌ Error saving logo record:', dbError);
       // Try to clean up the uploaded file
       await supabase.storage
         .from('logos')
@@ -94,6 +99,8 @@ exports.handler = async function (event, context) {
         body: JSON.stringify({ error: 'Failed to save logo record' })
       };
     }
+
+    console.log('✅ Logo record saved to database successfully:', logoRecord[0]);
 
     console.log('✅ Logo uploaded successfully:', {
       org_id,

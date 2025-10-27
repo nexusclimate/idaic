@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { colors, font } from '../config/colors';
-import { ErrorMessage } from '../components/ErrorMessage';
+import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -167,8 +167,8 @@ export default function UserAdmin({ onUserSelect }) {
       setShowAddUser(false);
       setSuccessMessage(`User ${newUser.name} created successfully!`);
       
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
+      // Clear success message after 5 seconds (longer since user can dismiss manually)
+      setTimeout(() => setSuccessMessage(''), 5000);
       
     } catch (err) {
       setError(err.message);
@@ -191,7 +191,7 @@ export default function UserAdmin({ onUserSelect }) {
     return (
       <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main }}>
         <div className="flex items-center justify-center py-6 sm:py-8">
-          <ErrorMessage message={error} />
+          <ErrorMessage message={error} onClose={() => setError(null)} />
         </div>
       </div>
     );
@@ -238,9 +238,10 @@ export default function UserAdmin({ onUserSelect }) {
 
       {/* Success message */}
       {successMessage && (
-        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-          {successMessage}
-        </div>
+        <SuccessMessage 
+          message={successMessage} 
+          onClose={() => setSuccessMessage('')} 
+        />
       )}
 
       {/* Add User Modal */}

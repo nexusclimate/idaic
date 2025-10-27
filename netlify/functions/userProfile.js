@@ -125,7 +125,7 @@ exports.handler = async function (event, context) {
         const mappedData = {
           name: profileData.name,
           email: profileData.email,
-          role: profileData.role ? profileData.role.toLowerCase() : null,
+          role: profileData.role ? profileData.role.toLowerCase() : 'guest', // Default to guest
           company: profileData.company,
           title: profileData.title,
           region: profileData.region,
@@ -141,7 +141,9 @@ exports.handler = async function (event, context) {
           ai_tools: profileData.aiTools,
           content: profileData.content,
           data_permission: profileData.data_permission,
-          profile_updated_at: new Date().toISOString()
+          profile_updated_at: new Date().toISOString(),
+          // Don't include updated_by for new users to avoid foreign key issues
+          // The database trigger will handle updated_at
         };
 
         let result;
@@ -164,19 +166,21 @@ exports.handler = async function (event, context) {
           result = data[0];
         } else {
           // Create new user - let the database generate the UUID automatically
+          console.log('🔄 Creating new user with data:', mappedData);
           const { data, error } = await supabase
             .from('users')
             .insert([mappedData])
             .select();
 
           if (error) {
-            console.error('Error creating user profile:', error);
+            console.error('❌ Error creating user profile:', error);
             return {
               statusCode: 500,
               body: JSON.stringify({ error: error.message })
             };
           }
 
+          console.log('✅ User created successfully:', data[0]);
           result = data[0];
         }
 

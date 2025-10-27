@@ -100,6 +100,14 @@ exports.handler = async function (event, context) {
           };
         }
 
+        console.log('🔄 Creating new organization with data:', {
+          org_id: orgData.org_id,
+          name: orgData.name,
+          bio: orgData.bio || '',
+          location: orgData.location || '',
+          website: orgData.website || ''
+        });
+
         const { data, error } = await supabase
           .from('orgs')
           .insert([{
@@ -107,19 +115,21 @@ exports.handler = async function (event, context) {
             name: orgData.name,
             bio: orgData.bio || '',
             location: orgData.location || '',
-            website: orgData.website || '',
-            updated_by: orgData.updated_by
+            website: orgData.website || ''
+            // Don't include updated_by for new organizations to avoid foreign key issues
+            // The database trigger will handle updated_at
           }])
           .select();
 
         if (error) {
-          console.error('Error creating organization:', error);
+          console.error('❌ Error creating organization:', error);
           return {
             statusCode: 500,
             body: JSON.stringify({ error: error.message })
           };
         }
 
+        console.log('✅ Organization created successfully:', data[0]);
         return {
           statusCode: 200,
           body: JSON.stringify({
