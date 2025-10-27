@@ -74,10 +74,24 @@ exports.handler = async function (event, context) {
         .eq('org_id', org_id);
     }
 
-    // Save logo record to database
+    // Save logo record to database with generated UUID
+    const logoId = crypto.randomUUID();
+    
+    console.log('🆔 Generated logo UUID:', logoId);
+    console.log('📊 Logo record data:', {
+      id: logoId,
+      org_id: org_id,
+      logo_url: logo_url,
+      logo_name: logo_name,
+      logo_size: logoSize,
+      logo_type: logo_type || 'image/png',
+      is_primary: is_primary || false
+    });
+    
     const { data: logoRecord, error: dbError } = await supabase
       .from('logos')
       .insert([{
+        id: logoId,
         org_id: org_id,
         logo_url: logo_url,
         logo_name: logo_name,
@@ -105,6 +119,7 @@ exports.handler = async function (event, context) {
     console.log('✅ Logo record saved to database successfully:', logoRecord[0]);
 
     console.log('✅ Logo uploaded successfully:', {
+      logo_id: logoId,
       org_id,
       logo_name,
       logo_url,

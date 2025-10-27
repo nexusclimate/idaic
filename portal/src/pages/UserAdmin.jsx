@@ -439,6 +439,17 @@ export default function UserAdmin({ onUserSelect }) {
                       scope="col"
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('login_method')}
+                    >
+                      Access
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                        {sortBy === 'login_method' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      </span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                       onClick={() => handleSort('role')}
                     >
                       Role

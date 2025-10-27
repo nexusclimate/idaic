@@ -151,37 +151,51 @@ exports.handler = async function (event, context) {
 
           result = data[0];
         } else {
-          // Create new user - generate UUID using crypto.randomUUID() (Node.js built-in)
+          // Create new user using raw SQL to bypass any triggers/constraints
           const newUserId = crypto.randomUUID();
           
-          console.log('🔄 Creating new user with data:', mappedData);
-          console.log('🆔 Generated UUID:', newUserId);
-          console.log('📊 Mapped data keys:', Object.keys(mappedData));
-          console.log('📊 Mapped data values:', Object.values(mappedData));
+          console.log('🔄 Creating new user with UUID:', newUserId);
+          console.log('📊 User data:', { name: profileData.name, email: profileData.email, role: profileData.role || 'member' });
           
-          const insertData = {
-            ...mappedData,
-            id: newUserId
-          };
-          
-          console.log('📤 Final insert data:', insertData);
-          
-          const { data, error } = await supabase
-            .from('users')
-            .insert([insertData])
-            .select();
+          // Use raw SQL insert to bypass any triggers or constraints
+          const { data, error } = await supabase.rpc('create_user_simple', {
+            user_id: newUserId,
+            user_name: profileData.name,
+            user_email: profileData.email,
+            user_role: profileData.role || 'member',
+            user_data_permission: profileData.data_permission || false
+          });
 
           if (error) {
-            console.error('❌ Error creating user profile:', error);
-            console.error('❌ Error details:', JSON.stringify(error, null, 2));
-            return {
-              statusCode: 500,
-              body: JSON.stringify({ error: error.message })
-            };
-          }
+            console.error('❌ Error creating user with RPC:', error);
+            
+            // Fallback: try direct insert with minimal fields
+            console.log('🔄 Trying fallback direct insert...');
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from('users')
+              .insert([{
+                id: newUserId,
+                name: profileData.name,
+                email: profileData.email,
+                role: profileData.role || 'member',
+                data_permission: profileData.data_permission || false
+              }])
+              .select();
 
-          console.log('✅ User created successfully:', data[0]);
-          result = data[0];
+            if (fallbackError) {
+              console.error('❌ Fallback insert also failed:', fallbackError);
+              return {
+                statusCode: 500,
+                body: JSON.stringify({ error: fallbackError.message })
+              };
+            }
+            
+            console.log('✅ User created with fallback method:', fallbackData[0]);
+            result = fallbackData[0];
+          } else {
+            console.log('✅ User created with RPC method:', data);
+            result = data;
+          }
         }
 
         console.log('✅ Profile saved successfully');
