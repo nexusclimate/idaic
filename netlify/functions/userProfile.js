@@ -165,11 +165,18 @@ exports.handler = async function (event, context) {
 
           result = data[0];
         } else {
-          // Create new user - let the database generate the UUID automatically
+          // Create new user - generate UUID using crypto.randomUUID() (Node.js built-in)
+          const newUserId = crypto.randomUUID();
+          
           console.log('🔄 Creating new user with data:', mappedData);
+          console.log('🆔 Generated UUID:', newUserId);
+          
           const { data, error } = await supabase
             .from('users')
-            .insert([mappedData])
+            .insert([{
+              ...mappedData,
+              id: newUserId
+            }])
             .select();
 
           if (error) {

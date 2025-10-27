@@ -96,7 +96,7 @@ export default function Organizations({ user }) {
   const handleEdit = (org) => {
     setEditingOrg(org);
     setFormData({
-      org_id: org.org_id,
+      org_id: org.id, // Use the organization's UUID instead of org.org_id
       name: org.name,
       bio: org.bio || '',
       location: org.location || '',

@@ -26,7 +26,7 @@ exports.handler = async function (event, context) {
     if (!org_id || !logo_name || !logo_data) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'org_id, logo_name, and logo_data are required' })
+        body: JSON.stringify({ error: 'org_id (organization UUID), logo_name, and logo_data are required' })
       };
     }
 
@@ -34,10 +34,12 @@ exports.handler = async function (event, context) {
     const logoBuffer = Buffer.from(logo_data, 'base64');
     const logoSize = logoBuffer.length;
 
-    // Generate unique filename
+    // Generate unique filename using organization UUID
     const timestamp = Date.now();
     const fileExtension = logo_name.split('.').pop() || 'png';
     const uniqueFileName = `${org_id}_${timestamp}.${fileExtension}`;
+
+    console.log('📁 Generated filename:', uniqueFileName);
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
