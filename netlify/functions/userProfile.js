@@ -121,29 +121,15 @@ exports.handler = async function (event, context) {
           .eq('email', profileData.email)
           .maybeSingle(); // Use maybeSingle instead of single to handle no results gracefully
 
-        // Map camelCase form fields to database fields
+        // Map camelCase form fields to database fields - MINIMAL SET for new users
         const mappedData = {
           name: profileData.name,
           email: profileData.email,
-          role: profileData.role ? profileData.role.toLowerCase() : 'guest', // Default to guest
-          company: profileData.company,
-          title: profileData.title,
-          region: profileData.region,
-          linkedin_url: profileData.linkedinUrl,
-          category: profileData.category,
-          other_category: profileData.otherCategory,
-          organization_description: profileData.organizationDescription,
-          ai_decarbonisation: profileData.aiDecarbonisation,
-          challenges: profileData.challenges,
-          contribution: profileData.contribution,
-          projects: profileData.projects,
-          share_projects: profileData.shareProjects,
-          ai_tools: profileData.aiTools,
-          content: profileData.content,
+          role: profileData.role ? profileData.role.toLowerCase() : 'member', // Default to member
           data_permission: profileData.data_permission,
-          profile_updated_at: new Date().toISOString(),
-          // Don't include updated_by for new users to avoid foreign key issues
-          // The database trigger will handle updated_at
+          profile_updated_at: new Date().toISOString()
+          // Only include essential fields to avoid any constraint issues
+          // Don't include updated_by, company, title, etc. for new users
         };
 
         let result;
@@ -170,17 +156,24 @@ exports.handler = async function (event, context) {
           
           console.log('🔄 Creating new user with data:', mappedData);
           console.log('🆔 Generated UUID:', newUserId);
+          console.log('📊 Mapped data keys:', Object.keys(mappedData));
+          console.log('📊 Mapped data values:', Object.values(mappedData));
+          
+          const insertData = {
+            ...mappedData,
+            id: newUserId
+          };
+          
+          console.log('📤 Final insert data:', insertData);
           
           const { data, error } = await supabase
             .from('users')
-            .insert([{
-              ...mappedData,
-              id: newUserId
-            }])
+            .insert([insertData])
             .select();
 
           if (error) {
             console.error('❌ Error creating user profile:', error);
+            console.error('❌ Error details:', JSON.stringify(error, null, 2));
             return {
               statusCode: 500,
               body: JSON.stringify({ error: error.message })

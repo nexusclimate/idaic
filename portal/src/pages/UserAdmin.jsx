@@ -19,7 +19,7 @@ export default function UserAdmin({ onUserSelect }) {
   const [addUserForm, setAddUserForm] = useState({
     name: '',
     email: '',
-    role: 'guest'
+    role: 'member'
   });
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -163,7 +163,7 @@ export default function UserAdmin({ onUserSelect }) {
       setUsers([...users, newUser]);
       
       // Reset form and close
-      setAddUserForm({ name: '', email: '', role: 'guest' });
+      setAddUserForm({ name: '', email: '', role: 'member' });
       setShowAddUser(false);
       setSuccessMessage(`User ${newUser.name} created successfully!`);
       
@@ -290,7 +290,6 @@ export default function UserAdmin({ onUserSelect }) {
                   onChange={(e) => setAddUserForm({ ...addUserForm, role: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
-                  <option value="guest">Guest</option>
                   <option value="member">Member</option>
                   <option value="moderator">Moderator</option>
                   <option value="admin">Admin</option>
@@ -309,7 +308,7 @@ export default function UserAdmin({ onUserSelect }) {
                   type="button"
                   onClick={() => {
                     setShowAddUser(false);
-                    setAddUserForm({ name: '', email: '', role: 'guest' });
+                    setAddUserForm({ name: '', email: '', role: 'member' });
                     setError(null);
                   }}
                   className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
