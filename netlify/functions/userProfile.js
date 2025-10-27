@@ -100,6 +100,20 @@ exports.handler = async function (event, context) {
           };
         }
 
+        // Validate role if provided (only for admin role management)
+        // Users updating their own profiles don't need role validation
+        if (profileData.role && profileData.role !== '') {
+          const validRoles = ['member', 'admin', 'moderator'];
+          if (!validRoles.includes(profileData.role.toLowerCase())) {
+            return {
+              statusCode: 400,
+              body: JSON.stringify({ 
+                error: `Invalid role. Must be one of: ${validRoles.join(', ')}` 
+              })
+            };
+          }
+        }
+
         // Check if user already exists by email
         const { data: existingUser } = await supabase
           .from('users')
@@ -111,7 +125,7 @@ exports.handler = async function (event, context) {
         const mappedData = {
           name: profileData.name,
           email: profileData.email,
-          role: profileData.role,
+          role: profileData.role ? profileData.role.toLowerCase() : null,
           company: profileData.company,
           title: profileData.title,
           region: profileData.region,
@@ -198,12 +212,26 @@ exports.handler = async function (event, context) {
           };
         }
 
+        // Validate role if provided (only for admin role management)
+        // Users updating their own profiles don't need role validation
+        if (updates.role && updates.role !== '') {
+          const validRoles = ['member', 'admin', 'moderator'];
+          if (!validRoles.includes(updates.role.toLowerCase())) {
+            return {
+              statusCode: 400,
+              body: JSON.stringify({ 
+                error: `Invalid role. Must be one of: ${validRoles.join(', ')}` 
+              })
+            };
+          }
+        }
+
         // Map camelCase updates to database fields
         const mappedUpdates = {};
         // Note: user_id is not a column in users table - it's just 'id'
         if (updates.name !== undefined) mappedUpdates.name = updates.name;
         if (updates.email !== undefined) mappedUpdates.email = updates.email;
-        if (updates.role !== undefined) mappedUpdates.role = updates.role;
+        if (updates.role !== undefined) mappedUpdates.role = updates.role.toLowerCase();
         if (updates.company !== undefined) mappedUpdates.company = updates.company;
         if (updates.title !== undefined) mappedUpdates.title = updates.title;
         if (updates.region !== undefined) mappedUpdates.region = updates.region;

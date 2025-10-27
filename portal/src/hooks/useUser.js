@@ -16,7 +16,7 @@ export function useUser() {
         try {
           const { data: userData, error } = await supabase
             .from('users')
-            .select('id, email, name')
+            .select('id, email, name, role')
             .eq('email', passwordEmail)
             .maybeSingle();
           
@@ -24,6 +24,7 @@ export function useUser() {
             setUser({
               id: userData.id,
               email: userData.email,
+              role: userData.role,
               user_metadata: { 
                 password_login: true,
                 name: userData.name
@@ -39,17 +40,68 @@ export function useUser() {
       
       // Get Supabase session for OTP login
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user || null);
+      
+      if (session?.user) {
+        // Fetch user role from database
+        try {
+          const { data: userData, error } = await supabase
+            .from('users')
+            .select('role')
+            .eq('email', session.user.email)
+            .maybeSingle();
+          
+          if (userData && !error) {
+            setUser({
+              ...session.user,
+              role: userData.role
+            });
+          } else {
+            setUser(session.user);
+          }
+        } catch (err) {
+          console.error('Error fetching user role:', err);
+          setUser(session.user);
+        }
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     };
 
     initUser();
 
     // Listen for auth changes (only for OTP login)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const isPasswordLogin = localStorage.getItem('idaic-password-login');
-      if (isPasswordLogin !== 'true') {
-        setUser(session?.user || null);
+      
+      if (isPasswordLogin === 'true') {
+        // Don't update user state for password login
+        return;
+      }
+      
+      if (session?.user) {
+        // Fetch user role from database
+        try {
+          const { data: userData, error } = await supabase
+            .from('users')
+            .select('role')
+            .eq('email', session.user.email)
+            .maybeSingle();
+          
+          if (userData && !error) {
+            setUser({
+              ...session.user,
+              role: userData.role
+            });
+          } else {
+            setUser(session.user);
+          }
+        } catch (err) {
+          console.error('Error fetching user role:', err);
+          setUser(session.user);
+        }
+      } else {
+        setUser(null);
       }
     });
 

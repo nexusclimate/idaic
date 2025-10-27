@@ -11,57 +11,57 @@ rel="stylesheet"
 />
 <style> body { font-family: 'Inter', sans-serif; } </style>
 <script>
-  // Tab switching function - defined early so it's available for onclick
+  // Tab switching function - supports OTP and Password
   window.switchTab = function(tab) {
     const otpTab = document.getElementById('otp-tab');
     const passwordTab = document.getElementById('password-tab');
     const otpContent = document.getElementById('otp-content');
     const passwordContent = document.getElementById('password-content');
-    
+
     if (tab === 'otp') {
       // Activate OTP tab
-      otpTab.classList.add('border-[#FF9900]', 'text-[#FF9900]');
-      otpTab.classList.remove('border-transparent', 'text-[#DCDCDC]');
-      passwordTab.classList.add('border-transparent', 'text-[#DCDCDC]');
-      passwordTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]');
-      
-      // Show OTP content, hide password content
-      otpContent.classList.remove('hidden');
-      passwordContent.classList.add('hidden');
-      
-      // Reset password form
-      if (document.getElementById('password')) {
-        document.getElementById('password').value = '';
+      if (otpTab) {
+        otpTab.classList.add('border-[#FF9900]', 'text-[#FF9900]');
+        otpTab.classList.remove('border-transparent', 'text-[#DCDCDC]');
       }
+      if (passwordTab) {
+        passwordTab.classList.add('border-transparent', 'text-[#DCDCDC]');
+        passwordTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]');
+      }
+
+      // Show OTP content, hide password content
+      if (otpContent) otpContent.classList.remove('hidden');
+      if (passwordContent) passwordContent.classList.add('hidden');
+
+      // Reset password form
+      const pwdEl = document.getElementById('password');
+      if (pwdEl) pwdEl.value = '';
     } else if (tab === 'password') {
       // Activate password tab
-      passwordTab.classList.add('border-[#FF9900]', 'text-[#FF9900]');
-      passwordTab.classList.remove('border-transparent', 'text-[#DCDCDC]');
-      otpTab.classList.add('border-transparent', 'text-[#DCDCDC]');
-      otpTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]');
-      
+      if (passwordTab) {
+        passwordTab.classList.add('border-[#FF9900]', 'text-[#FF9900]');
+        passwordTab.classList.remove('border-transparent', 'text-[#DCDCDC]');
+      }
+      if (otpTab) {
+        otpTab.classList.add('border-transparent', 'text-[#DCDCDC]');
+        otpTab.classList.remove('border-[#FF9900]', 'text-[#FF9900]');
+      }
+
       // Show password content, hide OTP content
-      passwordContent.classList.remove('hidden');
-      otpContent.classList.add('hidden');
-      
+      if (passwordContent) passwordContent.classList.remove('hidden');
+      if (otpContent) otpContent.classList.add('hidden');
+
       // Reset OTP forms
-      if (document.getElementById('email')) {
-        document.getElementById('email').value = '';
-      }
-      if (document.getElementById('code')) {
-        document.getElementById('code').value = '';
-      }
-      if (document.getElementById('otp-request-form')) {
-        document.getElementById('otp-request-form').classList.remove('hidden');
-      }
-      if (document.getElementById('otp-verify-form')) {
-        document.getElementById('otp-verify-form').classList.add('hidden');
-      }
-      
-      // Reset password form
-      if (document.getElementById('password-email')) {
-        document.getElementById('password-email').value = '';
-      }
+      const emailEl = document.getElementById('email');
+      const codeEl = document.getElementById('code');
+      if (emailEl) emailEl.value = '';
+      if (codeEl) codeEl.value = '';
+      const req = document.getElementById('otp-request-form');
+      const ver = document.getElementById('otp-verify-form');
+      if (req) req.classList.remove('hidden');
+      if (ver) ver.classList.add('hidden');
+      const pwdEmailEl = document.getElementById('password-email');
+      if (pwdEmailEl) pwdEmailEl.value = '';
     }
   };
 </script>
@@ -100,7 +100,7 @@ id="password-tab"
 class="flex-1 py-3 px-4 text-center font-medium border-b-2 border-transparent text-[#DCDCDC] hover:text-[#FAFAFA] transition-colors duration-200"
 onclick="window.switchTab('password')"
 >
-Password
+Password (Admins)
 </button>
 </div>
 
@@ -152,7 +152,7 @@ Verify &amp; Sign in
 <div id="password-content" class="space-y-5 hidden">
 <form id="password-form" class="space-y-5">
 <div>
-<label for="password-email" class="block mb-1">Email</label>
+<label for="password-email" class="block mb-1">Admin Email</label>
 <input
 id="password-email"
 type="email"
@@ -168,14 +168,14 @@ id="password"
 type="password"
 required
 class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
-placeholder="Enter password"
+placeholder="Enter admin password"
 />
 </div>
 <button
 type="submit"
 class="w-full py-2 bg-[#FF9900] hover:bg-orange-600 text-black rounded-lg font-semibold"
 >
-Sign in
+Sign in (Admin)
 </button>
 </form>
 </div>

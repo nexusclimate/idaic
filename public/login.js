@@ -306,167 +306,81 @@ document
     }
   })
 
-// 5. Password Login
-document
-  .getElementById('password-form')
-  .addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const email = document.getElementById('password-email').value.trim()
-    const password = document.getElementById('password').value.trim()
-    
-    // Basic validation
-    if (!email || !password) {
-      createNotification({ message: 'Please enter both email and password.', success: false })
+// 5. Admin-only Password Login
+document.getElementById('password-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const emailEl = document.getElementById('password-email')
+  const pwdEl = document.getElementById('password')
+  const email = emailEl ? emailEl.value.trim() : ''
+  const password = pwdEl ? pwdEl.value.trim() : ''
+
+  // Basic validation
+  if (!email || !password) {
+    createNotification({ message: 'Please enter both email and password.', success: false })
+    return
+  }
+
+  try {
+    // Check user exists and is admin
+    const { data: userRow, error: userErr } = await supabase
+      .from('users')
+      .select('id, name, email, role')
+      .eq('email', email)
+      .maybeSingle()
+
+    if (userErr) {
+      console.error('Error fetching user:', userErr)
+      createNotification({ message: 'Error checking user. Please try again.', success: false })
       return
     }
-    
-    // Check if password matches IDAIC2025!
+
+    if (!userRow) {
+      createNotification({ message: 'User not authorized. Please contact IDAIC admin.', success: false })
+      return
+    }
+
+    if ((userRow.role || '').toLowerCase() !== 'admin') {
+      createNotification({ message: 'Admin access required. Please use Email Code instead.', success: false })
+      return
+    }
+
+    // Simple shared secret password (client-side) — replace with server validation if needed
     if (password !== 'IDAIC2025!') {
       createNotification({ message: 'Invalid password. Please try again.', success: false })
       return
     }
-    
+
+    // Create mock session token and persist admin login marker
+    const accessToken = 'password_login_' + Date.now()
+    localStorage.setItem('idaic-token', accessToken)
+    localStorage.setItem('idaic-password-login', 'true')
+    localStorage.setItem('idaic-password-email', email)
+
+    createNotification({ message: 'Successfully signed in (admin). Redirecting…', success: true })
+
+    // Track password login and update last_login
     try {
-      // Use the provided email for password-based login
-      const adminEmail = email
-      
-      // For password login, only allow existing users (authorized users only)
-      let userId;
-      
-      // Check if user exists in the database
-      const { data: existingUser, error: fetchError } = await supabase
-        .from('users')
-        .select('id, name, email')
-        .eq('email', adminEmail)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Error fetching user:', fetchError);
-        createNotification({ message: 'Error checking user authorization. Please try again.', success: false });
-        return;
-      }
-
-      // Only allow login if user exists in database
-      if (!existingUser) {
-        console.log('User not found in database:', adminEmail);
-        createNotification({ message: 'User not authorized. Please contact IDAIC admin to be added to the system.', success: false });
-        return;
-      }
-      
-      userId = existingUser.id;
-      console.log('Found authorized user with ID:', userId);
-
-      // Create mock session with real UUID
-      const mockSession = {
-        access_token: 'password_login_' + Date.now(),
-        user: {
-          id: userId,
-          email: adminEmail
-        }
-      }
-      
-      localStorage.setItem('idaic-token', mockSession.access_token)
-      localStorage.setItem('idaic-password-login', 'true')
-      localStorage.setItem('idaic-password-email', adminEmail)
-      
-      createNotification({ message: 'Successfully signed in with password!', success: true })
-      
-      // Track password login - MUST complete before redirect
-      console.log('📝 Starting password login tracking...');
-      
-      try {
-        console.log('🌐 Fetching IP address...');
-        const ip = await fetch('https://api.ipify.org?format=json')
-          .then(res => res.json())
-          .then(data => data.ip);
-        console.log('✅ IP address fetched:', ip);
-
-        let geo = {};
-        try {
-          console.log('🗺️ Fetching geo location...');
-          geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
-          console.log('✅ Geo location fetched:', geo.country, geo.city);
-        } catch (geoErr) {
-          console.error('❌ Failed to fetch geo info:', geoErr);
-        }
-
-        function detectBrowser() {
-          if (navigator.userAgentData && navigator.userAgentData.brands) {
-            const brands = navigator.userAgentData.brands.map(b => b.brand);
-            if (brands.includes('Google Chrome')) return 'Chrome';
-            if (brands.includes('Microsoft Edge')) return 'Edge';
-            if (brands.includes('Chromium')) return 'Chromium';
-            return brands[0] || 'Unknown';
-          }
-          const ua = navigator.userAgent;
-          if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
-          if (/firefox|fxios/i.test(ua)) return 'Firefox';
-          if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
-          if (/edg/i.test(ua)) return 'Edge';
-          if (/opr\//i.test(ua)) return 'Opera';
-          return 'Unknown';
-        }
-
-        function detectOS() {
-          if (navigator.userAgentData && navigator.userAgentData.platform) {
-            return navigator.userAgentData.platform;
-          }
-          const ua = navigator.userAgent;
-          if (/windows/i.test(ua)) return 'Windows';
-          if (/macintosh|mac os x/i.test(ua)) return 'Mac';
-          if (/linux/i.test(ua)) return 'Linux';
-          if (/android/i.test(ua)) return 'Android';
-          if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
-          return 'Unknown';
-        }
-
-        const metadata = {
-          user_id: userId,
-          email: adminEmail,
-          ip_address: ip,
-          country: geo.country || 'Unknown',
-          city: geo.city || 'Unknown',
-          region: geo.regionName || geo.region || 'Unknown',
-          device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-          browser: detectBrowser(),
-          os: detectOS(),
-          user_agent: navigator.userAgent,
-          login_time: new Date().toISOString(),
+      const trackResponse = await fetch('/.netlify/functions/trackLogin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userRow.id,
+          email: userRow.email,
           login_method: 'password'
-        };
-
-        console.log('💾 Sending login tracking to server:', metadata);
-        
-        try {
-          const trackResponse = await fetch('/.netlify/functions/trackLogin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(metadata)
-          });
-          
-          if (trackResponse.ok) {
-            const trackResult = await trackResponse.json();
-            console.log('✅ Password login tracked successfully!');
-            console.log('✅ Server response:', trackResult);
-          } else {
-            const errorData = await trackResponse.json().catch(() => ({}));
-            console.error('❌ Failed to track password login:', errorData);
-            console.error('❌ Status:', trackResponse.status, trackResponse.statusText);
-          }
-        } catch (trackFetchErr) {
-          console.error('❌ Error calling track login function:', trackFetchErr);
-        }
-      } catch (trackErr) {
-        console.error('❌ Failed to track password login:', trackErr);
-        console.error('❌ Track error details:', trackErr.message, trackErr.stack);
+        })
+      })
+      if (!trackResponse.ok) {
+        const errorData = await trackResponse.json().catch(() => ({}))
+        console.error('Failed to track password login:', errorData)
       }
-      
-      console.log('🔄 Redirecting to /app...');
-      // Redirect after tracking completes
-      window.location.href = '/app'
-      
-    } catch (err) {
-      console.error('Password login error:', err);
-      createNotification({ message: `Login failed: ${err.message || 'Please try again.'}`, success: false })
+    } catch (trackErr) {
+      console.error('Track login error:', trackErr)
     }
-  })
+
+    // Redirect to app
+    window.location.href = '/app'
+  } catch (err) {
+    console.error('Password login error:', err)
+    createNotification({ message: `Login failed: ${err.message || 'Please try again.'}`, success: false })
+  }
+})

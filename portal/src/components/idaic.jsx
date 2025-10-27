@@ -51,7 +51,7 @@ import { ComputerDesktopIcon } from '@heroicons/react/24/solid'
 import { supabase } from '../config/supabase.js'
 import React, { useState, useEffect } from 'react'
 
-export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated }) {
+export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated, setIsAdminAuthenticated, user }) {
   // Detect mobile and set collapsed true by default on mobile
   const isMobile = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
   const [collapsed, setCollapsed] = useState(isMobile);
@@ -370,25 +370,28 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               <Cog6ToothIcon />
               {!collapsed && <SidebarLabel>User Profile</SidebarLabel>}
             </SidebarItem>
-            <SidebarItem 
-              onClick={() => handlePageChange('portal-admin')}
-              current={currentPage === 'portal-admin' ? true : undefined}
-              style={sidebarItemStyle}
-              onMouseEnter={(e) => {
-                if (currentPage !== 'portal-admin') {
-                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (currentPage !== 'portal-admin') {
-                  e.currentTarget.style.backgroundColor = '';
-                }
-              }}
-              title={collapsed ? 'Portal Admin' : undefined}
-            >
-              <ComputerDesktopIcon className="h-6 w-6 text-orange-500" />
-              {!collapsed && <SidebarLabel>Portal Admin</SidebarLabel>}
-            </SidebarItem>
+            {/* Only show admin portal for admin users */}
+            {user?.role === 'admin' && (
+              <SidebarItem 
+                onClick={() => handlePageChange('portal-admin')}
+                current={currentPage === 'portal-admin' ? true : undefined}
+                style={sidebarItemStyle}
+                onMouseEnter={(e) => {
+                  if (currentPage !== 'portal-admin') {
+                    e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentPage !== 'portal-admin') {
+                    e.currentTarget.style.backgroundColor = '';
+                  }
+                }}
+                title={collapsed ? 'Portal Admin' : undefined}
+              >
+                <ComputerDesktopIcon className="h-6 w-6 text-orange-500" />
+                {!collapsed && <SidebarLabel>Portal Admin</SidebarLabel>}
+              </SidebarItem>
+            )}
           </SidebarSection>
         </SidebarBody>
         

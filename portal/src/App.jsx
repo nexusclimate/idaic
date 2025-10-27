@@ -30,7 +30,7 @@ export default function App() {
           // Fetch user ID from database
           const { data: userData, error: userError } = await supabase
             .from('users')
-            .select('id')
+            .select('id, role')
             .eq('email', passwordEmail)
             .maybeSingle();
           
@@ -51,6 +51,7 @@ export default function App() {
           setUser({
             id: userId,
             email: passwordEmail,
+            role: userData.role,
             user_metadata: { password_login: true }
           });
           setIsAuthenticated(true);
@@ -72,7 +73,28 @@ export default function App() {
         if (session && session.user) {
           // Valid Supabase session found
           console.log('✅ Valid Supabase session found:', session.user.email);
-          setUser(session.user);
+          
+          // Fetch user role from database
+          try {
+            const { data: userData, error: roleError } = await supabase
+              .from('users')
+              .select('role')
+              .eq('email', session.user.email)
+              .maybeSingle();
+            
+            if (userData && !roleError) {
+              setUser({
+                ...session.user,
+                role: userData.role
+              });
+            } else {
+              setUser(session.user);
+            }
+          } catch (err) {
+            console.error('Error fetching user role:', err);
+            setUser(session.user);
+          }
+          
           setIsAuthenticated(true);
           
           // Update localStorage with current token (in case it was refreshed)
@@ -276,6 +298,7 @@ export default function App() {
         currentPage={currentPage}
         isAdminAuthenticated={isAdminAuthenticated}
         setIsAdminAuthenticated={setIsAdminAuthenticated}
+        user={user}
       />
       <main className="flex-1 bg-gray-50 p-10 h-full">
         <PageRouter 

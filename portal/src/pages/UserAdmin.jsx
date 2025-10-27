@@ -13,6 +13,8 @@ export default function UserAdmin({ onUserSelect }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingRole, setEditingRole] = useState(null);
+  const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -91,6 +93,37 @@ export default function UserAdmin({ onUserSelect }) {
     } else {
       setSortBy(col);
       setSortDir('asc');
+    }
+  };
+
+  const handleRoleUpdate = async (userId, newRole) => {
+    setRoleUpdateLoading(true);
+    try {
+      const response = await fetch(`/.netlify/functions/userProfile?id=${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          role: newRole,
+          updated_by: userId // This should be the current admin user's ID
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update role');
+      }
+
+      // Update the local state
+      setUsers(users.map(user => 
+        user.id === userId ? { ...user, role: newRole } : user
+      ));
+      
+      setEditingRole(null);
+    } catch (err) {
+      console.error('Error updating role:', err);
+      setError(err.message);
+    } finally {
+      setRoleUpdateLoading(false);
     }
   };
 
@@ -262,11 +295,11 @@ export default function UserAdmin({ onUserSelect }) {
                       scope="col"
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
-                      onClick={() => handleSort('last_login_method')}
+                      onClick={() => handleSort('role')}
                     >
-                      Login Method
+                      Role
                       <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
-                        {sortBy === 'last_login_method' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                        {sortBy === 'role' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                       </span>
                     </th>
                   </tr>
@@ -381,6 +414,43 @@ export default function UserAdmin({ onUserSelect }) {
                               {user.last_login_method === 'password' ? 'Password' : 'OTP'}
                             </span>
                           ) : '—'}
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                          )}
+                          style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        >
+                          {editingRole === user.id ? (
+                            <select
+                              value={user.role || 'member'}
+                              onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+                              disabled={roleUpdateLoading}
+                              className="text-xs border rounded px-1 py-0.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <option value="member">Member</option>
+                              <option value="admin">Admin</option>
+                              <option value="moderator">Moderator</option>
+                            </select>
+                          ) : (
+                            <span 
+                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:bg-gray-100 ${
+                                user.role === 'admin' 
+                                  ? 'bg-red-100 text-red-800' 
+                                  : user.role === 'moderator'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingRole(user.id);
+                              }}
+                              title="Click to edit role"
+                            >
+                              {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );

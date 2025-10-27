@@ -275,9 +275,6 @@ export default function Organizations({ user }) {
                   Organization
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Organization ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Location
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -301,9 +298,6 @@ export default function Organizations({ user }) {
                         <div className="text-sm text-gray-500 truncate max-w-xs">{org.bio}</div>
                       )}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.org_id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {org.location || '—'}
@@ -492,6 +486,25 @@ export default function Organizations({ user }) {
                   )}
                 </div>
                 
+                {/* Organization ID Footnote */}
+                {editingOrg && (
+                  <div className="mt-4 pt-3 border-t border-gray-200">
+                    <p className="text-xs text-gray-500">
+                      <span className="font-medium">Organization ID:</span> {editingOrg.org_id}
+                    </p>
+                    {editingOrg.created_at && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        <span className="font-medium">Created:</span> {new Date(editingOrg.created_at).toLocaleDateString()}
+                      </p>
+                    )}
+                    {editingOrg.updated_at && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        <span className="font-medium">Last Updated:</span> {new Date(editingOrg.updated_at).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
@@ -618,6 +631,13 @@ export default function Organizations({ user }) {
                         </p>
                       </div>
                     )}
+                  </div>
+                  
+                  {/* Organization ID Footnote */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <p className="text-xs text-gray-500">
+                      <span className="font-medium">Organization ID:</span> {selectedOrg.org_id}
+                    </p>
                   </div>
                 </div>
               </div>
