@@ -23,10 +23,10 @@ exports.handler = async function (event, context) {
     console.log('🔄 Logo upload request:', { org_id, logo_name, logo_type, is_primary });
 
     // Validate required fields
-    if (!org_id || !logo_name || !logo_data) {
+    if (!org_id || !logo_data) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'org_id (organization UUID), logo_name, and logo_data are required' })
+        body: JSON.stringify({ error: 'org_id (organization UUID) and logo_data are required' })
       };
     }
 
@@ -74,6 +74,7 @@ exports.handler = async function (event, context) {
       id: logoId,
       org_id: org_id
     });
+    console.log('🔍 About to insert into logos table...');
     
     const { data: logoRecord, error: dbError } = await supabase
       .from('logos')
@@ -84,6 +85,8 @@ exports.handler = async function (event, context) {
         // Removed logo_url, logo_name, logo_size, logo_type, is_primary as they don't exist
       }])
       .select();
+
+    console.log('📊 Database insert result:', { logoRecord, dbError });
 
     if (dbError) {
       console.error('❌ Error saving logo record:', dbError);
