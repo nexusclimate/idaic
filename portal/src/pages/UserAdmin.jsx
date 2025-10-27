@@ -422,34 +422,37 @@ export default function UserAdmin({ onUserSelect }) {
                           style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
                           {editingRole === user.id ? (
-                            <select
-                              value={user.role || 'member'}
-                              onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
-                              disabled={roleUpdateLoading}
-                              className="text-xs border rounded px-1 py-0.5"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <option value="member">Member</option>
-                              <option value="admin">Admin</option>
-                              <option value="moderator">Moderator</option>
-                            </select>
+             <select
+               value={user.role || 'guest'}
+               onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+               disabled={roleUpdateLoading}
+               className="text-xs border rounded px-1 py-0.5"
+               onClick={(e) => e.stopPropagation()}
+             >
+               <option value="guest">Guest</option>
+               <option value="member">Member</option>
+               <option value="admin">Admin</option>
+               <option value="moderator">Moderator</option>
+             </select>
                           ) : (
-                            <span 
-                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:bg-gray-100 ${
-                                user.role === 'admin' 
-                                  ? 'bg-red-100 text-red-800' 
-                                  : user.role === 'moderator'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingRole(user.id);
-                              }}
-                              title="Click to edit role"
-                            >
-                              {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
-                            </span>
+             <span 
+               className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:bg-gray-100 ${
+                 user.role === 'admin' 
+                   ? 'bg-red-100 text-red-800' 
+                   : user.role === 'moderator'
+                   ? 'bg-blue-100 text-blue-800'
+                   : user.role === 'member'
+                   ? 'bg-green-100 text-green-800'
+                   : 'bg-gray-100 text-gray-800'
+               }`}
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setEditingRole(user.id);
+               }}
+               title="Click to edit role"
+             >
+               {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Guest'}
+             </span>
                           )}
                         </td>
                       </tr>

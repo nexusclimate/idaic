@@ -167,12 +167,38 @@ export default function Organizations({ user }) {
           })
         });
 
+        let result = null;
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to upload logo');
+          try {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to upload logo');
+          } catch (e) {
+            throw new Error('Failed to upload logo');
+          }
+        } else {
+          try {
+            result = await response.json();
+          } catch (_) {
+            // ignore JSON parse errors
+          }
         }
 
-        setSuccess('Logo uploaded successfully!');
+        if (!result?.logo?.id) {
+          // Double-check by fetching logos for this org
+          try {
+            const verifyRes = await fetch(`/.netlify/functions/logos?org_id=${encodeURIComponent(formData.org_id)}`);
+            const verifyList = verifyRes.ok ? await verifyRes.json() : [];
+            if (Array.isArray(verifyList) && verifyList.length > 0) {
+              setSuccess('Logo uploaded and saved to database.');
+            } else {
+              setError('Logo uploaded to storage but not found in database. Please try again.');
+            }
+          } catch (vErr) {
+            setError('Logo uploaded to storage but verification failed.');
+          }
+        } else {
+          setSuccess('Logo uploaded and saved to database.');
+        }
         setLogoFile(null);
         loadOrganizations(); // Refresh the list
       };
@@ -362,7 +388,18 @@ export default function Organizations({ user }) {
               </h3>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Organization ID field removed from top section (kept small-print footer) */}
+                {/* Organization ID (required for linking logos). Visible in form. */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Organization ID</label>
+                  <input
+                    type="text"
+                    value={formData.org_id}
+                    onChange={(e) => setFormData({ ...formData, org_id: e.target.value })}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="company.com"
+                    required
+                  />
+                </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>

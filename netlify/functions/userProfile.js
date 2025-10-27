@@ -103,7 +103,7 @@ exports.handler = async function (event, context) {
         // Validate role if provided (only for admin role management)
         // Users updating their own profiles don't need role validation
         if (profileData.role && profileData.role !== '') {
-          const validRoles = ['member', 'admin', 'moderator'];
+          const validRoles = ['guest', 'member', 'admin', 'moderator'];
           if (!validRoles.includes(profileData.role.toLowerCase())) {
             return {
               statusCode: 400,
@@ -215,7 +215,7 @@ exports.handler = async function (event, context) {
         // Validate role if provided (only for admin role management)
         // Users updating their own profiles don't need role validation
         if (updates.role && updates.role !== '') {
-          const validRoles = ['member', 'admin', 'moderator'];
+          const validRoles = ['guest', 'member', 'admin', 'moderator'];
           if (!validRoles.includes(updates.role.toLowerCase())) {
             return {
               statusCode: 400,

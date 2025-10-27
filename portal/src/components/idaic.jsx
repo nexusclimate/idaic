@@ -436,6 +436,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                       localStorage.removeItem('idaic-token');
                       localStorage.removeItem('idaic-disclaimer-accepted');
                       localStorage.removeItem('idaic-password-login');
+                      localStorage.removeItem('idaic-password-email');
                     } else {
                       // Proper Supabase logout for OTP login
                       console.log('🔄 Signing out from Supabase...');
@@ -444,13 +445,18 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
                       localStorage.removeItem('idaic-disclaimer-accepted');
                     }
                     
-                    // Navigate to logout page in-app first
-                    handlePageChange('logout');
+                    // Clear all IDAIC-related localStorage
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                      const key = localStorage.key(i);
+                      if (key && key.startsWith('idaic-')) {
+                        keysToRemove.push(key);
+                      }
+                    }
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
                     
-                    // Redirect to login page, replacing history so back button doesn't restore
-                    setTimeout(() => {
-                      window.location.replace('/login.html');
-                    }, 500);
+                    // Redirect to login page immediately
+                    window.location.replace('/login.html');
                   } catch (error) {
                     console.error('Error during logout:', error);
                     // Fallback: still redirect to login even if logout fails
