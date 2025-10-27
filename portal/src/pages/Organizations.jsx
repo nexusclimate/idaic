@@ -362,17 +362,7 @@ export default function Organizations({ user }) {
               </h3>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Organization ID</label>
-                  <input
-                    type="text"
-                    value={formData.org_id}
-                    onChange={(e) => setFormData({ ...formData, org_id: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="company.com"
-                    required
-                  />
-                </div>
+                {/* Organization ID field removed from top section (kept small-print footer) */}
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -486,20 +476,20 @@ export default function Organizations({ user }) {
                   )}
                 </div>
                 
-                {/* Organization ID Footnote */}
+                {/* Organization ID Footnote (use UUID id), created/updated info */}
                 {editingOrg && (
                   <div className="mt-4 pt-3 border-t border-gray-200">
                     <p className="text-xs text-gray-500">
-                      <span className="font-medium">Organization ID:</span> {editingOrg.org_id}
+                      <span className="font-medium">Organization UUID:</span> {editingOrg.id}
                     </p>
                     {editingOrg.created_at && (
                       <p className="text-xs text-gray-500 mt-1">
-                        <span className="font-medium">Created:</span> {new Date(editingOrg.created_at).toLocaleDateString()}
+                        <span className="font-medium">Created:</span> {new Date(editingOrg.created_at).toLocaleString()}
                       </p>
                     )}
                     {editingOrg.updated_at && (
                       <p className="text-xs text-gray-500 mt-1">
-                        <span className="font-medium">Last Updated:</span> {new Date(editingOrg.updated_at).toLocaleDateString()}
+                        <span className="font-medium">Last Updated:</span> {new Date(editingOrg.updated_at).toLocaleString()}
                       </p>
                     )}
                   </div>
@@ -583,10 +573,7 @@ export default function Organizations({ user }) {
                       <p className="mt-1 text-sm text-gray-900">{selectedOrg.name}</p>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Organization ID</label>
-                      <p className="mt-1 text-sm text-gray-900">{selectedOrg.org_id}</p>
-                    </div>
+                    {/* Organization ID removed from top section */}
                     
                     {selectedOrg.bio && (
                       <div>
@@ -633,11 +620,21 @@ export default function Organizations({ user }) {
                     )}
                   </div>
                   
-                  {/* Organization ID Footnote */}
+                  {/* Organization ID Footnote (use UUID id), created/updated info */}
                   <div className="mt-6 pt-4 border-t border-gray-200">
                     <p className="text-xs text-gray-500">
-                      <span className="font-medium">Organization ID:</span> {selectedOrg.org_id}
+                      <span className="font-medium">Organization UUID:</span> {selectedOrg.id}
                     </p>
+                    {selectedOrg.created_at && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        <span className="font-medium">Created:</span> {new Date(selectedOrg.created_at).toLocaleString()}
+                      </p>
+                    )}
+                    {selectedOrg.updated_at && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        <span className="font-medium">Last Updated:</span> {new Date(selectedOrg.updated_at).toLocaleString()}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

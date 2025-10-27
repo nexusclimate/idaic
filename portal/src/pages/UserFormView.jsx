@@ -13,6 +13,7 @@ export default function UserFormView({ initialUser }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
+    role: '',
     name: '',
     email: '',
     company: '',
@@ -59,6 +60,7 @@ export default function UserFormView({ initialUser }) {
   const loadUserData = (user) => {
     setSelectedUser(user);
     setFormData({
+      role: (user.role || '').toLowerCase(),
       name: user.name || '',
       email: user.email || '',
       company: user.company || '',
@@ -88,15 +90,20 @@ export default function UserFormView({ initialUser }) {
     setSuccess('');
 
     try {
+      // Build payload, allow role change only for admins
+      const payload = { ...formData, updated_by: user?.id };
+      if ((user?.role || '').toLowerCase() !== 'admin') {
+        delete payload.role;
+      } else if (payload.role) {
+        payload.role = payload.role.toLowerCase();
+      }
+
       const response = await fetch(`/.netlify/functions/userProfile?id=${selectedUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...formData,
-          updated_by: user?.id // Track who made the update
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -216,6 +223,34 @@ export default function UserFormView({ initialUser }) {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Admin Controls: Role */}
+              {(user?.role || '').toLowerCase() === 'admin' && (
+                <div className="border-b pb-6">
+                  <h3 className="text-base font-semibold mb-4" style={{ color: colors.text.primary }}>
+                    Role
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                        User Role
+                      </label>
+                      <select
+                        value={formData.role || ''}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                      >
+                        <option value="">Select role</option>
+                        <option value="member">Member</option>
+                        <option value="moderator">Moderator</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      <p className="text-xs mt-1" style={{ color: colors.text.secondary }}>
+                        Only admins can change roles.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Basic Information */}
               <div className="border-b pb-6">
                 <h3 className="text-base font-semibold mb-4" style={{ color: colors.text.primary }}>

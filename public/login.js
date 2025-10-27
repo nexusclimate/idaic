@@ -189,6 +189,39 @@ document
     }
   });
 
+// 3b. Reveal Admin tab only for admin emails
+document.getElementById('admin-reveal')?.addEventListener('click', async () => {
+  try {
+    const emailInput = document.getElementById('email')
+    const email = (emailInput?.value || '').trim()
+    if (!email) {
+      createNotification({ message: 'Enter your email first to check admin access.', success: false })
+      return
+    }
+    const { data: userRow, error } = await supabase
+      .from('users')
+      .select('role,email')
+      .eq('email', email)
+      .maybeSingle()
+    if (error) {
+      createNotification({ message: 'Failed to check admin access. Try again.', success: false })
+      return
+    }
+    if ((userRow?.role || '').toLowerCase() === 'admin') {
+      const pwdTab = document.getElementById('password-tab')
+      if (pwdTab) pwdTab.classList.remove('hidden')
+      // Prefill email in admin form
+      const adminEmail = document.getElementById('password-email')
+      if (adminEmail) adminEmail.value = email
+      createNotification({ message: 'Admin access enabled.', success: true })
+    } else {
+      createNotification({ message: 'This email does not have admin access.', success: false })
+    }
+  } catch (err) {
+    createNotification({ message: 'Unexpected error. Please try again.', success: false })
+  }
+})
+
 // 4. Verify OTP
 document
   .getElementById('otp-verify-form')
@@ -310,13 +343,11 @@ document
 document.getElementById('password-form')?.addEventListener('submit', async (e) => {
   e.preventDefault()
   const emailEl = document.getElementById('password-email')
-  const pwdEl = document.getElementById('password')
   const email = emailEl ? emailEl.value.trim() : ''
-  const password = pwdEl ? pwdEl.value.trim() : ''
 
   // Basic validation
-  if (!email || !password) {
-    createNotification({ message: 'Please enter both email and password.', success: false })
+  if (!email) {
+    createNotification({ message: 'Please enter your admin email.', success: false })
     return
   }
 
@@ -341,12 +372,6 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
 
     if ((userRow.role || '').toLowerCase() !== 'admin') {
       createNotification({ message: 'Admin access required. Please use Email Code instead.', success: false })
-      return
-    }
-
-    // Simple shared secret password (client-side) — replace with server validation if needed
-    if (password !== 'IDAIC2025!') {
-      createNotification({ message: 'Invalid password. Please try again.', success: false })
       return
     }
 
