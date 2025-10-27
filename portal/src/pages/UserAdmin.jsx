@@ -15,6 +15,14 @@ export default function UserAdmin({ onUserSelect }) {
   const [error, setError] = useState(null);
   const [editingRole, setEditingRole] = useState(null);
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [addUserForm, setAddUserForm] = useState({
+    name: '',
+    email: '',
+    role: 'guest'
+  });
+  const [addUserLoading, setAddUserLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -127,6 +135,48 @@ export default function UserAdmin({ onUserSelect }) {
     }
   };
 
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    setAddUserLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/.netlify/functions/userProfile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: addUserForm.name,
+          email: addUserForm.email,
+          role: addUserForm.role,
+          data_permission: false // Default to false for new users
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create user');
+      }
+
+      const newUser = await response.json();
+      
+      // Add the new user to the local state
+      setUsers([...users, newUser]);
+      
+      // Reset form and close
+      setAddUserForm({ name: '', email: '', role: 'guest' });
+      setShowAddUser(false);
+      setSuccessMessage(`User ${newUser.name} created successfully!`);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAddUserLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main }}>
@@ -156,26 +206,120 @@ export default function UserAdmin({ onUserSelect }) {
         </p>
       </div>
 
-      {/* Search input */}
-      <div className="mb-3 max-w-xs">
-        <label htmlFor="search" className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-          Quick search
-        </label>
-        <div className="mt-1">
-          <div className="flex rounded-md bg-white outline-1 -outline-offset-1" style={{ outlineColor: colors.border.medium }}>
-            <input
-              id="search"
-              name="search"
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="block min-w-0 grow px-3 py-2 sm:py-1 text-base placeholder:text-gray-400 focus:outline-none sm:text-sm"
-              style={{ color: colors.text.primary, fontFamily: font.primary }}
-              placeholder="Search by name, email, or company..."
-            />
+      {/* Search input and Add User button */}
+      <div className="mb-3 flex items-end gap-4">
+        <div className="max-w-xs">
+          <label htmlFor="search" className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+            Quick search
+          </label>
+          <div className="mt-1">
+            <div className="flex rounded-md bg-white outline-1 -outline-offset-1" style={{ outlineColor: colors.border.medium }}>
+              <input
+                id="search"
+                name="search"
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="block min-w-0 grow px-3 py-2 sm:py-1 text-base placeholder:text-gray-400 focus:outline-none sm:text-sm"
+                style={{ color: colors.text.primary, fontFamily: font.primary }}
+                placeholder="Search by name, email, or company..."
+              />
+            </div>
           </div>
         </div>
+        
+        <button
+          onClick={() => setShowAddUser(true)}
+          className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium"
+        >
+          Add User
+        </button>
       </div>
+
+      {/* Success message */}
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+          {successMessage}
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {showAddUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: colors.text.primary }}>
+              Add New User
+            </h3>
+            
+            <form onSubmit={handleAddUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  value={addUserForm.name}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={addUserForm.email}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                  Role
+                </label>
+                <select
+                  value={addUserForm.role}
+                  onChange={(e) => setAddUserForm({ ...addUserForm, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <option value="guest">Guest</option>
+                  <option value="member">Member</option>
+                  <option value="moderator">Moderator</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={addUserLoading}
+                  className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                >
+                  {addUserLoading ? 'Creating...' : 'Create User'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddUser(false);
+                    setAddUserForm({ name: '', email: '', role: 'guest' });
+                    setError(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Activity Legend */}
       <div className="mb-4 p-3 bg-white rounded-lg border" style={{ borderColor: colors.border.light }}>

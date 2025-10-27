@@ -388,19 +388,6 @@ export default function Organizations({ user }) {
               </h3>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Organization ID (required for linking logos). Visible in form. */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Organization ID</label>
-                  <input
-                    type="text"
-                    value={formData.org_id}
-                    onChange={(e) => setFormData({ ...formData, org_id: e.target.value })}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="company.com"
-                    required
-                  />
-                </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
                   <input
