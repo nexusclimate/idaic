@@ -393,11 +393,8 @@ export default function Organizations({ user }) {
                     </button>
                     <button
                       onClick={() => handleEdit(org)}
-                      className="text-orange-600 hover:text-orange-500 flex items-center gap-2"
+                      className="text-orange-600 hover:text-orange-500"
                     >
-                      {org.website && (
-                        <Favicon url={org.website} size={16} />
-                      )}
                       Edit
                     </button>
                     <button

@@ -61,12 +61,31 @@ exports.handler = async function (event, context) {
 
     console.log('✅ Logo uploaded to storage successfully:', uploadData);
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('logos')
-      .getPublicUrl(uniqueFileName);
+    // Generate a signed URL with custom expiry (default 1 year), fallback to public URL if needed
+    const expiresInSeconds = parseInt(process.env.LOGO_URL_TTL_SECONDS || String(60 * 60 * 24 * 365), 10);
+    let logo_url = null;
 
-    const logo_url = urlData.publicUrl;
+    try {
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('logos')
+        .createSignedUrl(uniqueFileName, expiresInSeconds);
+
+      if (signedError) {
+        console.warn('⚠️ Failed to create signed URL, falling back to public URL:', signedError);
+        const { data: urlData } = supabase.storage
+          .from('logos')
+          .getPublicUrl(uniqueFileName);
+        logo_url = urlData.publicUrl;
+      } else {
+        logo_url = signedData?.signedUrl;
+      }
+    } catch (e) {
+      console.warn('⚠️ Exception during signed URL generation, falling back to public URL:', e);
+      const { data: urlData } = supabase.storage
+        .from('logos')
+        .getPublicUrl(uniqueFileName);
+      logo_url = urlData.publicUrl;
+    }
 
     // Update the organization record with the logo URL
     console.log('📊 Updating organization with logo URL:', {
