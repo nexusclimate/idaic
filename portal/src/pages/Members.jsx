@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors } from '../config/colors';
 import User from './User';
 
@@ -7,40 +7,37 @@ const tabs = [
   { name: 'Users', key: 'users' },
 ];
 
-const members = [
-  {
-    name: 'Nexus Climate',
-    logo: 'https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png',
-    alt: 'Nexus Climate Logo',
-    email: 'info@nexusclimate.co',
-    location: 'London, UK',
-    website: 'nexusclimate.co',
-    bio: 'Nexus Climate is a leading organization in climate solutions and sustainability.'
-  },
-  {
-    name: 'Azraq',
-    logo: 'https://raw.githubusercontent.com/nexusclimate/EcoNex/main/Azraq_white.png',
-    alt: 'Azraq Logo',
-    email: 'contact@azraq.org',
-    location: 'Dubai, UAE',
-    website: 'azraq.org',
-    bio: 'Azraq is dedicated to marine conservation and environmental education.'
-  },
-  {
-    name: 'Nexus Climate',
-    logo: 'https://raw.githubusercontent.com/nexusclimate/Clear/main/NEXUS_trans.png',
-    alt: 'Nexus Climate Logo',
-    email: 'info@nexusclimate.co',
-    location: 'London, UK',
-    website: 'nexusclimate.co',
-    bio: 'Nexus Climate is a leading organization in climate solutions and sustainability.'
-  },
-];
-
 export default function Members() {
   const [activeTab, setActiveTab] = useState('members');
   const [selected, setSelected] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [organizations, setOrganizations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch organizations with logos from database
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/.netlify/functions/orgs');
+        if (!response.ok) throw new Error('Failed to fetch organizations');
+        
+        const data = await response.json();
+        // Filter only organizations that have logos uploaded
+        const orgsWithLogos = data.filter(org => org.logo === true && org.logo_url);
+        setOrganizations(orgsWithLogos);
+        setError('');
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+        setError('Failed to load member organizations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizations();
+  }, []);
 
   const openDrawer = idx => {
     setSelected(idx);
@@ -95,32 +92,45 @@ export default function Members() {
           <div className="flex justify-between items-center mb-4 sm:mb-6">
             <h3 className="text-lg sm:text-xl font-semibold">Member Directory</h3>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {members.map((member, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleMemberClick(idx)}
-                className={`bg-gray-100 p-6 sm:p-8 lg:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
-                  selected === idx && drawerOpen
-                    ? ''
-                    : 'hover:border-orange-200'
-                }`}
-                style={{
-                  borderColor: selected === idx && drawerOpen ? colors.primary.orange : 'transparent',
-                  boxShadow: selected === idx && drawerOpen ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                  // background: selected === idx && drawerOpen ? colors.primary.orange + '22' : undefined,
-                }}
-              >
-                <img
-                  className="max-h-24 sm:max-h-28 lg:max-h-32 w-auto object-contain"
-                  src={member.logo}
-                  alt={member.alt}
-                  style={{ imageRendering: 'auto' }}
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-gray-500">Loading member organizations...</div>
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-red-500">{error}</div>
+            </div>
+          ) : organizations.length === 0 ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-gray-500">No member organizations with logos found.</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {organizations.map((org, idx) => (
+                <button
+                  key={org.id}
+                  onClick={() => handleMemberClick(idx)}
+                  className={`bg-gray-100 p-6 sm:p-8 lg:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
+                    selected === idx && drawerOpen
+                      ? ''
+                      : 'hover:border-orange-200'
+                  }`}
+                  style={{
+                    borderColor: selected === idx && drawerOpen ? colors.primary.orange : 'transparent',
+                    boxShadow: selected === idx && drawerOpen ? `0 0 0 2px ${colors.primary.orange}` : undefined,
+                  }}
+                >
+                  <img
+                    className="max-h-24 sm:max-h-28 lg:max-h-32 w-auto object-contain"
+                    src={org.logo_url}
+                    alt={`${org.name} Logo`}
+                    style={{ imageRendering: 'auto' }}
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {/* Drawer */}
@@ -156,43 +166,69 @@ export default function Members() {
                   </button>
                 </div>
                 {/* Main content */}
-                {selected !== null && (
+                {selected !== null && organizations[selected] && (
                   <div className="divide-y divide-gray-200 flex-1 overflow-y-auto">
                     <div className="pb-4 sm:pb-6">
                       <div className="-mt-8 sm:-mt-8 flow-root px-4 sm:flex sm:items-end sm:px-6 lg:-mt-16">
                         <div>
                           <div className="-m-1 flex">
                             <div className="inline-flex overflow-hidden rounded-lg border-4 border-white">
-                              <img className="size-24 sm:size-32 lg:size-40 xl:size-48 object-contain" src={members[selected].logo} alt="" style={{ imageRendering: 'auto' }} loading="lazy" />
+                              <img className="size-24 sm:size-32 lg:size-40 xl:size-48 object-contain" src={organizations[selected].logo_url} alt={`${organizations[selected].name} Logo`} style={{ imageRendering: 'auto' }} loading="lazy" />
                             </div>
                           </div>
                         </div>
                         <div className="mt-4 sm:mt-6 sm:ml-6 sm:flex-1">
                           <div>
                             <div className="flex items-center">
-                              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{members[selected].name}</h3>
+                              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{organizations[selected].name}</h3>
                             </div>
-                            <p className="text-sm text-gray-500">{members[selected].email}</p>
+                            {organizations[selected].website && (
+                              <p className="text-sm text-gray-500">
+                                <a 
+                                  href={organizations[selected].website.startsWith('http') ? organizations[selected].website : `https://${organizations[selected].website}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-500"
+                                >
+                                  {organizations[selected].website}
+                                </a>
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="px-4 py-4 sm:py-5 sm:px-0">
                       <dl className="space-y-6 sm:space-y-8 sm:divide-y sm:divide-gray-200">
-                        <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Bio</dt>
-                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
-                            <p>{members[selected].bio}</p>
-                          </dd>
-                        </div>
-                        <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Location</dt>
-                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{members[selected].location}</dd>
-                        </div>
-                        <div className="sm:flex sm:px-6 sm:py-5">
-                          <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Website</dt>
-                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{members[selected].website}</dd>
-                        </div>
+                        {organizations[selected].bio && (
+                          <div className="sm:flex sm:px-6 sm:py-5">
+                            <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Bio</dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
+                              <p>{organizations[selected].bio}</p>
+                            </dd>
+                          </div>
+                        )}
+                        {organizations[selected].location && (
+                          <div className="sm:flex sm:px-6 sm:py-5">
+                            <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Location</dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{organizations[selected].location}</dd>
+                          </div>
+                        )}
+                        {organizations[selected].website && (
+                          <div className="sm:flex sm:px-6 sm:py-5">
+                            <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Website</dt>
+                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
+                              <a 
+                                href={organizations[selected].website.startsWith('http') ? organizations[selected].website : `https://${organizations[selected].website}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-500"
+                              >
+                                {organizations[selected].website}
+                              </a>
+                            </dd>
+                          </div>
+                        )}
                       </dl>
                     </div>
                   </div>

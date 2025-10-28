@@ -77,7 +77,8 @@ exports.handler = async function (event, context) {
           name: orgData.name,
           bio: orgData.bio || '',
           location: orgData.location || '',
-          website: orgData.website || ''
+          website: orgData.website || '',
+          updated_by: orgData.updated_by
         });
 
         const { data, error } = await supabase
@@ -86,8 +87,9 @@ exports.handler = async function (event, context) {
             name: orgData.name,
             bio: orgData.bio || '',
             location: orgData.location || '',
-            website: orgData.website || ''
-            // Don't include updated_by for new organizations to avoid foreign key issues
+            website: orgData.website || '',
+            logo: false, // Default to no logo
+            updated_by: orgData.updated_by // Include updated_by for new organizations
             // The database will auto-generate the id (UUID) and updated_at
           }])
           .select();
@@ -101,6 +103,10 @@ exports.handler = async function (event, context) {
         }
 
         console.log('✅ Organization created successfully:', data[0]);
+        console.log('🆔 Generated Organization UUID:', data[0].id);
+        console.log('👤 Created by user:', data[0].updated_by);
+        console.log('⏰ Created at:', data[0].created_at);
+        console.log('🔄 Updated at:', data[0].updated_at);
         return {
           statusCode: 200,
           body: JSON.stringify({
@@ -129,6 +135,8 @@ exports.handler = async function (event, context) {
         if (updates.location !== undefined) mappedUpdates.location = updates.location;
         if (updates.website !== undefined) mappedUpdates.website = updates.website;
         if (updates.updated_by !== undefined) mappedUpdates.updated_by = updates.updated_by;
+
+        console.log('🔄 Updating organization:', id, 'with data:', mappedUpdates);
 
         const { data, error } = await supabase
           .from('orgs')

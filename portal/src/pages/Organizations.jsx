@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { colors } from '../config/colors';
 import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
+import Favicon from '../components/Favicon';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -19,6 +20,8 @@ export default function Organizations({ user }) {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [orgToDelete, setOrgToDelete] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -83,7 +86,19 @@ export default function Organizations({ user }) {
         throw new Error(errorData.error || 'Failed to save organization');
       }
 
-      setSuccess(editingOrg ? 'Organization updated successfully!' : 'Organization created successfully!');
+      const result = await response.json();
+      
+      if (result.organization) {
+        console.log('✅ Organization saved successfully:', result.organization);
+        console.log('🆔 Organization UUID:', result.organization.id);
+        
+        if (!editingOrg) {
+          // New organization created
+          console.log('📝 New organization created with UUID:', result.organization.id);
+        }
+      }
+
+      setSuccess(editingOrg ? 'Organization updated successfully!' : `Organization "${result.organization.name}" created successfully!`);
       setShowForm(false);
       setEditingOrg(null);
       setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
@@ -105,11 +120,16 @@ export default function Organizations({ user }) {
     setShowForm(true);
   };
 
-  const handleDelete = async (org) => {
-    if (!confirm(`Are you sure you want to delete "${org.name}"?`)) return;
+  const handleDelete = (org) => {
+    setOrgToDelete(org);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!orgToDelete) return;
 
     try {
-      const response = await fetch(`/.netlify/functions/orgs?id=${org.id}`, {
+      const response = await fetch(`/.netlify/functions/orgs?id=${orgToDelete.id}`, {
         method: 'DELETE'
       });
 
@@ -120,9 +140,18 @@ export default function Organizations({ user }) {
 
       setSuccess('Organization deleted successfully!');
       loadOrganizations();
+      setShowDeleteConfirm(false);
+      setOrgToDelete(null);
     } catch (err) {
       setError(err.message);
+      setShowDeleteConfirm(false);
+      setOrgToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setOrgToDelete(null);
   };
 
   const handleViewDetails = (org) => {
@@ -178,8 +207,8 @@ export default function Organizations({ user }) {
             logo_name: file.name,
             logo_data: base64Data,
             logo_type: file.type,
-            is_primary: true
-            // Removed updated_by to avoid foreign key constraint issues
+            is_primary: true,
+            updated_by: user?.id // Include updated_by for logo uploads
           })
         });
 
@@ -325,9 +354,6 @@ export default function Organizations({ user }) {
                   Website
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Logo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -358,17 +384,6 @@ export default function Organizations({ user }) {
                       </a>
                     ) : '—'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.logo_url ? (
-                      <img 
-                        src={org.logo_url} 
-                        alt={`${org.name} logo`}
-                        className="h-8 w-8 object-contain"
-                      />
-                    ) : (
-                      <span className="text-gray-400">No logo</span>
-                    )}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button
                       onClick={() => handleViewDetails(org)}
@@ -378,8 +393,11 @@ export default function Organizations({ user }) {
                     </button>
                     <button
                       onClick={() => handleEdit(org)}
-                      className="text-orange-600 hover:text-orange-500"
+                      className="text-orange-600 hover:text-orange-500 flex items-center gap-2"
                     >
+                      {org.website && (
+                        <Favicon url={org.website} size={16} />
+                      )}
                       Edit
                     </button>
                     <button
@@ -451,72 +469,6 @@ export default function Organizations({ user }) {
                   />
                 </div>
 
-                {/* Logo Upload Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Organization Logo</label>
-                  
-                  {/* Current Logo Display */}
-                  {editingOrg && editingOrg.logo_url && (
-                    <div className="mb-3">
-                      <p className="text-sm text-gray-600 mb-2">Current Logo:</p>
-                      <img 
-                        src={editingOrg.logo_url} 
-                        alt={`${editingOrg.name} logo`}
-                        className="h-16 w-16 object-contain border border-gray-200 rounded"
-                      />
-                    </div>
-                  )}
-                  
-                  {/* File Upload */}
-                  <div 
-                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-                      isDragOver 
-                        ? 'border-orange-500 bg-orange-50' 
-                        : 'border-gray-300 hover:border-orange-400'
-                    }`}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
-                    <input
-                      type="file"
-                      id="logo-upload"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      disabled={uploadingLogo}
-                    />
-                    <label 
-                      htmlFor="logo-upload" 
-                      className={`cursor-pointer ${uploadingLogo ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      {uploadingLogo ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-                          <span className="ml-2 text-sm text-gray-600">Uploading...</span>
-                        </div>
-                      ) : (
-                        <div>
-                          <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                          </svg>
-                          <p className="mt-2 text-sm text-gray-600">
-                            <span className="font-medium text-orange-600 hover:text-orange-500">
-                              Click to upload
-                            </span> or drag and drop
-                          </p>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                  
-                  {logoFile && (
-                    <p className="mt-2 text-sm text-gray-600">
-                      Selected: {logoFile.name}
-                    </p>
-                  )}
-                </div>
                 
                 {/* Organization ID Footnote (use UUID id), created/updated info */}
                 {editingOrg && (
@@ -593,17 +545,15 @@ export default function Organizations({ user }) {
               {/* Content */}
               <div className="flex-1 overflow-y-auto p-6">
                 <div className="space-y-6">
-                  {/* Logo */}
+                  {/* Organization Icon */}
                   <div className="text-center">
-                    {selectedOrg.logo_url ? (
-                      <img 
-                        src={selectedOrg.logo_url} 
-                        alt={`${selectedOrg.name} logo`}
-                        className="mx-auto h-24 w-24 object-contain"
-                      />
+                    {selectedOrg.website ? (
+                      <div className="mx-auto flex items-center justify-center">
+                        <Favicon url={selectedOrg.website} size={48} />
+                      </div>
                     ) : (
-                      <div className="mx-auto h-24 w-24 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-400 text-sm">No logo</span>
+                      <div className="mx-auto h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <span className="text-gray-400 text-sm">No website</span>
                       </div>
                     )}
                   </div>
@@ -678,6 +628,43 @@ export default function Organizations({ user }) {
                     className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     Edit Organization
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">Delete Organization</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to delete <strong>"{orgToDelete?.name}"</strong>? This action cannot be undone.
+                </p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <div className="flex space-x-3">
+                  <button
+                    onClick={cancelDelete}
+                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>

@@ -77,7 +77,11 @@ exports.handler = async function (event, context) {
     
     const { data: orgRecord, error: dbError } = await supabase
       .from('orgs')
-      .update({ logo_url: logo_url })
+      .update({ 
+        logo_url: logo_url, 
+        logo: true,
+        updated_by: updated_by // Include updated_by for logo updates
+      })
       .eq('id', org_id)
       .select();
 
@@ -112,6 +116,8 @@ exports.handler = async function (event, context) {
     }
 
     console.log('✅ Organization updated with logo URL successfully:', orgRecord[0]);
+    console.log('👤 Updated by user:', orgRecord[0].updated_by);
+    console.log('🔄 Updated at:', orgRecord[0].updated_at);
 
     console.log('✅ Logo uploaded successfully:', {
       org_id,
