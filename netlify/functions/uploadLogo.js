@@ -21,6 +21,8 @@ exports.handler = async function (event, context) {
     const { org_id, logo_name, logo_data, logo_type, is_primary, updated_by } = JSON.parse(event.body);
 
     console.log('🔄 Logo upload request:', { org_id, logo_name, logo_type, is_primary });
+    console.log('🔍 Request body keys:', Object.keys(JSON.parse(event.body)));
+    console.log('🔍 Full request body:', JSON.parse(event.body));
 
     // Validate required fields
     if (!org_id || !logo_data) {
@@ -90,6 +92,17 @@ exports.handler = async function (event, context) {
 
     if (dbError) {
       console.error('❌ Error saving logo record:', dbError);
+      console.error('❌ Error details:', {
+        message: dbError.message,
+        details: dbError.details,
+        hint: dbError.hint,
+        code: dbError.code
+      });
+      console.error('❌ Insert data that failed:', {
+        id: logoId,
+        org_id: org_id
+      });
+      
       // Try to clean up the uploaded file
       await supabase.storage
         .from('logos')
@@ -97,7 +110,11 @@ exports.handler = async function (event, context) {
       
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'Failed to save logo record' })
+        body: JSON.stringify({ 
+          error: 'Failed to save logo record',
+          details: dbError.message,
+          hint: dbError.hint
+        })
       };
     }
 

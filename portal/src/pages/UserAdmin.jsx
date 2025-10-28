@@ -167,8 +167,10 @@ export default function UserAdmin({ onUserSelect }) {
       setShowAddUser(false);
       setSuccessMessage(`User ${newUser.name} created successfully!`);
       
-      // Clear success message after 5 seconds (longer since user can dismiss manually)
-      setTimeout(() => setSuccessMessage(''), 5000);
+      // Refresh the page after a short delay to show the new user
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       
     } catch (err) {
       setError(err.message);
@@ -578,16 +580,15 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           {editingRole === user.id ? (
              <select
-               value={user.role || 'guest'}
+               value={user.role || 'member'}
                onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
                disabled={roleUpdateLoading}
                className="text-xs border rounded px-1 py-0.5"
                onClick={(e) => e.stopPropagation()}
              >
-               <option value="guest">Guest</option>
                <option value="member">Member</option>
-               <option value="admin">Admin</option>
                <option value="moderator">Moderator</option>
+               <option value="admin">Admin</option>
              </select>
                           ) : (
              <span 
@@ -606,7 +607,7 @@ export default function UserAdmin({ onUserSelect }) {
                }}
                title="Click to edit role"
              >
-               {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Guest'}
+               {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
              </span>
                           )}
                         </td>

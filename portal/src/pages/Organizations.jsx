@@ -73,7 +73,7 @@ export default function Organizations({ user }) {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          ...(editingOrg ? formData : { name: formData.name, bio: formData.bio, location: formData.location, website: formData.website }),
           updated_by: user?.id
         })
       });
@@ -184,12 +184,15 @@ export default function Organizations({ user }) {
         });
 
         console.log('📤 Upload response status:', response.status);
+        console.log('📤 Upload response headers:', Object.fromEntries(response.headers.entries()));
         
         let result = null;
         if (!response.ok) {
           try {
             const errorData = await response.json();
             console.error('❌ Upload error:', errorData);
+            console.error('❌ Error details:', errorData.details);
+            console.error('❌ Error hint:', errorData.hint);
             throw new Error(errorData.error || 'Failed to upload logo');
           } catch (e) {
             console.error('❌ Upload failed:', e);
@@ -199,6 +202,8 @@ export default function Organizations({ user }) {
           try {
             result = await response.json();
             console.log('✅ Upload result:', result);
+            console.log('✅ Upload result type:', typeof result);
+            console.log('✅ Upload result keys:', result ? Object.keys(result) : 'null');
           } catch (_) {
             console.log('⚠️ Could not parse response JSON');
           }

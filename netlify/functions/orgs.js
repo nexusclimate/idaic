@@ -92,16 +92,19 @@ exports.handler = async function (event, context) {
         // Create new organization
         const orgData = JSON.parse(event.body);
 
-        // Validate required fields
-        if (!orgData.org_id || !orgData.name) {
+        // Validate required fields - only name is required now
+        if (!orgData.name) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'org_id and name are required' })
+            body: JSON.stringify({ error: 'name is required' })
           };
         }
 
+        // Generate org_id automatically
+        const generatedOrgId = crypto.randomUUID();
+        
         console.log('🔄 Creating new organization with data:', {
-          org_id: orgData.org_id,
+          org_id: generatedOrgId,
           name: orgData.name,
           bio: orgData.bio || '',
           location: orgData.location || '',
@@ -111,7 +114,7 @@ exports.handler = async function (event, context) {
         const { data, error } = await supabase
           .from('orgs')
           .insert([{
-            org_id: orgData.org_id,
+            org_id: generatedOrgId,
             name: orgData.name,
             bio: orgData.bio || '',
             location: orgData.location || '',

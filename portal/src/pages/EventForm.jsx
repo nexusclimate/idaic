@@ -160,6 +160,19 @@ export default function EventForm({
                         placeholder="Paste registration link here"
                       />
                     </div>
+                    <div>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={localEvent.is_idaic_event || false}
+                          onChange={e => handleFieldChange('is_idaic_event', e.target.checked)}
+                          className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                          disabled={readOnly}
+                        />
+                        <span className="text-sm font-medium text-gray-700">IDAIC Organized Event</span>
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1">Check this if this event is organized by IDAIC (will show IDAIC logo instead of external favicon)</p>
+                    </div>
                     {localEvent.updated_at && (
                       <div className="text-xs text-gray-400 mb-0">
                         Updated at: {new Date(localEvent.updated_at).toUTCString()}

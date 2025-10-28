@@ -31,6 +31,37 @@ function useEvents() {
   return { events, loading, error, refetch: fetchEvents };
 }
 
+// Function to determine if an event is organized by IDAIC
+function isIdaicEvent(event) {
+  // First check if manually marked as IDAIC event
+  if (event.is_idaic_event === true) {
+    return true;
+  }
+  
+  if (!event.registration_link) return false;
+  
+  try {
+    const url = new URL(event.registration_link);
+    const hostname = url.hostname.toLowerCase();
+    
+    // Check for IDAIC-related domains or Teams meeting indicators
+    const idaicIndicators = [
+      'idaic.org',
+      'idaic.com',
+      'teams.microsoft.com',
+      'teams.live.com',
+      'microsoft.com'
+    ];
+    
+    // Check if the hostname contains any IDAIC indicators
+    return idaicIndicators.some(indicator => hostname.includes(indicator));
+  } catch (error) {
+    // If URL parsing fails, check if the link contains IDAIC-related text
+    const linkText = event.registration_link.toLowerCase();
+    return linkText.includes('idaic') || linkText.includes('teams.microsoft');
+  }
+}
+
 export default function Events({ isAdminAuthenticated = false }) {
   const { events, loading, error, refetch } = useEvents();
   const [formError, setFormError] = useState('');
@@ -209,7 +240,22 @@ export default function Events({ isAdminAuthenticated = false }) {
                 {/* Favicon in bottom-right corner */}
                 {event.registration_link && (
                   <div className="absolute bottom-2 right-2 z-10">
-                    <Favicon url={event.registration_link} size={28} />
+                    {isIdaicEvent(event) ? (
+                      <div 
+                        className="bg-white rounded-full p-1 shadow-sm border border-gray-200"
+                        style={{ width: 28, height: 28 }}
+                        title="IDAIC Event"
+                      >
+                        <img
+                          src="/idaic_trans.png"
+                          alt="IDAIC Logo"
+                          className="w-full h-full object-contain"
+                          style={{ width: 24, height: 24 }}
+                        />
+                      </div>
+                    ) : (
+                      <Favicon url={event.registration_link} size={28} />
+                    )}
                   </div>
                 )}
                 <div className="flex flex-row items-stretch h-full w-full">
