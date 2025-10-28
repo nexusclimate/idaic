@@ -209,24 +209,12 @@ export default function Organizations({ user }) {
           }
         }
 
-        if (!result?.logo?.id) {
-          console.log('🔍 Verifying logo in database...');
-          // Double-check by fetching logos for this org
-          try {
-            const verifyRes = await fetch(`/.netlify/functions/logos?org_id=${encodeURIComponent(formData.org_id)}`);
-            const verifyList = verifyRes.ok ? await verifyRes.json() : [];
-            console.log('🔍 Verification result:', verifyList);
-            if (Array.isArray(verifyList) && verifyList.length > 0) {
-              setSuccess('Logo uploaded and saved to database.');
-            } else {
-              setError('Logo uploaded to storage but not found in database. Please try again.');
-            }
-          } catch (vErr) {
-            console.error('❌ Verification failed:', vErr);
-            setError('Logo uploaded to storage but verification failed.');
-          }
+        if (!result?.organization?.logo_url) {
+          console.log('❌ Logo URL not returned in response');
+          setError('Logo uploaded to storage but URL not updated in organization.');
         } else {
-          setSuccess('Logo uploaded and saved to database.');
+          console.log('✅ Logo URL updated successfully:', result.organization.logo_url);
+          setSuccess('Logo uploaded and organization updated successfully.');
         }
         setLogoFile(null);
         loadOrganizations(); // Refresh the list
@@ -371,9 +359,9 @@ export default function Organizations({ user }) {
                     ) : '—'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.primary_logo_url ? (
+                    {org.logo_url ? (
                       <img 
-                        src={org.primary_logo_url} 
+                        src={org.logo_url} 
                         alt={`${org.name} logo`}
                         className="h-8 w-8 object-contain"
                       />
@@ -468,11 +456,11 @@ export default function Organizations({ user }) {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Organization Logo</label>
                   
                   {/* Current Logo Display */}
-                  {editingOrg && editingOrg.primary_logo_url && (
+                  {editingOrg && editingOrg.logo_url && (
                     <div className="mb-3">
                       <p className="text-sm text-gray-600 mb-2">Current Logo:</p>
                       <img 
-                        src={editingOrg.primary_logo_url} 
+                        src={editingOrg.logo_url} 
                         alt={`${editingOrg.name} logo`}
                         className="h-16 w-16 object-contain border border-gray-200 rounded"
                       />
@@ -607,9 +595,9 @@ export default function Organizations({ user }) {
                 <div className="space-y-6">
                   {/* Logo */}
                   <div className="text-center">
-                    {selectedOrg.primary_logo_url ? (
+                    {selectedOrg.logo_url ? (
                       <img 
-                        src={selectedOrg.primary_logo_url} 
+                        src={selectedOrg.logo_url} 
                         alt={`${selectedOrg.name} logo`}
                         className="mx-auto h-24 w-24 object-contain"
                       />

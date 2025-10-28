@@ -68,39 +68,32 @@ exports.handler = async function (event, context) {
 
     const logo_url = urlData.publicUrl;
 
-    // Save logo record to database with generated UUID
-    const logoId = crypto.randomUUID();
-    
-    console.log('🆔 Generated logo UUID:', logoId);
-    console.log('📊 Logo record data:', {
-      id: logoId,
-      org_id: org_id
+    // Update the organization record with the logo URL
+    console.log('📊 Updating organization with logo URL:', {
+      org_id: org_id,
+      logo_url: logo_url
     });
-    console.log('🔍 About to insert into logos table...');
+    console.log('🔍 About to update orgs table...');
     
-    const { data: logoRecord, error: dbError } = await supabase
-      .from('logos')
-      .insert([{
-        id: logoId,
-        org_id: org_id
-        // Only include columns that actually exist in the database
-        // Removed logo_url, logo_name, logo_size, logo_type, is_primary as they don't exist
-      }])
+    const { data: orgRecord, error: dbError } = await supabase
+      .from('orgs')
+      .update({ logo_url: logo_url })
+      .eq('org_id', org_id)
       .select();
 
-    console.log('📊 Database insert result:', { logoRecord, dbError });
+    console.log('📊 Database update result:', { orgRecord, dbError });
 
     if (dbError) {
-      console.error('❌ Error saving logo record:', dbError);
+      console.error('❌ Error updating organization with logo URL:', dbError);
       console.error('❌ Error details:', {
         message: dbError.message,
         details: dbError.details,
         hint: dbError.hint,
         code: dbError.code
       });
-      console.error('❌ Insert data that failed:', {
-        id: logoId,
-        org_id: org_id
+      console.error('❌ Update data that failed:', {
+        org_id: org_id,
+        logo_url: logo_url
       });
       
       // Try to clean up the uploaded file
@@ -111,25 +104,25 @@ exports.handler = async function (event, context) {
       return {
         statusCode: 500,
         body: JSON.stringify({ 
-          error: 'Failed to save logo record',
+          error: 'Failed to update organization with logo URL',
           details: dbError.message,
           hint: dbError.hint
         })
       };
     }
 
-    console.log('✅ Logo record saved to database successfully:', logoRecord[0]);
+    console.log('✅ Organization updated with logo URL successfully:', orgRecord[0]);
 
     console.log('✅ Logo uploaded successfully:', {
-      logo_id: logoId,
-      org_id
+      org_id,
+      logo_url
     });
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Logo uploaded successfully',
-        logo: logoRecord[0],
+        organization: orgRecord[0],
         logo_url: logo_url
       })
     };

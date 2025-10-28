@@ -41,35 +41,8 @@ exports.handler = async function (event, context) {
             };
           }
 
-          // Fetch primary logos and merge manually to emulate the view
-          const orgIds = (orgsData || []).map(o => o.org_id).filter(Boolean);
-          let primaryLogosByOrgId = {};
-          if (orgIds.length > 0) {
-            const { data: logosData, error: logosError } = await supabase
-              .from('logos')
-              .select('org_id, logo_url, logo_name, logo_type, is_primary')
-              .in('org_id', orgIds)
-              .eq('is_primary', true);
-
-            if (logosError) {
-              console.warn('⚠️ Error fetching logos; continuing without logos:', logosError.message);
-            } else {
-              primaryLogosByOrgId = (logosData || []).reduce((acc, row) => {
-                if (!acc[row.org_id]) acc[row.org_id] = row;
-                return acc;
-              }, {});
-            }
-          }
-
-          organizations = orgsData.map(org => {
-            const logo = primaryLogosByOrgId[org.org_id];
-            return {
-              ...org,
-              primary_logo_url: logo ? logo.logo_url : null,
-              primary_logo_name: logo ? logo.logo_name : null,
-              primary_logo_type: logo ? logo.logo_type : null,
-            };
-          });
+          // Logos are now stored directly in the orgs table
+          organizations = orgsData;
         } else if (error) {
           console.error('❌ Error fetching organizations:', error);
           return {
