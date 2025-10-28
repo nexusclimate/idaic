@@ -12,6 +12,8 @@ export default function UserFormView({ initialUser }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     role: '',
     name: '',
@@ -118,6 +120,56 @@ export default function UserFormView({ initialUser }) {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedUser) return;
+
+    setDeleting(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch(`/.netlify/functions/userProfile?id=${selectedUser.id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete user');
+      }
+
+      setSuccess('User deleted successfully');
+      setShowDeleteConfirm(false);
+      
+      // Clear selection and refresh users list
+      setSelectedUser(null);
+      setSearch('');
+      setFormData({
+        role: '',
+        name: '',
+        email: '',
+        company: '',
+        title: '',
+        region: '',
+        linkedin_url: '',
+        data_permission: false,
+        category: '',
+        other_category: '',
+        organization_description: '',
+        ai_decarbonisation: '',
+        challenges: '',
+        contribution: '',
+        projects: '',
+        ai_tools: ''
+      });
+      
+      await fetchUsers();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -458,14 +510,28 @@ export default function UserFormView({ initialUser }) {
               {success && <SuccessMessage message={success} />}
 
               {/* Actions */}
-              <div className="flex justify-end gap-3">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-6 py-2 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
+              <div className="flex justify-between">
+                {/* Delete button for admins */}
+                {(user?.role || '').toLowerCase() === 'admin' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600"
+                  >
+                    Delete User
+                  </button>
+                )}
+                
+                {/* Save button */}
+                <div className="flex gap-3">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-6 py-2 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -485,6 +551,46 @@ export default function UserFormView({ initialUser }) {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div className="mt-2 text-center">
+                <h3 className="text-lg font-medium text-gray-900">Delete User</h3>
+                <div className="mt-2 px-7 py-3">
+                  <p className="text-sm text-gray-500">
+                    Are you sure you want to delete <strong>{selectedUser?.name || selectedUser?.email}</strong>? 
+                    This action cannot be undone and will permanently remove the user from the database.
+                  </p>
+                </div>
+                <div className="flex justify-center gap-3 mt-4">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-400"
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deleting ? 'Deleting...' : 'Delete User'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

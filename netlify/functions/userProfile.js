@@ -314,6 +314,42 @@ exports.handler = async function (event, context) {
         };
       }
 
+      case 'DELETE': {
+        // Delete user profile
+        const { id } = event.queryStringParameters || {};
+
+        if (!id) {
+          return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'User ID is required' })
+          };
+        }
+
+        console.log('🗑️ Deleting user profile:', id);
+
+        const { error: deleteError } = await supabase
+          .from('users')
+          .delete()
+          .eq('id', id);
+
+        if (deleteError) {
+          console.error('❌ Error deleting user:', deleteError);
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Failed to delete user' })
+          };
+        }
+
+        console.log('✅ User deleted successfully:', id);
+
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            message: 'User deleted successfully'
+          })
+        };
+      }
+
       default:
         return {
           statusCode: 405,

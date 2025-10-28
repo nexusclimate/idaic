@@ -4,7 +4,7 @@ import UserAdmin from './UserAdmin';
 import UserFormView from './UserFormView';
 import Organizations from './Organizations';
 
-const tabs = [
+const allTabs = [
   { name: 'Content Management', key: 'content' },
   { name: 'User Admin', key: 'user_admin' },
   { name: 'User Form', key: 'user_form' },
@@ -12,6 +12,11 @@ const tabs = [
 ];
 
 export default function Admin({ user }) {
+  // Filter tabs based on user role
+  const tabs = user?.role?.toLowerCase() === 'moderator' 
+    ? allTabs.filter(tab => tab.key === 'content')
+    : allTabs;
+  
   const [activeTab, setActiveTab] = useState('content');
   const [selectedUser, setSelectedUser] = useState(null);
 

@@ -105,8 +105,8 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         </div>
       );
     case 'admin':
-      if ((user?.role || '').toLowerCase() === 'admin') {
-        return <Admin />;
+      if ((user?.role || '').toLowerCase() === 'admin' || (user?.role || '').toLowerCase() === 'moderator') {
+        return <Admin user={user} />;
       }
       return (
         <div className="flex items-center justify-center h-full">
@@ -124,8 +124,8 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         </div>
       );
     case 'portal-admin':
-      if ((user?.role || '').toLowerCase() === 'admin') {
-        return <Admin />;
+      if ((user?.role || '').toLowerCase() === 'admin' || (user?.role || '').toLowerCase() === 'moderator') {
+        return <Admin user={user} />;
       }
       return (
         <div className="flex items-center justify-center h-full">
