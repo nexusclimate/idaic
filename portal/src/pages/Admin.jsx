@@ -12,10 +12,17 @@ const allTabs = [
 ];
 
 export default function Admin({ user }) {
+  // Debug logging
+  console.log('Admin component - user:', user);
+  console.log('Admin component - user role:', user?.role);
+  console.log('Admin component - role lowercase:', user?.role?.toLowerCase());
+  
   // Filter tabs based on user role
   const tabs = user?.role?.toLowerCase() === 'moderator' 
     ? allTabs.filter(tab => tab.key === 'content')
     : allTabs;
+  
+  console.log('Admin component - filtered tabs:', tabs);
   
   const [activeTab, setActiveTab] = useState('content');
   const [selectedUser, setSelectedUser] = useState(null);

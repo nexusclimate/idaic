@@ -124,14 +124,23 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         </div>
       );
     case 'portal-admin':
+      console.log('PageRouter portal-admin - user:', user);
+      console.log('PageRouter portal-admin - user role:', user?.role);
+      console.log('PageRouter portal-admin - role lowercase:', user?.role?.toLowerCase());
+      console.log('PageRouter portal-admin - is admin:', (user?.role || '').toLowerCase() === 'admin');
+      console.log('PageRouter portal-admin - is moderator:', (user?.role || '').toLowerCase() === 'moderator');
+      
       if ((user?.role || '').toLowerCase() === 'admin' || (user?.role || '').toLowerCase() === 'moderator') {
+        console.log('PageRouter portal-admin - Access granted, rendering Admin component');
         return <Admin user={user} />;
       }
+      console.log('PageRouter portal-admin - Access denied');
       return (
         <div className="flex items-center justify-center h-full">
           <div className="text-center p-8">
             <h1 className="text-2xl font-semibold mb-2">Admin Access Required</h1>
             <p className="text-gray-600">You do not have permission to view this page.</p>
+            <p className="text-sm text-gray-500 mt-2">Your role: {user?.role || 'none'}</p>
           </div>
         </div>
       );

@@ -78,7 +78,7 @@ exports.handler = async function (event, context) {
     const { data: orgRecord, error: dbError } = await supabase
       .from('orgs')
       .update({ logo_url: logo_url })
-      .eq('org_id', org_id)
+      .eq('id', org_id)
       .select();
 
     console.log('📊 Database update result:', { orgRecord, dbError });

@@ -264,7 +264,7 @@ export default function Organizations({ user }) {
 
   const filteredOrganizations = organizations.filter(org =>
     org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    org.org_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    org.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (org.location && org.location.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 

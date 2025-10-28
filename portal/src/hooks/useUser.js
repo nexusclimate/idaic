@@ -21,6 +21,7 @@ export function useUser() {
             .maybeSingle();
           
           if (userData && !error) {
+            console.log('useUser - Password login user data:', userData);
             setUser({
               id: userData.id,
               email: userData.email,

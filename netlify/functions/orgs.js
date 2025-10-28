@@ -73,11 +73,7 @@ exports.handler = async function (event, context) {
           };
         }
 
-        // Generate org_id automatically
-        const generatedOrgId = crypto.randomUUID();
-        
         console.log('🔄 Creating new organization with data:', {
-          org_id: generatedOrgId,
           name: orgData.name,
           bio: orgData.bio || '',
           location: orgData.location || '',
@@ -87,13 +83,12 @@ exports.handler = async function (event, context) {
         const { data, error } = await supabase
           .from('orgs')
           .insert([{
-            org_id: generatedOrgId,
             name: orgData.name,
             bio: orgData.bio || '',
             location: orgData.location || '',
             website: orgData.website || ''
             // Don't include updated_by for new organizations to avoid foreign key issues
-            // The database trigger will handle updated_at
+            // The database will auto-generate the id (UUID) and updated_at
           }])
           .select();
 
