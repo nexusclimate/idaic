@@ -36,12 +36,16 @@ exports.handler = async function (event, context) {
     const logoBuffer = Buffer.from(logo_data, 'base64');
     const logoSize = logoBuffer.length;
 
-    // Generate unique filename using organization UUID
+    // Generate unique filename using organization UUID + timestamp + random component
+    // This ensures uniqueness even if multiple uploads happen at the same time
     const timestamp = Date.now();
+    const randomComponent = Math.random().toString(36).substring(2, 15);
     const fileExtension = logo_name.split('.').pop() || 'png';
-    const uniqueFileName = `${org_id}_${timestamp}.${fileExtension}`;
+    // Sanitize file extension to prevent path traversal
+    const sanitizedExtension = fileExtension.replace(/[^a-zA-Z0-9]/g, '');
+    const uniqueFileName = `${org_id}_${timestamp}_${randomComponent}.${sanitizedExtension}`;
 
-    console.log('📁 Generated filename:', uniqueFileName);
+    console.log('📁 Generated unique filename:', uniqueFileName);
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -61,31 +65,32 @@ exports.handler = async function (event, context) {
 
     console.log('✅ Logo uploaded to storage successfully:', uploadData);
 
-    // Generate a signed URL with custom expiry (default 1 year), fallback to public URL if needed
-    const expiresInSeconds = parseInt(process.env.LOGO_URL_TTL_SECONDS || String(60 * 60 * 24 * 365), 10);
-    let logo_url = null;
+    // Generate a permanent public URL for the logo
+    // Public URLs are stable and don't expire, making them ideal for storage in the database
+    // NOTE: The 'logos' storage bucket must be configured as public in Supabase for these URLs to work
+    const { data: urlData } = supabase.storage
+      .from('logos')
+      .getPublicUrl(uniqueFileName);
+    
+    const logo_url = urlData.publicUrl;
 
-    try {
-      const { data: signedData, error: signedError } = await supabase.storage
+    if (!logo_url) {
+      console.error('❌ Failed to generate public URL for logo');
+      // Try to clean up the uploaded file
+      await supabase.storage
         .from('logos')
-        .createSignedUrl(uniqueFileName, expiresInSeconds);
-
-      if (signedError) {
-        console.warn('⚠️ Failed to create signed URL, falling back to public URL:', signedError);
-        const { data: urlData } = supabase.storage
-          .from('logos')
-          .getPublicUrl(uniqueFileName);
-        logo_url = urlData.publicUrl;
-      } else {
-        logo_url = signedData?.signedUrl;
-      }
-    } catch (e) {
-      console.warn('⚠️ Exception during signed URL generation, falling back to public URL:', e);
-      const { data: urlData } = supabase.storage
-        .from('logos')
-        .getPublicUrl(uniqueFileName);
-      logo_url = urlData.publicUrl;
+        .remove([uniqueFileName]);
+      
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ 
+          error: 'Failed to generate public URL for logo. Please ensure the logos storage bucket is configured as public in Supabase.',
+          hint: 'In Supabase Dashboard, go to Storage > logos bucket > Settings and ensure "Public bucket" is enabled.'
+        })
+      };
     }
+
+    console.log('✅ Generated permanent public URL:', logo_url);
 
     // Update the organization record with the logo URL
     console.log('📊 Updating organization with logo URL:', {

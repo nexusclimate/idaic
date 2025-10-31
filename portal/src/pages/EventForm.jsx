@@ -83,14 +83,35 @@ export default function EventForm({
                 <DialogTitle className="text-sm sm:text-base font-semibold text-gray-900">
                   {isAdding ? 'Add Event' : 'Event Details'}
                 </DialogTitle>
-                <button
-                  type="button"
-                  className="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-orange-500"
-                  onClick={onClose}
-                >
-                  <span className="sr-only">Close panel</span>
-                  <XMarkIcon className="size-6" aria-hidden="true" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* IDAIC Icon in right corner when event is IDAIC organized */}
+                  {localEvent && (localEvent.is_idaic_event === true || 
+                    (localEvent.registration_link && (
+                      localEvent.registration_link.toLowerCase().includes('idaic') ||
+                      localEvent.registration_link.toLowerCase().includes('teams.microsoft')
+                    ))) && (
+                    <div 
+                      className="bg-white rounded-full p-1 shadow-sm border border-gray-200"
+                      style={{ width: 28, height: 28 }}
+                      title="IDAIC Event"
+                    >
+                      <img
+                        src="/idaic_trans.png"
+                        alt="IDAIC Logo"
+                        className="w-full h-full object-contain"
+                        style={{ width: 24, height: 24 }}
+                      />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="relative rounded-md bg-white text-gray-400 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-orange-500"
+                    onClick={onClose}
+                  >
+                    <span className="sr-only">Close panel</span>
+                    <XMarkIcon className="size-6" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
               {localEvent && (
                 <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">

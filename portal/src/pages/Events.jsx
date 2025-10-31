@@ -72,6 +72,8 @@ export default function Events({ isAdminAuthenticated = false }) {
 
   // Compute unique locations for filter dropdown
   const uniqueLocations = Array.from(new Set(events.map(e => e.location).filter(Boolean)));
+  // Always include "UK" as a filter option
+  const allLocations = Array.from(new Set([...uniqueLocations, 'UK'])).sort();
   const filteredEvents = locationFilter ? events.filter(e => e.location === locationFilter) : events;
 
   const handleAdd = async (event) => {
@@ -81,7 +83,8 @@ export default function Events({ isAdminAuthenticated = false }) {
         event_date: event.event_date,
         location: event.location,
         description: event.description, // add description
-        registration_link: event.registration_link // keep as optional
+        registration_link: event.registration_link, // keep as optional
+        is_idaic_event: event.is_idaic_event || false
       };
       const response = await fetch('/.netlify/functions/events', {
         method: 'POST',
@@ -107,7 +110,8 @@ export default function Events({ isAdminAuthenticated = false }) {
         event_date: updates.event_date,
         location: updates.location,
         description: updates.description, // add description
-        registration_link: updates.registration_link // keep as optional
+        registration_link: updates.registration_link, // keep as optional
+        is_idaic_event: updates.is_idaic_event || false
       };
       const response = await fetch(`/.netlify/functions/events?id=${id}`, {
         method: 'PUT',
@@ -203,7 +207,7 @@ export default function Events({ isAdminAuthenticated = false }) {
           </nav>
         </div>
         {/* Location Filter Dropdown */}
-        {uniqueLocations.length > 1 && (
+        {allLocations.length > 0 && (
           <div className="mt-4">
             <label htmlFor="location-filter" className="mr-2 text-sm font-medium text-gray-700">Filter by location:</label>
             <select
@@ -213,7 +217,7 @@ export default function Events({ isAdminAuthenticated = false }) {
               className="border border-gray-300 rounded px-2 py-1 text-sm"
             >
               <option value="">All</option>
-              {uniqueLocations.map(loc => (
+              {allLocations.map(loc => (
                 <option key={loc} value={loc}>{loc}</option>
               ))}
             </select>
