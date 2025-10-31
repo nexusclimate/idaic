@@ -46,13 +46,34 @@ exports.handler = async function (event, context) {
     const uniqueFileName = `${org_id}_${timestamp}_${randomComponent}.${sanitizedExtension}`;
 
     console.log('📁 Generated unique filename:', uniqueFileName);
+    console.log('📊 Buffer size:', logoBuffer.length, 'bytes');
+    console.log('🔍 Using Supabase URL:', process.env.SUPABASE_URL);
+
+    // Verify bucket exists first
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    if (listError) {
+      console.error('❌ Error listing buckets:', listError);
+    } else {
+      const logosBucket = buckets?.find(b => b.name === 'logos');
+      if (!logosBucket) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ 
+            error: 'Storage bucket "logos" not found. Please create it in Supabase Dashboard > Storage > New bucket.',
+            hint: 'Make sure to name it exactly "logos" and set it as a public bucket.'
+          })
+        };
+      }
+      console.log('✅ Logos bucket found:', logosBucket);
+    }
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('logos')
       .upload(uniqueFileName, logoBuffer, {
         contentType: logo_type || 'image/png',
-        upsert: false
+        upsert: false,
+        cacheControl: '3600'
       });
 
     if (uploadError) {

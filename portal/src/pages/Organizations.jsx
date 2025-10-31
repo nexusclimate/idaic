@@ -173,8 +173,11 @@ export default function Organizations({ user }) {
     // Check if org_id is available
     if (!formData.org_id) {
       setError('Organization ID is missing. Please save the organization first before uploading a logo.');
+      console.error('❌ formData.org_id is missing:', formData);
       return;
     }
+    
+    console.log('✅ org_id available:', formData.org_id);
     
     // Validate file type
     if (!file.type.startsWith('image/')) {
