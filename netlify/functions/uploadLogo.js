@@ -57,9 +57,34 @@ exports.handler = async function (event, context) {
 
     if (uploadError) {
       console.error('❌ Error uploading logo to storage:', uploadError);
+      console.error('❌ Upload error details:', {
+        message: uploadError.message,
+        statusCode: uploadError.statusCode,
+        error: uploadError.error,
+        name: uploadError.name
+      });
+      
+      // Provide more helpful error messages based on common issues
+      let errorMessage = 'Failed to upload logo to storage';
+      if (uploadError.message) {
+        if (uploadError.message.includes('new row violates row-level security policy')) {
+          errorMessage = 'Storage bucket policy issue. Please run the storage policies SQL script (sql/setup_logos_storage_policies.sql) in Supabase SQL Editor.';
+        } else if (uploadError.message.includes('Bucket not found')) {
+          errorMessage = 'Storage bucket "logos" not found. Please create it in Supabase Dashboard > Storage.';
+        } else if (uploadError.message.includes('JWT')) {
+          errorMessage = 'Authentication error. Please check SUPABASE_SERVICE_ROLE_KEY is correctly set in environment variables.';
+        } else {
+          errorMessage = `Upload failed: ${uploadError.message}`;
+        }
+      }
+      
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'Failed to upload logo to storage' })
+        body: JSON.stringify({ 
+          error: errorMessage,
+          details: uploadError.message,
+          hint: 'Check Netlify function logs and ensure storage policies are set up correctly.'
+        })
       };
     }
 
