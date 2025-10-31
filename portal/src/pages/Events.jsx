@@ -154,7 +154,7 @@ export default function Events({ isAdminAuthenticated = false }) {
   };
 
   const openAddDrawer = () => {
-    setSelectedEvent({ title: '', event_date: '', location: '', description: '', registration_link: '' });
+    setSelectedEvent({ title: '', event_date: '', location: '', description: '', registration_link: '', is_idaic_event: false });
     setIsAdding(true);
     setDrawerOpen(true);
   };
@@ -242,7 +242,7 @@ export default function Events({ isAdminAuthenticated = false }) {
                 style={{ color: colors.text.primary, fontFamily: 'Inter, sans-serif' }}
               >
                 {/* Favicon in bottom-right corner */}
-                {event.registration_link && (
+                {(event.registration_link || isIdaicEvent(event)) && (
                   <div className="absolute bottom-2 right-2 z-10">
                     {isIdaicEvent(event) ? (
                       <div 

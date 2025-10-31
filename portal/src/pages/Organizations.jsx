@@ -362,6 +362,9 @@ export default function Organizations({ user }) {
                   Website
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Logo Display
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -391,6 +394,19 @@ export default function Organizations({ user }) {
                         {org.website}
                       </a>
                     ) : '—'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {org.logo && org.logo_url ? (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        org.logo_display 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {org.logo_display ? 'Yes' : 'No'}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No logo</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button
