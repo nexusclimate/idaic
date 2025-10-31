@@ -13,9 +13,11 @@ export default function Members() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [organizations, setOrganizations] = useState([]);
   const [sortedOrganizations, setSortedOrganizations] = useState([]);
+  const [filteredOrganizations, setFilteredOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [sortBy, setSortBy] = useState('updated_at'); // 'updated_at' or 'name'
+  const [sortBy, setSortBy] = useState('latest'); // 'latest', 'founding', or 'alphabetical'
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch organizations with logos from database
   useEffect(() => {
@@ -44,22 +46,45 @@ export default function Members() {
     fetchOrganizations();
   }, []);
 
-  // Sort organizations whenever sortBy or organizations change
+  // Filter organizations based on search query
   useEffect(() => {
-    const sorted = [...organizations].sort((a, b) => {
-      if (sortBy === 'name') {
+    if (!searchQuery.trim()) {
+      setFilteredOrganizations(organizations);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const filtered = organizations.filter(org => 
+      org.name.toLowerCase().includes(query) ||
+      (org.bio && org.bio.toLowerCase().includes(query)) ||
+      (org.location && org.location.toLowerCase().includes(query))
+    );
+    setFilteredOrganizations(filtered);
+  }, [organizations, searchQuery]);
+
+  // Sort filtered organizations whenever sortBy or filteredOrganizations change
+  useEffect(() => {
+    const sorted = [...filteredOrganizations].sort((a, b) => {
+      if (sortBy === 'alphabetical') {
         // Alphabetical sorting (case-insensitive)
         return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-      } else if (sortBy === 'updated_at') {
-        // Latest updated first (most recent first)
+      } else if (sortBy === 'latest') {
+        // Latest members (most recently uploaded logo first)
+        // Sort by updated_at DESC - when logo is uploaded, updated_at is set
         const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
         const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
         return dateB - dateA; // Descending order (newest first)
+      } else if (sortBy === 'founding') {
+        // Founding members (earliest uploaded logo first)
+        // Sort by updated_at ASC - earliest uploaded logos appear first
+        const dateA = a.updated_at ? new Date(a.updated_at).getTime() : Infinity;
+        const dateB = b.updated_at ? new Date(b.updated_at).getTime() : Infinity;
+        return dateA - dateB; // Ascending order (oldest first)
       }
       return 0;
     });
     setSortedOrganizations(sorted);
-  }, [organizations, sortBy]);
+  }, [filteredOrganizations, sortBy]);
 
   const openDrawer = orgId => {
     setSelectedOrgId(orgId);
@@ -150,21 +175,39 @@ export default function Members() {
       )}
       {activeTab === 'members' && (
         <div className="bg-white border rounded-lg p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
-            <h3 className="text-lg sm:text-xl font-semibold">Member Directory</h3>
-            <div className="flex items-center gap-3">
-              <label htmlFor="sort-select" className="text-sm text-gray-700 font-medium">
-                Sort by:
-              </label>
-              <select
-                id="sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              >
-                <option value="updated_at">Latest Updated</option>
-                <option value="name">Alphabetically</option>
-              </select>
+          <div className="mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold">Member Directory</h3>
+              <div className="flex items-center gap-3">
+                <label htmlFor="sort-select" className="text-sm text-gray-700 font-medium whitespace-nowrap">
+                  Sort by:
+                </label>
+                <select
+                  id="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="latest">Latest Members</option>
+                  <option value="founding">Founding Members</option>
+                  <option value="alphabetical">Alphabetically</option>
+                </select>
+              </div>
+            </div>
+            {/* Search Input */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name, location, or bio..."
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+              />
             </div>
           </div>
           {loading ? (
@@ -178,6 +221,10 @@ export default function Members() {
           ) : organizations.length === 0 ? (
             <div className="flex justify-center items-center py-12">
               <div className="text-gray-500">No member organizations with logos found.</div>
+            </div>
+          ) : sortedOrganizations.length === 0 ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="text-gray-500">No organizations match your search.</div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
