@@ -88,10 +88,10 @@ exports.handler = async function (event, context) {
             bio: orgData.bio || '',
             location: orgData.location || '',
             website: orgData.website || '',
-            logo: false, // Default to no logo
             logo_display: orgData.logo_display || false, // Default to false
             updated_by: orgData.updated_by // Include updated_by for new organizations
             // The database will auto-generate the id (UUID) and updated_at
+            // logo_url will be null by default (no logo initially)
           }])
           .select();
 

@@ -350,8 +350,7 @@ export default function Organizations({ user }) {
           if (result.organization) {
             setFormData(prev => ({
               ...prev,
-              logo_url: result.organization.logo_url,
-              logo: true
+              logo_url: result.organization.logo_url
             }));
           }
         }
@@ -503,7 +502,7 @@ export default function Organizations({ user }) {
                     ) : '—'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {org.logo && org.logo_url ? (
+                    {org.logo_url ? (
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         org.logo_display 
                           ? 'bg-green-100 text-green-800' 

@@ -26,7 +26,6 @@ export default function Members() {
         const data = await response.json();
         // Filter only organizations that have logos uploaded AND logo_display is enabled
         const orgsWithLogos = data.filter(org => 
-          org.logo === true && 
           org.logo_url && 
           org.logo_display === true
         );
