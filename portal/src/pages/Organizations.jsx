@@ -29,7 +29,8 @@ export default function Organizations({ user }) {
     name: '',
     bio: '',
     location: '',
-    website: ''
+    website: '',
+    logo_display: false
   });
 
   // Load organizations on component mount
@@ -76,7 +77,13 @@ export default function Organizations({ user }) {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...(editingOrg ? formData : { name: formData.name, bio: formData.bio, location: formData.location, website: formData.website }),
+          ...(editingOrg ? formData : { 
+            name: formData.name, 
+            bio: formData.bio, 
+            location: formData.location, 
+            website: formData.website,
+            logo_display: false // Default to false for new organizations
+          }),
           updated_by: user?.id
         })
       });
@@ -101,7 +108,7 @@ export default function Organizations({ user }) {
       setSuccess(editingOrg ? 'Organization updated successfully!' : `Organization "${result.organization.name}" created successfully!`);
       setShowForm(false);
       setEditingOrg(null);
-      setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+      setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
       loadOrganizations();
     } catch (err) {
       setError(err.message);
@@ -115,7 +122,8 @@ export default function Organizations({ user }) {
       name: org.name,
       bio: org.bio || '',
       location: org.location || '',
-      website: org.website || ''
+      website: org.website || '',
+      logo_display: org.logo_display || false
     });
     setShowForm(true);
   };
@@ -330,7 +338,7 @@ export default function Organizations({ user }) {
           onClick={() => {
             setShowForm(true);
             setEditingOrg(null);
-            setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+            setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
           }}
           className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
@@ -533,6 +541,22 @@ export default function Organizations({ user }) {
                   </div>
                 )}
 
+                {/* Logo Display Toggle - Only show when editing and organization has a logo */}
+                {editingOrg && formData.org_id && (
+                  <div className="mt-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={formData.logo_display || false}
+                        onChange={(e) => setFormData({ ...formData, logo_display: e.target.checked })}
+                        className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">Display logo on members page</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">When enabled, this organization's logo will be shown on the main members page</p>
+                  </div>
+                )}
+
                 {/* Organization ID Footnote (use UUID id), created/updated info */}
                 {editingOrg && (
                   <div className="mt-4 pt-3 border-t border-gray-200">
@@ -558,7 +582,7 @@ export default function Organizations({ user }) {
                     onClick={() => {
                       setShowForm(false);
                       setEditingOrg(null);
-                      setFormData({ org_id: '', name: '', bio: '', location: '', website: '' });
+                      setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
                       setLogoFile(null);
                       setIsDragOver(false);
                     }}

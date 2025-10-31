@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import Favicon from '../components/Favicon';
 
 export default function EventForm({ 
   drawerOpen, 
@@ -95,12 +96,7 @@ export default function EventForm({
                       style={{ width: 28, height: 28 }}
                       title="IDAIC Event"
                     >
-                      <img
-                        src="/idaic_trans.png"
-                        alt="IDAIC Logo"
-                        className="w-full h-full object-contain"
-                        style={{ width: 24, height: 24 }}
-                      />
+                      <Favicon url="https://www.idaic.org/" size={24} />
                     </div>
                   )}
                   <button

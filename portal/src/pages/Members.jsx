@@ -24,8 +24,12 @@ export default function Members() {
         if (!response.ok) throw new Error('Failed to fetch organizations');
         
         const data = await response.json();
-        // Filter only organizations that have logos uploaded
-        const orgsWithLogos = data.filter(org => org.logo === true && org.logo_url);
+        // Filter only organizations that have logos uploaded AND logo_display is enabled
+        const orgsWithLogos = data.filter(org => 
+          org.logo === true && 
+          org.logo_url && 
+          org.logo_display === true
+        );
         setOrganizations(orgsWithLogos);
         setError('');
       } catch (err) {

@@ -250,12 +250,7 @@ export default function Events({ isAdminAuthenticated = false }) {
                         style={{ width: 28, height: 28 }}
                         title="IDAIC Event"
                       >
-                        <img
-                          src="/idaic_trans.png"
-                          alt="IDAIC Logo"
-                          className="w-full h-full object-contain"
-                          style={{ width: 24, height: 24 }}
-                        />
+                        <Favicon url="https://www.idaic.org/" size={24} />
                       </div>
                     ) : (
                       <Favicon url={event.registration_link} size={28} />
