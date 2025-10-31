@@ -254,7 +254,63 @@ export default function Organizations({ user }) {
           setError('Logo uploaded to storage but URL not updated in organization.');
         } else {
           console.log('✅ Logo URL updated successfully:', result.organization.logo_url);
-          setSuccess('Logo uploaded and organization updated successfully.');
+          
+          // After successful logo upload, also save any pending form changes (like logo_display)
+          // This ensures the form state is synced with the database
+          let profileUpdated = false;
+          if (editingOrg && formData.org_id) {
+            try {
+              // Check if there are any changes to save (compare with original organization)
+              const hasChanges = 
+                formData.name !== editingOrg.name ||
+                formData.bio !== (editingOrg.bio || '') ||
+                formData.location !== (editingOrg.location || '') ||
+                formData.website !== (editingOrg.website || '') ||
+                formData.logo_display !== (editingOrg.logo_display || false);
+
+              if (hasChanges) {
+                const updateResponse = await fetch(`/.netlify/functions/orgs?id=${formData.org_id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: formData.name,
+                    bio: formData.bio,
+                    location: formData.location,
+                    website: formData.website,
+                    logo_display: formData.logo_display || false,
+                    updated_by: user?.id
+                  })
+                });
+
+                if (updateResponse.ok) {
+                  console.log('✅ Organization form data also updated after logo upload');
+                  profileUpdated = true;
+                } else {
+                  console.warn('⚠️ Logo uploaded but form update had issues');
+                  setSuccess('Logo uploaded successfully. Organization profile could not be updated.');
+                }
+              }
+            } catch (updateErr) {
+              console.error('⚠️ Error updating form data after logo upload:', updateErr);
+              setSuccess('Logo uploaded successfully.');
+            }
+          }
+          
+          // Set appropriate success message based on what was updated
+          if (profileUpdated) {
+            setSuccess('Logo uploaded successfully. Organization profile has been updated.');
+          } else {
+            setSuccess('Logo uploaded successfully.');
+          }
+          
+          // Update formData with the returned organization data to keep it in sync
+          if (result.organization) {
+            setFormData(prev => ({
+              ...prev,
+              logo_url: result.organization.logo_url,
+              logo: true
+            }));
+          }
         }
         setLogoFile(null);
         loadOrganizations(); // Refresh the list
