@@ -69,6 +69,32 @@ export default function Events({ isAdminAuthenticated = false }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [locationFilter, setLocationFilter] = useState('');
+  const [idaicOrg, setIdaicOrg] = useState(null);
+
+  // Fetch IDAIC organization from database
+  useEffect(() => {
+    const fetchIdaicOrg = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/orgs');
+        if (response.ok) {
+          const orgs = await response.json();
+          // Find IDAIC organization - check for various possible names
+          const idaic = orgs.find(org => 
+            org.name && (
+              org.name.toLowerCase().includes('idaic') ||
+              org.name.toLowerCase() === 'idaic'
+            ) && org.logo_url
+          );
+          if (idaic) {
+            setIdaicOrg(idaic);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching IDAIC organization:', err);
+      }
+    };
+    fetchIdaicOrg();
+  }, []);
 
   // Compute unique locations for filter dropdown
   const uniqueLocations = Array.from(new Set(events.map(e => e.location).filter(Boolean)));
@@ -241,16 +267,25 @@ export default function Events({ isAdminAuthenticated = false }) {
                 className="relative bg-gray-100 p-0 flex flex-col rounded-lg transition border-2 focus:outline-none hover:border-orange-200 border-transparent"
                 style={{ color: colors.text.primary, fontFamily: 'Inter, sans-serif' }}
               >
-                {/* Favicon in bottom-right corner */}
+                {/* Favicon/Logo in bottom-right corner */}
                 {(event.registration_link || isIdaicEvent(event)) && (
                   <div className="absolute bottom-2 right-2 z-10">
                     {isIdaicEvent(event) ? (
                       <div 
-                        className="bg-white rounded-full p-1 shadow-sm border border-gray-200"
+                        className="bg-white rounded-full p-1 shadow-sm border border-gray-200 flex items-center justify-center overflow-hidden"
                         style={{ width: 28, height: 28 }}
                         title="IDAIC Event"
                       >
-                        <Favicon url="https://www.idaic.org/" size={24} />
+                        {idaicOrg && idaicOrg.logo_url ? (
+                          <img 
+                            src={idaicOrg.logo_url} 
+                            alt="IDAIC Logo" 
+                            className="w-full h-full object-contain"
+                            style={{ maxWidth: '24px', maxHeight: '24px' }}
+                          />
+                        ) : (
+                          <Favicon url="https://www.idaic.org/" size={24} />
+                        )}
                       </div>
                     ) : (
                       <Favicon url={event.registration_link} size={28} />

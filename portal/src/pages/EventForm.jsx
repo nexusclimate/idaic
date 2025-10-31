@@ -15,6 +15,32 @@ export default function EventForm({
 }) {
   const [readOnly, setReadOnly] = useState(true);
   const [localEvent, setLocalEvent] = useState(selectedEvent);
+  const [idaicOrg, setIdaicOrg] = useState(null);
+
+  // Fetch IDAIC organization from database
+  useEffect(() => {
+    const fetchIdaicOrg = async () => {
+      try {
+        const response = await fetch('/.netlify/functions/orgs');
+        if (response.ok) {
+          const orgs = await response.json();
+          // Find IDAIC organization - check for various possible names
+          const idaic = orgs.find(org => 
+            org.name && (
+              org.name.toLowerCase().includes('idaic') ||
+              org.name.toLowerCase() === 'idaic'
+            ) && org.logo_url
+          );
+          if (idaic) {
+            setIdaicOrg(idaic);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching IDAIC organization:', err);
+      }
+    };
+    fetchIdaicOrg();
+  }, []);
 
   useEffect(() => {
     if (isAdding) {
@@ -92,11 +118,20 @@ export default function EventForm({
                       localEvent.registration_link.toLowerCase().includes('teams.microsoft')
                     ))) && (
                     <div 
-                      className="bg-white rounded-full p-1 shadow-sm border border-gray-200"
+                      className="bg-white rounded-full p-1 shadow-sm border border-gray-200 flex items-center justify-center overflow-hidden"
                       style={{ width: 28, height: 28 }}
                       title="IDAIC Event"
                     >
-                      <Favicon url="https://www.idaic.org/" size={24} />
+                      {idaicOrg && idaicOrg.logo_url ? (
+                        <img 
+                          src={idaicOrg.logo_url} 
+                          alt="IDAIC Logo" 
+                          className="w-full h-full object-contain"
+                          style={{ maxWidth: '24px', maxHeight: '24px' }}
+                        />
+                      ) : (
+                        <Favicon url="https://www.idaic.org/" size={24} />
+                      )}
                     </div>
                   )}
                   <button

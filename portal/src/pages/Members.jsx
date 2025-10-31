@@ -322,18 +322,6 @@ export default function Members() {
                             <div className="flex items-center">
                               <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{selectedOrg.name}</h3>
                             </div>
-                            {selectedOrg.website && (
-                              <p className="text-sm text-gray-500">
-                                <a 
-                                  href={selectedOrg.website.startsWith('http') ? selectedOrg.website : `https://${selectedOrg.website}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:text-blue-500"
-                                >
-                                  {selectedOrg.website}
-                                </a>
-                              </p>
-                            )}
                           </div>
                         </div>
                       </div>
