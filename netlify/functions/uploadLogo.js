@@ -49,25 +49,33 @@ exports.handler = async function (event, context) {
     console.log('📊 Buffer size:', logoBuffer.length, 'bytes');
     console.log('🔍 Using Supabase URL:', process.env.SUPABASE_URL);
 
-    // Verify bucket exists first
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    if (listError) {
-      console.error('❌ Error listing buckets:', listError);
-    } else {
-      const logosBucket = buckets?.find(b => b.name === 'logos');
-      if (!logosBucket) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ 
-            error: 'Storage bucket "logos" not found. Please create it in Supabase Dashboard > Storage > New bucket.',
-            hint: 'Make sure to name it exactly "logos" and set it as a public bucket.'
-          })
-        };
+    // Verify bucket exists first (optional check - don't fail if listing doesn't work)
+    try {
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+      if (listError) {
+        console.warn('⚠️ Could not list buckets (will try upload anyway):', listError.message);
+      } else {
+        const logosBucket = buckets?.find(b => b.name === 'logos');
+        if (!logosBucket) {
+          console.warn('⚠️ Logos bucket not found in list, but will attempt upload anyway');
+          // Don't fail here - service role might still work even if list fails
+        } else {
+          console.log('✅ Logos bucket found:', logosBucket);
+        }
       }
-      console.log('✅ Logos bucket found:', logosBucket);
+    } catch (listErr) {
+      console.warn('⚠️ Error checking buckets (will try upload anyway):', listErr.message);
     }
 
     // Upload to Supabase Storage
+    console.log('📤 Attempting to upload to logos bucket...');
+    console.log('📊 Upload details:', {
+      bucket: 'logos',
+      filename: uniqueFileName,
+      bufferSize: logoBuffer.length,
+      contentType: logo_type || 'image/png'
+    });
+    
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('logos')
       .upload(uniqueFileName, logoBuffer, {
@@ -99,12 +107,17 @@ exports.handler = async function (event, context) {
         }
       }
       
+      // Log the full error object for debugging
+      console.error('❌ Full uploadError object:', JSON.stringify(uploadError, null, 2));
+      console.error('❌ uploadError keys:', Object.keys(uploadError));
+      
       return {
         statusCode: 500,
         body: JSON.stringify({ 
           error: errorMessage,
-          details: uploadError.message,
-          hint: 'Check Netlify function logs and ensure storage policies are set up correctly.'
+          details: uploadError.message || JSON.stringify(uploadError),
+          hint: 'Check Netlify function logs. If this is an RLS/policy error, run: ALTER TABLE storage.objects DISABLE ROW LEVEL SECURITY; in Supabase SQL Editor.',
+          fullError: uploadError // Include full error for debugging
         })
       };
     }

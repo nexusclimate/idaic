@@ -168,12 +168,19 @@ export default function Organizations({ user }) {
   };
 
   const handleLogoUpload = async (file) => {
-    if (!file) return;
+    console.log('🎯 handleLogoUpload called with file:', file?.name);
+    
+    if (!file) {
+      console.error('❌ No file provided to handleLogoUpload');
+      return;
+    }
     
     // Check if org_id is available
     if (!formData.org_id) {
-      setError('Organization ID is missing. Please save the organization first before uploading a logo.');
+      const errorMsg = 'Organization ID is missing. Please save the organization first before uploading a logo.';
+      setError(errorMsg);
       console.error('❌ formData.org_id is missing:', formData);
+      console.error('❌ Cannot upload without org_id. User needs to save organization first.');
       return;
     }
     
@@ -181,25 +188,48 @@ export default function Organizations({ user }) {
     
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file (PNG, JPG, GIF, etc.)');
+      const errorMsg = 'Please select an image file (PNG, JPG, GIF, etc.)';
+      setError(errorMsg);
+      console.error('❌ Invalid file type:', file.type);
       return;
     }
     
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB');
+      const errorMsg = 'File size must be less than 5MB';
+      setError(errorMsg);
+      console.error('❌ File too large:', file.size, 'bytes');
       return;
     }
     
+    console.log('✅ File validation passed, starting upload process...');
     setUploadingLogo(true);
     setError('');
+    setSuccess(''); // Clear any previous success messages
 
     try {
       // Convert file to base64
+      console.log('📖 Reading file as base64...');
       const reader = new FileReader();
+      
+      reader.onerror = (error) => {
+        console.error('❌ FileReader error:', error);
+        setError('Failed to read file. Please try again.');
+        setUploadingLogo(false);
+      };
+      
       reader.onloadend = async () => {
+        console.log('✅ File read complete, converting to base64...');
         const base64Data = reader.result.split(',')[1];
         
+        if (!base64Data) {
+          console.error('❌ Failed to extract base64 data from file');
+          setError('Failed to process file. Please try again.');
+          setUploadingLogo(false);
+          return;
+        }
+        
+        console.log('✅ Base64 data extracted, length:', base64Data.length);
         console.log('🔄 Uploading logo for org_id:', formData.org_id);
         console.log('📁 File details:', { name: file.name, type: file.type, size: file.size });
         console.log('📊 Upload payload:', {
@@ -230,12 +260,24 @@ export default function Organizations({ user }) {
         if (!response.ok) {
           try {
             const errorData = await response.json();
-            console.error('❌ Upload error:', errorData);
+            console.error('❌ Upload error response:', errorData);
+            console.error('❌ Error message:', errorData.error);
             console.error('❌ Error details:', errorData.details);
             console.error('❌ Error hint:', errorData.hint);
-            throw new Error(errorData.error || 'Failed to upload logo');
+            console.error('❌ Response status:', response.status);
+            
+            // Show the error to the user with all details
+            const errorMsg = errorData.error || 'Failed to upload logo';
+            const detailsMsg = errorData.details ? `\nDetails: ${errorData.details}` : '';
+            const hintMsg = errorData.hint ? `\nHint: ${errorData.hint}` : '';
+            setError(`${errorMsg}${detailsMsg}${hintMsg}`);
+            throw new Error(errorMsg);
           } catch (e) {
             console.error('❌ Upload failed:', e);
+            if (!error) {
+              // If we couldn't parse error, show generic message
+              setError(`Failed to upload logo. Server responded with status ${response.status}. Check browser console for details.`);
+            }
             throw new Error('Failed to upload logo');
           }
         } else {
@@ -244,8 +286,9 @@ export default function Organizations({ user }) {
             console.log('✅ Upload result:', result);
             console.log('✅ Upload result type:', typeof result);
             console.log('✅ Upload result keys:', result ? Object.keys(result) : 'null');
-          } catch (_) {
-            console.log('⚠️ Could not parse response JSON');
+          } catch (parseErr) {
+            console.error('⚠️ Could not parse response JSON:', parseErr);
+            setError('Logo upload may have succeeded, but could not parse response. Please check if logo appears in storage.');
           }
         }
 
@@ -327,8 +370,13 @@ export default function Organizations({ user }) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      console.log('📁 File selected:', file.name, file.type, file.size);
       setLogoFile(file);
+      // Upload automatically when file is selected
+      console.log('🚀 Starting upload...');
       handleLogoUpload(file);
+    } else {
+      console.warn('⚠️ No file selected');
     }
   };
 
@@ -598,10 +646,20 @@ export default function Organizations({ user }) {
                         </div>
                         <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
                         {uploadingLogo && (
-                          <p className="text-xs text-orange-600 mt-2">Uploading...</p>
+                          <p className="text-xs text-orange-600 mt-2">Uploading logo... Please wait.</p>
                         )}
                         {logoFile && !uploadingLogo && (
-                          <p className="text-xs text-green-600 mt-2">Ready to upload: {logoFile.name}</p>
+                          <div className="mt-2">
+                            <p className="text-xs text-green-600 mb-2">File selected: {logoFile.name}</p>
+                            <button
+                              type="button"
+                              onClick={() => handleLogoUpload(logoFile)}
+                              disabled={!formData.org_id || uploadingLogo}
+                              className="text-xs px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                              {formData.org_id ? 'Upload Logo Now' : 'Save Organization First'}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
