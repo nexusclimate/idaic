@@ -9,11 +9,13 @@ const tabs = [
 
 export default function Members() {
   const [activeTab, setActiveTab] = useState('members');
-  const [selected, setSelected] = useState(null);
+  const [selectedOrgId, setSelectedOrgId] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [organizations, setOrganizations] = useState([]);
+  const [sortedOrganizations, setSortedOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sortBy, setSortBy] = useState('updated_at'); // 'updated_at' or 'name'
 
   // Fetch organizations with logos from database
   useEffect(() => {
@@ -42,18 +44,74 @@ export default function Members() {
     fetchOrganizations();
   }, []);
 
-  const openDrawer = idx => {
-    setSelected(idx);
+  // Sort organizations whenever sortBy or organizations change
+  useEffect(() => {
+    const sorted = [...organizations].sort((a, b) => {
+      if (sortBy === 'name') {
+        // Alphabetical sorting (case-insensitive)
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      } else if (sortBy === 'updated_at') {
+        // Latest updated first (most recent first)
+        const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return dateB - dateA; // Descending order (newest first)
+      }
+      return 0;
+    });
+    setSortedOrganizations(sorted);
+  }, [organizations, sortBy]);
+
+  const openDrawer = orgId => {
+    setSelectedOrgId(orgId);
     setDrawerOpen(true);
   };
-  const closeDrawer = () => setDrawerOpen(false);
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    setSelectedOrgId(null);
+  };
 
   // Update drawer content live when clicking a different member
-  const handleMemberClick = idx => {
+  const handleMemberClick = orgId => {
     if (!drawerOpen) {
       setDrawerOpen(true);
     }
-    setSelected(idx);
+    setSelectedOrgId(orgId);
+  };
+
+  // Get the selected organization for drawer display
+  const selectedOrg = organizations.find(org => org.id === selectedOrgId);
+
+  // Download logo function
+  const downloadLogo = async (org, e) => {
+    e.stopPropagation(); // Prevent opening the drawer when clicking download
+    
+    try {
+      // Fetch the image
+      const response = await fetch(org.logo_url);
+      if (!response.ok) throw new Error('Failed to fetch logo');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get file extension from URL or default to png
+      const urlExtension = org.logo_url.split('.').pop().split('?')[0].toLowerCase();
+      const validExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'];
+      const extension = validExtensions.includes(urlExtension) ? urlExtension : 'png';
+      
+      // Create filename from organization name
+      const sanitizedName = org.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      link.download = `${sanitizedName}_logo.${extension}`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading logo:', err);
+      alert('Failed to download logo. Please try again.');
+    }
   };
 
   return (
@@ -92,8 +150,22 @@ export default function Members() {
       )}
       {activeTab === 'members' && (
         <div className="bg-white border rounded-lg p-4 sm:p-6">
-          <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
             <h3 className="text-lg sm:text-xl font-semibold">Member Directory</h3>
+            <div className="flex items-center gap-3">
+              <label htmlFor="sort-select" className="text-sm text-gray-700 font-medium">
+                Sort by:
+              </label>
+              <select
+                id="sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="updated_at">Latest Updated</option>
+                <option value="name">Alphabetically</option>
+              </select>
+            </div>
           </div>
           {loading ? (
             <div className="flex justify-center items-center py-12">
@@ -109,29 +181,47 @@ export default function Members() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-              {organizations.map((org, idx) => (
-                <button
-                  key={org.id}
-                  onClick={() => handleMemberClick(idx)}
-                  className={`bg-gray-100 p-6 sm:p-8 lg:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
-                    selected === idx && drawerOpen
-                      ? ''
-                      : 'hover:border-orange-200'
-                  }`}
-                  style={{
-                    borderColor: selected === idx && drawerOpen ? colors.primary.orange : 'transparent',
-                    boxShadow: selected === idx && drawerOpen ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                  }}
-                >
-                  <img
-                    className="max-h-24 sm:max-h-28 lg:max-h-32 w-auto object-contain"
-                    src={org.logo_url}
-                    alt={`${org.name} Logo`}
-                    style={{ imageRendering: 'auto' }}
-                    loading="lazy"
-                  />
-                </button>
-              ))}
+              {sortedOrganizations.map((org) => {
+                const isSelected = selectedOrgId === org.id && drawerOpen;
+                return (
+                  <div
+                    key={org.id}
+                    className="relative group"
+                  >
+                    <button
+                      onClick={() => handleMemberClick(org.id)}
+                      className={`w-full bg-gray-100 p-6 sm:p-8 lg:p-10 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
+                        isSelected
+                          ? ''
+                          : 'hover:border-orange-200'
+                      }`}
+                      style={{
+                        borderColor: isSelected ? colors.primary.orange : 'transparent',
+                        boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
+                      }}
+                    >
+                      <img
+                        className="max-h-24 sm:max-h-28 lg:max-h-32 w-auto object-contain"
+                        src={org.logo_url}
+                        alt={`${org.name} Logo`}
+                        style={{ imageRendering: 'auto' }}
+                        loading="lazy"
+                      />
+                    </button>
+                    {/* Download button */}
+                    <button
+                      onClick={(e) => downloadLogo(org, e)}
+                      className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-50 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      title={`Download ${org.name} logo`}
+                      aria-label={`Download ${org.name} logo`}
+                    >
+                      <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -169,31 +259,31 @@ export default function Members() {
                   </button>
                 </div>
                 {/* Main content */}
-                {selected !== null && organizations[selected] && (
+                {selectedOrg && (
                   <div className="divide-y divide-gray-200 flex-1 overflow-y-auto">
                     <div className="pb-4 sm:pb-6">
                       <div className="-mt-8 sm:-mt-8 flow-root px-4 sm:flex sm:items-end sm:px-6 lg:-mt-16">
                         <div>
                           <div className="-m-1 flex">
                             <div className="inline-flex overflow-hidden rounded-lg border-4 border-white">
-                              <img className="size-24 sm:size-32 lg:size-40 xl:size-48 object-contain" src={organizations[selected].logo_url} alt={`${organizations[selected].name} Logo`} style={{ imageRendering: 'auto' }} loading="lazy" />
+                              <img className="size-24 sm:size-32 lg:size-40 xl:size-48 object-contain" src={selectedOrg.logo_url} alt={`${selectedOrg.name} Logo`} style={{ imageRendering: 'auto' }} loading="lazy" />
                             </div>
                           </div>
                         </div>
                         <div className="mt-4 sm:mt-6 sm:ml-6 sm:flex-1">
                           <div>
                             <div className="flex items-center">
-                              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{organizations[selected].name}</h3>
+                              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{selectedOrg.name}</h3>
                             </div>
-                            {organizations[selected].website && (
+                            {selectedOrg.website && (
                               <p className="text-sm text-gray-500">
                                 <a 
-                                  href={organizations[selected].website.startsWith('http') ? organizations[selected].website : `https://${organizations[selected].website}`}
+                                  href={selectedOrg.website.startsWith('http') ? selectedOrg.website : `https://${selectedOrg.website}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-blue-600 hover:text-blue-500"
                                 >
-                                  {organizations[selected].website}
+                                  {selectedOrg.website}
                                 </a>
                               </p>
                             )}
@@ -203,31 +293,31 @@ export default function Members() {
                     </div>
                     <div className="px-4 py-4 sm:py-5 sm:px-0">
                       <dl className="space-y-6 sm:space-y-8 sm:divide-y sm:divide-gray-200">
-                        {organizations[selected].bio && (
+                        {selectedOrg.bio && (
                           <div className="sm:flex sm:px-6 sm:py-5">
                             <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Bio</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
-                              <p>{organizations[selected].bio}</p>
+                              <p>{selectedOrg.bio}</p>
                             </dd>
                           </div>
                         )}
-                        {organizations[selected].location && (
+                        {selectedOrg.location && (
                           <div className="sm:flex sm:px-6 sm:py-5">
                             <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Location</dt>
-                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{organizations[selected].location}</dd>
+                            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">{selectedOrg.location}</dd>
                           </div>
                         )}
-                        {organizations[selected].website && (
+                        {selectedOrg.website && (
                           <div className="sm:flex sm:px-6 sm:py-5">
                             <dt className="text-sm font-medium text-gray-500 sm:w-32 lg:w-48 sm:shrink-0">Website</dt>
                             <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 sm:ml-6">
                               <a 
-                                href={organizations[selected].website.startsWith('http') ? organizations[selected].website : `https://${organizations[selected].website}`}
+                                href={selectedOrg.website.startsWith('http') ? selectedOrg.website : `https://${selectedOrg.website}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:text-blue-500"
                               >
-                                {organizations[selected].website}
+                                {selectedOrg.website}
                               </a>
                             </dd>
                           </div>

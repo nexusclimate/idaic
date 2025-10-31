@@ -68,6 +68,23 @@ export default function Organizations({ user }) {
     setSuccess('');
 
     try {
+      // If there's a logo file and we have an org_id, upload the logo first
+      let uploadedLogoUrl = null;
+      if (logoFile && formData.org_id) {
+        console.log('📤 Logo file detected, uploading before saving organization...');
+        try {
+          uploadedLogoUrl = await uploadLogoFile(logoFile, formData.org_id);
+          console.log('✅ Logo uploaded successfully, URL:', uploadedLogoUrl);
+        } catch (logoErr) {
+          console.error('❌ Logo upload failed:', logoErr);
+          setError(`Logo upload failed: ${logoErr.message}. Organization will still be saved.`);
+          // Continue with organization save even if logo upload fails
+        }
+      }
+
+      // Determine the org_id - use formData.org_id if editing, or the newly created org id
+      let finalOrgId = formData.org_id;
+      
       const method = editingOrg ? 'PUT' : 'POST';
       const url = editingOrg 
         ? `/.netlify/functions/orgs?id=${editingOrg.id}`
@@ -99,20 +116,94 @@ export default function Organizations({ user }) {
         console.log('✅ Organization saved successfully:', result.organization);
         console.log('🆔 Organization UUID:', result.organization.id);
         
+        // If this was a new organization and we have a logo file, upload it now
+        if (!editingOrg && logoFile && result.organization.id) {
+          console.log('📤 New organization created, uploading logo...');
+          try {
+            await uploadLogoFile(logoFile, result.organization.id);
+            console.log('✅ Logo uploaded for new organization');
+            // Reload to get the updated organization with logo
+            await loadOrganizations();
+          } catch (logoErr) {
+            console.error('❌ Logo upload failed for new org:', logoErr);
+            // Don't fail the whole operation
+          }
+        }
+        
         if (!editingOrg) {
           // New organization created
           console.log('📝 New organization created with UUID:', result.organization.id);
         }
       }
 
-      setSuccess(editingOrg ? 'Organization updated successfully!' : `Organization "${result.organization.name}" created successfully!`);
+      let successMsg = editingOrg ? 'Organization updated successfully!' : `Organization "${result.organization.name}" created successfully!`;
+      if (logoFile && uploadedLogoUrl) {
+        successMsg += ' Logo uploaded successfully.';
+      }
+      
+      setSuccess(successMsg);
       setShowForm(false);
       setEditingOrg(null);
       setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
+      setLogoFile(null);
       loadOrganizations();
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  // Helper function to upload logo file
+  const uploadLogoFile = async (file, orgId) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onerror = (error) => {
+        console.error('❌ FileReader error:', error);
+        reject(new Error('Failed to read file'));
+      };
+      
+      reader.onloadend = async () => {
+        try {
+          const base64Data = reader.result.split(',')[1];
+          
+          if (!base64Data) {
+            reject(new Error('Failed to extract base64 data from file'));
+            return;
+          }
+          
+          const response = await fetch('/.netlify/functions/uploadLogo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              org_id: orgId,
+              logo_name: file.name,
+              logo_data: base64Data,
+              logo_type: file.type,
+              is_primary: true,
+              updated_by: user?.id
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            reject(new Error(errorData.error || 'Failed to upload logo'));
+            return;
+          }
+
+          const result = await response.json();
+          
+          if (result?.organization?.logo_url) {
+            resolve(result.organization.logo_url);
+          } else {
+            reject(new Error('Logo uploaded but URL not returned'));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+      
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleEdit = (org) => {
@@ -370,12 +461,22 @@ export default function Organizations({ user }) {
     const file = e.target.files[0];
     if (file) {
       console.log('📁 File selected:', file.name, file.type, file.size);
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file (PNG, JPG, GIF, etc.)');
+        return;
+      }
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
       setLogoFile(file);
-      // Upload automatically when file is selected
-      console.log('🚀 Starting upload...');
-      handleLogoUpload(file);
+      setError(''); // Clear any previous errors
+      console.log('✅ File ready for upload when Update is clicked');
     } else {
       console.warn('⚠️ No file selected');
+      setLogoFile(null);
     }
   };
 
@@ -397,8 +498,14 @@ export default function Organizations({ user }) {
     if (files.length > 0) {
       const file = files[0];
       if (file.type.startsWith('image/')) {
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          setError('File size must be less than 5MB');
+          return;
+        }
         setLogoFile(file);
-        handleLogoUpload(file);
+        setError(''); // Clear any previous errors
+        console.log('✅ File ready for upload when Update is clicked');
       } else {
         setError('Please select an image file.');
       }
@@ -649,15 +756,8 @@ export default function Organizations({ user }) {
                         )}
                         {logoFile && !uploadingLogo && (
                           <div className="mt-2">
-                            <p className="text-xs text-green-600 mb-2">File selected: {logoFile.name}</p>
-                            <button
-                              type="button"
-                              onClick={() => handleLogoUpload(logoFile)}
-                              disabled={!formData.org_id || uploadingLogo}
-                              className="text-xs px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            >
-                              {formData.org_id ? 'Upload Logo Now' : 'Save Organization First'}
-                            </button>
+                            <p className="text-xs text-green-600 mb-1">File selected: {logoFile.name}</p>
+                            <p className="text-xs text-gray-500">Logo will be uploaded when you click Update</p>
                           </div>
                         )}
                       </div>
