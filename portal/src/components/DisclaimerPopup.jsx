@@ -114,7 +114,7 @@ export default function DisclaimerPopup({ isOpen, onAccept, onDecline, onNavigat
           onClick={onAccept}
           disabled={!hasScrolled}
         >
-          I Accept
+          Accept & Update Profile
         </Button>
       </DialogActions>
     </Dialog>

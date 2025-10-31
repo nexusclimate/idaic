@@ -4,6 +4,11 @@ html, body {
   font-family: 'Inter', sans-serif;
 }
 
+/* Ensure app fills viewport and enables pane-level scrolling */
+html, body, #root {
+  height: 100%;
+}
+
 /* Custom styles for IDAIC Portal */
 
 /* Orange current indicator for sidebar - make it more prominent */

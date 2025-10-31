@@ -26,11 +26,11 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       return <Home />;
     case 'content':
       return (
-        <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
+        <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
           <iframe
             src="https://members.nexusclimate.co/"
             title="IDAIC Content"
-            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
+            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
             allowFullScreen
             onLoad={() => handleIframeLoad("IDAIC Content")}
             onError={(e) => handleIframeError("IDAIC Content", e)}
@@ -40,11 +40,11 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       );
     case 'case-studies':
       return (
-        <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
+        <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
           <iframe
             src="https://members.nexusclimate.co/tag/case-study/"
             title="IDAIC Case Studies"
-            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
+            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
             allowFullScreen
             onLoad={() => handleIframeLoad("IDAIC Case Studies")}
             onError={(e) => handleIframeError("IDAIC Case Studies", e)}
@@ -62,11 +62,11 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       return <MENAChapter />;
     case 'climate-solutions':
       return (
-        <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
+        <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
           <iframe
             src="https://climatesolutions.news/"
             title="Climate Solutions News"
-            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
+            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
             allowFullScreen
             onLoad={() => handleIframeLoad("Climate Solutions News")}
             onError={(e) => handleIframeError("Climate Solutions News", e)}
@@ -76,11 +76,11 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       );
     case 'uae-climate':
         return (
-            <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
+            <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
               <iframe
                 src="https://news.nexusclimate.vc/ae/"
                 title="Climate Solutions News"
-                style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
+                style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
                 allowFullScreen
                 onLoad={() => handleIframeLoad("Climate Solutions News")}
                 onError={(e) => handleIframeError("Climate Solutions News", e)}
@@ -92,11 +92,11 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       return <Feedback />;
     case 'changelog':
       return (
-        <div style={{ width: '100%', height: '100%', margin: 0, padding: 0, background: 'none', border: 'none' }}>
+        <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
           <iframe
             src="https://members.nexusclimate.co/tag/portal/"
             title="IDAIC Changelog"
-            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none' }}
+            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
             allowFullScreen
             onLoad={() => handleIframeLoad("IDAIC Changelog")}
             onError={(e) => handleIframeError("IDAIC Changelog", e)}

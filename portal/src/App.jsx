@@ -238,6 +238,7 @@ export default function App() {
         const result = await response.json();
         console.log('✅ Disclaimer acceptance recorded in database:', result);
         setShowDisclaimer(false);
+        setCurrentPage('settings');
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error('❌ Failed to record disclaimer acceptance in database:', {
@@ -248,12 +249,14 @@ export default function App() {
         console.log('✅ Disclaimer saved to localStorage as fallback');
         // Still close the modal - localStorage backup is saved
         setShowDisclaimer(false);
+        setCurrentPage('settings');
       }
     } catch (err) {
       console.error('❌ Error saving disclaimer acceptance:', err);
       console.log('✅ Disclaimer saved to localStorage as fallback');
       // Still close the modal - localStorage backup is saved
       setShowDisclaimer(false);
+      setCurrentPage('settings');
     }
   };
 
@@ -286,7 +289,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-screen">
+    <div className="flex h-svh w-screen overflow-hidden">
       <DisclaimerPopup 
         isOpen={showDisclaimer}
         onAccept={handleDisclaimerAccept}
@@ -300,7 +303,7 @@ export default function App() {
         setIsAdminAuthenticated={setIsAdminAuthenticated}
         user={user}
       />
-      <main className="flex-1 bg-gray-50 p-10 h-full">
+      <main className="flex-1 bg-gray-50 p-10 h-full overflow-y-auto min-h-0">
         <PageRouter 
           currentPage={currentPage} 
           isAdminAuthenticated={isAdminAuthenticated}

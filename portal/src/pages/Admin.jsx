@@ -33,7 +33,7 @@ export default function Admin({ user }) {
   };
 
   return (
-    <div>
+    <div className="h-full flex flex-col min-h-0">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Portal Administration</h1>
         
@@ -65,9 +65,9 @@ export default function Admin({ user }) {
       </div>
 
       {/* Tab Content */}
-      <div className="mt-6" style={{ height: 'calc(100vh - 220px)' }}>
+      <div className="mt-6 flex-1 min-h-0">
         {activeTab === 'content' && (
-          <div style={{ height: '100%', padding: 0, margin: 0, background: 'none', border: 'none', borderRadius: 0 }}>
+          <div className="w-full h-full min-h-0" style={{ padding: 0, margin: 0, background: 'none', border: 'none', borderRadius: 0 }}>
             <iframe
               src="https://members.nexusclimate.co/ghost/#/posts"
               title="Content Management"
@@ -81,19 +81,19 @@ export default function Admin({ user }) {
         )}
 
         {activeTab === 'user_admin' && (
-          <div style={{ height: '100%', overflow: 'hidden' }}>
+          <div className="w-full h-full min-h-0" style={{ overflow: 'hidden' }}>
             <UserAdmin onUserSelect={handleUserSelect} />
           </div>
         )}
 
         {activeTab === 'user_form' && (
-          <div style={{ height: '100%', overflow: 'hidden' }}>
+          <div className="w-full h-full min-h-0" style={{ overflow: 'hidden' }}>
             <UserFormView initialUser={selectedUser} />
           </div>
         )}
 
         {activeTab === 'members' && (
-          <div style={{ height: '100%', overflow: 'hidden' }}>
+          <div className="w-full h-full min-h-0" style={{ overflow: 'hidden' }}>
             <Organizations user={user} />
           </div>
         )}
