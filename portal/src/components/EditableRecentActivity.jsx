@@ -20,7 +20,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       StarterKit.configure({
         bulletList: {
           HTMLAttributes: {
-            class: 'list-disc list-inside space-y-1',
+            class: 'list-disc list-outside space-y-1 ml-4',
           },
         },
       }),
@@ -210,7 +210,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
             <div className="prose max-w-none">
               <EditorContent 
                 editor={editor} 
-                className="min-h-[100px] [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_li]:text-base" 
+                className="min-h-[100px] [&_ul]:list-disc [&_ul]:list-outside [&_ul]:ml-4 [&_ul]:space-y-1 [&_li]:text-base [&_li]:pl-0" 
               />
             </div>
           </div>
