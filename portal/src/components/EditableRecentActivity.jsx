@@ -26,7 +26,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       }),
     ],
     editable: true,
-    content: content?.content || '<ul><li>Add recent activity items...</li></ul>',
+    content: content?.content || '<ul><li>Activity item 1</li><li>Activity item 2</li><li>Activity item 3</li></ul>',
     editorProps: {
       attributes: {
         class: 'prose max-w-none focus:outline-none min-h-[100px] text-gray-900',
@@ -45,8 +45,8 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       setError(null);
     } catch (err) {
       console.error('Error fetching content:', err);
-      // If no content exists, set default
-      setContent({ content: '<ul><li>Add recent activity items...</li></ul>' });
+      // If no content exists, set default with 3 bullet points
+      setContent({ content: '<ul><li>Activity item 1</li><li>Activity item 2</li><li>Activity item 3</li></ul>' });
       setError(null);
     } finally {
       setLoading(false);
@@ -59,7 +59,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
 
   useEffect(() => {
     if (editor && content) {
-      editor.commands.setContent(content.content || '<ul><li>Add recent activity items...</li></ul>');
+      editor.commands.setContent(content.content || '<ul><li>Activity item 1</li><li>Activity item 2</li><li>Activity item 3</li></ul>');
     }
   }, [editor, content]);
 
@@ -151,16 +151,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       ) : (
         <div 
           className="relative group"
-          onDoubleClick={(e) => {
-            if (!isEditing && isAdmin) {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsEditing(true);
-              setTimeout(() => {
-                editor?.commands.focus();
-              }, 100);
-            }
-          }}
+          onDoubleClick={() => !isEditing && setIsEditing(true)}
         >
           {/* Toolbar */}
           {isEditing && (
@@ -187,11 +178,8 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                 ? 'min-h-[150px] border border-gray-300 rounded-lg p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500' 
                 : content ? '' : 'text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
             }`}
-            onClick={(e) => {
-              // Only allow editing if admin and not already editing
-              if (!isEditing && isAdmin) {
-                e.preventDefault();
-                e.stopPropagation();
+            onClick={() => {
+              if (!isEditing) {
                 setIsEditing(true);
                 // Give time for editor to become editable
                 setTimeout(() => {
@@ -213,14 +201,13 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                 handleSave(editor?.getHTML());
               }
             }}
-            style={!isEditing && isAdmin ? { cursor: 'pointer' } : {}}
           >
             {!content && !isEditing && (
               <div className="text-gray-400">
                 <p className="text-sm text-gray-500">Click to add content</p>
               </div>
             )}
-            <div className="prose max-w-none" style={!isEditing ? { pointerEvents: 'none' } : {}}>
+            <div className="prose max-w-none">
               <EditorContent 
                 editor={editor} 
                 className="min-h-[100px] [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_li]:text-base" 

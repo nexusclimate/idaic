@@ -237,7 +237,7 @@ export default function Members() {
                   >
                     <button
                       onClick={() => handleMemberClick(org.id)}
-                      className={`w-full bg-gray-100 p-3 sm:p-4 flex items-center justify-center rounded-lg transition border-2 focus:outline-none aspect-square ${
+                      className={`w-full bg-gray-100 p-2 sm:p-3 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
                         isSelected
                           ? ''
                           : 'hover:border-orange-200'
@@ -245,11 +245,12 @@ export default function Members() {
                       style={{
                         borderColor: isSelected ? colors.primary.orange : 'transparent',
                         boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                        minHeight: '120px',
+                        minHeight: '80px',
+                        aspectRatio: '3/2',
                       }}
                     >
                       <img
-                        className="max-h-16 sm:max-h-20 w-auto object-contain max-w-full"
+                        className="max-h-12 sm:max-h-16 w-auto object-contain max-w-full"
                         src={org.logo_url}
                         alt={`${org.name} Logo`}
                         style={{ imageRendering: 'auto' }}
