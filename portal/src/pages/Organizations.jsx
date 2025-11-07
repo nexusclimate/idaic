@@ -13,6 +13,8 @@ export default function Organizations({ user }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
   const [showForm, setShowForm] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
   const [selectedOrg, setSelectedOrg] = useState(null);
@@ -517,11 +519,43 @@ export default function Organizations({ user }) {
     }
   };
 
-  const filteredOrganizations = organizations.filter(org =>
-    org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    org.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (org.location && org.location.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const handleSort = (col) => {
+    if (sortBy === col) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(col);
+      setSortDir('asc');
+    }
+  };
+
+  const filteredOrganizations = organizations
+    .filter(org =>
+      org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      org.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (org.location && org.location.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => {
+      let aVal = a[sortBy];
+      let bVal = b[sortBy];
+      
+      // Handle null/undefined values
+      if (aVal === null || aVal === undefined) aVal = '';
+      if (bVal === null || bVal === undefined) bVal = '';
+      
+      // Handle boolean values (logo_display, founding_member)
+      if (typeof aVal === 'boolean') {
+        aVal = aVal ? 1 : 0;
+        bVal = bVal ? 1 : 0;
+      }
+      
+      // Convert to string for comparison if needed
+      if (typeof aVal !== 'string') aVal = String(aVal);
+      if (typeof bVal !== 'string') bVal = String(bVal);
+      
+      if (aVal.toLowerCase() < bVal.toLowerCase()) return sortDir === 'asc' ? -1 : 1;
+      if (aVal.toLowerCase() > bVal.toLowerCase()) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
 
   if (loading) {
     return (
@@ -566,24 +600,54 @@ export default function Organizations({ user }) {
 
       {/* Organizations Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort('name')}
+                >
                   Organization
+                  <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                    {sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  </span>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort('location')}
+                >
                   Location
+                  <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                    {sortBy === 'location' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  </span>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort('website')}
+                >
                   Website
+                  <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                    {sortBy === 'website' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  </span>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort('logo_display')}
+                >
                   Logo Display
+                  <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                    {sortBy === 'logo_display' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  </span>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                  onClick={() => handleSort('founding_member')}
+                >
                   Founding Member
+                  <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                    {sortBy === 'founding_member' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                  </span>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions

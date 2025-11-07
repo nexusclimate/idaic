@@ -6,14 +6,13 @@ import EditableRecentActivity from '../components/EditableRecentActivity';
 export default function UKChapter({ isAdminAuthenticated = false }) {
   const [activeTab, setActiveTab] = useState('main');
   const [users, setUsers] = useState([]);
-  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const tabs = [
     { name: 'Main', key: 'main' },
     { name: 'UK Updates', key: 'uk updates' },
   ];
 
-  // Fetch users and events
+  // Fetch users
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -23,12 +22,6 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsers(usersData);
-        }
-        // Fetch events
-        const eventsResponse = await fetch('/.netlify/functions/events');
-        if (eventsResponse.ok) {
-          const eventsData = await eventsResponse.json();
-          setEvents(eventsData);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -40,8 +33,8 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
   }, []);
 
   // Calculate stats
-  const totalUsers = users.length;
-  const ukUsers = users.filter(u => u.region === 'UK').length;
+  const totalUsers = users.length; // Total count of all users in database
+  const ukUsers = users.filter(u => u.region === 'UK').length; // Users where region = 'UK'
   
   // Calculate new members this month
   const now = new Date();
@@ -50,15 +43,6 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
     if (!u.created_at) return false;
     const createdDate = new Date(u.created_at);
     return createdDate >= startOfMonth && u.region === 'UK';
-  }).length;
-
-  // Count active events (events with location UK that are in the future or recent)
-  const activeEvents = events.filter(e => {
-    if (!e.location || e.location !== 'UK') return false;
-    if (!e.event_date) return true; // Include if no date specified
-    const eventDate = new Date(e.event_date);
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    return eventDate >= thirtyDaysAgo; // Events in the last 30 days or future
   }).length;
 
   return (
@@ -113,10 +97,6 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                     <span>UK Members:</span>
                     <span className="font-semibold">{ukUsers}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                    <span>Active Events:</span>
-                    <span className="font-semibold">{activeEvents}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                     <span>This Month:</span>

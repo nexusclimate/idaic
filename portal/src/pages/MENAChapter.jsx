@@ -6,14 +6,13 @@ import EditableRecentActivity from '../components/EditableRecentActivity';
 export default function MENAChapter({ isAdminAuthenticated = false }) {
   const [activeTab, setActiveTab] = useState('main');
   const [users, setUsers] = useState([]);
-  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const tabs = [
     { name: 'Main', key: 'main' },
     { name: 'MENA Updates', key: 'mena updates' },
   ];
 
-  // Fetch users and events
+  // Fetch users
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -23,12 +22,6 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsers(usersData);
-        }
-        // Fetch events
-        const eventsResponse = await fetch('/.netlify/functions/events');
-        if (eventsResponse.ok) {
-          const eventsData = await eventsResponse.json();
-          setEvents(eventsData);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -40,8 +33,8 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
   }, []);
 
   // Calculate stats
-  // Total members where region is MENA or UAE
-  const menaUsers = users.filter(u => u.region === 'MENA' || u.region === 'UAE').length;
+  const totalUsers = users.length; // Total count of all users in database
+  const menaUsers = users.filter(u => u.region === 'MENA' || u.region === 'UAE').length; // Users where region = 'UAE' or 'MENA'
   
   // Calculate new members this month
   const now = new Date();
@@ -50,17 +43,6 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
     if (!u.created_at) return false;
     const createdDate = new Date(u.created_at);
     return createdDate >= startOfMonth && (u.region === 'MENA' || u.region === 'UAE');
-  }).length;
-
-  // Count active events (events with location MENA or UAE that are in the future or recent)
-  const activeEvents = events.filter(e => {
-    if (!e.location) return false;
-    const location = e.location.toUpperCase();
-    if (location !== 'MENA' && location !== 'UAE') return false;
-    if (!e.event_date) return true; // Include if no date specified
-    const eventDate = new Date(e.event_date);
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    return eventDate >= thirtyDaysAgo; // Events in the last 30 days or future
   }).length;
 
   return (
@@ -106,12 +88,12 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
               ) : (
                 <div className="space-y-3">
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                    <span>Total Members:</span>
-                    <span className="font-semibold">{menaUsers}</span>
+                    <span>Total Users:</span>
+                    <span className="font-semibold">{totalUsers}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                    <span>Active Events:</span>
-                    <span className="font-semibold">{activeEvents}</span>
+                    <span>Total Members:</span>
+                    <span className="font-semibold">{menaUsers}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                     <span>This Month:</span>

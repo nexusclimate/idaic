@@ -272,8 +272,8 @@ export default function Events({ isAdminAuthenticated = false }) {
                   <div className="absolute bottom-2 right-2 z-10">
                     {isIdaicEvent(event) ? (
                       <div 
-                        className="bg-white rounded-full p-1 shadow-sm border border-gray-200 flex items-center justify-center overflow-hidden"
-                        style={{ width: 28, height: 28 }}
+                        className="bg-white rounded-full p-1.5 shadow-sm border border-gray-200 flex items-center justify-center overflow-hidden"
+                        style={{ width: 40, height: 40 }}
                         title="IDAIC Event"
                       >
                         {idaicOrg && idaicOrg.logo_url ? (
@@ -281,20 +281,20 @@ export default function Events({ isAdminAuthenticated = false }) {
                             src={idaicOrg.logo_url} 
                             alt="IDAIC Logo" 
                             className="w-full h-full object-contain"
-                            style={{ maxWidth: '24px', maxHeight: '24px' }}
+                            style={{ maxWidth: '36px', maxHeight: '36px' }}
                           />
                         ) : (
-                          <Favicon url="https://www.idaic.org/" size={24} />
+                          <Favicon url="https://www.idaic.org/" size={36} />
                         )}
                       </div>
                     ) : (
-                      <Favicon url={event.registration_link} size={28} />
+                      <Favicon url={event.registration_link} size={40} />
                     )}
                   </div>
                 )}
                 <div className="flex flex-row items-stretch h-full w-full">
-                  <div className="flex flex-col items-start px-6 pt-6 pb-2 min-w-[140px] max-w-[180px] flex-shrink-0 w-full">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-0 text-left w-full">{event.title}</h2>
+                  <div className="flex flex-col items-start px-6 pt-6 pb-2 min-w-[180px] max-w-[240px] flex-shrink-0 w-full">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-0 text-left w-full truncate" title={event.title}>{event.title}</h2>
                     <div className="text-xs sm:text-sm text-gray-500 text-left mt-1 w-full">{event.location}</div>
                     <div className="flex justify-start w-full">
                       <div className="h-1 bg-orange-500 rounded-full my-2" style={{ width: '90%' }} />

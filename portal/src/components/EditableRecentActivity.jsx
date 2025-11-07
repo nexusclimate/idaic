@@ -149,10 +149,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
           Error: {error}
         </div>
       ) : (
-        <div 
-          className="relative group"
-          onDoubleClick={() => !isEditing && isAdmin && setIsEditing(true)}
-        >
+        <div className="relative group">
           {/* Toolbar */}
           {isEditing && (
             <div className="mb-2 flex gap-2 p-2 bg-gray-50 rounded border border-gray-200">
@@ -178,12 +175,20 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                 ? 'min-h-[150px] border border-gray-300 rounded-lg p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500' 
                 : content ? '' : 'text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
             }`}
-            onClick={() => {
+            onDoubleClick={(e) => {
               if (!isEditing && isAdmin) {
+                e.preventDefault();
+                e.stopPropagation();
                 setIsEditing(true);
                 setTimeout(() => {
                   editor?.commands.focus();
                 }, 100);
+              }
+            }}
+            onClick={() => {
+              if (!isEditing && isAdmin) {
+                // Only enable on single click if not already editing
+                // Double-click will handle it, so we don't need single click
               }
             }}
             onBlur={(e) => {
