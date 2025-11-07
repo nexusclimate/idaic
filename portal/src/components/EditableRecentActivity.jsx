@@ -149,7 +149,10 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
           Error: {error}
         </div>
       ) : (
-        <div className="relative group">
+        <div 
+          className="relative group"
+          onDoubleClick={() => !isEditing && isAdmin && setIsEditing(true)}
+        >
           {/* Toolbar */}
           {isEditing && (
             <div className="mb-2 flex gap-2 p-2 bg-gray-50 rounded border border-gray-200">
@@ -175,26 +178,21 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                 ? 'min-h-[150px] border border-gray-300 rounded-lg p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500' 
                 : content ? '' : 'text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
             }`}
-            onDoubleClick={(e) => {
+            onClick={() => {
               if (!isEditing && isAdmin) {
-                e.preventDefault();
-                e.stopPropagation();
                 setIsEditing(true);
+                // Give time for editor to become editable
                 setTimeout(() => {
                   editor?.commands.focus();
                 }, 100);
               }
             }}
-            onClick={() => {
-              if (!isEditing && isAdmin) {
-                // Only enable on single click if not already editing
-                // Double-click will handle it, so we don't need single click
-              }
-            }}
             onBlur={(e) => {
+              // Don't trigger blur when clicking formatting buttons
               if (e.relatedTarget?.closest('.formatting-toolbar')) {
                 return;
               }
+              // Don't save if clicking inside the editor
               if (e.relatedTarget?.closest('.ProseMirror')) {
                 return;
               }
@@ -206,7 +204,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
           >
             {!content && !isEditing && (
               <div className="text-gray-400">
-                <p className="text-sm text-gray-500">Double-click to add content</p>
+                <p className="text-sm text-gray-500">Click to add content</p>
               </div>
             )}
             <div className="prose max-w-none">
