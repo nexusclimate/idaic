@@ -1,4 +1,4 @@
-import Home from '../pages/Home';
+import Home from '../pages/Home.jsx';
 import Content from '../pages/Content';
 import Events from '../pages/Events';
 import Members from '../pages/Members';
