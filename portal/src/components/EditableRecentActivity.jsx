@@ -151,7 +151,16 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       ) : (
         <div 
           className="relative group"
-          onDoubleClick={() => !isEditing && isAdmin && setIsEditing(true)}
+          onDoubleClick={(e) => {
+            if (!isEditing && isAdmin) {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsEditing(true);
+              setTimeout(() => {
+                editor?.commands.focus();
+              }, 100);
+            }
+          }}
         >
           {/* Toolbar */}
           {isEditing && (
@@ -178,8 +187,11 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                 ? 'min-h-[150px] border border-gray-300 rounded-lg p-4 bg-gray-50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500' 
                 : content ? '' : 'text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300'
             }`}
-            onClick={() => {
+            onClick={(e) => {
+              // Only allow editing if admin and not already editing
               if (!isEditing && isAdmin) {
+                e.preventDefault();
+                e.stopPropagation();
                 setIsEditing(true);
                 // Give time for editor to become editable
                 setTimeout(() => {
@@ -201,13 +213,14 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                 handleSave(editor?.getHTML());
               }
             }}
+            style={!isEditing && isAdmin ? { cursor: 'pointer' } : {}}
           >
             {!content && !isEditing && (
               <div className="text-gray-400">
                 <p className="text-sm text-gray-500">Click to add content</p>
               </div>
             )}
-            <div className="prose max-w-none">
+            <div className="prose max-w-none" style={!isEditing ? { pointerEvents: 'none' } : {}}>
               <EditorContent 
                 editor={editor} 
                 className="min-h-[100px] [&_ul]:list-disc [&_ul]:list-inside [&_ul]:space-y-1 [&_li]:text-base" 

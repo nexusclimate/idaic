@@ -600,7 +600,7 @@ export default function Organizations({ user }) {
 
       {/* Organizations Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+        <div className="overflow-x-auto max-h-[75vh] overflow-y-auto pb-4">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
@@ -724,6 +724,10 @@ export default function Organizations({ user }) {
                   </td>
                 </tr>
               ))}
+              {/* Spacer row to ensure last row is fully visible */}
+              <tr>
+                <td colSpan="6" className="h-8"></td>
+              </tr>
             </tbody>
           </table>
         </div>
