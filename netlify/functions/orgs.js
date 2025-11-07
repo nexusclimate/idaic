@@ -78,6 +78,7 @@ exports.handler = async function (event, context) {
           bio: orgData.bio || '',
           location: orgData.location || '',
           website: orgData.website || '',
+          founding_member: orgData.founding_member || false,
           updated_by: orgData.updated_by
         });
 
@@ -89,6 +90,7 @@ exports.handler = async function (event, context) {
             location: orgData.location || '',
             website: orgData.website || '',
             logo_display: orgData.logo_display || false, // Default to false
+            founding_member: orgData.founding_member || false, // Default to false
             updated_by: orgData.updated_by // Include updated_by for new organizations
             // The database will auto-generate the id (UUID) and updated_at
             // logo_url will be null by default (no logo initially)
@@ -136,6 +138,7 @@ exports.handler = async function (event, context) {
         if (updates.location !== undefined) mappedUpdates.location = updates.location;
         if (updates.website !== undefined) mappedUpdates.website = updates.website;
         if (updates.logo_display !== undefined) mappedUpdates.logo_display = updates.logo_display;
+        if (updates.founding_member !== undefined) mappedUpdates.founding_member = updates.founding_member;
         if (updates.updated_by !== undefined) mappedUpdates.updated_by = updates.updated_by;
 
         console.log('🔄 Updating organization:', id, 'with data:', mappedUpdates);

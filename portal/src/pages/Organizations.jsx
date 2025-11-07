@@ -30,7 +30,8 @@ export default function Organizations({ user }) {
     bio: '',
     location: '',
     website: '',
-    logo_display: false
+    logo_display: false,
+    founding_member: false
   });
 
   // Load organizations on component mount
@@ -99,7 +100,8 @@ export default function Organizations({ user }) {
             bio: formData.bio, 
             location: formData.location, 
             website: formData.website,
-            logo_display: false // Default to false for new organizations
+            logo_display: false, // Default to false for new organizations
+            founding_member: false // Default to false for new organizations
           }),
           updated_by: user?.id
         })
@@ -144,7 +146,7 @@ export default function Organizations({ user }) {
       setSuccess(successMsg);
       setShowForm(false);
       setEditingOrg(null);
-      setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
+      setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false, founding_member: false });
       setLogoFile(null);
       loadOrganizations();
     } catch (err) {
@@ -214,7 +216,8 @@ export default function Organizations({ user }) {
       bio: org.bio || '',
       location: org.location || '',
       website: org.website || '',
-      logo_display: org.logo_display || false
+      logo_display: org.logo_display || false,
+      founding_member: org.founding_member || false
     });
     setShowForm(true);
   };
@@ -400,7 +403,8 @@ export default function Organizations({ user }) {
                 formData.bio !== (editingOrg.bio || '') ||
                 formData.location !== (editingOrg.location || '') ||
                 formData.website !== (editingOrg.website || '') ||
-                formData.logo_display !== (editingOrg.logo_display || false);
+                formData.logo_display !== (editingOrg.logo_display || false) ||
+                formData.founding_member !== (editingOrg.founding_member || false);
 
               if (hasChanges) {
                 const updateResponse = await fetch(`/.netlify/functions/orgs?id=${formData.org_id}`, {
@@ -412,6 +416,7 @@ export default function Organizations({ user }) {
                     location: formData.location,
                     website: formData.website,
                     logo_display: formData.logo_display || false,
+                    founding_member: formData.founding_member || false,
                     updated_by: user?.id
                   })
                 });
@@ -551,7 +556,7 @@ export default function Organizations({ user }) {
           onClick={() => {
             setShowForm(true);
             setEditingOrg(null);
-            setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
+            setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false, founding_member: false });
           }}
           className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
         >
@@ -576,6 +581,9 @@ export default function Organizations({ user }) {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Logo Display
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Founding Member
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -620,6 +628,15 @@ export default function Organizations({ user }) {
                     ) : (
                       <span className="text-gray-400">No logo</span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      org.founding_member 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {org.founding_member ? 'Yes' : 'No'}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button
@@ -789,6 +806,20 @@ export default function Organizations({ user }) {
                   </div>
                 )}
 
+                {/* Founding Member Checkbox */}
+                <div className="mt-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.founding_member || false}
+                      onChange={(e) => setFormData({ ...formData, founding_member: e.target.checked })}
+                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Founding Member</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">Mark this organization as a founding member for special ranking</p>
+                </div>
+
                 {/* Organization ID Footnote (use UUID id), created/updated info */}
                 {editingOrg && (
                   <div className="mt-4 pt-3 border-t border-gray-200">
@@ -814,7 +845,7 @@ export default function Organizations({ user }) {
                     onClick={() => {
                       setShowForm(false);
                       setEditingOrg(null);
-                      setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false });
+                      setFormData({ org_id: '', name: '', bio: '', location: '', website: '', logo_display: false, founding_member: false });
                       setLogoFile(null);
                       setIsDragOver(false);
                     }}

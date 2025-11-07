@@ -1,4 +1,4 @@
-import Home from '../pages/home';
+import Home from '../pages/Home';
 import Content from '../pages/Content';
 import Events from '../pages/Events';
 import Members from '../pages/Members';
@@ -57,9 +57,9 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
     case 'members':
       return <Members />;
     case 'uk':
-      return <UKChapter />;
+      return <UKChapter isAdminAuthenticated={isAdminAuthenticated} />;
     case 'mena':
-      return <MENAChapter />;
+      return <MENAChapter isAdminAuthenticated={isAdminAuthenticated} />;
     case 'climate-solutions':
       return (
         <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>

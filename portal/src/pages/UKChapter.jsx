@@ -1,13 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { colors } from '../config/colors';
 import RichTextSection from '../components/RichTextSection';
+import EditableRecentActivity from '../components/EditableRecentActivity';
 
-export default function UKChapter() {
+export default function UKChapter({ isAdminAuthenticated = false }) {
   const [activeTab, setActiveTab] = useState('main');
+  const [users, setUsers] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const tabs = [
     { name: 'Main', key: 'main' },
     { name: 'UK Updates', key: 'uk updates' },
   ];
+
+  // Fetch users and events
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        // Fetch users
+        const usersResponse = await fetch('/.netlify/functions/userfetch');
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setUsers(usersData);
+        }
+        // Fetch events
+        const eventsResponse = await fetch('/.netlify/functions/events');
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          setEvents(eventsData);
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Calculate stats
+  const totalUsers = users.length;
+  const ukUsers = users.filter(u => u.region === 'UK').length;
+  
+  // Calculate new members this month
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const newMembersThisMonth = users.filter(u => {
+    if (!u.created_at) return false;
+    const createdDate = new Date(u.created_at);
+    return createdDate >= startOfMonth && u.region === 'UK';
+  }).length;
+
+  // Count active events (events with location UK that are in the future or recent)
+  const activeEvents = events.filter(e => {
+    if (!e.location || e.location !== 'UK') return false;
+    if (!e.event_date) return true; // Include if no date specified
+    const eventDate = new Date(e.event_date);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return eventDate >= thirtyDaysAgo; // Events in the last 30 days or future
+  }).length;
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-8">
@@ -46,32 +98,37 @@ export default function UKChapter() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="bg-white border rounded-lg p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-semibold mb-4">Chapter Stats</h3>
-              <div className="space-y-3">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                  <span>Total Members:</span>
-                  <span className="font-semibold">45</span>
+              {loading ? (
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                    <span>Loading...</span>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                  <span>Active Events:</span>
-                  <span className="font-semibold">3</span>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                    <span>Total Users:</span>
+                    <span className="font-semibold">{totalUsers}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                    <span>UK Members:</span>
+                    <span className="font-semibold">{ukUsers}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                    <span>Active Events:</span>
+                    <span className="font-semibold">{activeEvents}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                    <span>This Month:</span>
+                    <span className="font-semibold">{newMembersThisMonth} new members</span>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                  <span>This Month:</span>
-                  <span className="font-semibold">12 new members</span>
-                </div>
-              </div>
+              )}
             </div>
-            <div className="bg-white border rounded-lg p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-semibold mb-4">Recent Activity</h3>
-              <ul className="space-y-2">
-                <li>• New member registration</li>
-                <li>• Event planning meeting</li>
-                <li>• Content submission</li>
-              </ul>
-            </div>
+            <EditableRecentActivity section="uk_chapter_recent_activity" isAdminAuthenticated={isAdminAuthenticated} />
           </div>
           <div className="mt-8">
-            <RichTextSection section="uk_chapter" />
+            <RichTextSection section="uk_chapter" isAdmin={isAdminAuthenticated} />
           </div>
         </>
       )}
