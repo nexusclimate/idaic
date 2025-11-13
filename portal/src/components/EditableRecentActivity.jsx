@@ -31,6 +31,16 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       attributes: {
         class: 'prose max-w-none focus:outline-none min-h-[100px] text-gray-900',
       },
+      handleKeyDown: (view, event) => {
+        // Enable keyboard shortcuts for bullet lists
+        // Ctrl+Shift+8 or Cmd+Shift+8 for bullet list
+        if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === '8') {
+          event.preventDefault();
+          editor?.chain().focus().toggleBulletList().run();
+          return true;
+        }
+        return false;
+      },
     },
   });
 
@@ -155,19 +165,25 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
         >
           {/* Toolbar */}
           {isEditing && (
-            <div className="mb-2 flex gap-2 p-2 bg-gray-50 rounded border border-gray-200">
+            <div className="mb-2 flex gap-2 p-2 bg-gray-50 rounded border border-gray-200 formatting-toolbar">
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1 ${
                   editor?.isActive('bulletList')
-                    ? 'bg-gray-200 text-gray-900'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                    : 'text-gray-700 hover:bg-gray-100 border border-transparent'
                 }`}
-                title="Bullet List"
+                title="Toggle Bullet List (Ctrl+Shift+8)"
               >
-                •
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span>Bullets</span>
               </button>
+              <div className="text-xs text-gray-500 flex items-center px-2">
+                Tip: Type "- " or "* " at the start of a line to create bullets
+              </div>
             </div>
           )}
           

@@ -6,6 +6,7 @@ import EditableRecentActivity from '../components/EditableRecentActivity';
 export default function MENAChapter({ isAdminAuthenticated = false }) {
   const [activeTab, setActiveTab] = useState('main');
   const [users, setUsers] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
   const [totalUsersCount, setTotalUsersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const tabs = [
@@ -13,7 +14,7 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
     { name: 'MENA Updates', key: 'mena updates' },
   ];
 
-  // Fetch users and total count
+  // Fetch users, organizations, and total count
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,6 +32,13 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
           const allUsersData = await totalCountResponse.json();
           setTotalUsersCount(allUsersData.length);
         }
+        
+        // Fetch all organizations
+        const orgsResponse = await fetch('/.netlify/functions/orgs');
+        if (orgsResponse.ok) {
+          const orgsData = await orgsResponse.json();
+          setOrganizations(orgsData);
+        }
       } catch (err) {
         console.error('Error fetching data:', err);
       } finally {
@@ -40,8 +48,35 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
     fetchData();
   }, []);
 
+  // Helper function to determine region from location or use region field if it exists
+  const getOrgRegion = (org) => {
+    // Check if organization has a region field
+    if (org.region) {
+      return org.region;
+    }
+    // Otherwise, try to determine from location field
+    if (org.location) {
+      const locationUpper = org.location.toUpperCase();
+      if (locationUpper.includes('UK') || locationUpper.includes('UNITED KINGDOM') || locationUpper.includes('LONDON') || locationUpper.includes('ENGLAND') || locationUpper.includes('SCOTLAND') || locationUpper.includes('WALES')) {
+        return 'UK';
+      }
+      if (locationUpper.includes('UAE') || locationUpper.includes('UNITED ARAB EMIRATES') || locationUpper.includes('DUBAI') || locationUpper.includes('ABU DHABI')) {
+        return 'UAE';
+      }
+      if (locationUpper.includes('MENA') || locationUpper.includes('MIDDLE EAST') || locationUpper.includes('NORTH AFRICA')) {
+        return 'MENA';
+      }
+    }
+    return null;
+  };
+
   // Calculate stats
   const totalUsers = totalUsersCount; // Total count of all users in database
+  const totalMembers = organizations.length; // Total count of all organizations
+  const menaMembers = organizations.filter(org => {
+    const region = getOrgRegion(org);
+    return region === 'MENA' || region === 'UAE';
+  }).length; // Organizations where region = 'UAE' or 'MENA'
   const menaUsers = users.filter(u => u.region === 'MENA' || u.region === 'UAE').length; // Users where region = 'UAE' or 'MENA'
   
   // Calculate new members this month
@@ -101,7 +136,11 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                     <span>Total Members:</span>
-                    <span className="font-semibold">{menaUsers}</span>
+                    <span className="font-semibold">{totalMembers}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
+                    <span>MENA Members:</span>
+                    <span className="font-semibold">{menaMembers}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                     <span>This Month:</span>
