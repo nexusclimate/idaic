@@ -41,13 +41,20 @@ exports.handler = async function (event, context) {
     const timestamp = Date.now();
     const randomComponent = Math.random().toString(36).substring(2, 15);
     const fileExtension = logo_name.split('.').pop() || 'png';
-    // Sanitize file extension to prevent path traversal
-    const sanitizedExtension = fileExtension.replace(/[^a-zA-Z0-9]/g, '');
+    // Sanitize file extension to prevent path traversal, but preserve 'svg'
+    const sanitizedExtension = fileExtension.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
     const uniqueFileName = `${org_id}_${timestamp}_${randomComponent}.${sanitizedExtension}`;
+
+    // Determine content type - explicitly handle SVG files
+    let contentType = logo_type || 'image/png';
+    if (sanitizedExtension === 'svg' || logo_type === 'image/svg+xml') {
+      contentType = 'image/svg+xml';
+    }
 
     console.log('📁 Generated unique filename:', uniqueFileName);
     console.log('📊 Buffer size:', logoBuffer.length, 'bytes');
     console.log('🔍 Using Supabase URL:', process.env.SUPABASE_URL);
+    console.log('🔍 Content type:', contentType);
 
     // Verify bucket exists first (optional check - don't fail if listing doesn't work)
     try {
@@ -73,13 +80,13 @@ exports.handler = async function (event, context) {
       bucket: 'logos',
       filename: uniqueFileName,
       bufferSize: logoBuffer.length,
-      contentType: logo_type || 'image/png'
+      contentType: contentType
     });
     
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('logos')
       .upload(uniqueFileName, logoBuffer, {
-        contentType: logo_type || 'image/png',
+        contentType: contentType,
         upsert: false,
         cacheControl: '3600'
       });
