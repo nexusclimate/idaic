@@ -237,7 +237,7 @@ export default function Members() {
                   >
                     <button
                       onClick={() => handleMemberClick(org.id)}
-                      className={`w-full bg-gray-100 p-1 flex items-center justify-center rounded-lg transition border-2 focus:outline-none aspect-square ${
+                      className={`w-full bg-gray-100 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
                         isSelected
                           ? ''
                           : 'hover:border-orange-200'
@@ -245,7 +245,10 @@ export default function Members() {
                       style={{
                         borderColor: isSelected ? colors.primary.orange : 'transparent',
                         boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                        minHeight: '80px',
+                        height: '112px',
+                        width: '112px',
+                        padding: '16px',
+                        margin: '0 auto',
                       }}
                     >
                       <img
