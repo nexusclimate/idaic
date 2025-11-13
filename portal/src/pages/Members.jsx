@@ -227,7 +227,7 @@ export default function Members() {
               <div className="text-gray-500">No organizations match your search.</div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
               {sortedOrganizations.map((org) => {
                 const isSelected = selectedOrgId === org.id && drawerOpen;
                 return (
@@ -245,17 +245,17 @@ export default function Members() {
                       style={{
                         borderColor: isSelected ? colors.primary.orange : 'transparent',
                         boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                        height: '300px',
-                        width: '450px',
-                        padding: '30px',
+                        height: '250px',
+                        width: '375px',
+                        padding: '25px',
                         margin: '0 auto',
                       }}
                     >
                       <img
-                        className="h-60 w-auto object-contain max-w-full"
+                        className="w-auto object-contain max-w-full"
                         src={org.logo_url}
                         alt={`${org.name} Logo`}
-                        style={{ imageRendering: 'auto' }}
+                        style={{ imageRendering: 'auto', height: '200px' }}
                         loading="lazy"
                       />
                     </button>
@@ -295,6 +295,13 @@ export default function Members() {
             <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-4 sm:pl-10 lg:pl-16">
               <div
                 className={`pointer-events-auto w-screen max-w-sm sm:max-w-md lg:max-w-2xl transform transition ease-in-out duration-500 sm:duration-700 bg-white shadow-xl flex flex-col h-full ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                onClick={(e) => {
+                  // Close drawer when clicking on non-interactive areas of the panel
+                  // Don't close if clicking on buttons, links, or other interactive elements
+                  if (!e.target.closest('button, a, input, textarea, select')) {
+                    closeDrawer();
+                  }
+                }}
               >
                 <div className="px-4 py-4 sm:py-6 sm:px-6 flex items-start justify-between">
                   <h2 className="text-base font-semibold text-gray-900" id="drawer-title">Member Details</h2>
