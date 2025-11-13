@@ -7,11 +7,22 @@ import DisclaimerPopup from "./components/DisclaimerPopup";
 import { supabase } from './config/supabase.js';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
+  // Initialize currentPage from localStorage if available, otherwise default to 'home'
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedPage = localStorage.getItem('idaic-current-page');
+    return savedPage || 'home';
+  });
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [user, setUser] = useState(null);
+
+  // Save current page to localStorage whenever it changes
+  useEffect(() => {
+    if (currentPage) {
+      localStorage.setItem('idaic-current-page', currentPage);
+    }
+  }, [currentPage]);
 
   useEffect(() => {
     // Check authentication on app load
@@ -238,7 +249,9 @@ export default function App() {
         const result = await response.json();
         console.log('✅ Disclaimer acceptance recorded in database:', result);
         setShowDisclaimer(false);
-        setCurrentPage('settings');
+        const page = 'settings';
+        setCurrentPage(page);
+        localStorage.setItem('idaic-current-page', page);
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error('❌ Failed to record disclaimer acceptance in database:', {
@@ -249,14 +262,18 @@ export default function App() {
         console.log('✅ Disclaimer saved to localStorage as fallback');
         // Still close the modal - localStorage backup is saved
         setShowDisclaimer(false);
-        setCurrentPage('settings');
+        const page = 'settings';
+        setCurrentPage(page);
+        localStorage.setItem('idaic-current-page', page);
       }
     } catch (err) {
       console.error('❌ Error saving disclaimer acceptance:', err);
       console.log('✅ Disclaimer saved to localStorage as fallback');
       // Still close the modal - localStorage backup is saved
       setShowDisclaimer(false);
-      setCurrentPage('settings');
+      const page = 'settings';
+      setCurrentPage(page);
+      localStorage.setItem('idaic-current-page', page);
     }
   };
 
@@ -284,7 +301,9 @@ export default function App() {
   };
 
   const handleNavigateToFeedback = () => {
-    setCurrentPage('feedback');
+    const page = 'feedback';
+    setCurrentPage(page);
+    localStorage.setItem('idaic-current-page', page);
     setShowDisclaimer(false);
   };
 
@@ -297,7 +316,10 @@ export default function App() {
         onNavigateToFeedback={handleNavigateToFeedback}
       />
       <Idaic 
-        onPageChange={setCurrentPage} 
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          localStorage.setItem('idaic-current-page', page);
+        }} 
         currentPage={currentPage}
         isAdminAuthenticated={isAdminAuthenticated}
         setIsAdminAuthenticated={setIsAdminAuthenticated}
