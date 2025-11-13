@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function Favicon({ url, className = '', size = 16 }) {
   const [faviconUrl, setFaviconUrl] = useState(null);
+  const [hostname, setHostname] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -16,41 +17,35 @@ export default function Favicon({ url, className = '', size = 16 }) {
         setLoading(true);
         setError(false);
 
-        // Try multiple favicon sources
-        const faviconSources = [
-          // Direct favicon.ico
-          `${url}/favicon.ico`,
-          // Common favicon paths
-          `${url}/favicon.png`,
-          `${url}/apple-touch-icon.png`,
-          // Google's favicon service as fallback
-          `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=${size}`,
-        ];
-
-        // Try each source until one works
-        for (const source of faviconSources) {
-          try {
-            const response = await fetch(source, { 
-              method: 'HEAD',
-              mode: 'cors'
-            });
-            
-            if (response.ok) {
-              setFaviconUrl(source);
-              setLoading(false);
-              return;
-            }
-          } catch (err) {
-            // Continue to next source
-            continue;
-          }
+        // Clean and normalize the URL - remove trailing spaces and whitespace
+        let cleanUrl = url.trim();
+        
+        // Ensure URL has a protocol
+        if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+          cleanUrl = `https://${cleanUrl}`;
         }
 
-        // If all direct sources fail, use Google's service
-        setFaviconUrl(`https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=${size}`);
+        // Parse URL to get hostname
+        let extractedHostname;
+        try {
+          const urlObj = new URL(cleanUrl);
+          extractedHostname = urlObj.hostname;
+        } catch (err) {
+          // If URL parsing fails, try to extract hostname manually
+          const match = cleanUrl.match(/https?:\/\/([^\/]+)/);
+          extractedHostname = match ? match[1] : cleanUrl.replace(/^https?:\/\//, '').split('/')[0];
+        }
+        
+        setHostname(extractedHostname);
+
+        // Use Google's favicon service as primary (no CORS issues when used as img src)
+        const googleFaviconUrl = `https://www.google.com/s2/favicons?domain=${extractedHostname}&sz=${size}`;
+        
+        // Set Google's service as the primary source (works reliably without CORS)
+        setFaviconUrl(googleFaviconUrl);
         setLoading(false);
       } catch (err) {
-        console.warn('Failed to fetch favicon for:', url, err);
+        // Silently handle errors - don't log to console
         setError(true);
         setLoading(false);
       }
@@ -94,11 +89,14 @@ export default function Favicon({ url, className = '', size = 16 }) {
   return (
     <img
       src={faviconUrl}
-      alt={`${new URL(url).hostname} favicon`}
+      alt="Website favicon"
       className={`rounded ${className}`}
       style={{ width: size, height: size }}
-      onError={() => setError(true)}
-      title={new URL(url).hostname}
+      onError={() => {
+        setError(true);
+        setFaviconUrl(null);
+      }}
+      title={hostname || url}
     />
   );
 }

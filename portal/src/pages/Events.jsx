@@ -288,7 +288,7 @@ export default function Events({ isAdminAuthenticated = false }) {
                         )}
                       </div>
                     ) : (
-                      <Favicon url={event.registration_link} size={40} />
+                      <Favicon url={event.registration_link?.trim()} size={40} />
                     )}
                   </div>
                 )}
