@@ -6,22 +6,30 @@ import EditableRecentActivity from '../components/EditableRecentActivity';
 export default function MENAChapter({ isAdminAuthenticated = false }) {
   const [activeTab, setActiveTab] = useState('main');
   const [users, setUsers] = useState([]);
+  const [totalUsersCount, setTotalUsersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const tabs = [
     { name: 'Main', key: 'main' },
     { name: 'MENA Updates', key: 'mena updates' },
   ];
 
-  // Fetch users
+  // Fetch users and total count
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch users
+        // Fetch users with data_permission = true
         const usersResponse = await fetch('/.netlify/functions/userfetch');
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
           setUsers(usersData);
+        }
+        
+        // Fetch total count of all users in database
+        const totalCountResponse = await fetch('/.netlify/functions/userAdminFetch');
+        if (totalCountResponse.ok) {
+          const allUsersData = await totalCountResponse.json();
+          setTotalUsersCount(allUsersData.length);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -33,7 +41,7 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
   }, []);
 
   // Calculate stats
-  const totalUsers = users.length; // Total count of all users in database
+  const totalUsers = totalUsersCount; // Total count of all users in database
   const menaUsers = users.filter(u => u.region === 'MENA' || u.region === 'UAE').length; // Users where region = 'UAE' or 'MENA'
   
   // Calculate new members this month
