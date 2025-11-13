@@ -245,14 +245,14 @@ export default function Members() {
                       style={{
                         borderColor: isSelected ? colors.primary.orange : 'transparent',
                         boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                        height: '100px',
-                        width: '150px',
-                        padding: '10px',
+                        height: '300px',
+                        width: '450px',
+                        padding: '30px',
                         margin: '0 auto',
                       }}
                     >
                       <img
-                        className="h-20 w-auto object-contain max-w-full"
+                        className="h-60 w-auto object-contain max-w-full"
                         src={org.logo_url}
                         alt={`${org.name} Logo`}
                         style={{ imageRendering: 'auto' }}
