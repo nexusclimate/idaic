@@ -79,13 +79,14 @@ export default function MENAChapter({ isAdminAuthenticated = false }) {
   }).length; // Organizations where region = 'UAE' or 'MENA'
   const menaUsers = users.filter(u => u.region === 'MENA' || u.region === 'UAE').length; // Users where region = 'UAE' or 'MENA'
   
-  // Calculate new members this month
+  // Calculate new members this month (organizations created in current month)
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const newMembersThisMonth = users.filter(u => {
-    if (!u.created_at) return false;
-    const createdDate = new Date(u.created_at);
-    return createdDate >= startOfMonth && (u.region === 'MENA' || u.region === 'UAE');
+  const newMembersThisMonth = organizations.filter(org => {
+    if (!org.created_at) return false;
+    const createdDate = new Date(org.created_at);
+    const region = getOrgRegion(org);
+    return createdDate >= startOfMonth && (region === 'MENA' || region === 'UAE');
   }).length;
 
   return (
