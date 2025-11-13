@@ -102,8 +102,8 @@ export default function Organizations({ user }) {
             bio: formData.bio, 
             location: formData.location, 
             website: formData.website,
-            logo_display: false, // Default to false for new organizations
-            founding_member: false // Default to false for new organizations
+            logo_display: formData.logo_display || false, // Use formData value
+            founding_member: formData.founding_member || false // Use formData value
           }),
           updated_by: user?.id
         })
@@ -283,8 +283,8 @@ export default function Organizations({ user }) {
     console.log('✅ org_id available:', formData.org_id);
     
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      const errorMsg = 'Please select an image file (PNG, JPG, GIF, etc.)';
+    if (!file.type.startsWith('image/') && file.type !== 'image/svg+xml') {
+      const errorMsg = 'Please select an image file (PNG, JPG, GIF, SVG, etc.)';
       setError(errorMsg);
       console.error('❌ Invalid file type:', file.type);
       return;
@@ -469,8 +469,8 @@ export default function Organizations({ user }) {
     if (file) {
       console.log('📁 File selected:', file.name, file.type, file.size);
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please select an image file (PNG, JPG, GIF, etc.)');
+      if (!file.type.startsWith('image/') && file.type !== 'image/svg+xml') {
+        setError('Please select an image file (PNG, JPG, GIF, SVG, etc.)');
         return;
       }
       // Validate file size (5MB limit)
@@ -504,7 +504,7 @@ export default function Organizations({ user }) {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith('image/') || file.type === 'image/svg+xml') {
         // Validate file size (5MB limit)
         if (file.size > 5 * 1024 * 1024) {
           setError('File size must be less than 5MB');
@@ -514,7 +514,7 @@ export default function Organizations({ user }) {
         setError(''); // Clear any previous errors
         console.log('✅ File ready for upload when Update is clicked');
       } else {
-        setError('Please select an image file.');
+        setError('Please select an image file (PNG, JPG, GIF, SVG, etc.).');
       }
     }
   };
@@ -828,14 +828,14 @@ export default function Organizations({ user }) {
                               name="logo-upload"
                               type="file"
                               className="sr-only"
-                              accept="image/*"
+                              accept="image/*,.svg"
                               onChange={handleFileChange}
                               disabled={uploadingLogo}
                             />
                           </label>
                           <p className="pl-1">or drag and drop</p>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        <p className="text-xs text-gray-500">PNG, JPG, GIF, SVG up to 5MB</p>
                         {uploadingLogo && (
                           <p className="text-xs text-orange-600 mt-2">Uploading logo... Please wait.</p>
                         )}

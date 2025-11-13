@@ -237,7 +237,7 @@ export default function Members() {
                   >
                     <button
                       onClick={() => handleMemberClick(org.id)}
-                      className={`w-full bg-gray-100 p-3 sm:p-4 flex items-center justify-center rounded-lg transition border-2 focus:outline-none aspect-square ${
+                      className={`w-full bg-gray-100 p-2 flex items-center justify-center rounded-lg transition border-2 focus:outline-none aspect-square ${
                         isSelected
                           ? ''
                           : 'hover:border-orange-200'
@@ -249,7 +249,7 @@ export default function Members() {
                       }}
                     >
                       <img
-                        className="max-h-14 sm:max-h-16 w-auto object-contain max-w-full"
+                        className="h-16 w-auto object-contain max-w-full"
                         src={org.logo_url}
                         alt={`${org.name} Logo`}
                         style={{ imageRendering: 'auto' }}
