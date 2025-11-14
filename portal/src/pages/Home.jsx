@@ -46,6 +46,7 @@ export default function Home() {
         </div>
       </div>
       <div className="mt-8">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Latest Updates</h2>
         <RichTextSection section="home_content" />
       </div>
     </div>

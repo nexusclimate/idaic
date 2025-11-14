@@ -370,8 +370,15 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               <Cog6ToothIcon />
               {!collapsed && <SidebarLabel>User Profile</SidebarLabel>}
             </SidebarItem>
-            {/* Only show admin portal for admin users */}
-            {user?.role === 'admin' && (
+            {/* Show admin portal for admin and moderator users */}
+            {(() => {
+              console.log('Sidebar - user:', user);
+              console.log('Sidebar - user role:', user?.role);
+              console.log('Sidebar - is admin:', user?.role === 'admin');
+              console.log('Sidebar - is moderator:', user?.role === 'moderator');
+              console.log('Sidebar - should show portal admin:', (user?.role === 'admin' || user?.role === 'moderator'));
+              return (user?.role === 'admin' || user?.role === 'moderator');
+            })() && (
               <SidebarItem 
                 onClick={() => handlePageChange('portal-admin')}
                 current={currentPage === 'portal-admin' ? true : undefined}
