@@ -12,7 +12,7 @@
   for = "/*"
   [headers.values]
     X-Frame-Options = "ALLOWALL"
-    Content-Security-Policy = "frame-ancestors 'self' https://members.nexusclimate.co https://climatesolutions.news https://news.nexusclimate.vc"
+    Content-Security-Policy = "frame-ancestors 'self' https://members.nexusclimate.co https://climatesolutions.news https://news.nexusclimate.vc https://uaenews.nexusclimate.vc"
 
 [[redirects]]
   from = "/"

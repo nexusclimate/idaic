@@ -78,7 +78,7 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
         return (
             <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
               <iframe
-                src="https://news.nexusclimate.vc/ae/"
+                src="https://uaenews.nexusclimate.vc/"
                 title="Climate Solutions News"
                 style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
                 allowFullScreen
