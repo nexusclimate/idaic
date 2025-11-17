@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { colors } from '../config/colors';
 import User from './User';
 
@@ -16,7 +16,7 @@ export default function Members() {
   const [filteredOrganizations, setFilteredOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [sortBy, setSortBy] = useState('latest'); // 'latest', 'founding', or 'alphabetical'
+  const [sortBy, setSortBy] = useState('alphabetical'); // 'latest', 'founding', or 'alphabetical'
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch organizations with logos from database
@@ -64,25 +64,39 @@ export default function Members() {
 
   // Sort filtered organizations whenever sortBy or filteredOrganizations change
   useEffect(() => {
-    const sorted = [...filteredOrganizations].sort((a, b) => {
-      if (sortBy === 'alphabetical') {
-        // Alphabetical sorting (case-insensitive)
+    let sorted = [];
+    if (sortBy === 'alphabetical') {
+      // Alphabetical sorting (case-insensitive)
+      sorted = [...filteredOrganizations].sort((a, b) => {
         return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-      } else if (sortBy === 'latest') {
-        // Latest members (most recently uploaded logo first)
-        // Sort by updated_at DESC - when logo is uploaded, updated_at is set
+      });
+    } else if (sortBy === 'latest') {
+      // Latest members (most recently uploaded logo first)
+      // Sort by updated_at DESC - when logo is uploaded, updated_at is set
+      sorted = [...filteredOrganizations].sort((a, b) => {
         const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
         const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
         return dateB - dateA; // Descending order (newest first)
-      } else if (sortBy === 'founding') {
-        // Founding members (earliest uploaded logo first)
-        // Sort by updated_at ASC - earliest uploaded logos appear first
+      });
+    } else if (sortBy === 'founding') {
+      // Founding members first (sorted by earliest uploaded logo), then others
+      // Separate founding and non-founding members
+      const foundingMembers = filteredOrganizations.filter(org => org.founding_member === true);
+      const nonFoundingMembers = filteredOrganizations.filter(org => org.founding_member !== true);
+      
+      // Sort each group by updated_at ASC - earliest uploaded logos appear first
+      const sortByDate = (a, b) => {
         const dateA = a.updated_at ? new Date(a.updated_at).getTime() : Infinity;
         const dateB = b.updated_at ? new Date(b.updated_at).getTime() : Infinity;
         return dateA - dateB; // Ascending order (oldest first)
-      }
-      return 0;
-    });
+      };
+      
+      foundingMembers.sort(sortByDate);
+      nonFoundingMembers.sort(sortByDate);
+      
+      // Combine: founding members first, then non-founding members
+      sorted = [...foundingMembers, ...nonFoundingMembers];
+    }
     setSortedOrganizations(sorted);
   }, [filteredOrganizations, sortBy]);
 
@@ -228,49 +242,63 @@ export default function Members() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-              {sortedOrganizations.map((org) => {
+              {sortedOrganizations.map((org, index) => {
                 const isSelected = selectedOrgId === org.id && drawerOpen;
+                // Check if we need to add a divider: previous was founding, current is not
+                const prevOrg = index > 0 ? sortedOrganizations[index - 1] : null;
+                const showDivider = sortBy === 'founding' && 
+                                  prevOrg && 
+                                  prevOrg.founding_member === true && 
+                                  org.founding_member !== true;
+                
                 return (
-                  <div
-                    key={org.id}
-                    className="relative group"
-                  >
-                    <button
-                      onClick={() => handleMemberClick(org.id)}
-                      className={`bg-gray-100 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
-                        isSelected
-                          ? ''
-                          : 'hover:border-orange-200'
-                      }`}
-                      style={{
-                        borderColor: isSelected ? colors.primary.orange : 'transparent',
-                        boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                        height: '250px',
-                        width: '375px',
-                        padding: '25px',
-                        margin: '0 auto',
-                      }}
-                    >
-                      <img
-                        className="w-auto object-contain max-w-full"
-                        src={org.logo_url}
-                        alt={`${org.name} Logo`}
-                        style={{ imageRendering: 'auto', height: '200px' }}
-                        loading="lazy"
+                  <Fragment key={org.id}>
+                    {showDivider && (
+                      <div 
+                        className="col-span-full my-4"
+                        style={{ borderTop: `2px solid ${colors.primary.orange}` }}
                       />
-                    </button>
-                    {/* Download button */}
-                    <button
-                      onClick={(e) => downloadLogo(org, e)}
-                      className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-50 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      title={`Download ${org.name} logo`}
-                      aria-label={`Download ${org.name} logo`}
+                    )}
+                    <div
+                      className="relative group"
                     >
-                      <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => handleMemberClick(org.id)}
+                        className={`bg-gray-100 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
+                          isSelected
+                            ? ''
+                            : 'hover:border-orange-200'
+                        }`}
+                        style={{
+                          borderColor: isSelected ? colors.primary.orange : 'transparent',
+                          boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
+                          height: '250px',
+                          width: '375px',
+                          padding: '25px',
+                          margin: '0 auto',
+                        }}
+                      >
+                        <img
+                          className="w-auto object-contain max-w-full"
+                          src={org.logo_url}
+                          alt={`${org.name} Logo`}
+                          style={{ imageRendering: 'auto', height: '200px' }}
+                          loading="lazy"
+                        />
+                      </button>
+                      {/* Download button */}
+                      <button
+                        onClick={(e) => downloadLogo(org, e)}
+                        className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-50 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        title={`Download ${org.name} logo`}
+                        aria-label={`Download ${org.name} logo`}
+                      >
+                        <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
+                    </div>
+                  </Fragment>
                 );
               })}
             </div>
