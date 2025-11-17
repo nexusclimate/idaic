@@ -23,46 +23,84 @@ exports.handler = async function (event, context) {
     console.log('📝 Received login tracking request:', {
       user_id: loginData.user_id,
       email: loginData.email,
-      login_method: loginData.login_method
+      login_method: loginData.login_method,
+      ip_address: loginData.ip_address,
+      country: loginData.country,
+      city: loginData.city,
+      region: loginData.region
     });
 
     // Validate required fields
     if (!loginData.user_id || !loginData.email) {
-      console.error('❌ Missing required fields:', loginData);
+      console.error('❌ Missing required fields:', {
+        has_user_id: !!loginData.user_id,
+        has_email: !!loginData.email,
+        full_data: loginData
+      });
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'user_id and email are required' })
+        body: JSON.stringify({ 
+          error: 'user_id and email are required',
+          received: {
+            has_user_id: !!loginData.user_id,
+            has_email: !!loginData.email
+          }
+        })
       };
     }
 
     const loginTime = loginData.login_time || new Date().toISOString();
 
+    // Prepare the insert data with proper defaults
+    const insertData = {
+      user_id: loginData.user_id,
+      email: loginData.email,
+      ip_address: loginData.ip_address || 'Unknown',
+      country: loginData.country || 'Unknown',
+      city: loginData.city || 'Unknown',
+      region: loginData.region || 'Unknown',
+      device: loginData.device || 'Unknown',
+      browser: loginData.browser || 'Unknown',
+      os: loginData.os || 'Unknown',
+      user_agent: loginData.user_agent || 'Unknown',
+      login_time: loginTime,
+      login_method: loginData.login_method || 'unknown'
+    };
+
+    console.log('📤 Inserting login record with data:', insertData);
+
     // Insert login record
     const { data, error } = await supabase
       .from('user_logins')
-      .insert([{
-        user_id: loginData.user_id,
-        email: loginData.email,
-        ip_address: loginData.ip_address || 'Unknown',
-        country: loginData.country || 'Unknown',
-        city: loginData.city || 'Unknown',
-        region: loginData.region || 'Unknown',
-        device: loginData.device || 'Unknown',
-        browser: loginData.browser || 'Unknown',
-        os: loginData.os || 'Unknown',
-        user_agent: loginData.user_agent || 'Unknown',
-        login_time: loginTime,
-        login_method: loginData.login_method || 'unknown'
-      }])
+      .insert([insertData])
       .select();
 
     if (error) {
-      console.error('❌ Error inserting login record:', error);
+      console.error('❌ Error inserting login record:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        full_error: error
+      });
       return {
         statusCode: 500,
         body: JSON.stringify({ 
-          error: error.message,
-          details: error
+          error: 'Failed to insert login record',
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        })
+      };
+    }
+
+    if (!data || data.length === 0) {
+      console.error('❌ No data returned from insert, but no error reported');
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ 
+          error: 'Insert succeeded but no data returned'
         })
       };
     }

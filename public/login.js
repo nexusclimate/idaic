@@ -341,22 +341,31 @@ document
         };
 
         // Use the trackLogin function for consistency
+        console.log('📤 Sending login tracking data:', metadata);
         const trackResponse = await fetch('/.netlify/functions/trackLogin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(metadata)
         });
         
+        const trackResult = await trackResponse.json();
+        
         if (trackResponse.ok) {
-          const trackResult = await trackResponse.json();
           console.log('✅ OTP login tracked successfully!');
           console.log('✅ Server response:', trackResult);
         } else {
-          const errorData = await trackResponse.json().catch(() => ({}));
-          console.error('❌ Failed to track OTP login:', errorData);
+          console.error('❌ Failed to track OTP login:', {
+            status: trackResponse.status,
+            statusText: trackResponse.statusText,
+            error: trackResult
+          });
         }
       } catch (trackErr) {
-        console.error('❌ Failed to track user login:', trackErr);
+        console.error('❌ Failed to track user login:', {
+          error: trackErr,
+          message: trackErr.message,
+          stack: trackErr.stack
+        });
       }
 
       window.location.href = '/app'
@@ -445,22 +454,31 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
         login_method: 'password'
       };
 
+      console.log('📤 Sending login tracking data:', metadata);
       const trackResponse = await fetch('/.netlify/functions/trackLogin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(metadata)
       })
       
+      const trackResult = await trackResponse.json();
+      
       if (trackResponse.ok) {
-        const trackResult = await trackResponse.json();
         console.log('✅ Password login tracked successfully!');
         console.log('✅ Server response:', trackResult);
       } else {
-        const errorData = await trackResponse.json().catch(() => ({}))
-        console.error('❌ Failed to track password login:', errorData)
+        console.error('❌ Failed to track password login:', {
+          status: trackResponse.status,
+          statusText: trackResponse.statusText,
+          error: trackResult
+        });
       }
     } catch (trackErr) {
-      console.error('❌ Track login error:', trackErr)
+      console.error('❌ Track login error:', {
+        error: trackErr,
+        message: trackErr.message,
+        stack: trackErr.stack
+      });
     }
 
     // Redirect to app
