@@ -39,6 +39,82 @@ function detectOS() {
   return 'Unknown';
 }
 
+// Shared function to fetch IP and geolocation data with improved accuracy
+async function fetchIPAndLocation() {
+  let ip = 'Unknown';
+  let geo = {
+    country: 'Unknown',
+    city: 'Unknown',
+    region: 'Unknown'
+  };
+
+  try {
+    // Fetch IP address with timeout
+    const ipResponse = await Promise.race([
+      fetch('https://api.ipify.org?format=json'),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('IP fetch timeout')), 5000))
+    ]);
+    
+    if (ipResponse.ok) {
+      const ipData = await ipResponse.json();
+      ip = ipData.ip || 'Unknown';
+    }
+  } catch (ipErr) {
+    console.error('❌ Failed to fetch IP address:', ipErr);
+  }
+
+  // If we got an IP, fetch geolocation data
+  if (ip && ip !== 'Unknown') {
+    try {
+      // Try ip-api.com first (free, good accuracy)
+      const geoResponse = await Promise.race([
+        fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp`),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 5000))
+      ]);
+
+      if (geoResponse.ok) {
+        const geoData = await geoResponse.json();
+        
+        // ip-api.com returns status field - check if successful
+        if (geoData.status === 'success') {
+          geo = {
+            country: geoData.country || geoData.countryCode || 'Unknown',
+            city: geoData.city || 'Unknown',
+            region: geoData.regionName || geoData.region || 'Unknown'
+          };
+        } else {
+          console.warn('⚠️ ip-api.com returned error:', geoData.message);
+        }
+      }
+    } catch (geoErr) {
+      console.error('❌ Failed to fetch geolocation from ip-api.com:', geoErr);
+      
+      // Fallback: Try ipapi.co as backup
+      try {
+        const fallbackResponse = await Promise.race([
+          fetch(`https://ipapi.co/${ip}/json/`),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Fallback geo fetch timeout')), 5000))
+        ]);
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          if (!fallbackData.error) {
+            geo = {
+              country: fallbackData.country_name || fallbackData.country || 'Unknown',
+              city: fallbackData.city || 'Unknown',
+              region: fallbackData.region || fallbackData.region_code || 'Unknown'
+            };
+          }
+        }
+      } catch (fallbackErr) {
+        console.error('❌ Fallback geolocation also failed:', fallbackErr);
+      }
+    }
+  }
+
+  return { ip, geo };
+}
+
 // 2. Notification helper
 function createNotification({ message, success = true, warning = false }) {
   const container = document.getElementById('notification-list')
@@ -242,19 +318,9 @@ document
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
 
-      // Track user login stats
+      // Track user login stats with improved geolocation
       try {
-        const ip = await fetch('https://api.ipify.org?format=json')
-          .then(res => res.json())
-          .then(data => data.ip);
-
-        let geo = {};
-        try {
-          // Use HTTPS for geolocation API
-          geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
-        } catch (geoErr) {
-          console.error('❌ Failed to fetch geo info:', geoErr);
-        }
+        const { ip, geo } = await fetchIPAndLocation();
 
         const user = data.user || {}; // data.user may be undefined, fallback to empty object
         const userId = data.user?.id || null;
@@ -263,10 +329,9 @@ document
           user_id: userId, // Store the Auth UUID
           email: user.email || document.getElementById('email').value.trim(),
           ip_address: ip,
-          country: geo.country || 'Unknown',
-          city: geo.city || 'Unknown',
-          // Prefer regionName, fallback to region
-          region: geo.regionName || geo.region || 'Unknown',
+          country: geo.country,
+          city: geo.city,
+          region: geo.region,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
           browser: detectBrowser(),
           os: detectOS(),
@@ -361,28 +426,17 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
 
     // Track password login with full metadata (IP, location, device, browser, OS, etc.)
     try {
-      // Fetch IP address
-      const ip = await fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => data.ip)
-        .catch(() => 'Unknown');
-
-      // Fetch geolocation data
-      let geo = {};
-      try {
-        geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
-      } catch (geoErr) {
-        console.error('❌ Failed to fetch geo info:', geoErr);
-      }
+      // Fetch IP and geolocation with improved accuracy
+      const { ip, geo } = await fetchIPAndLocation();
 
       // Prepare metadata with all tracking information
       const metadata = {
         user_id: userRow.id,
         email: userRow.email,
         ip_address: ip,
-        country: geo.country || 'Unknown',
-        city: geo.city || 'Unknown',
-        region: geo.regionName || geo.region || 'Unknown',
+        country: geo.country,
+        city: geo.city,
+        region: geo.region,
         device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
         browser: detectBrowser(),
         os: detectOS(),
