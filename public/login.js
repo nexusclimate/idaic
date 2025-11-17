@@ -8,6 +8,37 @@ const N8N_URL  = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+// Shared browser and OS detection functions
+function detectBrowser() {
+  if (navigator.userAgentData && navigator.userAgentData.brands) {
+    const brands = navigator.userAgentData.brands.map(b => b.brand);
+    if (brands.includes('Google Chrome')) return 'Chrome';
+    if (brands.includes('Microsoft Edge')) return 'Edge';
+    if (brands.includes('Chromium')) return 'Chromium';
+    return brands[0] || 'Unknown';
+  }
+  const ua = navigator.userAgent;
+  if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
+  if (/firefox|fxios/i.test(ua)) return 'Firefox';
+  if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
+  if (/edg/i.test(ua)) return 'Edge';
+  if (/opr\//i.test(ua)) return 'Opera';
+  return 'Unknown';
+}
+
+function detectOS() {
+  if (navigator.userAgentData && navigator.userAgentData.platform) {
+    return navigator.userAgentData.platform;
+  }
+  const ua = navigator.userAgent;
+  if (/windows/i.test(ua)) return 'Windows';
+  if (/macintosh|mac os x/i.test(ua)) return 'Mac';
+  if (/linux/i.test(ua)) return 'Linux';
+  if (/android/i.test(ua)) return 'Android';
+  if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+  return 'Unknown';
+}
+
 // 2. Notification helper
 function createNotification({ message, success = true, warning = false }) {
   const container = document.getElementById('notification-list')
@@ -211,38 +242,6 @@ document
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
 
-      // Improved browser detection
-      function detectBrowser() {
-        if (navigator.userAgentData && navigator.userAgentData.brands) {
-          const brands = navigator.userAgentData.brands.map(b => b.brand);
-          if (brands.includes('Google Chrome')) return 'Chrome';
-          if (brands.includes('Microsoft Edge')) return 'Edge';
-          if (brands.includes('Chromium')) return 'Chromium';
-          return brands[0] || 'Unknown';
-        }
-        const ua = navigator.userAgent;
-        if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
-        if (/firefox|fxios/i.test(ua)) return 'Firefox';
-        if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
-        if (/edg/i.test(ua)) return 'Edge';
-        if (/opr\//i.test(ua)) return 'Opera';
-        return 'Unknown';
-      }
-
-      // Improved OS detection
-      function detectOS() {
-        if (navigator.userAgentData && navigator.userAgentData.platform) {
-          return navigator.userAgentData.platform;
-        }
-        const ua = navigator.userAgent;
-        if (/windows/i.test(ua)) return 'Windows';
-        if (/macintosh|mac os x/i.test(ua)) return 'Mac';
-        if (/linux/i.test(ua)) return 'Linux';
-        if (/android/i.test(ua)) return 'Android';
-        if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
-        return 'Unknown';
-      }
-
       // Track user login stats
       try {
         const ip = await fetch('https://api.ipify.org?format=json')
@@ -360,23 +359,54 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
 
     createNotification({ message: 'Successfully signed in (admin). Redirecting…', success: true })
 
-    // Track password login and update last_login
+    // Track password login with full metadata (IP, location, device, browser, OS, etc.)
     try {
+      // Fetch IP address
+      const ip = await fetch('https://api.ipify.org?format=json')
+        .then(res => res.json())
+        .then(data => data.ip)
+        .catch(() => 'Unknown');
+
+      // Fetch geolocation data
+      let geo = {};
+      try {
+        geo = await fetch(`https://ip-api.com/json/${ip}`).then(res => res.json());
+      } catch (geoErr) {
+        console.error('❌ Failed to fetch geo info:', geoErr);
+      }
+
+      // Prepare metadata with all tracking information
+      const metadata = {
+        user_id: userRow.id,
+        email: userRow.email,
+        ip_address: ip,
+        country: geo.country || 'Unknown',
+        city: geo.city || 'Unknown',
+        region: geo.regionName || geo.region || 'Unknown',
+        device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+        browser: detectBrowser(),
+        os: detectOS(),
+        user_agent: navigator.userAgent,
+        login_time: new Date().toISOString(),
+        login_method: 'password'
+      };
+
       const trackResponse = await fetch('/.netlify/functions/trackLogin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userRow.id,
-          email: userRow.email,
-          login_method: 'password'
-        })
+        body: JSON.stringify(metadata)
       })
-      if (!trackResponse.ok) {
+      
+      if (trackResponse.ok) {
+        const trackResult = await trackResponse.json();
+        console.log('✅ Password login tracked successfully!');
+        console.log('✅ Server response:', trackResult);
+      } else {
         const errorData = await trackResponse.json().catch(() => ({}))
-        console.error('Failed to track password login:', errorData)
+        console.error('❌ Failed to track password login:', errorData)
       }
     } catch (trackErr) {
-      console.error('Track login error:', trackErr)
+      console.error('❌ Track login error:', trackErr)
     }
 
     // Redirect to app
