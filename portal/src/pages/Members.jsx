@@ -241,7 +241,7 @@ export default function Members() {
               <div className="text-gray-500">No organizations match your search.</div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {sortedOrganizations.map((org, index) => {
                 const isSelected = selectedOrgId === org.id && drawerOpen;
                 // Check if we need to add a divider: previous was founding, current is not
@@ -260,11 +260,11 @@ export default function Members() {
                       />
                     )}
                     <div
-                      className="relative group"
+                      className="relative group w-full"
                     >
                       <button
                         onClick={() => handleMemberClick(org.id)}
-                        className={`bg-gray-100 flex items-center justify-center rounded-lg transition border-2 focus:outline-none ${
+                        className={`bg-gray-100 flex items-center justify-center rounded-lg transition border-2 focus:outline-none w-full ${
                           isSelected
                             ? ''
                             : 'hover:border-orange-200'
@@ -272,17 +272,16 @@ export default function Members() {
                         style={{
                           borderColor: isSelected ? colors.primary.orange : 'transparent',
                           boxShadow: isSelected ? `0 0 0 2px ${colors.primary.orange}` : undefined,
-                          height: '250px',
-                          width: '375px',
-                          padding: '25px',
-                          margin: '0 auto',
+                          aspectRatio: '3/2',
+                          padding: 'clamp(12px, 3vw, 25px)',
+                          minHeight: '150px',
                         }}
                       >
                         <img
-                          className="w-auto object-contain max-w-full"
+                          className="w-full h-full object-contain max-w-full max-h-full"
                           src={org.logo_url}
                           alt={`${org.name} Logo`}
-                          style={{ imageRendering: 'auto', height: '200px' }}
+                          style={{ imageRendering: 'auto' }}
                           loading="lazy"
                         />
                       </button>
@@ -293,7 +292,7 @@ export default function Members() {
                         title={`Download ${org.name} logo`}
                         aria-label={`Download ${org.name} logo`}
                       >
-                        <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                       </button>
