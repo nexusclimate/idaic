@@ -353,7 +353,7 @@ export default function UserAdmin({ onUserSelect }) {
       <div className="mt-2 flow-root">
         <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
           <div className="inline-block min-w-full align-middle">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-visible" style={{ maxWidth: '100%' }}>
               <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
                 <thead>
                   <tr>
@@ -458,6 +458,69 @@ export default function UserAdmin({ onUserSelect }) {
                       <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
                         {sortBy === 'role' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
                       </span>
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      colSpan="5"
+                    >
+                      Newsletter Subscriptions
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter cursor-pointer select-none"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                      onClick={() => handleSort('updated_at')}
+                    >
+                      Last Updated
+                      <span className="ml-1 align-middle" style={{ color: colors.primary.orange }}>
+                        {sortBy === 'updated_at' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      </span>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th colSpan="10" className="sticky top-0 z-10 border-b bg-white/75"></th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
+                      IDAIC Content
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
+                      IDAIC UK
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
+                      IDAIC MENA
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
+                      CSN News
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
+                      UAE Climate
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
                     </th>
                   </tr>
                 </thead>
@@ -610,6 +673,91 @@ export default function UserAdmin({ onUserSelect }) {
                {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
              </span>
                           )}
+                        </td>
+                        {/* Newsletter Subscription Columns */}
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap text-center',
+                          )}
+                          style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                            user.newsletter_idaic_content 
+                              ? 'bg-green-500' 
+                              : 'bg-gray-300'
+                          }`} title={user.newsletter_idaic_content ? 'Subscribed' : 'Not subscribed'}>
+                            {user.newsletter_idaic_content ? '✓' : ''}
+                          </span>
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap text-center',
+                          )}
+                          style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                            user.newsletter_idaic_uk 
+                              ? 'bg-green-500' 
+                              : 'bg-gray-300'
+                          }`} title={user.newsletter_idaic_uk ? 'Subscribed' : 'Not subscribed'}>
+                            {user.newsletter_idaic_uk ? '✓' : ''}
+                          </span>
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap text-center',
+                          )}
+                          style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                            user.newsletter_idaic_mena 
+                              ? 'bg-green-500' 
+                              : 'bg-gray-300'
+                          }`} title={user.newsletter_idaic_mena ? 'Subscribed' : 'Not subscribed'}>
+                            {user.newsletter_idaic_mena ? '✓' : ''}
+                          </span>
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap text-center',
+                          )}
+                          style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                            user.newsletter_csn_news 
+                              ? 'bg-green-500' 
+                              : 'bg-gray-300'
+                          }`} title={user.newsletter_csn_news ? 'Subscribed' : 'Not subscribed'}>
+                            {user.newsletter_csn_news ? '✓' : ''}
+                          </span>
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap text-center',
+                          )}
+                          style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                            user.newsletter_uae_climate 
+                              ? 'bg-green-500' 
+                              : 'bg-gray-300'
+                          }`} title={user.newsletter_uae_climate ? 'Subscribed' : 'Not subscribed'}>
+                            {user.newsletter_uae_climate ? '✓' : ''}
+                          </span>
+                        </td>
+                        {/* Last Updated Column */}
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                          )}
+                          style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        >
+                          {formatDate(user.updated_at)}
                         </td>
                       </tr>
                     );

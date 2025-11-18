@@ -66,6 +66,11 @@ exports.handler = async function (event, context) {
             content: profile.content,
             profile_updated_at: profile.profile_updated_at,
             data_permission: profile.data_permission,
+            newsletter_idaic_content: profile.newsletter_idaic_content,
+            newsletter_idaic_uk: profile.newsletter_idaic_uk,
+            newsletter_idaic_mena: profile.newsletter_idaic_mena,
+            newsletter_csn_news: profile.newsletter_csn_news,
+            newsletter_uae_climate: profile.newsletter_uae_climate,
             updated_at: profile.updated_at,
             updated_by: profile.updated_by
           };
@@ -260,6 +265,11 @@ exports.handler = async function (event, context) {
         if (updates.aiTools !== undefined) mappedUpdates.ai_tools = updates.aiTools;
         if (updates.content !== undefined) mappedUpdates.content = updates.content;
         if (updates.data_permission !== undefined) mappedUpdates.data_permission = updates.data_permission;
+        if (updates.newsletter_idaic_content !== undefined) mappedUpdates.newsletter_idaic_content = updates.newsletter_idaic_content;
+        if (updates.newsletter_idaic_uk !== undefined) mappedUpdates.newsletter_idaic_uk = updates.newsletter_idaic_uk;
+        if (updates.newsletter_idaic_mena !== undefined) mappedUpdates.newsletter_idaic_mena = updates.newsletter_idaic_mena;
+        if (updates.newsletter_csn_news !== undefined) mappedUpdates.newsletter_csn_news = updates.newsletter_csn_news;
+        if (updates.newsletter_uae_climate !== undefined) mappedUpdates.newsletter_uae_climate = updates.newsletter_uae_climate;
         
         // Track who updated this record and when (updated_at is handled by trigger)
         if (updates.updated_by !== undefined) {
@@ -304,6 +314,11 @@ exports.handler = async function (event, context) {
           content: profile.content,
           profile_updated_at: profile.profile_updated_at,
           data_permission: profile.data_permission,
+          newsletter_idaic_content: profile.newsletter_idaic_content,
+          newsletter_idaic_uk: profile.newsletter_idaic_uk,
+          newsletter_idaic_mena: profile.newsletter_idaic_mena,
+          newsletter_csn_news: profile.newsletter_csn_news,
+          newsletter_uae_climate: profile.newsletter_uae_climate,
           updated_at: profile.updated_at,
           updated_by: profile.updated_by
         };

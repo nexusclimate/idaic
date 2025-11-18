@@ -4,6 +4,7 @@ import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 
 const tabs = [
   { name: 'Personal Info', key: 'personal' },
+  { name: 'Newsletters', key: 'newsletters' },
 ];
 
 export default function Settings({ user }) {
@@ -32,6 +33,13 @@ export default function Settings({ user }) {
   const [aiTools, setAiTools] = useState('');
   const [content, setContent] = useState('');
   const [dataPermission, setDataPermission] = useState('');
+  
+  // Newsletter subscription fields
+  const [newsletterIdaicContent, setNewsletterIdaicContent] = useState(false);
+  const [newsletterIdaicUk, setNewsletterIdaicUk] = useState(false);
+  const [newsletterIdaicMena, setNewsletterIdaicMena] = useState(false);
+  const [newsletterCsnNews, setNewsletterCsnNews] = useState(false);
+  const [newsletterUaeClimate, setNewsletterUaeClimate] = useState(false);
   
   // Edit mode and success popup states
   const [isEditing, setIsEditing] = useState(false);
@@ -70,6 +78,13 @@ export default function Settings({ user }) {
               setAiTools(profileData.aiTools || '');
               setContent(profileData.content || '');
               setDataPermission(profileData.data_permission === null ? '' : profileData.data_permission ? 'yes' : 'no');
+              
+              // Load newsletter preferences
+              setNewsletterIdaicContent(profileData.newsletter_idaic_content || false);
+              setNewsletterIdaicUk(profileData.newsletter_idaic_uk || false);
+              setNewsletterIdaicMena(profileData.newsletter_idaic_mena || false);
+              setNewsletterCsnNews(profileData.newsletter_csn_news || false);
+              setNewsletterUaeClimate(profileData.newsletter_uae_climate || false);
               
               // If user has existing data, they've submitted before
               setHasSubmitted(true);
@@ -136,6 +151,11 @@ export default function Settings({ user }) {
       aiTools,
       content,
       data_permission: dataPermission === 'yes',
+      newsletter_idaic_content: newsletterIdaicContent,
+      newsletter_idaic_uk: newsletterIdaicUk,
+      newsletter_idaic_mena: newsletterIdaicMena,
+      newsletter_csn_news: newsletterCsnNews,
+      newsletter_uae_climate: newsletterUaeClimate,
       updated_by: user?.id // Track who made the update
     };
 
@@ -508,6 +528,155 @@ export default function Settings({ user }) {
               </div>
             </form>
           </>
+        )}
+        {activeTab === 'newsletters' && (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-base font-medium text-gray-900 mb-4">Newsletter Subscriptions</h3>
+              <p className="text-sm text-gray-600 mb-6">Manage your newsletter subscriptions below. Select "Yes" to subscribe or "No" to unsubscribe.</p>
+              
+              {/* IDAIC Newsletters */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900">IDAIC Content Updates</label>
+                    <p className="text-xs text-gray-500 mt-1">Stay updated with IDAIC's latest content and announcements</p>
+                  </div>
+                  <select
+                    value={newsletterIdaicContent ? 'yes' : 'no'}
+                    onChange={(e) => setNewsletterIdaicContent(e.target.value === 'yes')}
+                    className="ml-4 rounded-md border border-gray-300 py-1.5 px-3 text-sm focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900">IDAIC UK Chapter Updates</label>
+                    <p className="text-xs text-gray-500 mt-1">Receive updates from the IDAIC UK Chapter</p>
+                  </div>
+                  <select
+                    value={newsletterIdaicUk ? 'yes' : 'no'}
+                    onChange={(e) => setNewsletterIdaicUk(e.target.value === 'yes')}
+                    className="ml-4 rounded-md border border-gray-300 py-1.5 px-3 text-sm focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900">IDAIC MENA Chapter Updates</label>
+                    <p className="text-xs text-gray-500 mt-1">Receive updates from the IDAIC MENA Chapter</p>
+                  </div>
+                  <select
+                    value={newsletterIdaicMena ? 'yes' : 'no'}
+                    onChange={(e) => setNewsletterIdaicMena(e.target.value === 'yes')}
+                    className="ml-4 rounded-md border border-gray-300 py-1.5 px-3 text-sm focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Orange Divider */}
+              <div className="my-6" style={{ borderTop: `2px solid ${colors.primary.orange}` }}></div>
+              
+              {/* Other Newsletters */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900">CSN News Updates</label>
+                    <p className="text-xs text-gray-500 mt-1">Climate Solutions News updates and articles</p>
+                  </div>
+                  <select
+                    value={newsletterCsnNews ? 'yes' : 'no'}
+                    onChange={(e) => setNewsletterCsnNews(e.target.value === 'yes')}
+                    className="ml-4 rounded-md border border-gray-300 py-1.5 px-3 text-sm focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-center justify-between py-3 border-b border-gray-200">
+                  <div>
+                    <label className="text-sm font-medium text-gray-900">UAE Climate News</label>
+                    <p className="text-xs text-gray-500 mt-1">UAE Climate Tech News and updates</p>
+                  </div>
+                  <select
+                    value={newsletterUaeClimate ? 'yes' : 'no'}
+                    onChange={(e) => setNewsletterUaeClimate(e.target.value === 'yes')}
+                    className="ml-4 rounded-md border border-gray-300 py-1.5 px-3 text-sm focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+              
+              {/* Unsubscribe All Button */}
+              <div className="pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewsletterIdaicContent(false);
+                    setNewsletterIdaicUk(false);
+                    setNewsletterIdaicMena(false);
+                    setNewsletterCsnNews(false);
+                    setNewsletterUaeClimate(false);
+                  }}
+                  className="text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  Unsubscribe All
+                </button>
+              </div>
+              
+              {/* Save Button */}
+              <div className="flex justify-end pt-6">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setError('');
+                    try {
+                      const formData = {
+                        newsletter_idaic_content: newsletterIdaicContent,
+                        newsletter_idaic_uk: newsletterIdaicUk,
+                        newsletter_idaic_mena: newsletterIdaicMena,
+                        newsletter_csn_news: newsletterCsnNews,
+                        newsletter_uae_climate: newsletterUaeClimate,
+                        updated_by: user?.id
+                      };
+                      
+                      const response = await fetch(`/.netlify/functions/userProfile?id=${user?.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                      });
+                      
+                      if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to update newsletter preferences');
+                      }
+                      
+                      setShowSuccessPopup(true);
+                      setTimeout(() => setShowSuccessPopup(false), 3000);
+                    } catch (error) {
+                      console.error('Error updating newsletter preferences:', error);
+                      setError(error.message || 'Failed to save newsletter preferences. Please try again.');
+                    }
+                  }}
+                  className="inline-flex justify-center rounded-md border border-transparent bg-orange-500 py-1.5 px-3 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                >
+                  Save Preferences
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
       
