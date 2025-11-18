@@ -271,11 +271,15 @@ exports.handler = async function (event, context) {
         if (updates.newsletter_csn_news !== undefined) mappedUpdates.newsletter_csn_news = updates.newsletter_csn_news;
         if (updates.newsletter_uae_climate !== undefined) mappedUpdates.newsletter_uae_climate = updates.newsletter_uae_climate;
         
-        // Track who updated this record and when (updated_at is handled by trigger)
+        // Track who updated this record and when
         if (updates.updated_by !== undefined) {
           mappedUpdates.updated_by = updates.updated_by;
           console.log('📝 Profile updated by user:', updates.updated_by);
         }
+        
+        // Explicitly update updated_at timestamp to reflect any changes (including newsletter updates)
+        // This ensures the Last Updated column always shows the most recent change
+        mappedUpdates.updated_at = new Date().toISOString();
 
         const { data: updatedProfile, error: updateError } = await supabase
           .from('users')

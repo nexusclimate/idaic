@@ -353,7 +353,7 @@ export default function UserAdmin({ onUserSelect }) {
       <div className="mt-2 flow-root">
         <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
           <div className="inline-block min-w-full align-middle">
-            <div className="overflow-x-auto overflow-y-visible" style={{ maxWidth: '100%' }}>
+            <div className="overflow-x-auto overflow-y-auto" style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 300px)' }}>
               <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
                 <thead>
                   <tr>
@@ -480,7 +480,11 @@ export default function UserAdmin({ onUserSelect }) {
                     </th>
                   </tr>
                   <tr>
-                    <th colSpan="10" className="sticky top-0 z-10 border-b bg-white/75"></th>
+                    <th 
+                      colSpan="10" 
+                      className="sticky top-0 z-10 border-b bg-white/75 backdrop-blur-sm backdrop-filter"
+                      style={{ borderColor: colors.border.medium }}
+                    ></th>
                     <th
                       scope="col"
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs font-semibold backdrop-blur-sm backdrop-filter"
@@ -684,10 +688,9 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
                             user.newsletter_idaic_content 
-                              ? 'bg-green-500' 
+                              ? 'bg-green-100' 
                               : 'bg-gray-300'
                           }`} title={user.newsletter_idaic_content ? 'Subscribed' : 'Not subscribed'}>
-                            {user.newsletter_idaic_content ? '✓' : ''}
                           </span>
                         </td>
                         <td
@@ -699,10 +702,9 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
                             user.newsletter_idaic_uk 
-                              ? 'bg-green-500' 
+                              ? 'bg-green-100' 
                               : 'bg-gray-300'
                           }`} title={user.newsletter_idaic_uk ? 'Subscribed' : 'Not subscribed'}>
-                            {user.newsletter_idaic_uk ? '✓' : ''}
                           </span>
                         </td>
                         <td
@@ -714,10 +716,9 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
                             user.newsletter_idaic_mena 
-                              ? 'bg-green-500' 
+                              ? 'bg-green-100' 
                               : 'bg-gray-300'
                           }`} title={user.newsletter_idaic_mena ? 'Subscribed' : 'Not subscribed'}>
-                            {user.newsletter_idaic_mena ? '✓' : ''}
                           </span>
                         </td>
                         <td
@@ -729,10 +730,9 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
                             user.newsletter_csn_news 
-                              ? 'bg-green-500' 
+                              ? 'bg-green-100' 
                               : 'bg-gray-300'
                           }`} title={user.newsletter_csn_news ? 'Subscribed' : 'Not subscribed'}>
-                            {user.newsletter_csn_news ? '✓' : ''}
                           </span>
                         </td>
                         <td
@@ -744,10 +744,9 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
                             user.newsletter_uae_climate 
-                              ? 'bg-green-500' 
+                              ? 'bg-green-100' 
                               : 'bg-gray-300'
                           }`} title={user.newsletter_uae_climate ? 'Subscribed' : 'Not subscribed'}>
-                            {user.newsletter_uae_climate ? '✓' : ''}
                           </span>
                         </td>
                         {/* Last Updated Column */}
