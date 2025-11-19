@@ -274,11 +274,37 @@ export const PageMention = Extension.create({
               
               if (!pluginState.active) {
                 if (component) {
-                  ReactRenderer.destroy(component);
-                  component = null;
+                  try {
+                    // Remove element from DOM first
+                    if (component.element && component.element.parentNode) {
+                      component.element.parentNode.removeChild(component.element);
+                    }
+                    // Then try to destroy the component if it has a destroy method
+                    if (typeof component.destroy === 'function') {
+                      component.destroy();
+                    } else if (ReactRenderer && typeof ReactRenderer.destroy === 'function' && component.element) {
+                      // Only call ReactRenderer.destroy if component looks like a ReactRenderer instance
+                      try {
+                        ReactRenderer.destroy(component);
+                      } catch (destroyErr) {
+                        // If destroy fails, we've already removed the element, so it's okay
+                      }
+                    }
+                  } catch (err) {
+                    // Ignore destroy errors - component might already be destroyed
+                    // The element removal is the most important part
+                  } finally {
+                    component = null;
+                  }
                 }
                 if (container) {
-                  container.remove();
+                  try {
+                    if (container.parentNode) {
+                      container.remove();
+                    }
+                  } catch (err) {
+                    // Ignore remove errors
+                  }
                   container = null;
                 }
                 return;
@@ -364,10 +390,38 @@ export const PageMention = Extension.create({
                 clearTimeout(updateTimeout);
               }
               if (component) {
-                ReactRenderer.destroy(component);
+                try {
+                  // Remove element from DOM first
+                  if (component.element && component.element.parentNode) {
+                    component.element.parentNode.removeChild(component.element);
+                  }
+                  // Then try to destroy the component if it has a destroy method
+                  if (typeof component.destroy === 'function') {
+                    component.destroy();
+                  } else if (ReactRenderer && typeof ReactRenderer.destroy === 'function' && component.element) {
+                    // Only call ReactRenderer.destroy if component looks like a ReactRenderer instance
+                    try {
+                      ReactRenderer.destroy(component);
+                    } catch (destroyErr) {
+                      // If destroy fails, we've already removed the element, so it's okay
+                    }
+                  }
+                } catch (err) {
+                  // Ignore destroy errors - component might already be destroyed
+                  // The element removal is the most important part
+                } finally {
+                  component = null;
+                }
               }
               if (container) {
-                container.remove();
+                try {
+                  if (container.parentNode) {
+                    container.remove();
+                  }
+                } catch (err) {
+                  // Ignore remove errors
+                }
+                container = null;
               }
             },
           };
