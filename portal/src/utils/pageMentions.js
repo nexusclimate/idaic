@@ -1,21 +1,21 @@
 // Utility functions for @ mention functionality
 
-// Map of page display names to route identifiers
+// Map of page display names to route identifiers - matching sidebar pages
 export const PAGE_MAP = {
   'Home': 'home',
-  'Feedback': 'feedback',
-  'Events': 'events',
-  'Members': 'members',
-  'UKChapter': 'uk',
-  'MENAChapter': 'mena',
-  'ClimateSolutions': 'climate-solutions',
-  'UAEClimate': 'uae-climate',
-  'Changelog': 'changelog',
-  'Settings': 'settings',
-  'Projects': 'projects',
-  'Admin': 'portal-admin',
   'Content': 'content',
   'CaseStudies': 'case-studies',
+  'Events': 'events',
+  'Projects': 'projects',
+  'Members': 'members',
+  'UK': 'uk',
+  'MENA': 'mena',
+  'CSN': 'climate-solutions',
+  'UAE': 'uae-climate',
+  'Feedback': 'feedback',
+  'Changelog': 'changelog',
+  'Settings': 'settings',
+  'Admin': 'portal-admin',
 };
 
 // Reverse map for getting display name from route

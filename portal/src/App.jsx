@@ -24,6 +24,22 @@ export default function App() {
     }
   }, [currentPage]);
 
+  // Listen for navigation events from @ mentions
+  useEffect(() => {
+    const handleNavigateToPage = (event) => {
+      const page = event.detail?.page;
+      if (page) {
+        setCurrentPage(page);
+        localStorage.setItem('idaic-current-page', page);
+      }
+    };
+
+    window.addEventListener('navigateToPage', handleNavigateToPage);
+    return () => {
+      window.removeEventListener('navigateToPage', handleNavigateToPage);
+    };
+  }, []);
+
   useEffect(() => {
     // Check authentication on app load
     const checkAuthentication = async () => {

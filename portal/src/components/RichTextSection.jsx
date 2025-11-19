@@ -3,6 +3,7 @@ import { Button } from './button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
+import { PageMention } from '../extensions/PageMention';
 import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../config/supabase';
@@ -21,9 +22,16 @@ export default function RichTextSection({ section, isAdmin = false }) {
       StarterKit.configure({
         heading: {
           levels: [1, 2]
-        }
+        },
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'page-mention-link',
+          },
+        },
       }),
       Underline,
+      PageMention,
     ],
     editable: true,
     content: content?.content || '',
@@ -34,10 +42,45 @@ export default function RichTextSection({ section, isAdmin = false }) {
           & h1 { font-size: 2.5em; margin-bottom: 0.5em; }
           & h2 { font-size: 1.75em; margin-bottom: 0.5em; }
           & p { font-size: 1.1em; margin-bottom: 0.5em; }
+          & a[data-mention="true"] { color: #ea580c; font-weight: 500; cursor: pointer; text-decoration: underline; }
         `
+      },
+      handleClick: (view, pos, event) => {
+        const target = event.target;
+        if (target.tagName === 'A' && target.getAttribute('data-mention') === 'true') {
+          event.preventDefault();
+          const route = target.getAttribute('data-route') || target.getAttribute('href')?.replace('#', '');
+          if (route) {
+            // Dispatch navigation event
+            const navEvent = new CustomEvent('pageMentionClick', { 
+              detail: { route } 
+            });
+            window.dispatchEvent(navEvent);
+          }
+          return true;
+        }
+        return false;
       },
     },
   });
+
+  // Listen for navigation events
+  useEffect(() => {
+    const handleNavigation = (event) => {
+      const route = event.detail?.route;
+      if (route) {
+        // Update current page in localStorage and trigger navigation
+        localStorage.setItem('idaic-current-page', route);
+        // Trigger a custom event that App.jsx can listen to
+        window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
+      }
+    };
+
+    window.addEventListener('pageMentionClick', handleNavigation);
+    return () => {
+      window.removeEventListener('pageMentionClick', handleNavigation);
+    };
+  }, []);
 
   // Fetch current content
   const fetchContent = async () => {

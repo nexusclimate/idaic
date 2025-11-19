@@ -38,6 +38,26 @@ export default function Members() {
     return false;
   };
 
+  // Helper function to determine if an organization is from MENA
+  const isMENAMember = (org) => {
+    // Check if organization has a region field
+    if (org.region) {
+      return org.region === 'MENA' || org.region === 'UAE';
+    }
+    // Otherwise, try to determine from location field
+    if (org.location) {
+      const locationUpper = org.location.toUpperCase();
+      return locationUpper.includes('MENA') || 
+             locationUpper.includes('MIDDLE EAST') || 
+             locationUpper.includes('NORTH AFRICA') ||
+             locationUpper.includes('UAE') ||
+             locationUpper.includes('UNITED ARAB EMIRATES') ||
+             locationUpper.includes('DUBAI') ||
+             locationUpper.includes('ABU DHABI');
+    }
+    return false;
+  };
+
   // Fetch organizations with logos from database
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -99,12 +119,15 @@ export default function Members() {
       });
     } else if (sortBy === 'founding') {
       // Founding members first (sorted by earliest uploaded logo), then others
-      // Separate founding members into UK and non-UK, and non-founding members
+      // Separate founding members into UK, MENA, and others
       const ukFoundingMembers = filteredOrganizations.filter(org => 
         org.founding_member === true && isUKMember(org)
       );
+      const menaFoundingMembers = filteredOrganizations.filter(org => 
+        org.founding_member === true && !isUKMember(org) && isMENAMember(org)
+      );
       const otherFoundingMembers = filteredOrganizations.filter(org => 
-        org.founding_member === true && !isUKMember(org)
+        org.founding_member === true && !isUKMember(org) && !isMENAMember(org)
       );
       const nonFoundingMembers = filteredOrganizations.filter(org => org.founding_member !== true);
       
@@ -116,11 +139,12 @@ export default function Members() {
       };
       
       ukFoundingMembers.sort(sortByDate);
+      menaFoundingMembers.sort(sortByDate);
       otherFoundingMembers.sort(sortByDate);
       nonFoundingMembers.sort(sortByDate);
       
-      // Combine: UK founding members first (top row), then other founding members (second row), then non-founding members
-      sorted = [...ukFoundingMembers, ...otherFoundingMembers, ...nonFoundingMembers];
+      // Combine: UK founding members first (top row), then MENA founding members (second row), then other founding members, then non-founding members
+      sorted = [...ukFoundingMembers, ...menaFoundingMembers, ...otherFoundingMembers, ...nonFoundingMembers];
     }
     setSortedOrganizations(sorted);
   }, [filteredOrganizations, sortBy]);
@@ -270,15 +294,16 @@ export default function Members() {
               {sortedOrganizations.map((org, index) => {
                 const isSelected = selectedOrgId === org.id && drawerOpen;
                 // Check if we need to add a divider: 
-                // 1. Between UK founding members and other founding members
-                // 2. Between founding members and non-founding members
+                // 1. Between UK founding members and MENA founding members
+                // 2. After MENA founding members (before other founding members or non-founding members)
                 const prevOrg = index > 0 ? sortedOrganizations[index - 1] : null;
                 const showDivider = sortBy === 'founding' && prevOrg && (
-                  // Divider between UK founding and other founding members
+                  // Divider between UK founding and MENA founding members
                   (isUKMember(prevOrg) && prevOrg.founding_member === true && 
-                   !isUKMember(org) && org.founding_member === true) ||
-                  // Divider between founding members and non-founding members
-                  (prevOrg.founding_member === true && org.founding_member !== true)
+                   isMENAMember(org) && org.founding_member === true) ||
+                  // Divider after MENA founding members (before other founding members or non-founding members)
+                  (isMENAMember(prevOrg) && prevOrg.founding_member === true && 
+                   (!isMENAMember(org) || org.founding_member !== true))
                 );
                 
                 return (

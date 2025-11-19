@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { PageMention } from '../extensions/PageMention';
 import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 
@@ -23,13 +24,23 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
             class: 'list-disc list-outside space-y-1 ml-4',
           },
         },
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'page-mention-link',
+          },
+        },
       }),
+      PageMention,
     ],
     editable: true,
     content: content?.content || '<ul><li>Activity item 1</li><li>Activity item 2</li><li>Activity item 3</li></ul>',
     editorProps: {
       attributes: {
         class: 'prose max-w-none focus:outline-none min-h-[100px] text-gray-900',
+        style: `
+          & a[data-mention="true"] { color: #ea580c; font-weight: 500; cursor: pointer; text-decoration: underline; }
+        `
       },
       handleKeyDown: (view, event) => {
         // Enable keyboard shortcuts for bullet lists
@@ -41,8 +52,42 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
         }
         return false;
       },
+      handleClick: (view, pos, event) => {
+        const target = event.target;
+        if (target.tagName === 'A' && target.getAttribute('data-mention') === 'true') {
+          event.preventDefault();
+          const route = target.getAttribute('data-route') || target.getAttribute('href')?.replace('#', '');
+          if (route) {
+            // Dispatch navigation event
+            const navEvent = new CustomEvent('pageMentionClick', { 
+              detail: { route } 
+            });
+            window.dispatchEvent(navEvent);
+          }
+          return true;
+        }
+        return false;
+      },
     },
   });
+
+  // Listen for navigation events
+  useEffect(() => {
+    const handleNavigation = (event) => {
+      const route = event.detail?.route;
+      if (route) {
+        // Update current page in localStorage and trigger navigation
+        localStorage.setItem('idaic-current-page', route);
+        // Trigger a custom event that App.jsx can listen to
+        window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
+      }
+    };
+
+    window.addEventListener('pageMentionClick', handleNavigation);
+    return () => {
+      window.removeEventListener('pageMentionClick', handleNavigation);
+    };
+  }, []);
 
   // Fetch current content
   const fetchContent = async () => {
