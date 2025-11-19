@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { colors, font, form as formConfig } from '../config/colors';
+import LinkableTextarea from '../components/LinkableTextarea';
 
-export default function FeedbackForm() {
+export default function FeedbackForm({ onNavigate }) {
   const [status, setStatus] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [comment, setComment] = useState('');
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -80,7 +82,7 @@ export default function FeedbackForm() {
         email: form.email.value,
         subject: form.subject.value,
         type: form.type.value,
-        comment: form.comment.value,
+        comment: comment || form.comment?.value || '',
         attachments: attachmentUrls // Pass attachment URLs
       };
 
@@ -99,6 +101,7 @@ export default function FeedbackForm() {
         setStatus(successMessage);
         form.reset();
         setSelectedFiles([]);
+        setComment('');
       } else {
         let errorText = 'Oops, something went wrong.';
         try {
@@ -219,8 +222,17 @@ export default function FeedbackForm() {
             <label htmlFor="comment" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
               Add your comment
             </label>
-            <textarea
-              id="comment" name="comment" rows="4" required
+            <LinkableTextarea
+              id="comment"
+              name="comment"
+              rows="4"
+              required
+              value={comment}
+              onChange={(e) => {
+                setComment(e.target.value);
+              }}
+              onNavigate={onNavigate}
+              showPreview={true}
               className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
@@ -231,6 +243,7 @@ export default function FeedbackForm() {
               }}
               onFocus={e => e.target.style.outlineColor = formConfig.focus}
               onBlur={e => e.target.style.outlineColor = ''}
+              placeholder="Type @ followed by a page name (e.g., @Feedback) to create a link"
             />
           </div>
 

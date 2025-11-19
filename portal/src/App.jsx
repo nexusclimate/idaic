@@ -331,6 +331,10 @@ export default function App() {
           isAdminAuthenticated={isAdminAuthenticated}
           setIsAdminAuthenticated={setIsAdminAuthenticated}
           user={user}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+            localStorage.setItem('idaic-current-page', page);
+          }}
         />
       </main>
     </div>

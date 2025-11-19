@@ -12,7 +12,7 @@ import Admin from '../pages/Admin';
 import Settings from '../pages/Settings';
 import Projects from '../pages/projects';
 
-export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated, user }) {
+export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated, user, onPageChange }) {
   const handleIframeLoad = (title) => {
     console.log(`Iframe loaded successfully: ${title}`);
   };
@@ -89,7 +89,7 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
             </div>
           );
     case 'feedback':
-      return <Feedback />;
+      return <Feedback onNavigate={onPageChange} />;
     case 'changelog':
       return (
         <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>

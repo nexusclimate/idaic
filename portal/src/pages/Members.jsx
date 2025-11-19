@@ -19,6 +19,25 @@ export default function Members() {
   const [sortBy, setSortBy] = useState('alphabetical'); // 'latest', 'founding', or 'alphabetical'
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Helper function to determine if an organization is from the UK
+  const isUKMember = (org) => {
+    // Check if organization has a region field
+    if (org.region) {
+      return org.region === 'UK';
+    }
+    // Otherwise, try to determine from location field
+    if (org.location) {
+      const locationUpper = org.location.toUpperCase();
+      return locationUpper.includes('UK') || 
+             locationUpper.includes('UNITED KINGDOM') || 
+             locationUpper.includes('LONDON') || 
+             locationUpper.includes('ENGLAND') || 
+             locationUpper.includes('SCOTLAND') || 
+             locationUpper.includes('WALES');
+    }
+    return false;
+  };
+
   // Fetch organizations with logos from database
   useEffect(() => {
     const fetchOrganizations = async () => {
@@ -80,8 +99,13 @@ export default function Members() {
       });
     } else if (sortBy === 'founding') {
       // Founding members first (sorted by earliest uploaded logo), then others
-      // Separate founding and non-founding members
-      const foundingMembers = filteredOrganizations.filter(org => org.founding_member === true);
+      // Separate founding members into UK and non-UK, and non-founding members
+      const ukFoundingMembers = filteredOrganizations.filter(org => 
+        org.founding_member === true && isUKMember(org)
+      );
+      const otherFoundingMembers = filteredOrganizations.filter(org => 
+        org.founding_member === true && !isUKMember(org)
+      );
       const nonFoundingMembers = filteredOrganizations.filter(org => org.founding_member !== true);
       
       // Sort each group by updated_at ASC - earliest uploaded logos appear first
@@ -91,11 +115,12 @@ export default function Members() {
         return dateA - dateB; // Ascending order (oldest first)
       };
       
-      foundingMembers.sort(sortByDate);
+      ukFoundingMembers.sort(sortByDate);
+      otherFoundingMembers.sort(sortByDate);
       nonFoundingMembers.sort(sortByDate);
       
-      // Combine: founding members first, then non-founding members
-      sorted = [...foundingMembers, ...nonFoundingMembers];
+      // Combine: UK founding members first (top row), then other founding members (second row), then non-founding members
+      sorted = [...ukFoundingMembers, ...otherFoundingMembers, ...nonFoundingMembers];
     }
     setSortedOrganizations(sorted);
   }, [filteredOrganizations, sortBy]);
@@ -244,12 +269,17 @@ export default function Members() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {sortedOrganizations.map((org, index) => {
                 const isSelected = selectedOrgId === org.id && drawerOpen;
-                // Check if we need to add a divider: previous was founding, current is not
+                // Check if we need to add a divider: 
+                // 1. Between UK founding members and other founding members
+                // 2. Between founding members and non-founding members
                 const prevOrg = index > 0 ? sortedOrganizations[index - 1] : null;
-                const showDivider = sortBy === 'founding' && 
-                                  prevOrg && 
-                                  prevOrg.founding_member === true && 
-                                  org.founding_member !== true;
+                const showDivider = sortBy === 'founding' && prevOrg && (
+                  // Divider between UK founding and other founding members
+                  (isUKMember(prevOrg) && prevOrg.founding_member === true && 
+                   !isUKMember(org) && org.founding_member === true) ||
+                  // Divider between founding members and non-founding members
+                  (prevOrg.founding_member === true && org.founding_member !== true)
+                );
                 
                 return (
                   <Fragment key={org.id}>
