@@ -38,7 +38,14 @@ const MentionList = React.forwardRef((props, ref) => {
   }
 
   return (
-    <div className="mention-suggestions bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto min-w-[200px] z-50">
+    <div 
+      className="mention-suggestions bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto min-w-[200px] z-50"
+      style={{ 
+        position: 'relative',
+        display: 'block',
+        visibility: 'visible'
+      }}
+    >
       {items.map((item, index) => (
         <div
           key={item.id}
@@ -46,6 +53,10 @@ const MentionList = React.forwardRef((props, ref) => {
             index === selectedIndex ? 'bg-gray-100' : ''
           } hover:bg-gray-100`}
           onClick={() => selectItem(index)}
+          onMouseDown={(e) => {
+            e.preventDefault(); // Prevent losing focus
+            selectItem(index);
+          }}
         >
           <span className="font-medium text-gray-900">@{item.label}</span>
         </div>
@@ -93,12 +104,13 @@ export const PageMention = Extension.create({
             if (meta && meta.selectedIndex !== undefined && value) {
               return { ...value, selectedIndex: meta.selectedIndex };
             }
+            
             const { selection } = newState;
             const { $from } = selection;
             const cursorPos = $from.pos;
             
-            // Get text from a reasonable range before cursor (up to 50 chars back)
-            const startLookback = Math.max(0, cursorPos - 50);
+            // Get text from a reasonable range before cursor (up to 100 chars back for better detection)
+            const startLookback = Math.max(0, cursorPos - 100);
             const textBefore = newState.doc.textBetween(startLookback, cursorPos, ' ', '');
             
             // Find the last @ symbol in the text before cursor
@@ -135,6 +147,11 @@ export const PageMention = Extension.create({
                 label: page,
                 route: PAGE_MAP[page] || null,
               }));
+            
+            // Debug logging
+            if (items.length > 0) {
+              console.log('PageMention apply: found @, items:', items.length, 'query:', query);
+            }
             
             return {
               active: items.length > 0,
@@ -231,6 +248,7 @@ export const PageMention = Extension.create({
           let component = null;
           let container = null;
           let updateTimeout = null;
+          let isRaf = false;
           
           // Capture pluginKey in closure
           const key = pluginKey;
@@ -238,7 +256,12 @@ export const PageMention = Extension.create({
           const update = (view, prevState) => {
             // Clear any pending updates
             if (updateTimeout) {
-              clearTimeout(updateTimeout);
+              if (isRaf) {
+                cancelAnimationFrame(updateTimeout);
+              } else {
+                clearTimeout(updateTimeout);
+              }
+              updateTimeout = null;
             }
             
             // Ensure we have a valid view and state
@@ -252,7 +275,8 @@ export const PageMention = Extension.create({
               return;
             }
             
-            updateTimeout = setTimeout(() => {
+            // Use requestAnimationFrame for better performance, but also allow immediate execution
+            const executeUpdate = () => {
               try {
                 // Ensure view and state are still valid
                 if (!view || !view.state) {
@@ -270,6 +294,11 @@ export const PageMention = Extension.create({
                 // Safety check
                 if (!pluginState) {
                   return;
+                }
+                
+                // Debug logging (can be removed later)
+                if (pluginState.active) {
+                  console.log('PageMention active:', pluginState.items.length, 'items');
                 }
               
               if (!pluginState.active) {
@@ -311,10 +340,17 @@ export const PageMention = Extension.create({
               }
 
               if (!container) {
+                console.log('Creating new container for dropdown');
                 container = document.createElement('div');
                 container.style.position = 'fixed';
-                container.style.zIndex = '9999';
+                container.style.zIndex = '99999';
+                container.style.display = 'block';
+                container.style.visibility = 'visible';
+                container.style.pointerEvents = 'auto';
                 document.body.appendChild(container);
+                console.log('Container created and appended to body:', container);
+              } else {
+                console.log('Using existing container');
               }
 
               const command = (item) => {
@@ -351,33 +387,79 @@ export const PageMention = Extension.create({
               };
 
               if (!component) {
-                component = new ReactRenderer(MentionList, {
-                  props: {
+                try {
+                  console.log('Creating new ReactRenderer with', pluginState.items.length, 'items');
+                  component = new ReactRenderer(MentionList, {
+                    props: {
+                      items: pluginState.items,
+                      selectedIndex: pluginState.selectedIndex,
+                      command,
+                    },
+                    editor: view,
+                  });
+                  
+                  if (!component || !component.element) {
+                    console.error('ReactRenderer failed to create component or element');
+                    return;
+                  }
+                  
+                  console.log('ReactRenderer created, element:', component.element);
+                  container.appendChild(component.element);
+                  console.log('Component appended to container');
+                } catch (renderErr) {
+                  console.error('Error creating ReactRenderer:', renderErr);
+                  return;
+                }
+              } else {
+                try {
+                  console.log('Updating existing component with', pluginState.items.length, 'items');
+                  component.updateProps({
                     items: pluginState.items,
                     selectedIndex: pluginState.selectedIndex,
                     command,
-                  },
-                  editor: view,
-                });
-                container.appendChild(component.element);
-              } else {
-                component.updateProps({
-                  items: pluginState.items,
-                  selectedIndex: pluginState.selectedIndex,
-                  command,
-                });
+                  });
+                } catch (updateErr) {
+                  console.error('Error updating component props:', updateErr);
+                }
               }
 
-                // Position the dropdown
-                const { from } = pluginState.range;
+              // Position the dropdown
+              const { from } = pluginState.range;
+              try {
                 const coords = view.coordsAtPos(from);
-                container.style.top = `${coords.bottom + window.scrollY + 5}px`;
-                container.style.left = `${coords.left + window.scrollX}px`;
+                if (coords) {
+                  container.style.top = `${coords.bottom + window.scrollY + 5}px`;
+                  container.style.left = `${coords.left + window.scrollX}px`;
+                  container.style.display = 'block';
+                  container.style.visibility = 'visible';
+                  console.log('Dropdown positioned at:', coords.bottom, coords.left);
+                  console.log('Container styles:', {
+                    top: container.style.top,
+                    left: container.style.left,
+                    display: container.style.display,
+                    visibility: container.style.visibility,
+                    zIndex: container.style.zIndex
+                  });
+                } else {
+                  console.warn('No coordinates returned from coordsAtPos');
+                }
+              } catch (posErr) {
+                console.error('Error positioning dropdown:', posErr);
+              }
               } catch (error) {
                 console.error('Error in PageMention update:', error);
                 // Silently fail to prevent breaking the editor
               }
-            }, 0);
+            };
+            
+            // Use requestAnimationFrame for smoother updates, but with immediate fallback
+            if (typeof requestAnimationFrame !== 'undefined') {
+              updateTimeout = requestAnimationFrame(executeUpdate);
+              isRaf = true;
+            } else {
+              updateTimeout = setTimeout(executeUpdate, 0);
+              isRaf = false;
+            }
           };
 
           // Don't call update initially - let ProseMirror call it when needed
@@ -387,7 +469,11 @@ export const PageMention = Extension.create({
             update,
             destroy() {
               if (updateTimeout) {
-                clearTimeout(updateTimeout);
+                if (isRaf) {
+                  cancelAnimationFrame(updateTimeout);
+                } else {
+                  clearTimeout(updateTimeout);
+                }
               }
               if (component) {
                 try {
