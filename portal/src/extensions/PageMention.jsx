@@ -86,20 +86,28 @@ export const PageMention = Extension.create({
             const { selection } = newState;
             const { $from } = selection;
             
-            // Get text before cursor
-            const textBefore = $from.nodeBefore?.textContent || '';
-            const textNode = $from.nodeBefore;
-            const offset = textNode ? $from.parentOffset - (textNode.textContent?.length || 0) : 0;
+            // Get text from the start of the current node to the cursor
+            const textBefore = $from.parent.textBetween(
+              Math.max(0, $from.parentOffset - 50),
+              $from.parentOffset,
+              ' ',
+              0
+            );
             
             // Check for @ mention
             const lastAt = textBefore.lastIndexOf('@');
             
-            if (lastAt === -1 || offset < 0) {
+            if (lastAt === -1) {
               return { active: false, range: null, query: null, items: [], selectedIndex: 0 };
             }
 
-            const query = textBefore.substring(lastAt + 1);
-            if (query.length === 0 || query.includes(' ') || query.includes('\n')) {
+            // Get the text after @
+            const afterAt = textBefore.substring(lastAt + 1);
+            // Check if there's a space or newline (which would end the mention)
+            const spaceIndex = afterAt.search(/[\s\n]/);
+            const query = spaceIndex === -1 ? afterAt : afterAt.substring(0, spaceIndex);
+            
+            if (query.length === 0) {
               return { active: false, range: null, query: null, items: [], selectedIndex: 0 };
             }
 
@@ -113,6 +121,7 @@ export const PageMention = Extension.create({
                 route: PAGE_MAP[page] || null,
               }));
 
+            // Calculate the start position of the @ mention
             const startPos = $from.pos - query.length - 1;
             
             return {
