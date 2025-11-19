@@ -294,13 +294,9 @@ export default function Members() {
               {sortedOrganizations.map((org, index) => {
                 const isSelected = selectedOrgId === org.id && drawerOpen;
                 // Check if we need to add a divider: 
-                // 1. Between UK founding members and MENA founding members
-                // 2. After MENA founding members (before other founding members or non-founding members)
+                // Only show divider after MENA founding members (before other founding members or non-founding members)
                 const prevOrg = index > 0 ? sortedOrganizations[index - 1] : null;
                 const showDivider = sortBy === 'founding' && prevOrg && (
-                  // Divider between UK founding and MENA founding members
-                  (isUKMember(prevOrg) && prevOrg.founding_member === true && 
-                   isMENAMember(org) && org.founding_member === true) ||
                   // Divider after MENA founding members (before other founding members or non-founding members)
                   (isMENAMember(prevOrg) && prevOrg.founding_member === true && 
                    (!isMENAMember(org) || org.founding_member !== true))
