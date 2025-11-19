@@ -346,15 +346,51 @@ export default function RichTextSection({ section, isAdmin = false }) {
                           e.preventDefault();
                           const route = PAGE_MAP[page];
                           if (editor && route) {
-                            // Insert the mention as a link
-                            const { from, to } = editor.state.selection;
-                            const text = `@${page}`;
+                            // Insert the mention as a link using ProseMirror transaction (like PageMention extension)
+                            const { state, view } = editor;
+                            const { from, to } = state.selection;
+                            const text = `@${page} `;
+                            const linkMark = state.schema.marks.link;
                             
-                            editor.chain()
-                              .focus()
-                              .deleteRange({ from, to })
-                              .insertContent(`<a href="#${route}" data-route="${route}" data-mention="true">${text}</a> `)
-                              .run();
+                            if (linkMark) {
+                              const tr = state.tr
+                                .delete(from, to)
+                                .insertText(text, from)
+                                .addMark(
+                                  from,
+                                  from + text.length - 1, // -1 to exclude the trailing space
+                                  linkMark.create({
+                                    href: `#${route}`,
+                                  })
+                                );
+                              
+                              view.dispatch(tr);
+                              
+                              // Add data attributes to the DOM element
+                              setTimeout(() => {
+                                const domNode = view.domAtPos(from);
+                                if (domNode && domNode.node) {
+                                  let linkElement = null;
+                                  if (domNode.node.nodeType === Node.TEXT_NODE && domNode.node.parentElement) {
+                                    linkElement = domNode.node.parentElement.closest('a');
+                                  } else if (domNode.node.nodeType === Node.ELEMENT_NODE) {
+                                    linkElement = domNode.node.closest('a');
+                                  }
+                                  
+                                  if (linkElement) {
+                                    linkElement.setAttribute('data-route', route);
+                                    linkElement.setAttribute('data-mention', 'true');
+                                  }
+                                }
+                              }, 10);
+                            } else {
+                              // Fallback if link mark doesn't exist
+                              editor.chain()
+                                .focus()
+                                .deleteRange({ from, to })
+                                .insertContent(text)
+                                .run();
+                            }
                             
                             setShowPageMentionDropdown(false);
                           }
