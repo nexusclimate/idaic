@@ -3,7 +3,7 @@ import { Button } from './button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
-import { PageMention } from '../extensions/PageMention';
+// import { PageMention } from '../extensions/PageMention';
 import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../config/supabase';
@@ -31,7 +31,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
         },
       }),
       Underline,
-      PageMention,
+      // PageMention,
     ],
     editable: true,
     content: content?.content || '',
@@ -65,22 +65,22 @@ export default function RichTextSection({ section, isAdmin = false }) {
   });
 
   // Listen for navigation events
-  useEffect(() => {
-    const handleNavigation = (event) => {
-      const route = event.detail?.route;
-      if (route) {
-        // Update current page in localStorage and trigger navigation
-        localStorage.setItem('idaic-current-page', route);
-        // Trigger a custom event that App.jsx can listen to
-        window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
-      }
-    };
+  // useEffect(() => {
+  //   const handleNavigation = (event) => {
+  //     const route = event.detail?.route;
+  //     if (route) {
+  //       // Update current page in localStorage and trigger navigation
+  //       localStorage.setItem('idaic-current-page', route);
+  //       // Trigger a custom event that App.jsx can listen to
+  //       window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
+  //     }
+  //   };
 
-    window.addEventListener('pageMentionClick', handleNavigation);
-    return () => {
-      window.removeEventListener('pageMentionClick', handleNavigation);
-    };
-  }, []);
+  //   window.addEventListener('pageMentionClick', handleNavigation);
+  //   return () => {
+  //     window.removeEventListener('pageMentionClick', handleNavigation);
+  //   };
+  // }, []);
 
   // Fetch current content
   const fetchContent = async () => {

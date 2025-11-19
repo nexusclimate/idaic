@@ -126,13 +126,14 @@ export const PageMention = Extension.create({
         },
         props: {
           handleKeyDown(view, event) {
-            const pluginState = this.getState(view.state);
+            const plugin = this;
+            const pluginState = plugin.getState(view.state);
             if (!pluginState.active) return false;
 
             if (event.key === 'ArrowDown') {
               event.preventDefault();
               const newIndex = (pluginState.selectedIndex + 1) % pluginState.items.length;
-              this.setMeta('pageMention', {
+              plugin.setMeta('pageMention', {
                 ...pluginState,
                 selectedIndex: newIndex,
               });
@@ -142,7 +143,7 @@ export const PageMention = Extension.create({
             if (event.key === 'ArrowUp') {
               event.preventDefault();
               const newIndex = (pluginState.selectedIndex + pluginState.items.length - 1) % pluginState.items.length;
-              this.setMeta('pageMention', {
+              plugin.setMeta('pageMention', {
                 ...pluginState,
                 selectedIndex: newIndex,
               });
@@ -196,7 +197,7 @@ export const PageMention = Extension.create({
 
             if (event.key === 'Escape') {
               event.preventDefault();
-              this.setMeta('pageMention', {
+              plugin.setMeta('pageMention', {
                 active: false,
                 range: null,
                 query: null,
@@ -210,11 +211,12 @@ export const PageMention = Extension.create({
           },
         },
         view(editorView) {
+          const plugin = this;
           let component = null;
           let container = null;
 
           const update = () => {
-            const pluginState = this.getState(editorView.state);
+            const pluginState = plugin.getState(editorView.state);
             
             if (!pluginState.active) {
               if (component) {
@@ -265,7 +267,7 @@ export const PageMention = Extension.create({
               }
               
               // Close suggestions
-              this.setMeta('pageMention', {
+              plugin.setMeta('pageMention', {
                 active: false,
                 range: null,
                 query: null,

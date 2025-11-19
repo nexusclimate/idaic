@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from './button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { PageMention } from '../extensions/PageMention';
+// import { PageMention } from '../extensions/PageMention';
 import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 
@@ -31,7 +31,7 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
           },
         },
       }),
-      PageMention,
+      // PageMention,
     ],
     editable: true,
     content: content?.content || '<ul><li>Activity item 1</li><li>Activity item 2</li><li>Activity item 3</li></ul>',
@@ -72,22 +72,22 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
   });
 
   // Listen for navigation events
-  useEffect(() => {
-    const handleNavigation = (event) => {
-      const route = event.detail?.route;
-      if (route) {
-        // Update current page in localStorage and trigger navigation
-        localStorage.setItem('idaic-current-page', route);
-        // Trigger a custom event that App.jsx can listen to
-        window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
-      }
-    };
+  // useEffect(() => {
+  //   const handleNavigation = (event) => {
+  //     const route = event.detail?.route;
+  //     if (route) {
+  //       // Update current page in localStorage and trigger navigation
+  //       localStorage.setItem('idaic-current-page', route);
+  //       // Trigger a custom event that App.jsx can listen to
+  //       window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
+  //     }
+  //   };
 
-    window.addEventListener('pageMentionClick', handleNavigation);
-    return () => {
-      window.removeEventListener('pageMentionClick', handleNavigation);
-    };
-  }, []);
+  //   window.addEventListener('pageMentionClick', handleNavigation);
+  //   return () => {
+  //     window.removeEventListener('pageMentionClick', handleNavigation);
+  //   };
+  // }, []);
 
   // Fetch current content
   const fetchContent = async () => {
