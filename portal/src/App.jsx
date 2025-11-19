@@ -28,7 +28,9 @@ export default function App() {
   useEffect(() => {
     const handleNavigateToPage = (event) => {
       const page = event.detail?.page;
+      console.log('App.jsx received navigateToPage event, page:', page);
       if (page) {
+        console.log('Setting current page to:', page);
         setCurrentPage(page);
         localStorage.setItem('idaic-current-page', page);
       }

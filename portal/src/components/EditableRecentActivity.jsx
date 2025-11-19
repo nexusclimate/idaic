@@ -57,17 +57,26 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
       },
       handleClick: (view, pos, event) => {
         const target = event.target;
-        if (target.tagName === 'A' && target.getAttribute('data-mention') === 'true') {
-          event.preventDefault();
-          const route = target.getAttribute('data-route') || target.getAttribute('href')?.replace('#', '');
-          if (route) {
-            // Dispatch navigation event
-            const navEvent = new CustomEvent('pageMentionClick', { 
-              detail: { route } 
-            });
-            window.dispatchEvent(navEvent);
+        // Check if clicked on a link (mention or regular)
+        const linkElement = target.closest('a');
+        if (linkElement) {
+          const linkText = linkElement.textContent.trim();
+          // If it's a mention (starts with @) or has data-mention attribute
+          if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
+            event.preventDefault();
+            event.stopPropagation();
+            const route = linkElement.getAttribute('data-route') || 
+                         linkElement.getAttribute('href')?.replace('#', '');
+            if (route) {
+              console.log('Navigating to page:', route);
+              // Dispatch navigation event
+              const navEvent = new CustomEvent('pageMentionClick', { 
+                detail: { route } 
+              });
+              window.dispatchEvent(navEvent);
+            }
+            return true;
           }
-          return true;
         }
         return false;
       },
@@ -78,10 +87,12 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
   useEffect(() => {
     const handleNavigation = (event) => {
       const route = event.detail?.route;
+      console.log('EditableRecentActivity received pageMentionClick event, route:', route);
       if (route) {
         // Update current page in localStorage and trigger navigation
         localStorage.setItem('idaic-current-page', route);
         // Trigger a custom event that App.jsx can listen to
+        console.log('Dispatching navigateToPage event with page:', route);
         window.dispatchEvent(new CustomEvent('navigateToPage', { detail: { page: route } }));
       }
     };
@@ -116,16 +127,24 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
             }
             link.style.cursor = 'pointer';
             
-            // Add click handler
-            link.onclick = (e) => {
+            // Add click handler - use capture phase to ensure it fires
+            const handleLinkClick = (e) => {
               e.preventDefault();
               e.stopPropagation();
+              console.log('Link onclick - Navigating to page:', route);
               const navEvent = new CustomEvent('pageMentionClick', { 
                 detail: { route } 
               });
               window.dispatchEvent(navEvent);
               return false;
             };
+            
+            // Remove old listener if exists
+            link.removeEventListener('click', handleLinkClick, true);
+            // Add new listener in capture phase
+            link.addEventListener('click', handleLinkClick, true);
+            // Also set onclick as backup
+            link.onclick = handleLinkClick;
           }
         }
       });
@@ -134,16 +153,19 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
     const handleEditorClick = (event) => {
       const target = event.target;
       // Check if clicked element is a link
-      const linkElement = target.closest('a[href^="#"]');
+      const linkElement = target.closest('a');
       if (linkElement) {
+        const href = linkElement.getAttribute('href');
         const linkText = linkElement.textContent.trim();
-        // Check if it's a mention (starts with @)
-        if (linkText.startsWith('@')) {
+        
+        // Check if it's a mention (starts with @) or has data-mention
+        if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
           event.preventDefault();
           event.stopPropagation();
           const route = linkElement.getAttribute('data-route') || 
-                       linkElement.getAttribute('href')?.replace('#', '');
+                       (href ? href.replace('#', '') : null);
           if (route) {
+            console.log('Editor click - Navigating to page:', route);
             // Dispatch navigation event
             const navEvent = new CustomEvent('pageMentionClick', { 
               detail: { route } 
