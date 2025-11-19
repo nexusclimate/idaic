@@ -85,35 +85,94 @@ export default function RichTextSection({ section, isAdmin = false }) {
     };
   }, []);
 
-  // Add click listener directly to editor content for page mentions
+  // Add click listener and ensure all mention links are clickable
   useEffect(() => {
     if (!editor) return;
 
+    const setupMentionLinks = () => {
+      const editorElement = editor.view.dom;
+      const allLinks = editorElement.querySelectorAll('a[href^="#"]');
+      
+      allLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          const route = href.replace('#', '');
+          // Check if this looks like a page mention (starts with @)
+          const linkText = link.textContent.trim();
+          if (linkText.startsWith('@')) {
+            // Ensure data attributes are set
+            if (!link.getAttribute('data-route')) {
+              link.setAttribute('data-route', route);
+            }
+            if (!link.getAttribute('data-mention')) {
+              link.setAttribute('data-mention', 'true');
+            }
+            link.style.cursor = 'pointer';
+            
+            // Add click handler
+            link.onclick = (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const navEvent = new CustomEvent('pageMentionClick', { 
+                detail: { route } 
+              });
+              window.dispatchEvent(navEvent);
+              return false;
+            };
+          }
+        }
+      });
+    };
+
     const handleEditorClick = (event) => {
       const target = event.target;
-      // Check if clicked element is a link with data-mention attribute
-      const linkElement = target.closest('a[data-mention="true"]');
+      // Check if clicked element is a link
+      const linkElement = target.closest('a[href^="#"]');
       if (linkElement) {
-        event.preventDefault();
-        event.stopPropagation();
-        const route = linkElement.getAttribute('data-route') || 
-                     linkElement.getAttribute('href')?.replace('#', '');
-        if (route) {
-          // Dispatch navigation event
-          const navEvent = new CustomEvent('pageMentionClick', { 
-            detail: { route } 
-          });
-          window.dispatchEvent(navEvent);
+        const linkText = linkElement.textContent.trim();
+        // Check if it's a mention (starts with @)
+        if (linkText.startsWith('@')) {
+          event.preventDefault();
+          event.stopPropagation();
+          const route = linkElement.getAttribute('data-route') || 
+                       linkElement.getAttribute('href')?.replace('#', '');
+          if (route) {
+            // Dispatch navigation event
+            const navEvent = new CustomEvent('pageMentionClick', { 
+              detail: { route } 
+            });
+            window.dispatchEvent(navEvent);
+          }
+          return false;
         }
-        return false;
       }
     };
 
     const editorElement = editor.view.dom;
     editorElement.addEventListener('click', handleEditorClick, true);
     
+    // Setup links initially
+    setupMentionLinks();
+    
+    // Watch for content changes and setup new links
+    const observer = new MutationObserver(() => {
+      setupMentionLinks();
+    });
+    
+    observer.observe(editorElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['href', 'data-route', 'data-mention']
+    });
+    
+    // Also setup links when editor content updates
+    editor.on('update', setupMentionLinks);
+    
     return () => {
       editorElement.removeEventListener('click', handleEditorClick, true);
+      observer.disconnect();
+      editor.off('update', setupMentionLinks);
     };
   }, [editor]);
 
