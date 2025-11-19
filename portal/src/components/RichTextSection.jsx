@@ -31,6 +31,8 @@ export default function RichTextSection({ section, isAdmin = false }) {
           HTMLAttributes: {
             class: 'page-mention-link',
           },
+          // Allow clicking on links
+          inclusive: false,
         },
       }),
       Underline,
@@ -121,9 +123,19 @@ export default function RichTextSection({ section, isAdmin = false }) {
       // Find ALL links, not just those with href starting with #
       const allLinks = editorElement.querySelectorAll('a');
       
-      allLinks.forEach(link => {
+      console.log('Setting up mention links, found', allLinks.length, 'links');
+      
+      allLinks.forEach((link, index) => {
         const href = link.getAttribute('href');
         const linkText = link.textContent.trim();
+        
+        console.log(`Link ${index}:`, {
+          text: linkText,
+          href: href,
+          hasDataRoute: !!link.getAttribute('data-route'),
+          hasDataMention: !!link.getAttribute('data-mention'),
+          tagName: link.tagName
+        });
         
         // Check if this looks like a page mention (starts with @)
         if (linkText.startsWith('@')) {
@@ -131,6 +143,8 @@ export default function RichTextSection({ section, isAdmin = false }) {
                        (href ? href.replace('#', '') : null);
           
           if (route) {
+            console.log('Setting up click handler for link:', linkText, 'route:', route);
+            
             // Ensure data attributes are set
             if (!link.getAttribute('data-route')) {
               link.setAttribute('data-route', route);
@@ -144,6 +158,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
             link.style.pointerEvents = 'auto';
             link.style.userSelect = 'none';
             link.style.textDecoration = 'underline';
+            link.style.color = '#ea580c';
             
             // Store route in a way we can access it
             if (!link.dataset.route) {
@@ -156,11 +171,20 @@ export default function RichTextSection({ section, isAdmin = false }) {
             // Create a unique handler function for this link
             const linkRoute = route; // Capture route in closure
             const handleLinkClick = (e) => {
+              console.log('=== LINK CLICKED ===', linkRoute, e);
               try {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
                 console.log('Link clicked directly - Navigating to page:', linkRoute);
+                
+                // Direct navigation
+                localStorage.setItem('idaic-current-page', linkRoute);
+                window.dispatchEvent(new CustomEvent('navigateToPage', { 
+                  detail: { page: linkRoute },
+                  bubbles: true
+                }));
+                
                 const navEvent = new CustomEvent('pageMentionClick', { 
                   detail: { route: linkRoute },
                   bubbles: true,
@@ -173,33 +197,42 @@ export default function RichTextSection({ section, isAdmin = false }) {
               return false;
             };
             
-            // Remove old handlers if they exist (by cloning without handlers)
-            const oldOnClick = link.onclick;
-            const oldOnMouseDown = link.onmousedown;
+            // Remove ALL existing listeners by cloning
+            const newLink = link.cloneNode(true);
+            link.parentNode?.replaceChild(newLink, link);
             
-            // Add new handlers - use capture phase
-            link.addEventListener('click', handleLinkClick, { capture: true, once: false });
-            link.addEventListener('mousedown', handleLinkClick, { capture: true, once: false });
+            // Add handlers to the new link
+            newLink.addEventListener('click', handleLinkClick, true);
+            newLink.addEventListener('mousedown', handleLinkClick, true);
+            newLink.onclick = handleLinkClick;
+            newLink.onmousedown = handleLinkClick;
             
-            // Also set as properties as backup
-            link.onclick = handleLinkClick;
-            link.onmousedown = handleLinkClick;
+            // Re-apply styles
+            newLink.style.cursor = 'pointer';
+            newLink.style.pointerEvents = 'auto';
+            newLink.style.userSelect = 'none';
+            newLink.style.textDecoration = 'underline';
+            newLink.style.color = '#ea580c';
           }
         }
       });
     };
 
     const handleEditorClick = (event) => {
+      console.log('Editor click detected, target:', event.target, event.target.tagName);
       try {
         const target = event.target;
         // Check if clicked element is a link or inside a link
         const linkElement = target.closest('a');
+        console.log('Closest link element:', linkElement);
         if (linkElement) {
           const href = linkElement.getAttribute('href');
           const linkText = linkElement.textContent.trim();
+          console.log('Link found:', { text: linkText, href: href, dataRoute: linkElement.getAttribute('data-route') });
           
           // Check if it's a mention (starts with @) or has data-mention
           if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
+            console.log('=== MENTION LINK CLICKED IN EDITOR ===');
             event.preventDefault();
             event.stopPropagation();
             event.stopImmediatePropagation();
@@ -207,6 +240,12 @@ export default function RichTextSection({ section, isAdmin = false }) {
                          (href ? href.replace('#', '') : null);
             if (route) {
               console.log('Editor click handler - Navigating to page:', route);
+              // Direct navigation
+              localStorage.setItem('idaic-current-page', route);
+              window.dispatchEvent(new CustomEvent('navigateToPage', { 
+                detail: { page: route },
+                bubbles: true
+              }));
               // Dispatch navigation event
               const navEvent = new CustomEvent('pageMentionClick', { 
                 detail: { route },
