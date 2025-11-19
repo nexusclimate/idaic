@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './button';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -7,6 +7,7 @@ import { PageMention } from '../extensions/PageMention';
 import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../config/supabase';
+import { getAvailablePages, PAGE_MAP } from '../utils/pageMentions';
 
 export default function RichTextSection({ section, isAdmin = false }) {
   const { user } = useUser();
@@ -16,6 +17,8 @@ export default function RichTextSection({ section, isAdmin = false }) {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showPageMentionDropdown, setShowPageMentionDropdown] = useState(false);
+  const mentionDropdownRef = useRef(null);
 
   const editor = useEditor({
     extensions: [
@@ -81,6 +84,22 @@ export default function RichTextSection({ section, isAdmin = false }) {
       window.removeEventListener('pageMentionClick', handleNavigation);
     };
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mentionDropdownRef.current && !mentionDropdownRef.current.contains(event.target)) {
+        setShowPageMentionDropdown(false);
+      }
+    };
+
+    if (showPageMentionDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showPageMentionDropdown]);
 
   // Fetch current content
   const fetchContent = async () => {
@@ -300,6 +319,53 @@ export default function RichTextSection({ section, isAdmin = false }) {
               >
                 •
               </button>
+              <div className="w-px h-6 my-auto bg-gray-200" />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPageMentionDropdown(!showPageMentionDropdown);
+                  }}
+                  className="px-2 py-1 rounded text-sm font-medium transition-colors text-gray-700 hover:bg-gray-100"
+                  title="Insert page mention"
+                >
+                  @
+                </button>
+                {showPageMentionDropdown && (
+                  <div
+                    ref={mentionDropdownRef}
+                    className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto min-w-[200px] z-50"
+                    style={{ maxHeight: '200px' }}
+                  >
+                    {getAvailablePages().map((page) => (
+                      <div
+                        key={page}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          const route = PAGE_MAP[page];
+                          if (editor && route) {
+                            // Insert the mention as a link
+                            const { from, to } = editor.state.selection;
+                            const text = `@${page}`;
+                            
+                            editor.chain()
+                              .focus()
+                              .deleteRange({ from, to })
+                              .insertContent(`<a href="#${route}" data-route="${route}" data-mention="true">${text}</a> `)
+                              .run();
+                            
+                            setShowPageMentionDropdown(false);
+                          }
+                        }}
+                      >
+                        <span className="font-medium text-gray-900">@{page}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           
