@@ -68,10 +68,10 @@ export const PageMention = Extension.create({
 
   addProseMirrorPlugins() {
     const extension = this;
+    const pluginKey = new PluginKey('pageMention');
     
-    return [
-      new Plugin({
-        key: new PluginKey('pageMention'),
+    const plugin = new Plugin({
+        key: pluginKey,
         state: {
           init() {
             return {
@@ -83,6 +83,16 @@ export const PageMention = Extension.create({
             };
           },
           apply(tr, value, oldState, newState) {
+            // Check if meta was set to close suggestions
+            const meta = tr.getMeta(pluginKey);
+            if (meta && meta.active === false) {
+              return { active: false, range: null, query: null, items: [], selectedIndex: 0 };
+            }
+            
+            // If meta was set with new selectedIndex, use it
+            if (meta && meta.selectedIndex !== undefined && value) {
+              return { ...value, selectedIndex: meta.selectedIndex };
+            }
             const { selection } = newState;
             const { $from } = selection;
             const cursorPos = $from.pos;
@@ -137,27 +147,28 @@ export const PageMention = Extension.create({
         },
         props: {
           handleKeyDown(view, event) {
-            const plugin = this;
-            const pluginState = plugin.getState(view.state);
+            const pluginState = pluginKey.getState(view.state);
             if (!pluginState.active) return false;
 
             if (event.key === 'ArrowDown') {
               event.preventDefault();
               const newIndex = (pluginState.selectedIndex + 1) % pluginState.items.length;
-              plugin.setMeta('pageMention', {
+              const tr = view.state.tr.setMeta(pluginKey, {
                 ...pluginState,
                 selectedIndex: newIndex,
               });
+              view.dispatch(tr);
               return true;
             }
 
             if (event.key === 'ArrowUp') {
               event.preventDefault();
               const newIndex = (pluginState.selectedIndex + pluginState.items.length - 1) % pluginState.items.length;
-              plugin.setMeta('pageMention', {
+              const tr = view.state.tr.setMeta(pluginKey, {
                 ...pluginState,
                 selectedIndex: newIndex,
               });
+              view.dispatch(tr);
               return true;
             }
 
@@ -194,27 +205,22 @@ export const PageMention = Extension.create({
                   );
                 }
                 
-                // Close suggestions
-                this.setMeta('pageMention', {
-                  active: false,
-                  range: null,
-                  query: null,
-                  items: [],
-                  selectedIndex: 0,
-                });
+                // Close suggestions - the transaction will trigger apply which will close it
+                // No need to manually set meta
               }
               return true;
             }
 
             if (event.key === 'Escape') {
               event.preventDefault();
-              plugin.setMeta('pageMention', {
+              const tr = view.state.tr.setMeta(pluginKey, {
                 active: false,
                 range: null,
                 query: null,
                 items: [],
                 selectedIndex: 0,
               });
+              view.dispatch(tr);
               return true;
             }
 
@@ -222,19 +228,49 @@ export const PageMention = Extension.create({
           },
         },
         view(editorView) {
-          const plugin = this;
           let component = null;
           let container = null;
           let updateTimeout = null;
+          
+          // Capture pluginKey in closure
+          const key = pluginKey;
 
-          const update = () => {
+          const update = (view, prevState) => {
             // Clear any pending updates
             if (updateTimeout) {
               clearTimeout(updateTimeout);
             }
             
+            // Ensure we have a valid view and state
+            // The first parameter should be the EditorView, not the plugin
+            if (!view || typeof view !== 'object' || !view.state) {
+              return;
+            }
+            
+            // Ensure pluginKey is available and has getState method
+            if (!key || typeof key.getState !== 'function') {
+              return;
+            }
+            
             updateTimeout = setTimeout(() => {
-              const pluginState = plugin.getState(editorView.state);
+              try {
+                // Ensure view and state are still valid
+                if (!view || !view.state) {
+                  return;
+                }
+                
+                // Ensure key still has getState method
+                if (!key || typeof key.getState !== 'function') {
+                  return;
+                }
+                
+                // Use the plugin key to get state from the view's state
+                const pluginState = key.getState(view.state);
+                
+                // Safety check
+                if (!pluginState) {
+                  return;
+                }
               
               if (!pluginState.active) {
                 if (component) {
@@ -259,10 +295,10 @@ export const PageMention = Extension.create({
                 const { range } = pluginState;
                 const { label, route } = item;
                 
-                const linkMark = editorView.state.schema.marks.link;
+                const linkMark = view.state.schema.marks.link;
                 if (linkMark) {
-                  editorView.dispatch(
-                    editorView.state.tr
+                  view.dispatch(
+                    view.state.tr
                       .delete(range.from, range.to)
                       .insertText(`@${label} `, range.from)
                       .addMark(
@@ -277,21 +313,15 @@ export const PageMention = Extension.create({
                   );
                 } else {
                   // Fallback: insert as text
-                  editorView.dispatch(
-                    editorView.state.tr
+                  view.dispatch(
+                    view.state.tr
                       .delete(range.from, range.to)
                       .insertText(`@${label} `, range.from)
                   );
                 }
                 
-                // Close suggestions
-                plugin.setMeta('pageMention', {
-                  active: false,
-                  range: null,
-                  query: null,
-                  items: [],
-                  selectedIndex: 0,
-                });
+                // Close suggestions - state will be updated by the apply function
+                // No need to manually set meta here as the transaction will trigger apply
               };
 
               if (!component) {
@@ -301,7 +331,7 @@ export const PageMention = Extension.create({
                     selectedIndex: pluginState.selectedIndex,
                     command,
                   },
-                  editor: editorView,
+                  editor: view,
                 });
                 container.appendChild(component.element);
               } else {
@@ -312,16 +342,20 @@ export const PageMention = Extension.create({
                 });
               }
 
-              // Position the dropdown
-              const { from } = pluginState.range;
-              const coords = editorView.coordsAtPos(from);
-              container.style.top = `${coords.bottom + window.scrollY + 5}px`;
-              container.style.left = `${coords.left + window.scrollX}px`;
+                // Position the dropdown
+                const { from } = pluginState.range;
+                const coords = view.coordsAtPos(from);
+                container.style.top = `${coords.bottom + window.scrollY + 5}px`;
+                container.style.left = `${coords.left + window.scrollX}px`;
+              } catch (error) {
+                console.error('Error in PageMention update:', error);
+                // Silently fail to prevent breaking the editor
+              }
             }, 0);
           };
 
-          // Initial update
-          update();
+          // Don't call update initially - let ProseMirror call it when needed
+          // The update function will be called by ProseMirror automatically
 
           return {
             update,
@@ -338,7 +372,8 @@ export const PageMention = Extension.create({
             },
           };
         },
-      }),
-    ];
+      });
+    
+    return [plugin];
   },
 });
