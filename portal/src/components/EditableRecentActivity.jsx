@@ -92,6 +92,38 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
     };
   }, []);
 
+  // Add click listener directly to editor content for page mentions
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleEditorClick = (event) => {
+      const target = event.target;
+      // Check if clicked element is a link with data-mention attribute
+      const linkElement = target.closest('a[data-mention="true"]');
+      if (linkElement) {
+        event.preventDefault();
+        event.stopPropagation();
+        const route = linkElement.getAttribute('data-route') || 
+                     linkElement.getAttribute('href')?.replace('#', '');
+        if (route) {
+          // Dispatch navigation event
+          const navEvent = new CustomEvent('pageMentionClick', { 
+            detail: { route } 
+          });
+          window.dispatchEvent(navEvent);
+        }
+        return false;
+      }
+    };
+
+    const editorElement = editor.view.dom;
+    editorElement.addEventListener('click', handleEditorClick, true);
+    
+    return () => {
+      editorElement.removeEventListener('click', handleEditorClick, true);
+    };
+  }, [editor]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -297,21 +329,29 @@ export default function EditableRecentActivity({ section, isAdminAuthenticated =
                               
                               // Add data attributes to the DOM element
                               setTimeout(() => {
-                                const domNode = view.domAtPos(from);
-                                if (domNode && domNode.node) {
-                                  let linkElement = null;
-                                  if (domNode.node.nodeType === Node.TEXT_NODE && domNode.node.parentElement) {
-                                    linkElement = domNode.node.parentElement.closest('a');
-                                  } else if (domNode.node.nodeType === Node.ELEMENT_NODE) {
-                                    linkElement = domNode.node.closest('a');
+                                // Find all links in the editor and update the one we just created
+                                const editorDom = view.dom;
+                                const allLinks = editorDom.querySelectorAll('a[href="#' + route + '"]');
+                                
+                                // Find the link that contains our text
+                                allLinks.forEach(link => {
+                                  if (link.textContent.trim() === `@${page}`) {
+                                    link.setAttribute('data-route', route);
+                                    link.setAttribute('data-mention', 'true');
+                                    link.style.cursor = 'pointer';
+                                    // Ensure it's clickable
+                                    link.onclick = (e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      const navEvent = new CustomEvent('pageMentionClick', { 
+                                        detail: { route } 
+                                      });
+                                      window.dispatchEvent(navEvent);
+                                      return false;
+                                    };
                                   }
-                                  
-                                  if (linkElement) {
-                                    linkElement.setAttribute('data-route', route);
-                                    linkElement.setAttribute('data-mention', 'true');
-                                  }
-                                }
-                              }, 10);
+                                });
+                              }, 50);
                             } else {
                               // Fallback if link mark doesn't exist
                               editor.chain()

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { colors, font, form as formConfig } from '../config/colors';
-import LinkableTextarea from '../components/LinkableTextarea';
 import { useUser } from '../hooks/useUser';
 
 export default function FeedbackForm({ onNavigate }) {
@@ -255,7 +254,7 @@ export default function FeedbackForm({ onNavigate }) {
             <label htmlFor="comment" className="block text-sm font-medium" style={{ color: colors.text.primary }}>
               Add your comment
             </label>
-            <LinkableTextarea
+            <textarea
               id="comment"
               name="comment"
               rows="4"
@@ -264,8 +263,6 @@ export default function FeedbackForm({ onNavigate }) {
               onChange={(e) => {
                 setComment(e.target.value);
               }}
-              onNavigate={onNavigate}
-              showPreview={true}
               className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
@@ -276,7 +273,7 @@ export default function FeedbackForm({ onNavigate }) {
               }}
               onFocus={e => e.target.style.outlineColor = formConfig.focus}
               onBlur={e => e.target.style.outlineColor = ''}
-              placeholder="Type @ followed by a page name (e.g., @Feedback) to create a link"
+              placeholder="Enter your feedback here..."
             />
           </div>
 
