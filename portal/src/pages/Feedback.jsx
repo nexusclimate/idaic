@@ -1,12 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { colors, font, form as formConfig } from '../config/colors';
 import LinkableTextarea from '../components/LinkableTextarea';
+import { useUser } from '../hooks/useUser';
 
 export default function FeedbackForm({ onNavigate }) {
+  const { user } = useUser();
   const [status, setStatus] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [comment, setComment] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
+  // Pre-fill name and email from user data
+  useEffect(() => {
+    if (user) {
+      // Get name from user_metadata or user object
+      const userName = user.user_metadata?.name || 
+                       user.user_metadata?.full_name || 
+                       user.name || 
+                       '';
+      // Get email from user object
+      const userEmail = user.email || '';
+      
+      setName(userName);
+      setEmail(userEmail);
+    }
+  }, [user]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -78,8 +98,8 @@ export default function FeedbackForm({ onNavigate }) {
       setStatus('Creating issue…');
       
       const data = {
-        name: form.name.value,
-        email: form.email.value,
+        name: name || form.name?.value || '',
+        email: email || form.email?.value || '',
         subject: form.subject.value,
         type: form.type.value,
         comment: comment || form.comment?.value || '',
@@ -102,6 +122,15 @@ export default function FeedbackForm({ onNavigate }) {
         form.reset();
         setSelectedFiles([]);
         setComment('');
+        // Reset name and email to user's values (in case they were changed)
+        if (user) {
+          const userName = user.user_metadata?.name || 
+                           user.user_metadata?.full_name || 
+                           user.name || 
+                           '';
+          setName(userName);
+          setEmail(user.email || '');
+        }
       } else {
         let errorText = 'Oops, something went wrong.';
         try {
@@ -145,6 +174,8 @@ export default function FeedbackForm({ onNavigate }) {
             </label>
             <input
               id="name" name="name" required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,
@@ -164,6 +195,8 @@ export default function FeedbackForm({ onNavigate }) {
             </label>
             <input
               id="email" name="email" type="email" placeholder="you@example.com" required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full rounded-md px-3 py-2 sm:py-1.5 text-base outline-1 outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:outline-offset-2 sm:text-sm"
               style={{
                 background: colors.background.white,

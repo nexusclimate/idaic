@@ -85,48 +85,50 @@ export const PageMention = Extension.create({
           apply(tr, value, oldState, newState) {
             const { selection } = newState;
             const { $from } = selection;
+            const cursorPos = $from.pos;
             
-            // Get text from the start of the current node to the cursor
-            const textBefore = $from.parent.textBetween(
-              Math.max(0, $from.parentOffset - 50),
-              $from.parentOffset,
-              ' ',
-              0
-            );
+            // Get text from a reasonable range before cursor (up to 50 chars back)
+            const startLookback = Math.max(0, cursorPos - 50);
+            const textBefore = newState.doc.textBetween(startLookback, cursorPos, ' ', '');
             
-            // Check for @ mention
+            // Find the last @ symbol in the text before cursor
             const lastAt = textBefore.lastIndexOf('@');
             
             if (lastAt === -1) {
               return { active: false, range: null, query: null, items: [], selectedIndex: 0 };
             }
-
-            // Get the text after @
-            const afterAt = textBefore.substring(lastAt + 1);
-            // Check if there's a space or newline (which would end the mention)
-            const spaceIndex = afterAt.search(/[\s\n]/);
-            const query = spaceIndex === -1 ? afterAt : afterAt.substring(0, spaceIndex);
             
-            if (query.length === 0) {
+            // Calculate the actual position of @ in the document
+            const atPos = startLookback + lastAt;
+            
+            // Get text after @ up to cursor
+            const textAfter = newState.doc.textBetween(atPos + 1, cursorPos, ' ', '');
+            
+            // Check if there's a space or newline (which would end the mention)
+            const spaceIndex = textAfter.search(/[\s\n]/);
+            const query = spaceIndex === -1 ? textAfter : textAfter.substring(0, spaceIndex);
+            
+            // If query contains invalid chars, don't show suggestions
+            if (query.match(/[\s\n]/)) {
               return { active: false, range: null, query: null, items: [], selectedIndex: 0 };
             }
-
+            
+            // Get matching pages (show all if query is empty, filtered if query exists)
             const pages = getAvailablePages();
-            const items = pages
-              .filter(page => page.toLowerCase().includes(query.toLowerCase()))
+            const items = (query.length === 0 
+              ? pages 
+              : pages.filter(page => page.toLowerCase().includes(query.toLowerCase()))
+            )
               .slice(0, 10)
               .map(page => ({
                 id: page,
                 label: page,
                 route: PAGE_MAP[page] || null,
               }));
-
-            // Calculate the start position of the @ mention
-            const startPos = $from.pos - query.length - 1;
             
             return {
               active: items.length > 0,
-              range: { from: startPos, to: $from.pos },
+              range: { from: atPos, to: cursorPos },
               query,
               items,
               selectedIndex: 0,
@@ -223,96 +225,110 @@ export const PageMention = Extension.create({
           const plugin = this;
           let component = null;
           let container = null;
+          let updateTimeout = null;
 
           const update = () => {
-            const pluginState = plugin.getState(editorView.state);
+            // Clear any pending updates
+            if (updateTimeout) {
+              clearTimeout(updateTimeout);
+            }
             
-            if (!pluginState.active) {
-              if (component) {
-                ReactRenderer.destroy(component);
-                component = null;
-              }
-              if (container) {
-                container.remove();
-                container = null;
-              }
-              return;
-            }
-
-            if (!container) {
-              container = document.createElement('div');
-              container.style.position = 'fixed';
-              container.style.zIndex = '9999';
-              document.body.appendChild(container);
-            }
-
-            const command = (item) => {
-              const { range } = pluginState;
-              const { label, route } = item;
+            updateTimeout = setTimeout(() => {
+              const pluginState = plugin.getState(editorView.state);
               
-              const linkMark = editorView.state.schema.marks.link;
-              if (linkMark) {
-                editorView.dispatch(
-                  editorView.state.tr
-                    .delete(range.from, range.to)
-                    .insertText(`@${label} `, range.from)
-                    .addMark(
-                      range.from,
-                      range.from + label.length + 1,
-                      linkMark.create({
-                        href: `#${route}`,
-                        'data-route': route,
-                        'data-mention': 'true',
-                      })
-                    )
-                );
+              if (!pluginState.active) {
+                if (component) {
+                  ReactRenderer.destroy(component);
+                  component = null;
+                }
+                if (container) {
+                  container.remove();
+                  container = null;
+                }
+                return;
+              }
+
+              if (!container) {
+                container = document.createElement('div');
+                container.style.position = 'fixed';
+                container.style.zIndex = '9999';
+                document.body.appendChild(container);
+              }
+
+              const command = (item) => {
+                const { range } = pluginState;
+                const { label, route } = item;
+                
+                const linkMark = editorView.state.schema.marks.link;
+                if (linkMark) {
+                  editorView.dispatch(
+                    editorView.state.tr
+                      .delete(range.from, range.to)
+                      .insertText(`@${label} `, range.from)
+                      .addMark(
+                        range.from,
+                        range.from + label.length + 1,
+                        linkMark.create({
+                          href: `#${route}`,
+                          'data-route': route,
+                          'data-mention': 'true',
+                        })
+                      )
+                  );
+                } else {
+                  // Fallback: insert as text
+                  editorView.dispatch(
+                    editorView.state.tr
+                      .delete(range.from, range.to)
+                      .insertText(`@${label} `, range.from)
+                  );
+                }
+                
+                // Close suggestions
+                plugin.setMeta('pageMention', {
+                  active: false,
+                  range: null,
+                  query: null,
+                  items: [],
+                  selectedIndex: 0,
+                });
+              };
+
+              if (!component) {
+                component = new ReactRenderer(MentionList, {
+                  props: {
+                    items: pluginState.items,
+                    selectedIndex: pluginState.selectedIndex,
+                    command,
+                  },
+                  editor: editorView,
+                });
+                container.appendChild(component.element);
               } else {
-                // Fallback: insert as text
-                editorView.dispatch(
-                  editorView.state.tr
-                    .delete(range.from, range.to)
-                    .insertText(`@${label} `, range.from)
-                );
-              }
-              
-              // Close suggestions
-              plugin.setMeta('pageMention', {
-                active: false,
-                range: null,
-                query: null,
-                items: [],
-                selectedIndex: 0,
-              });
-            };
-
-            if (!component) {
-              component = new ReactRenderer(MentionList, {
-                props: {
+                component.updateProps({
                   items: pluginState.items,
                   selectedIndex: pluginState.selectedIndex,
                   command,
-                },
-                editor: editorView,
-              });
-              container.appendChild(component.element);
-            } else {
-              component.updateProps({
-                items: pluginState.items,
-                selectedIndex: pluginState.selectedIndex,
-                command,
-              });
-            }
+                });
+              }
 
-            // Position the dropdown
-            const { from } = pluginState.range;
-            const coords = editorView.coordsAtPos(from);
-            container.style.top = `${coords.bottom + window.scrollY + 5}px`;
-            container.style.left = `${coords.left + window.scrollX}px`;
+              // Position the dropdown
+              const { from } = pluginState.range;
+              const coords = editorView.coordsAtPos(from);
+              container.style.top = `${coords.bottom + window.scrollY + 5}px`;
+              container.style.left = `${coords.left + window.scrollX}px`;
+            }, 0);
           };
+
+          // Initial update
+          update();
 
           return {
             update,
             destroy() {
+              if (updateTimeout) {
+                clearTimeout(updateTimeout);
+              }
               if (component) {
                 ReactRenderer.destroy(component);
               }
