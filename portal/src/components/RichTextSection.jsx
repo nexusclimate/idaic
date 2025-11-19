@@ -49,29 +49,45 @@ export default function RichTextSection({ section, isAdmin = false }) {
         `
       },
       handleClick: (view, pos, event) => {
-        const target = event.target;
-        // Check if clicked on a link (mention or regular)
-        const linkElement = target.closest('a');
-        if (linkElement) {
-          const linkText = linkElement.textContent.trim();
-          // If it's a mention (starts with @) or has data-mention attribute
-          if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
-            event.preventDefault();
-            event.stopPropagation();
-            const route = linkElement.getAttribute('data-route') || 
-                         linkElement.getAttribute('href')?.replace('#', '');
-            if (route) {
-              console.log('Navigating to page:', route);
-              // Dispatch navigation event
-              const navEvent = new CustomEvent('pageMentionClick', { 
-                detail: { route } 
-              });
-              window.dispatchEvent(navEvent);
+        try {
+          const target = event.target;
+          // Check if clicked on a link (mention or regular)
+          const linkElement = target.closest('a');
+          if (linkElement) {
+            const linkText = linkElement.textContent.trim();
+            const href = linkElement.getAttribute('href');
+            
+            // If it's a mention (starts with @) or has data-mention attribute
+            if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              
+              const route = linkElement.getAttribute('data-route') || 
+                           (href ? href.replace('#', '') : null);
+              
+              if (route) {
+                console.log('handleClick - Navigating to page:', route);
+                // Directly trigger navigation without custom event
+                localStorage.setItem('idaic-current-page', route);
+                window.dispatchEvent(new CustomEvent('navigateToPage', { 
+                  detail: { page: route },
+                  bubbles: true
+                }));
+                
+                // Also dispatch pageMentionClick for backwards compatibility
+                window.dispatchEvent(new CustomEvent('pageMentionClick', { 
+                  detail: { route },
+                  bubbles: true
+                }));
+              }
+              return true; // Tell ProseMirror we handled this
             }
-            return true;
           }
+        } catch (error) {
+          console.error('Error in handleClick:', error);
         }
-        return false;
+        return false; // Let ProseMirror handle other clicks
       },
     },
   });
@@ -102,15 +118,19 @@ export default function RichTextSection({ section, isAdmin = false }) {
 
     const setupMentionLinks = () => {
       const editorElement = editor.view.dom;
-      const allLinks = editorElement.querySelectorAll('a[href^="#"]');
+      // Find ALL links, not just those with href starting with #
+      const allLinks = editorElement.querySelectorAll('a');
       
       allLinks.forEach(link => {
         const href = link.getAttribute('href');
-        if (href && href.startsWith('#')) {
-          const route = href.replace('#', '');
-          // Check if this looks like a page mention (starts with @)
-          const linkText = link.textContent.trim();
-          if (linkText.startsWith('@')) {
+        const linkText = link.textContent.trim();
+        
+        // Check if this looks like a page mention (starts with @)
+        if (linkText.startsWith('@')) {
+          const route = link.getAttribute('data-route') || 
+                       (href ? href.replace('#', '') : null);
+          
+          if (route) {
             // Ensure data attributes are set
             if (!link.getAttribute('data-route')) {
               link.setAttribute('data-route', route);
@@ -118,60 +138,125 @@ export default function RichTextSection({ section, isAdmin = false }) {
             if (!link.getAttribute('data-mention')) {
               link.setAttribute('data-mention', 'true');
             }
-            link.style.cursor = 'pointer';
             
-            // Add click handler - use capture phase to ensure it fires
+            // Make sure link is clickable
+            link.style.cursor = 'pointer';
+            link.style.pointerEvents = 'auto';
+            link.style.userSelect = 'none';
+            link.style.textDecoration = 'underline';
+            
+            // Store route in a way we can access it
+            if (!link.dataset.route) {
+              link.dataset.route = route;
+            }
+            if (!link.dataset.mention) {
+              link.dataset.mention = 'true';
+            }
+            
+            // Create a unique handler function for this link
+            const linkRoute = route; // Capture route in closure
             const handleLinkClick = (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('Link onclick - Navigating to page:', route);
-              const navEvent = new CustomEvent('pageMentionClick', { 
-                detail: { route } 
-              });
-              window.dispatchEvent(navEvent);
+              try {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                console.log('Link clicked directly - Navigating to page:', linkRoute);
+                const navEvent = new CustomEvent('pageMentionClick', { 
+                  detail: { route: linkRoute },
+                  bubbles: true,
+                  cancelable: true
+                });
+                window.dispatchEvent(navEvent);
+              } catch (error) {
+                console.error('Error handling link click:', error);
+              }
               return false;
             };
             
-            // Remove old listener if exists
-            link.removeEventListener('click', handleLinkClick, true);
-            // Add new listener in capture phase
-            link.addEventListener('click', handleLinkClick, true);
-            // Also set onclick as backup
+            // Remove old handlers if they exist (by cloning without handlers)
+            const oldOnClick = link.onclick;
+            const oldOnMouseDown = link.onmousedown;
+            
+            // Add new handlers - use capture phase
+            link.addEventListener('click', handleLinkClick, { capture: true, once: false });
+            link.addEventListener('mousedown', handleLinkClick, { capture: true, once: false });
+            
+            // Also set as properties as backup
             link.onclick = handleLinkClick;
+            link.onmousedown = handleLinkClick;
           }
         }
       });
     };
 
     const handleEditorClick = (event) => {
-      const target = event.target;
-      // Check if clicked element is a link
-      const linkElement = target.closest('a');
-      if (linkElement) {
-        const href = linkElement.getAttribute('href');
-        const linkText = linkElement.textContent.trim();
-        
-        // Check if it's a mention (starts with @) or has data-mention
-        if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
-          event.preventDefault();
-          event.stopPropagation();
-          const route = linkElement.getAttribute('data-route') || 
-                       (href ? href.replace('#', '') : null);
-          if (route) {
-            console.log('Editor click - Navigating to page:', route);
-            // Dispatch navigation event
-            const navEvent = new CustomEvent('pageMentionClick', { 
-              detail: { route } 
-            });
-            window.dispatchEvent(navEvent);
+      try {
+        const target = event.target;
+        // Check if clicked element is a link or inside a link
+        const linkElement = target.closest('a');
+        if (linkElement) {
+          const href = linkElement.getAttribute('href');
+          const linkText = linkElement.textContent.trim();
+          
+          // Check if it's a mention (starts with @) or has data-mention
+          if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            const route = linkElement.getAttribute('data-route') || 
+                         (href ? href.replace('#', '') : null);
+            if (route) {
+              console.log('Editor click handler - Navigating to page:', route);
+              // Dispatch navigation event
+              const navEvent = new CustomEvent('pageMentionClick', { 
+                detail: { route },
+                bubbles: true,
+                cancelable: true
+              });
+              window.dispatchEvent(navEvent);
+            }
+            return false;
           }
-          return false;
         }
+      } catch (error) {
+        console.error('Error in editor click handler:', error);
       }
+      return undefined; // Don't return false, let other handlers process
+    };
+
+    const handleEditorMouseDown = (event) => {
+      try {
+        const target = event.target;
+        const linkElement = target.closest('a');
+        if (linkElement) {
+          const linkText = linkElement.textContent.trim();
+          if (linkText.startsWith('@') || linkElement.getAttribute('data-mention') === 'true') {
+            // Prevent default to stop text selection
+            event.preventDefault();
+            const href = linkElement.getAttribute('href');
+            const route = linkElement.getAttribute('data-route') || 
+                         (href ? href.replace('#', '') : null);
+            if (route) {
+              console.log('Editor mousedown - Navigating to page:', route);
+              const navEvent = new CustomEvent('pageMentionClick', { 
+                detail: { route },
+                bubbles: true,
+                cancelable: true
+              });
+              window.dispatchEvent(navEvent);
+            }
+            return false;
+          }
+        }
+      } catch (error) {
+        console.error('Error in editor mousedown handler:', error);
+      }
+      return undefined;
     };
 
     const editorElement = editor.view.dom;
     editorElement.addEventListener('click', handleEditorClick, true);
+    editorElement.addEventListener('mousedown', handleEditorMouseDown, true);
     
     // Setup links initially
     setupMentionLinks();
@@ -193,6 +278,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
     
     return () => {
       editorElement.removeEventListener('click', handleEditorClick, true);
+      editorElement.removeEventListener('mousedown', handleEditorMouseDown, true);
       observer.disconnect();
       editor.off('update', setupMentionLinks);
     };
