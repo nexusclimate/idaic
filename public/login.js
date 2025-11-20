@@ -8,6 +8,26 @@ const N8N_URL  = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+// Check if user was redirected due to blocked role
+window.addEventListener('DOMContentLoaded', () => {
+  const blockedRole = localStorage.getItem('idaic-blocked-role');
+  if (blockedRole) {
+    localStorage.removeItem('idaic-blocked-role');
+    if (blockedRole === 'new') {
+      createNotification({ 
+        message: 'Your account is pending approval. The IDAIC team will review your submission and get in touch with you soon.', 
+        success: false, 
+        warning: true 
+      });
+    } else if (blockedRole === 'declined') {
+      createNotification({ 
+        message: 'Access to your account has been declined. Please contact the IDAIC team if you believe this is an error.', 
+        success: false 
+      });
+    }
+  }
+});
+
 // Shared browser and OS detection functions
 function detectBrowser() {
   if (navigator.userAgentData && navigator.userAgentData.brands) {
@@ -183,17 +203,39 @@ document
       return;
     }
 
-    // 2. Check if user exists in users table
+    // 2. Check if user exists in users table and their role
     let userExists = false;
+    let userRole = null;
     try {
       const { data: userData, error: userError } = await supabase
         .from('users')
-        .select('id')
+        .select('id, role')
         .eq('email', email)
         .maybeSingle();
-      if (userData) userExists = true;
+      if (userData) {
+        userExists = true;
+        userRole = userData.role;
+      }
     } catch (err) {
       createNotification({ message: 'Error checking user database. Please try again.', success: false });
+      return;
+    }
+
+    // Check if user role is "new" or "declined" - block login
+    if (userRole === 'new') {
+      createNotification({ 
+        message: 'Your account is pending approval. The IDAIC team will review your submission and get in touch with you soon.', 
+        success: false, 
+        warning: true 
+      });
+      return;
+    }
+
+    if (userRole === 'declined') {
+      createNotification({ 
+        message: 'Access to your account has been declined. Please contact the IDAIC team if you believe this is an error.', 
+        success: false 
+      });
       return;
     }
 
@@ -315,6 +357,42 @@ document
 
       if (error) throw error
 
+      // Check user role before allowing login
+      let userRole = null;
+      try {
+        const { data: userData, error: roleError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('email', email)
+          .maybeSingle();
+        
+        if (userData && !roleError) {
+          userRole = userData.role;
+        }
+      } catch (err) {
+        console.error('Error checking user role:', err);
+      }
+
+      // Block login for "new" and "declined" roles
+      if (userRole === 'new') {
+        await supabase.auth.signOut();
+        createNotification({ 
+          message: 'Your account is pending approval. The IDAIC team will review your submission and get in touch with you soon.', 
+          success: false, 
+          warning: true 
+        });
+        return;
+      }
+
+      if (userRole === 'declined') {
+        await supabase.auth.signOut();
+        createNotification({ 
+          message: 'Access to your account has been declined. Please contact the IDAIC team if you believe this is an error.', 
+          success: false 
+        });
+        return;
+      }
+
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
 
@@ -414,7 +492,26 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
       return
     }
 
-    if ((userRow.role || '').toLowerCase() !== 'admin') {
+    // Check if user role is "new" or "declined" - block login
+    const userRole = (userRow.role || '').toLowerCase();
+    if (userRole === 'new') {
+      createNotification({ 
+        message: 'Your account is pending approval. The IDAIC team will review your submission and get in touch with you soon.', 
+        success: false, 
+        warning: true 
+      });
+      return;
+    }
+
+    if (userRole === 'declined') {
+      createNotification({ 
+        message: 'Access to your account has been declined. Please contact the IDAIC team if you believe this is an error.', 
+        success: false 
+      });
+      return;
+    }
+
+    if (userRole !== 'admin') {
       createNotification({ message: 'Admin access required. Please use Email Code instead.', success: false })
       return
     }

@@ -25,6 +25,16 @@
         </a>
       </div>
 
+      <!-- Opening Notice -->
+      <div id="notice-section" class="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <h2 class="text-lg font-semibold mb-3 text-gray-900">
+          Notice - members portal
+        </h2>
+        <p class="text-sm leading-relaxed text-gray-600">
+          We're currently creating our members portal to include more detailed member profiles and a library showcasing members' ongoing or completed projects. This will help other members better understand your work and potentially reach out for collaboration through our platform. Projects seeking collaboration with industry partners or AI technology experts will be specially tagged.
+        </p>
+      </div>
+
       <!-- Form -->
       <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8">
         <h1 class="text-2xl font-bold mb-6 text-center text-gray-900">
@@ -433,8 +443,12 @@
         // Show success message
         successMessage.classList.remove('hidden');
         
-        // Hide form
+        // Hide form and notice section
         form.style.display = 'none';
+        const noticeSection = document.getElementById('notice-section');
+        if (noticeSection) {
+          noticeSection.style.display = 'none';
+        }
         
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });

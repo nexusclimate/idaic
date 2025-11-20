@@ -91,11 +91,22 @@ export default function App() {
           }
           
           const userId = userData.id;
+          const userRole = userData.role;
+          
+          // Check if user role is "new" or "declined" - block access
+          if (userRole === 'new' || userRole === 'declined') {
+            setIsAuthenticated(false);
+            setUser(null);
+            // Store role for message display
+            localStorage.setItem('idaic-blocked-role', userRole);
+            window.location.href = '/login.html';
+            return;
+          }
           
           setUser({
             id: userId,
             email: passwordEmail,
-            role: userData.role,
+            role: userRole,
             user_metadata: { password_login: true }
           });
           setIsAuthenticated(true);
@@ -127,9 +138,24 @@ export default function App() {
               .maybeSingle();
             
             if (userData && !roleError) {
+              const userRole = userData.role;
+              
+              // Check if user role is "new" or "declined" - block access
+              if (userRole === 'new' || userRole === 'declined') {
+                // Sign out the user
+                await supabase.auth.signOut();
+                setIsAuthenticated(false);
+                setUser(null);
+                localStorage.removeItem('idaic-token');
+                // Store role for message display
+                localStorage.setItem('idaic-blocked-role', userRole);
+                window.location.href = '/login.html';
+                return;
+              }
+              
               setUser({
                 ...session.user,
-                role: userData.role
+                role: userRole
               });
             } else {
               setUser(session.user);
@@ -225,6 +251,32 @@ export default function App() {
       console.log('🔄 Auth state changed:', event, session?.user?.email);
       
       if (event === 'SIGNED_IN' && session) {
+        // Check user role before allowing access
+        try {
+          const { data: userData, error: roleError } = await supabase
+            .from('users')
+            .select('role')
+            .eq('email', session.user.email)
+            .maybeSingle();
+          
+          if (userData && !roleError) {
+            const userRole = userData.role;
+            
+            // Block access for "new" and "declined" roles
+            if (userRole === 'new' || userRole === 'declined') {
+              await supabase.auth.signOut();
+              setIsAuthenticated(false);
+              setUser(null);
+              localStorage.removeItem('idaic-token');
+              localStorage.setItem('idaic-blocked-role', userRole);
+              window.location.href = '/login.html';
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Error checking user role on sign in:', err);
+        }
+        
         setUser(session.user);
         setIsAuthenticated(true);
         localStorage.setItem('idaic-token', session.access_token);
