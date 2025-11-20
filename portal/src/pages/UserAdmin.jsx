@@ -562,10 +562,12 @@ export default function UserAdmin({ onUserSelect }) {
                                 N
                               </span>
                             )}
-                            <span 
-                              className={`w-2.5 h-2.5 rounded-full ${status.color}`}
-                              title={status.label}
-                            ></span>
+                            {user.role !== 'new' && (
+                              <span 
+                                className={`w-2.5 h-2.5 rounded-full ${status.color}`}
+                                title={status.label}
+                              ></span>
+                            )}
                           </div>
                         </td>
                         <td
