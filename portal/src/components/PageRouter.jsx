@@ -11,6 +11,7 @@ import Changelog from '../pages/Changelog';
 import Admin from '../pages/Admin';
 import Settings from '../pages/Settings';
 import Projects from '../pages/projects';
+import NewUserForm from '../pages/NewUserForm';
 
 export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated, user, onPageChange }) {
   const handleIframeLoad = (title) => {
@@ -148,6 +149,9 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       return <Settings user={user} />;
     case 'projects':
       return <Projects />;
+    case 'newuser-form':
+    case 'newmember-signup':
+      return <NewUserForm />;
     default:
       return (
         <div>

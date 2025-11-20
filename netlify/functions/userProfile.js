@@ -126,16 +126,36 @@ exports.handler = async function (event, context) {
           .eq('email', profileData.email)
           .maybeSingle(); // Use maybeSingle instead of single to handle no results gracefully
 
-        // Map camelCase form fields to database fields - MINIMAL SET for new users
+        // Map camelCase form fields to database fields
         const mappedData = {
           name: profileData.name,
           email: profileData.email,
           role: profileData.role ? profileData.role.toLowerCase() : 'member', // Default to member
           data_permission: profileData.data_permission,
           profile_updated_at: new Date().toISOString()
-          // Only include essential fields to avoid any constraint issues
-          // Don't include updated_by, company, title, etc. for new users
         };
+
+        // Include optional fields if provided
+        if (profileData.company !== undefined) mappedData.company = profileData.company;
+        if (profileData.title !== undefined) mappedData.title = profileData.title;
+        if (profileData.region !== undefined) mappedData.region = profileData.region;
+        if (profileData.linkedin_url !== undefined) mappedData.linkedin_url = profileData.linkedin_url;
+        if (profileData.category !== undefined) mappedData.category = profileData.category;
+        if (profileData.other_category !== undefined) mappedData.other_category = profileData.other_category;
+        if (profileData.organization_description !== undefined) mappedData.organization_description = profileData.organization_description;
+        if (profileData.ai_decarbonisation !== undefined) mappedData.ai_decarbonisation = profileData.ai_decarbonisation;
+        if (profileData.challenges !== undefined) mappedData.challenges = profileData.challenges;
+        if (profileData.contribution !== undefined) mappedData.contribution = profileData.contribution;
+        if (profileData.projects !== undefined) mappedData.projects = profileData.projects;
+        if (profileData.ai_tools !== undefined) mappedData.ai_tools = profileData.ai_tools;
+        
+        // Handle approved field - default to false for new public form submissions
+        if (profileData.approved !== undefined) {
+          mappedData.approved = profileData.approved;
+        } else {
+          // Default to false if not specified (for new public form submissions)
+          mappedData.approved = false;
+        }
 
         let result;
         if (existingUser) {
@@ -167,18 +187,17 @@ exports.handler = async function (event, context) {
             data_permission: profileData.data_permission || false
           });
           
-          // Try direct insert with absolute minimal fields to avoid any constraints
+          // Insert new user with all provided fields
+          const insertPayload = {
+            id: newUserId,
+            ...mappedData,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
           const { data: insertData, error: insertError } = await supabase
             .from('users')
-            .insert([{
-              id: newUserId,
-              name: profileData.name,
-              email: profileData.email,
-              role: profileData.role || 'member',
-              data_permission: profileData.data_permission || false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }])
+            .insert([insertPayload])
             .select();
 
           if (insertError) {
@@ -270,6 +289,7 @@ exports.handler = async function (event, context) {
         if (updates.newsletter_idaic_mena !== undefined) mappedUpdates.newsletter_idaic_mena = updates.newsletter_idaic_mena;
         if (updates.newsletter_csn_news !== undefined) mappedUpdates.newsletter_csn_news = updates.newsletter_csn_news;
         if (updates.newsletter_uae_climate !== undefined) mappedUpdates.newsletter_uae_climate = updates.newsletter_uae_climate;
+        if (updates.approved !== undefined) mappedUpdates.approved = updates.approved;
         
         // Track who updated this record and when
         if (updates.updated_by !== undefined) {

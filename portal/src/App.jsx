@@ -7,8 +7,13 @@ import DisclaimerPopup from "./components/DisclaimerPopup";
 import { supabase } from './config/supabase.js';
 
 export default function App() {
-  // Initialize currentPage from localStorage if available, otherwise default to 'home'
+  // Initialize currentPage from URL pathname or localStorage, otherwise default to 'home'
   const [currentPage, setCurrentPage] = useState(() => {
+    // Check URL pathname first for public pages
+    const pathname = window.location.pathname;
+    if (pathname === '/newuser-form' || pathname === '/newmember-signup') {
+      return pathname.replace('/', '');
+    }
     const savedPage = localStorage.getItem('idaic-current-page');
     return savedPage || 'home';
   });
@@ -43,6 +48,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    // Check if this is a public page - skip authentication
+    const pathname = window.location.pathname;
+    const isPublicPage = pathname === '/newuser-form' || pathname === '/newmember-signup' || 
+                         currentPage === 'newuser-form' || currentPage === 'newmember-signup';
+    
+    if (isPublicPage) {
+      setIsAuthenticated(true); // Set to true to allow rendering, but user will be null
+      return;
+    }
+
     // Check authentication on app load
     const checkAuthentication = async () => {
       try {
@@ -235,11 +250,14 @@ export default function App() {
     };
   }, []);
 
-  if (isAuthenticated === null) {
+  // Allow public access to newuser-form page
+  const isPublicPage = currentPage === 'newuser-form' || currentPage === 'newmember-signup';
+
+  if (isAuthenticated === null && !isPublicPage) {
     return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isPublicPage) {
     return <div>Redirecting to login...</div>;
   }
 
@@ -324,6 +342,24 @@ export default function App() {
     localStorage.setItem('idaic-current-page', page);
     setShowDisclaimer(false);
   };
+
+  // For public pages, render without sidebar
+  if (isPublicPage) {
+    return (
+      <div className="min-h-screen w-screen overflow-auto">
+        <PageRouter 
+          currentPage={currentPage} 
+          isAdminAuthenticated={isAdminAuthenticated}
+          setIsAdminAuthenticated={setIsAdminAuthenticated}
+          user={user}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+            localStorage.setItem('idaic-current-page', page);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-svh w-screen overflow-hidden">
