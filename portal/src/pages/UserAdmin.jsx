@@ -558,7 +558,17 @@ export default function UserAdmin({ onUserSelect }) {
                           )}
                           style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
-                          {user.name || '—'}
+                          <div className="flex items-center gap-2">
+                            {user.name || '—'}
+                            {user.role === 'new' && (
+                              <span 
+                                className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold"
+                                title="New member signup"
+                              >
+                                N
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td
                           className={classNames(
@@ -653,9 +663,11 @@ export default function UserAdmin({ onUserSelect }) {
                className="text-xs border rounded px-1 py-0.5"
                onClick={(e) => e.stopPropagation()}
              >
+               <option value="new">New</option>
                <option value="member">Member</option>
                <option value="moderator">Moderator</option>
                <option value="admin">Admin</option>
+               <option value="declined">Declined</option>
              </select>
                           ) : (
              <span 
@@ -666,6 +678,10 @@ export default function UserAdmin({ onUserSelect }) {
                    ? 'bg-blue-100 text-blue-800'
                    : user.role === 'member'
                    ? 'bg-green-100 text-green-800'
+                   : user.role === 'new'
+                   ? 'bg-orange-100 text-orange-800'
+                   : user.role === 'declined'
+                   ? 'bg-gray-200 text-gray-700'
                    : 'bg-gray-100 text-gray-800'
                }`}
                onClick={(e) => {

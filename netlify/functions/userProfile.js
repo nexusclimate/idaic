@@ -108,7 +108,7 @@ exports.handler = async function (event, context) {
         // Validate role if provided (only for admin role management)
         // Users updating their own profiles don't need role validation
         if (profileData.role && profileData.role !== '') {
-          const validRoles = ['guest', 'member', 'admin', 'moderator'];
+          const validRoles = ['guest', 'member', 'admin', 'moderator', 'new', 'declined'];
           if (!validRoles.includes(profileData.role.toLowerCase())) {
             return {
               statusCode: 400,
@@ -130,7 +130,7 @@ exports.handler = async function (event, context) {
         const mappedData = {
           name: profileData.name,
           email: profileData.email,
-          role: profileData.role ? profileData.role.toLowerCase() : 'member', // Default to member
+          role: profileData.role ? profileData.role.toLowerCase() : (profileData.approved === false ? 'new' : 'member'), // Default to 'new' if approved is false, otherwise 'member'
           data_permission: profileData.data_permission,
           profile_updated_at: new Date().toISOString()
         };
@@ -179,11 +179,14 @@ exports.handler = async function (event, context) {
           // Create new user with explicit UUID and minimal fields
           const newUserId = crypto.randomUUID();
           
+          // Ensure role is set correctly - use 'new' if role is 'new' or if approved is false
+          const finalRole = profileData.role ? profileData.role.toLowerCase() : (profileData.approved === false ? 'new' : 'member');
+          
           console.log('🔄 Creating new user with UUID:', newUserId);
           console.log('📊 User data:', { 
             name: profileData.name, 
             email: profileData.email, 
-            role: profileData.role || 'member',
+            role: finalRole,
             data_permission: profileData.data_permission || false
           });
           
@@ -191,6 +194,7 @@ exports.handler = async function (event, context) {
           const insertPayload = {
             id: newUserId,
             ...mappedData,
+            role: finalRole, // Override with the correct role
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
@@ -252,7 +256,7 @@ exports.handler = async function (event, context) {
         // Validate role if provided (only for admin role management)
         // Users updating their own profiles don't need role validation
         if (updates.role && updates.role !== '') {
-          const validRoles = ['guest', 'member', 'admin', 'moderator'];
+          const validRoles = ['guest', 'member', 'admin', 'moderator', 'new', 'declined'];
           if (!validRoles.includes(updates.role.toLowerCase())) {
             return {
               statusCode: 400,
