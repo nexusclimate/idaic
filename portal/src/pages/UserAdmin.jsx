@@ -83,6 +83,14 @@ export default function UserAdmin({ onUserSelect }) {
       u.company?.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
+      // Always sort "new" role users to the top
+      const aIsNew = a.role === 'new';
+      const bIsNew = b.role === 'new';
+      
+      if (aIsNew && !bIsNew) return -1;
+      if (!aIsNew && bIsNew) return 1;
+      
+      // If both are "new" or both are not "new", use the regular sorting
       let aVal = a[sortBy];
       let bVal = b[sortBy];
       
@@ -546,6 +554,14 @@ export default function UserAdmin({ onUserSelect }) {
                           style={{ borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
                           <div className="flex items-center gap-2">
+                            {user.role === 'new' && (
+                              <span 
+                                className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold mr-1"
+                                title="New member signup"
+                              >
+                                N
+                              </span>
+                            )}
                             <span 
                               className={`w-2.5 h-2.5 rounded-full ${status.color}`}
                               title={status.label}
@@ -558,17 +574,7 @@ export default function UserAdmin({ onUserSelect }) {
                           )}
                           style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
-                          <div className="flex items-center gap-2">
-                            {user.name || '—'}
-                            {user.role === 'new' && (
-                              <span 
-                                className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold"
-                                title="New member signup"
-                              >
-                                N
-                              </span>
-                            )}
-                          </div>
+                          {user.name || '—'}
                         </td>
                         <td
                           className={classNames(

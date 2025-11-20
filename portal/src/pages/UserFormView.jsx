@@ -287,14 +287,15 @@ export default function UserFormView({ initialUser }) {
                         User Role
                       </label>
                       <select
-                        value={formData.role || 'guest'}
+                        value={formData.role || 'member'}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
                       >
-                        <option value="guest">Guest</option>
+                        <option value="new">New</option>
                         <option value="member">Member</option>
                         <option value="moderator">Moderator</option>
                         <option value="admin">Admin</option>
+                        <option value="declined">Declined</option>
                       </select>
                       <p className="text-xs mt-1" style={{ color: colors.text.secondary }}>
                         Only admins can change roles.
