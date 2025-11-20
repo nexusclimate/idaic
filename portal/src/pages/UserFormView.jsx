@@ -59,6 +59,8 @@ export default function UserFormView({ initialUser }) {
     setLoading(false);
   };
 
+  const [approverInfo, setApproverInfo] = useState(null);
+
   const loadUserData = (user) => {
     setSelectedUser(user);
     setFormData({
@@ -79,6 +81,26 @@ export default function UserFormView({ initialUser }) {
       projects: user.projects || '',
       ai_tools: user.ai_tools || ''
     });
+    
+    // Fetch approver info if user was approved/declined
+    if ((user.role === 'member' || user.role === 'declined') && user.updated_by) {
+      fetch(`/.netlify/functions/userProfile?id=${user.updated_by}`)
+        .then(r => r.json())
+        .then(data => {
+          const approver = data.profile || data;
+          setApproverInfo({
+            name: approver.name || approver.email || 'Unknown',
+            action: user.role === 'member' ? 'approved' : 'declined'
+          });
+        })
+        .catch(err => {
+          console.error('Error fetching approver:', err);
+          setApproverInfo(null);
+        });
+    } else {
+      setApproverInfo(null);
+    }
+    
     setSuccess('');
     setError('');
   };
@@ -298,7 +320,7 @@ export default function UserFormView({ initialUser }) {
                           <option value="admin">Admin</option>
                           <option value="declined">Declined</option>
                         </select>
-                        {(formData.role === 'new' || formData.role?.toLowerCase() === 'new') && (
+                        {(formData.role === 'new' || formData.role?.toLowerCase() === 'new') ? (
                           <>
                             <button
                               type="button"
@@ -377,7 +399,11 @@ export default function UserFormView({ initialUser }) {
                               Decline
                             </button>
                           </>
-                        )}
+                        ) : approverInfo ? (
+                          <span className="text-xs px-2 py-1" style={{ color: approverInfo.action === 'approved' ? '#059669' : '#dc2626' }}>
+                            {approverInfo.action === 'approved' ? '✓' : '✗'} {approverInfo.action} by {approverInfo.name}
+                          </span>
+                        ) : null}
                       </div>
                       <p className="text-xs mt-1" style={{ color: colors.text.secondary }}>
                         Only admins can change roles.

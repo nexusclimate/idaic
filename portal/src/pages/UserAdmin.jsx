@@ -1,12 +1,45 @@
 import { useState, useEffect } from 'react';
+import React from 'react';
 import { colors, font } from '../config/colors';
 import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
+import { useUser } from '../hooks/useUser';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+// Component to display who approved/declined a user
+function ApproverDisplay({ approverId, action, cache, onFetch }) {
+  const [approverName, setApproverName] = useState(cache[approverId] || null);
+  const [loading, setLoading] = useState(!cache[approverId]);
+
+  useEffect(() => {
+    if (!approverName && approverId && onFetch) {
+      setLoading(true);
+      onFetch(approverId).then(name => {
+        setApproverName(name);
+        setLoading(false);
+      });
+    }
+  }, [approverId, approverName, onFetch]);
+
+  if (loading) {
+    return <span className="text-xs text-gray-500">Loading...</span>;
+  }
+
+  if (!approverName) {
+    return <span className="text-xs text-gray-500">—</span>;
+  }
+
+  return (
+    <span className="text-xs" style={{ color: action === 'approved' ? '#059669' : '#dc2626' }}>
+      {action === 'approved' ? '✓' : '✗'} {approverName}
+    </span>
+  );
+}
+
 export default function UserAdmin({ onUserSelect }) {
+  const { user: currentUser } = useUser();
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortDir, setSortDir] = useState('asc');
@@ -15,6 +48,7 @@ export default function UserAdmin({ onUserSelect }) {
   const [error, setError] = useState(null);
   const [editingRole, setEditingRole] = useState(null);
   const [roleUpdateLoading, setRoleUpdateLoading] = useState(false);
+  const [approverCache, setApproverCache] = useState({}); // Cache for approver names
   const [showAddUser, setShowAddUser] = useState(false);
   const [addUserForm, setAddUserForm] = useState({
     name: '',
@@ -120,7 +154,7 @@ export default function UserAdmin({ onUserSelect }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           role: newRole,
-          updated_by: userId // This should be the current admin user's ID
+          updated_by: currentUser?.id // Use current admin user's ID
         })
       });
 
@@ -129,10 +163,22 @@ export default function UserAdmin({ onUserSelect }) {
         throw new Error(errorData.error || 'Failed to update role');
       }
 
-      // Update the local state
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      ));
+      // Fetch updated user data to get updated_by
+      const updatedResponse = await fetch(`/.netlify/functions/userProfile?id=${userId}`);
+      if (updatedResponse.ok) {
+        const updatedData = await updatedResponse.json();
+        const updatedUser = updatedData.profile || updatedData;
+        
+        // Update the local state with full user data including updated_by
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, ...updatedUser } : user
+        ));
+      } else {
+        // Fallback: just update role if we can't fetch full data
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, role: newRole, updated_by: currentUser?.id } : user
+        ));
+      }
       
       setEditingRole(null);
     } catch (err) {
@@ -141,6 +187,25 @@ export default function UserAdmin({ onUserSelect }) {
     } finally {
       setRoleUpdateLoading(false);
     }
+  };
+
+  const fetchApproverName = async (approverId) => {
+    if (!approverId) return null;
+    if (approverCache[approverId]) return approverCache[approverId];
+    
+    try {
+      const response = await fetch(`/.netlify/functions/userProfile?id=${approverId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const approver = data.profile || data;
+        const name = approver.name || approver.email || 'Unknown';
+        setApproverCache(prev => ({ ...prev, [approverId]: name }));
+        return name;
+      }
+    } catch (err) {
+      console.error('Error fetching approver:', err);
+    }
+    return null;
   };
 
   const handleApprove = async (userId, e) => {
@@ -737,7 +802,7 @@ export default function UserAdmin({ onUserSelect }) {
                           )}
                           style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
-                          {(user.role === 'new' || user.role?.toLowerCase() === 'new') && (
+                          {(user.role === 'new' || user.role?.toLowerCase() === 'new') ? (
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={(e) => handleApprove(user.id, e)}
@@ -756,7 +821,14 @@ export default function UserAdmin({ onUserSelect }) {
                                 Decline
                               </button>
                             </div>
-                          )}
+                          ) : ((user.role === 'member' || user.role === 'declined') && user.updated_by) ? (
+                            <ApproverDisplay 
+                              approverId={user.updated_by} 
+                              action={user.role === 'member' ? 'approved' : 'declined'}
+                              cache={approverCache}
+                              onFetch={fetchApproverName}
+                            />
+                          ) : null}
                         </td>
                         {/* Newsletter Subscription Columns */}
                         <td
