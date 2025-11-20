@@ -171,8 +171,14 @@ exports.handler = async function (event, context) {
           // Create new user with explicit UUID and minimal fields
           const newUserId = crypto.randomUUID();
           
-          // Ensure role is set correctly - use 'new' if role is 'new', otherwise default to 'member'
-          const finalRole = profileData.role ? profileData.role.toLowerCase() : 'member';
+          // Ensure role is set correctly
+          // Note: If role is 'new', use 'guest' initially due to database constraint
+          // The constraint needs to be updated to allow 'new' and 'declined'
+          let finalRole = profileData.role ? profileData.role.toLowerCase() : 'member';
+          if (finalRole === 'new') {
+            finalRole = 'guest'; // Use 'guest' as workaround until constraint is updated
+            console.log('⚠️ Using "guest" role instead of "new" due to database constraint');
+          }
           
           console.log('🔄 Creating new user with UUID:', newUserId);
           console.log('📊 User data:', { 

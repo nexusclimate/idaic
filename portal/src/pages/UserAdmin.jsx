@@ -560,7 +560,7 @@ export default function UserAdmin({ onUserSelect }) {
                         >
                           <div className="flex items-center gap-2">
                             {user.name || '—'}
-                            {user.role === 'new' && (
+                            {(user.role === 'new' || user.role === 'guest') && (
                               <span 
                                 className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold"
                                 title="New member signup"
@@ -682,6 +682,8 @@ export default function UserAdmin({ onUserSelect }) {
                    ? 'bg-orange-100 text-orange-800'
                    : user.role === 'declined'
                    ? 'bg-gray-200 text-gray-700'
+                   : user.role === 'guest'
+                   ? 'bg-orange-100 text-orange-800'
                    : 'bg-gray-100 text-gray-800'
                }`}
                onClick={(e) => {

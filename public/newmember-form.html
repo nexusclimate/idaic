@@ -423,7 +423,7 @@
         contribution: document.getElementById('contribution').value.trim(),
         projects: document.getElementById('projects').value.trim(),
         ai_tools: document.getElementById('ai_tools').value.trim(),
-        role: 'new' // Set role to 'new' for new member form submissions
+        role: 'guest' // Use 'guest' role initially (database constraint doesn't allow 'new' yet)
       };
 
       try {
