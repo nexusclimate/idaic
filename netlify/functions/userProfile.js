@@ -130,7 +130,7 @@ exports.handler = async function (event, context) {
         const mappedData = {
           name: profileData.name,
           email: profileData.email,
-          role: profileData.role ? profileData.role.toLowerCase() : (profileData.approved === false ? 'new' : 'member'), // Default to 'new' if approved is false, otherwise 'member'
+          role: profileData.role ? profileData.role.toLowerCase() : 'member', // Default to 'member' if not specified
           data_permission: profileData.data_permission,
           profile_updated_at: new Date().toISOString()
         };
@@ -148,14 +148,6 @@ exports.handler = async function (event, context) {
         if (profileData.contribution !== undefined) mappedData.contribution = profileData.contribution;
         if (profileData.projects !== undefined) mappedData.projects = profileData.projects;
         if (profileData.ai_tools !== undefined) mappedData.ai_tools = profileData.ai_tools;
-        
-        // Handle approved field - default to false for new public form submissions
-        if (profileData.approved !== undefined) {
-          mappedData.approved = profileData.approved;
-        } else {
-          // Default to false if not specified (for new public form submissions)
-          mappedData.approved = false;
-        }
 
         let result;
         if (existingUser) {
@@ -179,8 +171,8 @@ exports.handler = async function (event, context) {
           // Create new user with explicit UUID and minimal fields
           const newUserId = crypto.randomUUID();
           
-          // Ensure role is set correctly - use 'new' if role is 'new' or if approved is false
-          const finalRole = profileData.role ? profileData.role.toLowerCase() : (profileData.approved === false ? 'new' : 'member');
+          // Ensure role is set correctly - use 'new' if role is 'new', otherwise default to 'member'
+          const finalRole = profileData.role ? profileData.role.toLowerCase() : 'member';
           
           console.log('🔄 Creating new user with UUID:', newUserId);
           console.log('📊 User data:', { 

@@ -20,7 +20,9 @@
     <div class="max-w-4xl mx-auto">
       <!-- Logo -->
       <div class="flex justify-center mb-8">
-        <img id="idaic-logo" alt="IDAIC Logo" class="h-20 w-auto object-contain" style="display: none;" />
+        <a href="https://www.idaic.org" target="_blank" rel="noopener noreferrer" class="cursor-pointer hover:opacity-80 transition-opacity">
+          <img id="idaic-logo" alt="IDAIC Logo" class="h-20 w-auto object-contain" style="display: none;" />
+        </a>
       </div>
 
       <!-- Opening Notice -->
@@ -40,9 +42,18 @@
         </h1>
 
         <!-- Success Message -->
-        <div id="success-message" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
-          <p class="text-sm text-green-800">
-            Thank you for your submission! Your profile will be reviewed for approval.
+        <div id="success-message" class="hidden mb-4 p-6 bg-green-50 border border-green-200 rounded-md text-center">
+          <div class="mb-4">
+            <svg class="mx-auto h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-green-800 mb-2">Thank you for your registration!</h3>
+          <p class="text-sm text-green-700 mb-4">
+            The IDAIC team in your respective region will review your submission and get in touch with you soon.
+          </p>
+          <p class="text-xs text-green-600">
+            You will be redirected to <a href="https://www.idaic.org" class="underline font-medium">www.idaic.org</a> in <span id="countdown">15</span> seconds...
           </p>
         </div>
 
@@ -356,7 +367,6 @@
         contribution: document.getElementById('contribution').value.trim(),
         projects: document.getElementById('projects').value.trim(),
         ai_tools: document.getElementById('ai_tools').value.trim(),
-        approved: false,
         role: 'new' // Set role to 'new' for new member form submissions
       };
 
@@ -377,11 +387,25 @@
         // Show success message
         successMessage.classList.remove('hidden');
         
-        // Reset form
-        form.reset();
+        // Hide form
+        form.style.display = 'none';
         
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Countdown and redirect
+        let countdown = 15;
+        const countdownElement = document.getElementById('countdown');
+        const redirectInterval = setInterval(() => {
+          countdown--;
+          if (countdownElement) {
+            countdownElement.textContent = countdown;
+          }
+          if (countdown <= 0) {
+            clearInterval(redirectInterval);
+            window.location.href = 'https://www.idaic.org';
+          }
+        }, 1000);
       } catch (err) {
         // Show error message
         errorText.textContent = err.message;
