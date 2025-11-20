@@ -28,3 +28,13 @@
   from = "/app/*"
   to = "/app.html"
   status = 200
+
+[[redirects]]
+  from = "/newuser-form"
+  to = "/newuser-form.html"
+  status = 200
+
+[[redirects]]
+  from = "/newmember-signup"
+  to = "/newuser-form.html"
+  status = 200

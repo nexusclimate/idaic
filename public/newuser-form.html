@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IDAIC Member Registration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Logo -->
+      <div class="flex justify-center mb-8">
+        <img id="idaic-logo" alt="IDAIC Logo" class="h-20 w-auto object-contain" style="display: none;" />
+      </div>
+
+      <!-- Opening Notice -->
+      <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <h2 class="text-lg font-semibold mb-3 text-gray-900">
+          Notice - members portal
+        </h2>
+        <p class="text-sm leading-relaxed text-gray-600">
+          We're currently creating our members portal to include more detailed member profiles and a library showcasing members' ongoing or completed projects. This will help other members better understand your work and potentially reach out for collaboration through our platform. Projects seeking collaboration with industry partners or AI technology experts will be specially tagged.
+        </p>
+      </div>
+
+      <!-- Form -->
+      <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8">
+        <h1 class="text-2xl font-bold mb-6 text-center text-gray-900">
+          IDAIC Member Registration
+        </h1>
+
+        <!-- Success Message -->
+        <div id="success-message" class="hidden mb-4 p-4 bg-green-50 border border-green-200 rounded-md">
+          <p class="text-sm text-green-800">
+            Thank you for your submission! Your profile will be reviewed for approval.
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p class="text-sm text-red-800" id="error-text"></p>
+        </div>
+
+        <form id="registration-form" class="space-y-6">
+          <!-- Basic Information -->
+          <div class="border-b pb-6">
+            <h3 class="text-base font-semibold mb-4 text-gray-900">
+              Basic Information
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Company
+                </label>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Title/Position
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Region
+                </label>
+                <select
+                  id="region"
+                  name="region"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                >
+                  <option value="">Select Region</option>
+                  <option value="UK">UK</option>
+                  <option value="UAE">UAE</option>
+                  <option value="EU">EU</option>
+                  <option value="MENA">MENA</option>
+                  <option value="Global">Global</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  LinkedIn URL
+                </label>
+                <input
+                  type="url"
+                  id="linkedin_url"
+                  name="linkedin_url"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="https://linkedin.com/in/..."
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Data Permission -->
+          <div class="border-b pb-6">
+            <h3 class="text-base font-semibold mb-2 text-gray-900">
+              Data Permission
+            </h3>
+            <p class="text-sm mb-3 text-gray-600">
+              User consent to display their information on the member section
+            </p>
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                id="data_permission"
+                name="data_permission"
+                class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <span class="ml-2 text-sm text-gray-900">
+                I agree that IDAIC have permission to process my data and host this information on the member section of the IDAIC website
+              </span>
+            </label>
+          </div>
+
+          <!-- Additional Information -->
+          <div class="border-b pb-6">
+            <h3 class="text-base font-semibold mb-4 text-gray-900">
+              Additional Information
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div class="lg:col-span-2">
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  id="category"
+                  name="category"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Organization Description
+                </label>
+                <textarea
+                  id="organization_description"
+                  name="organization_description"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  AI Decarbonisation
+                </label>
+                <textarea
+                  id="ai_decarbonisation"
+                  name="ai_decarbonisation"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Challenges
+                </label>
+                <textarea
+                  id="challenges"
+                  name="challenges"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Contribution
+                </label>
+                <textarea
+                  id="contribution"
+                  name="contribution"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  Projects
+                </label>
+                <textarea
+                  id="projects"
+                  name="projects"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                ></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1 text-gray-900">
+                  AI Tools
+                </label>
+                <textarea
+                  id="ai_tools"
+                  name="ai_tools"
+                  rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                ></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-center">
+            <button
+              type="submit"
+              id="submit-btn"
+              class="px-8 py-3 bg-orange-500 text-white rounded-md text-base font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Submit Registration
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="mt-8 bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4 text-gray-900">
+          Disclaimer
+        </h2>
+        <div class="text-sm space-y-3 text-gray-600">
+          <p>
+            This form is managed by Nexus Climate. By submitting this form you agree that Nexus Climate will store and process the information you submit for the purpose of administering your participation in IDAIC and managing related activities. You agree that your information will be shared with the IDAIC team, Cleantech for UK, and Innovate UK for the purposes of running the coalition and its activities.
+          </p>
+          <p>
+            You can unsubscribe from these communications at any time by contacting info@nexusclimate.vc
+          </p>
+          <p class="italic text-xs text-gray-600">
+            Nexus Climate is the trading name of Nexus Climate LTD, a company incorporated in England and Wales with company number 15267106, and Nexus Climate Consultancy Ltd, registered in the Dubai International Financial Center (DIFC), Dubai, UAE, under registration number 425675 and licence number CL8040. For more details on how we handle your personal data, please review our{' '}
+            <a 
+              href="https://nexusclimate.vc/privacy-policy" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-orange-500 hover:text-orange-600 underline"
+            >
+              Privacy Policy
+            </a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fetch IDAIC logo from organizations database
+    async function loadIdaicLogo() {
+      try {
+        const response = await fetch('/.netlify/functions/orgs');
+        if (response.ok) {
+          const orgs = await response.json();
+          // Find IDAIC organization - check for various possible names
+          const idaic = orgs.find(org => 
+            org.name && (
+              org.name.toLowerCase().includes('idaic') ||
+              org.name.toLowerCase() === 'idaic'
+            ) && org.logo_url
+          );
+          if (idaic && idaic.logo_url) {
+            const logoImg = document.getElementById('idaic-logo');
+            logoImg.src = idaic.logo_url;
+            logoImg.style.display = 'block';
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching IDAIC logo:', err);
+      }
+    }
+
+    // Load logo on page load
+    loadIdaicLogo();
+
+    const form = document.getElementById('registration-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Hide previous messages
+      successMessage.classList.add('hidden');
+      errorMessage.classList.add('hidden');
+      
+      // Disable submit button
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      
+      // Collect form data
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        company: document.getElementById('company').value.trim(),
+        title: document.getElementById('title').value.trim(),
+        region: document.getElementById('region').value,
+        linkedin_url: document.getElementById('linkedin_url').value.trim(),
+        data_permission: document.getElementById('data_permission').checked,
+        category: document.getElementById('category').value.trim(),
+        other_category: '',
+        organization_description: document.getElementById('organization_description').value.trim(),
+        ai_decarbonisation: document.getElementById('ai_decarbonisation').value.trim(),
+        challenges: document.getElementById('challenges').value.trim(),
+        contribution: document.getElementById('contribution').value.trim(),
+        projects: document.getElementById('projects').value.trim(),
+        ai_tools: document.getElementById('ai_tools').value.trim(),
+        approved: false
+      };
+
+      try {
+        const response = await fetch('/.netlify/functions/userProfile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to submit form');
+        }
+
+        // Show success message
+        successMessage.classList.remove('hidden');
+        
+        // Reset form
+        form.reset();
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        // Show error message
+        errorText.textContent = err.message;
+        errorMessage.classList.remove('hidden');
+        
+        // Scroll to error message
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } finally {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Registration';
+      }
+    });
+  </script>
+</body>
+</html>
+
