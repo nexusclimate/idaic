@@ -370,9 +370,21 @@ export default function UserAdmin({ onUserSelect }) {
 
       <div className="mt-2 flow-root">
         <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
-          <div className="inline-block min-w-full align-middle">
-            <div className="overflow-x-auto overflow-y-auto" style={{ maxWidth: '100%', maxHeight: 'calc(100vh - 300px)' }}>
-              <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
+          <div className="inline-block min-w-full align-middle w-full">
+            <div 
+              className="overflow-x-auto overflow-y-auto shadow ring-1 ring-black ring-opacity-5 rounded-lg" 
+              style={{ 
+                maxHeight: 'calc(100vh - 300px)',
+                width: '100%'
+              }}
+            >
+              <table 
+                className="min-w-full border-separate border-spacing-0" 
+                style={{ 
+                  fontFamily: font.primary,
+                  minWidth: '1200px' // Ensure minimum width for all columns
+                }}
+              >
                 <thead>
                   <tr>
                     <th
@@ -481,6 +493,13 @@ export default function UserAdmin({ onUserSelect }) {
                       scope="col"
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
+                      Actions
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                       colSpan="5"
                     >
                       Newsletter Subscriptions
@@ -499,7 +518,7 @@ export default function UserAdmin({ onUserSelect }) {
                   </tr>
                   <tr>
                     <th 
-                      colSpan="10" 
+                      colSpan="11" 
                       className="sticky top-0 z-10 border-b bg-white/75 backdrop-blur-sm backdrop-filter"
                       style={{ borderColor: colors.border.medium }}
                     ></th>
@@ -673,90 +692,71 @@ export default function UserAdmin({ onUserSelect }) {
                           )}
                           style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
                         >
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {editingRole === user.id ? (
-                              <>
-                                <select
-                                  value={user.role || 'member'}
-                                  onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
-                                  disabled={roleUpdateLoading}
-                                  className="text-xs border rounded px-1 py-0.5"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <option value="new">New</option>
-                                  <option value="member">Member</option>
-                                  <option value="moderator">Moderator</option>
-                                  <option value="admin">Admin</option>
-                                  <option value="declined">Declined</option>
-                                </select>
-                                {(user.role === 'new' || user.role?.toLowerCase() === 'new') && (
-                                  <>
-                                    <button
-                                      onClick={(e) => handleApprove(user.id, e)}
-                                      disabled={roleUpdateLoading}
-                                      className="px-2 py-0.5 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                                      title="Approve user"
-                                    >
-                                      Approve
-                                    </button>
-                                    <button
-                                      onClick={(e) => handleDecline(user.id, e)}
-                                      disabled={roleUpdateLoading}
-                                      className="px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                                      title="Decline user"
-                                    >
-                                      Decline
-                                    </button>
-                                  </>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <span 
-                                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:bg-gray-100 ${
-                                    user.role === 'admin' 
-                                      ? 'bg-red-100 text-red-800' 
-                                      : user.role === 'moderator'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : user.role === 'member'
-                                      ? 'bg-green-100 text-green-800'
-                                      : user.role === 'new'
-                                      ? 'bg-orange-100 text-orange-800'
-                                      : user.role === 'declined'
-                                      ? 'bg-gray-200 text-gray-700'
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingRole(user.id);
-                                  }}
-                                  title="Click to edit role"
-                                >
-                                  {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
-                                </span>
-                                {(user.role === 'new' || user.role?.toLowerCase() === 'new') && (
-                                  <>
-                                    <button
-                                      onClick={(e) => handleApprove(user.id, e)}
-                                      disabled={roleUpdateLoading}
-                                      className="px-2 py-0.5 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                                      title="Approve user"
-                                    >
-                                      Approve
-                                    </button>
-                                    <button
-                                      onClick={(e) => handleDecline(user.id, e)}
-                                      disabled={roleUpdateLoading}
-                                      className="px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                                      title="Decline user"
-                                    >
-                                      Decline
-                                    </button>
-                                  </>
-                                )}
-                              </>
-                            )}
-                          </div>
+                          {editingRole === user.id ? (
+                            <select
+                              value={user.role || 'member'}
+                              onChange={(e) => handleRoleUpdate(user.id, e.target.value)}
+                              disabled={roleUpdateLoading}
+                              className="text-xs border rounded px-1 py-0.5"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <option value="new">New</option>
+                              <option value="member">Member</option>
+                              <option value="moderator">Moderator</option>
+                              <option value="admin">Admin</option>
+                              <option value="declined">Declined</option>
+                            </select>
+                          ) : (
+                            <span 
+                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:bg-gray-100 ${
+                                user.role === 'admin' 
+                                  ? 'bg-red-100 text-red-800' 
+                                  : user.role === 'moderator'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : user.role === 'member'
+                                  ? 'bg-green-100 text-green-800'
+                                  : user.role === 'new'
+                                  ? 'bg-orange-100 text-orange-800'
+                                  : user.role === 'declined'
+                                  ? 'bg-gray-200 text-gray-700'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingRole(user.id);
+                              }}
+                              title="Click to edit role"
+                            >
+                              {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
+                            </span>
+                          )}
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap',
+                          )}
+                          style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        >
+                          {(user.role === 'new' || user.role?.toLowerCase() === 'new') && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => handleApprove(user.id, e)}
+                                disabled={roleUpdateLoading}
+                                className="px-2 py-0.5 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                title="Approve user"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={(e) => handleDecline(user.id, e)}
+                                disabled={roleUpdateLoading}
+                                className="px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                                title="Decline user"
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          )}
                         </td>
                         {/* Newsletter Subscription Columns */}
                         <td

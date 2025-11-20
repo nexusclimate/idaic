@@ -286,17 +286,99 @@ export default function UserFormView({ initialUser }) {
                       <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
                         User Role
                       </label>
-                      <select
-                        value={formData.role || 'member'}
-                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
-                      >
-                        <option value="new">New</option>
-                        <option value="member">Member</option>
-                        <option value="moderator">Moderator</option>
-                        <option value="admin">Admin</option>
-                        <option value="declined">Declined</option>
-                      </select>
+                      <div className="flex items-end gap-2">
+                        <select
+                          value={formData.role || 'member'}
+                          onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                        >
+                          <option value="new">New</option>
+                          <option value="member">Member</option>
+                          <option value="moderator">Moderator</option>
+                          <option value="admin">Admin</option>
+                          <option value="declined">Declined</option>
+                        </select>
+                        {(formData.role === 'new' || formData.role?.toLowerCase() === 'new') && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!selectedUser?.id) return;
+                                setSaving(true);
+                                setError('');
+                                setSuccess('');
+                                try {
+                                  const response = await fetch(`/.netlify/functions/userProfile?id=${selectedUser.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ role: 'member', updated_by: user?.id })
+                                  });
+                                  if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.error || 'Failed to approve user');
+                                  }
+                                  setFormData({ ...formData, role: 'member' });
+                                  setSuccess('User approved successfully!');
+                                  // Reload user data
+                                  await fetchUsers();
+                                  const updatedUsers = await fetch('/.netlify/functions/userAdminFetch').then(r => r.json());
+                                  const updatedUser = updatedUsers.find(u => u.id === selectedUser.id);
+                                  if (updatedUser) {
+                                    loadUserData(updatedUser);
+                                  }
+                                } catch (err) {
+                                  setError('Failed to approve user: ' + err.message);
+                                } finally {
+                                  setSaving(false);
+                                }
+                              }}
+                              disabled={saving}
+                              className="px-3 py-2 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                              title="Approve user"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!selectedUser?.id) return;
+                                setSaving(true);
+                                setError('');
+                                setSuccess('');
+                                try {
+                                  const response = await fetch(`/.netlify/functions/userProfile?id=${selectedUser.id}`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ role: 'declined', updated_by: user?.id })
+                                  });
+                                  if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.error || 'Failed to decline user');
+                                  }
+                                  setFormData({ ...formData, role: 'declined' });
+                                  setSuccess('User declined successfully!');
+                                  // Reload user data
+                                  await fetchUsers();
+                                  const updatedUsers = await fetch('/.netlify/functions/userAdminFetch').then(r => r.json());
+                                  const updatedUser = updatedUsers.find(u => u.id === selectedUser.id);
+                                  if (updatedUser) {
+                                    loadUserData(updatedUser);
+                                  }
+                                } catch (err) {
+                                  setError('Failed to decline user: ' + err.message);
+                                } finally {
+                                  setSaving(false);
+                                }
+                              }}
+                              disabled={saving}
+                              className="px-3 py-2 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                              title="Decline user"
+                            >
+                              Decline
+                            </button>
+                          </>
+                        )}
+                      </div>
                       <p className="text-xs mt-1" style={{ color: colors.text.secondary }}>
                         Only admins can change roles.
                       </p>
