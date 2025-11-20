@@ -31,10 +31,15 @@
 
 [[redirects]]
   from = "/newuser-form"
-  to = "/newuser-form.html"
+  to = "/newmember-form.html"
   status = 200
 
 [[redirects]]
   from = "/newmember-signup"
-  to = "/newuser-form.html"
+  to = "/newmember-form.html"
+  status = 200
+
+[[redirects]]
+  from = "/newmember-form"
+  to = "/newmember-form.html"
   status = 200
