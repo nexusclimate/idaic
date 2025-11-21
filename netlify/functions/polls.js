@@ -43,7 +43,7 @@ exports.handler = async function (event, context) {
           // Count votes per time slot
           const voteCounts = {};
           poll.time_slots.forEach((slot, index) => {
-            voteCounts[index] = votes.filter(v => v.time_slot_index === index).length;
+            voteCounts[index] = votes.filter(v => (v.selected_slot_index !== undefined ? v.selected_slot_index : v.time_slot_index) === index).length;
           });
 
           return { 
@@ -55,7 +55,7 @@ exports.handler = async function (event, context) {
             }) 
           };
         } else if (event_id) {
-          // Get poll for specific event
+          // Get poll by event_id (for poll page using event UUID)
           const { data: poll, error: pollError } = await supabase
             .from('polls')
             .select('*')
@@ -66,7 +66,43 @@ exports.handler = async function (event, context) {
             return { statusCode: 500, body: JSON.stringify({ error: pollError.message }) };
           }
           
-          return { statusCode: 200, body: JSON.stringify(poll || null) };
+          if (!poll) {
+            return { statusCode: 404, body: JSON.stringify({ error: 'Poll not found' }) };
+          }
+
+          // Get votes for this poll
+          const { data: votes, error: votesError } = await supabase
+            .from('poll_votes')
+            .select('*')
+            .eq('poll_id', poll.id)
+            .order('created_at', { ascending: false });
+          
+          if (votesError) {
+            return { statusCode: 500, body: JSON.stringify({ error: votesError.message }) };
+          }
+
+          // Count votes per time slot
+          const voteCounts = {};
+          poll.time_slots.forEach((slot, index) => {
+            voteCounts[index] = votes.filter(v => (v.selected_slot_index !== undefined ? v.selected_slot_index : v.time_slot_index) === index).length;
+          });
+
+          // Get event details
+          const { data: eventData, error: eventError } = await supabase
+            .from('events')
+            .select('*')
+            .eq('id', event_id)
+            .maybeSingle();
+
+          return { 
+            statusCode: 200, 
+            body: JSON.stringify({ 
+              ...poll, 
+              votes: votes || [],
+              voteCounts,
+              event: eventData || null
+            }) 
+          };
         } else {
           // Get all polls
           const { data, error } = await supabase
@@ -98,6 +134,7 @@ exports.handler = async function (event, context) {
           id: pollId,
           event_id: pollData.event_id,
           time_slots: pollData.time_slots,
+          deadline: pollData.deadline || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };

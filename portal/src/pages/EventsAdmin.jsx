@@ -89,7 +89,37 @@ export default function EventsAdmin() {
       }
 
       const createdEvent = await response.json();
-      setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
+      
+      // Create poll if poll data is provided
+      if (eventData.create_poll && eventData.poll_time_slot_1 && eventData.poll_time_slot_2 && eventData.poll_time_slot_3 && eventData.poll_deadline) {
+        try {
+          const pollResponse = await fetch('/.netlify/functions/polls', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_id: createdEvent.id,
+              time_slots: [
+                eventData.poll_time_slot_1,
+                eventData.poll_time_slot_2,
+                eventData.poll_time_slot_3
+              ],
+              deadline: eventData.poll_deadline
+            })
+          });
+          
+          if (pollResponse.ok) {
+            setSuccess(`Event and poll created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id} | Poll URL: idaic.nexusclimate.co/poll-${createdEvent.id}`);
+          } else {
+            setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
+          }
+        } catch (pollErr) {
+          console.error('Error creating poll:', pollErr);
+          setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
+        }
+      } else {
+        setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
+      }
+      
       await fetchEvents();
       // Note: Modal will close itself via onClose in handleSubmit
     } catch (err) {
@@ -553,7 +583,13 @@ function EventFormModal({ event, onSave, onClose }) {
     description: event?.description || '',
     agenda: event?.agenda || '',
     registration_link: event?.registration_link || '',
-    is_idaic_event: event?.is_idaic_event || false
+    is_idaic_event: event?.is_idaic_event || false,
+    // Poll fields
+    create_poll: event?.poll_id ? true : false,
+    poll_time_slot_1: '',
+    poll_time_slot_2: '',
+    poll_time_slot_3: '',
+    poll_deadline: ''
   });
   const [saving, setSaving] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
@@ -612,6 +648,31 @@ function EventFormModal({ event, onSave, onClose }) {
               const createdEvent = await response.json();
               setCreatedEventId(createdEvent.id);
               setLastSaved(new Date());
+              
+              // Create poll if poll fields are filled
+              if (formData.create_poll && formData.poll_time_slot_1 && formData.poll_time_slot_2 && formData.poll_time_slot_3 && formData.poll_deadline) {
+                try {
+                  const pollResponse = await fetch('/.netlify/functions/polls', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      event_id: createdEvent.id,
+                      time_slots: [
+                        formData.poll_time_slot_1,
+                        formData.poll_time_slot_2,
+                        formData.poll_time_slot_3
+                      ],
+                      deadline: formData.poll_deadline
+                    })
+                  });
+                  if (pollResponse.ok) {
+                    console.log('Poll created successfully');
+                  }
+                } catch (pollErr) {
+                  console.error('Error creating poll:', pollErr);
+                }
+              }
+              
               // Update parent component
               await onSave(createdEvent.id, formData);
             }
@@ -637,11 +698,60 @@ function EventFormModal({ event, onSave, onClose }) {
       return;
     }
 
+    // Validate poll fields if poll is being created
+    if (formData.create_poll) {
+      if (!formData.poll_time_slot_1 || !formData.poll_time_slot_2 || !formData.poll_time_slot_3 || !formData.poll_deadline) {
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       if (createdEventId) {
         // Final save of existing event
         await onSave(createdEventId, formData);
+        
+        // Create/update poll if needed
+        if (formData.create_poll && formData.poll_time_slot_1 && formData.poll_time_slot_2 && formData.poll_time_slot_3 && formData.poll_deadline) {
+          try {
+            // Check if poll already exists
+            const pollCheckResponse = await fetch(`/.netlify/functions/polls?event_id=${createdEventId}`);
+            const existingPoll = pollCheckResponse.ok ? await pollCheckResponse.json() : null;
+            
+            if (existingPoll && existingPoll.id) {
+              // Update existing poll
+              await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  time_slots: [
+                    formData.poll_time_slot_1,
+                    formData.poll_time_slot_2,
+                    formData.poll_time_slot_3
+                  ],
+                  deadline: formData.poll_deadline
+                })
+              });
+            } else {
+              // Create new poll
+              await fetch('/.netlify/functions/polls', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  event_id: createdEventId,
+                  time_slots: [
+                    formData.poll_time_slot_1,
+                    formData.poll_time_slot_2,
+                    formData.poll_time_slot_3
+                  ],
+                  deadline: formData.poll_deadline
+                })
+              });
+            }
+          } catch (pollErr) {
+            console.error('Error creating/updating poll:', pollErr);
+          }
+        }
       } else {
         // Create new event (shouldn't happen if auto-save worked, but fallback)
         await onSave(undefined, formData);
@@ -779,6 +889,76 @@ function EventFormModal({ event, onSave, onClose }) {
             <label htmlFor="is_idaic_event" className="ml-2 text-sm" style={{ color: colors.text.primary }}>
               IDAIC Event
             </label>
+          </div>
+
+          {/* Poll Section */}
+          <div className="border-t pt-4 mt-4">
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="create_poll"
+                checked={formData.create_poll}
+                onChange={(e) => setFormData({ ...formData, create_poll: e.target.checked })}
+                className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+              />
+              <label htmlFor="create_poll" className="ml-2 text-sm font-medium" style={{ color: colors.text.primary }}>
+                Create Poll for Time Selection
+              </label>
+            </div>
+
+            {formData.create_poll && (
+              <div className="space-y-4 pl-6 border-l-2 border-orange-200">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                    Poll Time Slot 1 *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.poll_time_slot_1}
+                    onChange={(e) => setFormData({ ...formData, poll_time_slot_1: e.target.value })}
+                    required={formData.create_poll}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                    Poll Time Slot 2 *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.poll_time_slot_2}
+                    onChange={(e) => setFormData({ ...formData, poll_time_slot_2: e.target.value })}
+                    required={formData.create_poll}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                    Poll Time Slot 3 *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.poll_time_slot_3}
+                    onChange={(e) => setFormData({ ...formData, poll_time_slot_3: e.target.value })}
+                    required={formData.create_poll}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                    Poll Deadline *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.poll_deadline}
+                    onChange={(e) => setFormData({ ...formData, poll_deadline: e.target.value })}
+                    required={formData.create_poll}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Voting will close at this date and time</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

@@ -33,10 +33,13 @@ exports.handler = async function (event, context) {
       case 'POST': {
         const voteData = JSON.parse(event.body);
         
-        if (!voteData.poll_id || voteData.time_slot_index === undefined || !voteData.name || !voteData.email) {
+        // Support both time_slot_index and selected_slot_index
+        const slotIndex = voteData.selected_slot_index !== undefined ? voteData.selected_slot_index : voteData.time_slot_index;
+        
+        if (!voteData.poll_id || slotIndex === undefined || !voteData.name || !voteData.email) {
           return {
             statusCode: 400,
-            body: JSON.stringify({ error: 'poll_id, time_slot_index, name, and email are required' })
+            body: JSON.stringify({ error: 'poll_id, selected_slot_index (or time_slot_index), name, and email are required' })
           };
         }
 
@@ -53,7 +56,7 @@ exports.handler = async function (event, context) {
           const { data, error } = await supabase
             .from('poll_votes')
             .update({
-              time_slot_index: voteData.time_slot_index,
+              selected_slot_index: slotIndex,
               name: voteData.name,
               updated_at: new Date().toISOString()
             })
@@ -69,7 +72,7 @@ exports.handler = async function (event, context) {
         // Create new vote
         const newVote = {
           poll_id: voteData.poll_id,
-          time_slot_index: voteData.time_slot_index,
+          selected_slot_index: slotIndex,
           name: voteData.name,
           email: voteData.email,
           company: voteData.company || null,
