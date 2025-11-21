@@ -88,7 +88,10 @@ export default function Admin({ user }) {
 
         {activeTab === 'user_form' && (
           <div className="w-full h-full min-h-0" style={{ overflow: 'hidden' }}>
-            <UserFormView initialUser={selectedUser} />
+            <UserFormView 
+              initialUser={selectedUser} 
+              onNavigateToUserAdmin={() => setActiveTab('user_admin')}
+            />
           </div>
         )}
 

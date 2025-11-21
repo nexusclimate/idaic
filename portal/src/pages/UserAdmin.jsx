@@ -97,11 +97,11 @@ export default function UserAdmin({ onUserSelect }) {
     const daysDiff = hoursDiff / 24;
 
     if (hoursDiff <= 4) {
-      return { color: 'bg-green-500', label: 'Active now' };
+      return { color: 'bg-green-400', label: 'Active within last 4 hours' };
     } else if (hoursDiff <= 48) {
-      return { color: 'bg-orange-500', label: 'Last 48 hours' };
-    } else if (daysDiff <= 10) {
-      return { color: 'bg-yellow-500', label: 'Last 10 days' };
+      return { color: 'bg-green-600', label: 'Active within last 48 hours' };
+    } else if (daysDiff <= 5) {
+      return { color: 'bg-orange-500', label: 'Active within last 5 days' };
     } else if (daysDiff <= 30) {
       return { color: 'bg-purple-500', label: 'Last 30 days' };
     } else {
@@ -411,20 +411,24 @@ export default function UserAdmin({ onUserSelect }) {
         <p className="text-xs font-semibold mb-2" style={{ color: colors.text.primary }}>Activity Status:</p>
         <div className="flex flex-wrap gap-3 text-xs">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-            <span style={{ color: colors.text.secondary }}>Active (4 hours)</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+            <span style={{ color: colors.text.secondary }}>Active within last 4 hours</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-600"></span>
+            <span style={{ color: colors.text.secondary }}>Active within last 48 hours</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
-            <span style={{ color: colors.text.secondary }}>Recent (48 hours)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
-            <span style={{ color: colors.text.secondary }}>Last 10 days</span>
+            <span style={{ color: colors.text.secondary }}>Active within last 5 days</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
             <span style={{ color: colors.text.secondary }}>Last 30 days</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+            <span style={{ color: colors.text.secondary }}>Over 30 days</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500"></span>

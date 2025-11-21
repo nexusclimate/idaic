@@ -3,7 +3,7 @@ import { colors, font } from '../config/colors';
 import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 import { useUser } from '../hooks/useUser';
 
-export default function UserFormView({ initialUser }) {
+export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
   const { user } = useUser();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
@@ -187,7 +187,13 @@ export default function UserFormView({ initialUser }) {
         ai_tools: ''
       });
       
+      // Refresh users list
       await fetchUsers();
+      
+      // Navigate back to user admin tab
+      if (onNavigateToUserAdmin) {
+        onNavigateToUserAdmin();
+      }
     } catch (err) {
       setError(err.message);
     } finally {
