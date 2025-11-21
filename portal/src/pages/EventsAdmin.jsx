@@ -627,10 +627,32 @@ function EventFormModal({ event, onSave, onClose }) {
   const [lastSaved, setLastSaved] = useState(null);
   const autoSaveTimeoutRef = useRef(null);
 
+  // Helper function to round time to :00 or :30
+  const roundTimeToHalfHour = (timeString) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+    const mins = parseInt(minutes);
+    const roundedMins = mins < 15 ? '00' : mins < 45 ? '30' : '00';
+    // If rounding to 00 and original was >= 45, increment hour
+    if (mins >= 45) {
+      const newHour = (parseInt(hours) + 1) % 24;
+      return `${String(newHour).padStart(2, '0')}:00`;
+    }
+    return `${hours}:${roundedMins}`;
+  };
+
+  // Helper function to add 2 hours to a time string
+  const addTwoHours = (timeString) => {
+    if (!timeString) return '';
+    const [hours, minutes] = timeString.split(':');
+    const newHour = (parseInt(hours) + 2) % 24;
+    return `${String(newHour).padStart(2, '0')}:${minutes}`;
+  };
+
   // Auto-save effect - debounced
   useEffect(() => {
-    // Only auto-save if we have title and date (minimum required fields)
-    if (!formData.title || !formData.event_date) {
+    // Only auto-save if we have title (and date if not creating poll)
+    if (!formData.title || (!formData.create_poll && !formData.event_date)) {
       return;
     }
 
@@ -877,15 +899,18 @@ function EventFormModal({ event, onSave, onClose }) {
 
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-              Event Date & Time *
+              Event Date & Time {!formData.create_poll && '*'}
             </label>
             <input
               type="datetime-local"
               value={formData.event_date}
               onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
-              required
+              required={!formData.create_poll}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+            {formData.create_poll && (
+              <p className="text-xs text-gray-500 mt-1">Optional when creating a poll - can be set later</p>
+            )}
           </div>
 
           <div>
@@ -994,22 +1019,35 @@ function EventFormModal({ event, onSave, onClose }) {
                       <input
                         type="time"
                         value={formData.poll_slot_1_start}
-                        onChange={(e) => setFormData({ ...formData, poll_slot_1_start: e.target.value })}
+                        onChange={(e) => {
+                          const roundedTime = roundTimeToHalfHour(e.target.value);
+                          const newEndTime = addTwoHours(roundedTime);
+                          setFormData({ 
+                            ...formData, 
+                            poll_slot_1_start: roundedTime,
+                            poll_slot_1_end: newEndTime
+                          });
+                        }}
                         required={formData.create_poll}
                         step="1800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
+                      <p className="text-xs text-gray-400 mt-0.5">Only :00 or :30</p>
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">End Time</label>
                       <input
                         type="time"
                         value={formData.poll_slot_1_end}
-                        onChange={(e) => setFormData({ ...formData, poll_slot_1_end: e.target.value })}
+                        onChange={(e) => {
+                          const roundedTime = roundTimeToHalfHour(e.target.value);
+                          setFormData({ ...formData, poll_slot_1_end: roundedTime });
+                        }}
                         required={formData.create_poll}
                         step="1800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
+                      <p className="text-xs text-gray-400 mt-0.5">Defaults to +2 hours</p>
                     </div>
                   </div>
                 </div>
@@ -1035,22 +1073,35 @@ function EventFormModal({ event, onSave, onClose }) {
                       <input
                         type="time"
                         value={formData.poll_slot_2_start}
-                        onChange={(e) => setFormData({ ...formData, poll_slot_2_start: e.target.value })}
+                        onChange={(e) => {
+                          const roundedTime = roundTimeToHalfHour(e.target.value);
+                          const newEndTime = addTwoHours(roundedTime);
+                          setFormData({ 
+                            ...formData, 
+                            poll_slot_2_start: roundedTime,
+                            poll_slot_2_end: newEndTime
+                          });
+                        }}
                         required={formData.create_poll}
                         step="1800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
+                      <p className="text-xs text-gray-400 mt-0.5">Only :00 or :30</p>
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">End Time</label>
                       <input
                         type="time"
                         value={formData.poll_slot_2_end}
-                        onChange={(e) => setFormData({ ...formData, poll_slot_2_end: e.target.value })}
+                        onChange={(e) => {
+                          const roundedTime = roundTimeToHalfHour(e.target.value);
+                          setFormData({ ...formData, poll_slot_2_end: roundedTime });
+                        }}
                         required={formData.create_poll}
                         step="1800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
+                      <p className="text-xs text-gray-400 mt-0.5">Defaults to +2 hours</p>
                     </div>
                   </div>
                 </div>
@@ -1076,22 +1127,35 @@ function EventFormModal({ event, onSave, onClose }) {
                       <input
                         type="time"
                         value={formData.poll_slot_3_start}
-                        onChange={(e) => setFormData({ ...formData, poll_slot_3_start: e.target.value })}
+                        onChange={(e) => {
+                          const roundedTime = roundTimeToHalfHour(e.target.value);
+                          const newEndTime = addTwoHours(roundedTime);
+                          setFormData({ 
+                            ...formData, 
+                            poll_slot_3_start: roundedTime,
+                            poll_slot_3_end: newEndTime
+                          });
+                        }}
                         required={formData.create_poll}
                         step="1800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
+                      <p className="text-xs text-gray-400 mt-0.5">Only :00 or :30</p>
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">End Time</label>
                       <input
                         type="time"
                         value={formData.poll_slot_3_end}
-                        onChange={(e) => setFormData({ ...formData, poll_slot_3_end: e.target.value })}
+                        onChange={(e) => {
+                          const roundedTime = roundTimeToHalfHour(e.target.value);
+                          setFormData({ ...formData, poll_slot_3_end: roundedTime });
+                        }}
                         required={formData.create_poll}
                         step="1800"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
+                      <p className="text-xs text-gray-400 mt-0.5">Defaults to +2 hours</p>
                     </div>
                   </div>
                 </div>
@@ -1124,7 +1188,7 @@ function EventFormModal({ event, onSave, onClose }) {
             </button>
             <button
               type="submit"
-              disabled={saving || !formData.title || !formData.event_date}
+              disabled={saving || !formData.title || (!formData.create_poll && !formData.event_date)}
               className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Saving...' : createdEventId ? 'Save & Close' : 'Create & Close'}
