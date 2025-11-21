@@ -34,6 +34,10 @@ exports.handler = async function (event, context) {
         if (!eventData.updated_at) {
           eventData.updated_at = new Date().toISOString();
         }
+        // Convert empty strings to null for date fields
+        if (eventData.event_date === '' || eventData.event_date === null || eventData.event_date === undefined) {
+          eventData.event_date = null;
+        }
         const { data: newEvent, error: insertError } = await supabase
           .from('events')
           .insert([eventData])
@@ -48,6 +52,10 @@ exports.handler = async function (event, context) {
         const updates = JSON.parse(event.body);
         if (!id) {
           return { statusCode: 400, body: JSON.stringify({ error: 'Event ID is required' }) };
+        }
+        // Convert empty strings to null for date fields
+        if (updates.event_date === '' || updates.event_date === null || updates.event_date === undefined) {
+          updates.event_date = null;
         }
         const { data: updatedEvent, error: updateError } = await supabase
           .from('events')

@@ -11,6 +11,8 @@ export default function EventsAdmin() {
   const [showPollForm, setShowPollForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [registrations, setRegistrations] = useState({}); // event_id -> registrations array
+  const [polls, setPolls] = useState({}); // event_id -> poll data with votes
+  const [collapsedSections, setCollapsedSections] = useState({}); // event_id -> boolean
   const [search, setSearch] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [eventToDelete, setEventToDelete] = useState(null);
@@ -49,9 +51,12 @@ export default function EventsAdmin() {
       setEvents(data);
       setError(null);
       
-      // Fetch registrations for each event
+      // Fetch registrations and polls for each event
       for (const event of data) {
         await fetchRegistrations(event.id);
+        if (event.poll_id) {
+          await fetchPollData(event.id);
+        }
       }
     } catch (err) {
       setError('Failed to load events: ' + err.message);
@@ -71,14 +76,40 @@ export default function EventsAdmin() {
     }
   };
 
+  const fetchPollData = async (eventId) => {
+    try {
+      const response = await fetch(`/.netlify/functions/polls?event_id=${eventId}`);
+      if (response.ok) {
+        const pollData = await response.json();
+        setPolls(prev => ({ ...prev, [eventId]: pollData }));
+      }
+    } catch (err) {
+      console.error('Error fetching poll data:', err);
+    }
+  };
+
+  const toggleSection = (eventId) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [eventId]: !prev[eventId]
+    }));
+  };
+
   const handleCreateEvent = async (eventData) => {
     try {
       // Generate UUID for the event (backend will also generate if not provided)
       const eventId = crypto.randomUUID();
       // Exclude poll fields from event data
       const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
+      
+      // Convert empty strings to null for date fields
+      const cleanedEventFields = { ...eventFields };
+      if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
+        cleanedEventFields.event_date = null;
+      }
+      
       const newEvent = {
-        ...eventFields,
+        ...cleanedEventFields,
         id: eventId
       };
 
@@ -156,11 +187,18 @@ export default function EventsAdmin() {
     try {
       // Exclude poll fields from event data
       const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
+      
+      // Convert empty strings to null for date fields
+      const cleanedEventFields = { ...eventFields };
+      if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
+        cleanedEventFields.event_date = null;
+      }
+      
       const response = await fetch(`/.netlify/functions/events?id=${eventId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...eventFields,
+          ...cleanedEventFields,
           updated_at: new Date().toISOString()
         })
       });
@@ -194,6 +232,10 @@ export default function EventsAdmin() {
       const createdPoll = await response.json();
       setSuccess(`Poll created successfully! Poll URL: idaic.nexusclimate.co/poll-${createdPoll.id}`);
       await fetchEvents();
+      // Refresh poll data for the event
+      if (pollData.event_id) {
+        await fetchPollData(pollData.event_id);
+      }
     } catch (err) {
       setError('Failed to create poll: ' + err.message);
     }
@@ -373,12 +415,95 @@ export default function EventsAdmin() {
                 </div>
               </div>
 
+              {/* Poll Results Section */}
+              {event.poll_id && polls[event.id] && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="font-semibold mb-2" style={{ color: colors.text.primary }}>
+                    Poll Results
+                  </h4>
+                  {(() => {
+                    const poll = polls[event.id];
+                    const voteCounts = poll.voteCounts || {};
+                    const timeSlots = poll.time_slots || [];
+                    
+                    // Find max votes
+                    const maxVotes = Math.max(...Object.values(voteCounts), 0);
+                    
+                    // Find all slots with max votes (top votes)
+                    const topSlots = [];
+                    timeSlots.forEach((slot, index) => {
+                      if (voteCounts[index] === maxVotes && maxVotes > 0) {
+                        topSlots.push({ index, slot, votes: maxVotes });
+                      }
+                    });
+                    
+                    // Format date helper
+                    const formatSlotDate = (slotDate) => {
+                      const date = new Date(slotDate);
+                      return date.toLocaleDateString('en-GB', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      });
+                    };
+                    
+                    return (
+                      <div className="space-y-2">
+                        {topSlots.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {topSlots.map(({ index, slot, votes }) => (
+                              <div
+                                key={index}
+                                className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-sm"
+                              >
+                                <div className="font-medium text-blue-900">
+                                  Option {index + 1}: {formatSlotDate(slot)}
+                                </div>
+                                <div className="text-xs text-blue-700 mt-0.5">
+                                  {votes} {votes === 1 ? 'vote' : 'votes'}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-500">No votes yet</p>
+                        )}
+                        {timeSlots.length > 0 && (
+                          <div className="text-xs text-gray-500 mt-2">
+                            All options: {timeSlots.map((slot, idx) => (
+                              <span key={idx} className="ml-2">
+                                Option {idx + 1}: {voteCounts[idx] || 0} {voteCounts[idx] === 1 ? 'vote' : 'votes'}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
               {/* Registrations Section */}
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold" style={{ color: colors.text.primary }}>
+                  <button
+                    onClick={() => toggleSection(event.id)}
+                    className="flex items-center gap-2 font-semibold hover:text-orange-500 transition-colors"
+                    style={{ color: colors.text.primary }}
+                  >
+                    <svg
+                      className={`w-4 h-4 transition-transform ${collapsedSections[event.id] ? '' : 'rotate-90'}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                     Registrations ({eventRegistrations.length})
-                  </h4>
+                  </button>
                   <button
                     onClick={() => fetchRegistrations(event.id)}
                     className="text-sm text-orange-500 hover:underline"
@@ -386,63 +511,67 @@ export default function EventsAdmin() {
                     Refresh
                   </button>
                 </div>
-                {eventRegistrations.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Name</th>
-                          <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Email</th>
-                          <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Company</th>
-                          <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Type</th>
-                          <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Registered</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {eventRegistrations.map((reg, idx) => (
-                          <tr key={reg.id || idx} className="border-b">
-                            <td className="py-2 px-2" style={{ color: colors.text.primary }}>
-                              {reg.name || '—'}
-                            </td>
-                            <td className="py-2 px-2" style={{ color: colors.text.primary }}>
-                              {reg.email || '—'}
-                            </td>
-                            <td className="py-2 px-2" style={{ color: colors.text.primary }}>
-                              {reg.company || '—'}
-                            </td>
-                            <td className="py-2 px-2" style={{ color: colors.text.primary }}>
-                              {reg.registration_type === 'new' ? (
-                                <span className="px-2 py-0.5 rounded text-xs bg-orange-100 text-orange-800">
-                                  New
-                                </span>
-                              ) : reg.user_role ? (
-                                <span className={`px-2 py-0.5 rounded text-xs ${
-                                  reg.user_role === 'admin' 
-                                    ? 'bg-red-100 text-red-800'
-                                    : reg.user_role === 'moderator'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : reg.user_role === 'member'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : 'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {reg.user_role.charAt(0).toUpperCase() + reg.user_role.slice(1)}
-                                </span>
-                              ) : (
-                                <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
-                                  External
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-2 px-2" style={{ color: colors.text.secondary }}>
-                              {formatDate(reg.created_at)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No registrations yet</p>
+                {!collapsedSections[event.id] && (
+                  <>
+                    {eventRegistrations.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Name</th>
+                              <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Email</th>
+                              <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Company</th>
+                              <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Type</th>
+                              <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Registered</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {eventRegistrations.map((reg, idx) => (
+                              <tr key={reg.id || idx} className="border-b">
+                                <td className="py-2 px-2" style={{ color: colors.text.primary }}>
+                                  {reg.name || '—'}
+                                </td>
+                                <td className="py-2 px-2" style={{ color: colors.text.primary }}>
+                                  {reg.email || '—'}
+                                </td>
+                                <td className="py-2 px-2" style={{ color: colors.text.primary }}>
+                                  {reg.company || '—'}
+                                </td>
+                                <td className="py-2 px-2" style={{ color: colors.text.primary }}>
+                                  {reg.registration_type === 'new' ? (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-orange-100 text-orange-800">
+                                      New
+                                    </span>
+                                  ) : reg.user_role ? (
+                                    <span className={`px-2 py-0.5 rounded text-xs ${
+                                      reg.user_role === 'admin' 
+                                        ? 'bg-red-100 text-red-800'
+                                        : reg.user_role === 'moderator'
+                                        ? 'bg-purple-100 text-purple-800'
+                                        : reg.user_role === 'member'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {reg.user_role.charAt(0).toUpperCase() + reg.user_role.slice(1)}
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
+                                      External
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-2" style={{ color: colors.text.secondary }}>
+                                  {formatDate(reg.created_at)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No registrations yet</p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -724,11 +853,18 @@ function EventFormModal({ event, onSave, onClose }) {
         if (createdEventId) {
           // Update existing event (exclude poll fields)
           const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
+          
+          // Convert empty strings to null for date fields
+          const cleanedEventData = { ...eventData };
+          if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
+            cleanedEventData.event_date = null;
+          }
+          
           const response = await fetch(`/.netlify/functions/events?id=${createdEventId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              ...eventData,
+              ...cleanedEventData,
               updated_at: new Date().toISOString()
             })
           });
