@@ -8,6 +8,7 @@ export default function EventsAdmin() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
   const [showEventForm, setShowEventForm] = useState(false);
+  const [showPollForm, setShowPollForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [registrations, setRegistrations] = useState({}); // event_id -> registrations array
   const [search, setSearch] = useState('');
@@ -117,6 +118,27 @@ export default function EventsAdmin() {
       // Note: Modal will close itself via onClose in handleSubmit
     } catch (err) {
       setError('Failed to update event: ' + err.message);
+    }
+  };
+
+  const handleCreatePoll = async (pollData) => {
+    try {
+      const response = await fetch('/.netlify/functions/polls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pollData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create poll');
+      }
+
+      const createdPoll = await response.json();
+      setSuccess(`Poll created successfully! Poll URL: idaic.nexusclimate.co/poll-${createdPoll.id}`);
+      await fetchEvents();
+    } catch (err) {
+      setError('Failed to create poll: ' + err.message);
     }
   };
 
@@ -241,9 +263,33 @@ export default function EventsAdmin() {
                         idaic.nexusclimate.co/events-{event.id}
                       </a>
                     </div>
+                    {event.poll_id && (
+                      <div className="mt-2">
+                        <strong>Poll URL:</strong>{' '}
+                        <a
+                          href={`/poll-${event.poll_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline"
+                        >
+                          idaic.nexusclimate.co/poll-{event.poll_id}
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
+                  {!event.poll_id && (
+                    <button
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setShowPollForm(true);
+                      }}
+                      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                    >
+                      Create Poll
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setSelectedEvent(event);
@@ -357,6 +403,143 @@ export default function EventsAdmin() {
           }}
         />
       )}
+
+      {/* Poll Form Modal */}
+      {showPollForm && (
+        <PollFormModal
+          event={selectedEvent}
+          onSave={async (pollData) => {
+            await handleCreatePoll(pollData);
+          }}
+          onClose={() => {
+            setShowPollForm(false);
+            setSelectedEvent(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// Poll Form Modal Component
+function PollFormModal({ event, onSave, onClose }) {
+  const [formData, setFormData] = useState({
+    time_slot_1: '',
+    time_slot_2: '',
+    time_slot_3: ''
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.time_slot_1 || !formData.time_slot_2 || !formData.time_slot_3) {
+      setError('All three time slots are required');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+    try {
+      const pollData = {
+        event_id: event.id,
+        time_slots: [
+          formData.time_slot_1,
+          formData.time_slot_2,
+          formData.time_slot_3
+        ]
+      };
+      await onSave(pollData);
+      onClose();
+      // Refresh events to show poll URL
+      window.location.reload();
+    } catch (err) {
+      setError('Failed to create poll: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div
+        className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold" style={{ color: colors.text.primary }}>
+            Create Poll for {event?.title}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 focus:outline-none"
+            aria-label="Close"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+              {error}
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+              Time Slot 1 *
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.time_slot_1}
+              onChange={(e) => setFormData({ ...formData, time_slot_1: e.target.value })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+              Time Slot 2 *
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.time_slot_2}
+              onChange={(e) => setFormData({ ...formData, time_slot_2: e.target.value })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+              Time Slot 3 *
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.time_slot_3}
+              onChange={(e) => setFormData({ ...formData, time_slot_3: e.target.value })}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 disabled:opacity-50"
+            >
+              {saving ? 'Creating...' : 'Create Poll'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

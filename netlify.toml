@@ -49,3 +49,9 @@
   from = "/events-*"
   to = "/event-page.html"
   status = 200
+
+# Poll pages - redirect to poll-page.html with UUID parameter
+[[redirects]]
+  from = "/poll-*"
+  to = "/poll-page.html"
+  status = 200
