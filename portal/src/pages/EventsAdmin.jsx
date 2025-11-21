@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { colors, font } from '../config/colors';
 import { ErrorMessage, SuccessMessage } from '../components/ErrorMessage';
 
@@ -373,6 +373,80 @@ function EventFormModal({ event, onSave, onClose }) {
     is_idaic_event: event?.is_idaic_event || false
   });
   const [saving, setSaving] = useState(false);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [createdEventId, setCreatedEventId] = useState(event?.id || null);
+  const [lastSaved, setLastSaved] = useState(null);
+  const autoSaveTimeoutRef = useRef(null);
+
+  // Auto-save effect - debounced
+  useEffect(() => {
+    // Only auto-save if we have title and date (minimum required fields)
+    if (!formData.title || !formData.event_date) {
+      return;
+    }
+
+    // Clear existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (2 seconds after user stops typing)
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      if (saving || autoSaving) return;
+      
+      setAutoSaving(true);
+      try {
+        if (createdEventId) {
+          // Update existing event
+          const response = await fetch(`/.netlify/functions/events?id=${createdEventId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formData,
+              updated_at: new Date().toISOString()
+            })
+          });
+
+          if (response.ok) {
+            setLastSaved(new Date());
+          }
+        } else {
+          // Create new event if we have title and date
+          if (formData.title && formData.event_date) {
+            const eventId = crypto.randomUUID();
+            const newEvent = {
+              ...formData,
+              id: eventId
+            };
+
+            const response = await fetch('/.netlify/functions/events', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newEvent)
+            });
+
+            if (response.ok) {
+              const createdEvent = await response.json();
+              setCreatedEventId(createdEvent.id);
+              setLastSaved(new Date());
+              // Update parent component
+              await onSave(createdEvent.id, formData);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error auto-saving event:', err);
+      } finally {
+        setAutoSaving(false);
+      }
+    }, 2000);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [formData.title, formData.event_date, formData.location, formData.description, formData.agenda, formData.registration_link, formData.is_idaic_event, createdEventId, saving, autoSaving, onSave]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -382,11 +456,11 @@ function EventFormModal({ event, onSave, onClose }) {
 
     setSaving(true);
     try {
-      if (event?.id) {
-        // Update existing event
-        await onSave(event.id, formData);
+      if (createdEventId) {
+        // Final save of existing event
+        await onSave(createdEventId, formData);
       } else {
-        // Create new event
+        // Create new event (shouldn't happen if auto-save worked, but fallback)
         await onSave(undefined, formData);
       }
       // Close modal after successful save
@@ -400,14 +474,35 @@ function EventFormModal({ event, onSave, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
         className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-semibold mb-4" style={{ color: colors.text.primary }}>
-          {event ? 'Edit Event' : 'Create New Event'}
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold" style={{ color: colors.text.primary }}>
+            {createdEventId ? 'Edit Event' : 'Create New Event'}
+          </h3>
+          <div className="flex items-center gap-3">
+            {autoSaving && (
+              <span className="text-xs text-gray-500">Auto-saving...</span>
+            )}
+            {lastSaved && !autoSaving && (
+              <span className="text-xs text-gray-500">
+                Saved {lastSaved.toLocaleTimeString()}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label="Close"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
@@ -509,16 +604,31 @@ function EventFormModal({ event, onSave, onClose }) {
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
             >
-              Cancel
+              Close
             </button>
             <button
               type="submit"
-              disabled={saving}
-              className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 disabled:opacity-50"
+              disabled={saving || !formData.title || !formData.event_date}
+              className="px-4 py-2 bg-orange-500 text-white rounded-md text-sm hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving...' : event ? 'Update Event' : 'Create Event'}
+              {saving ? 'Saving...' : createdEventId ? 'Save & Close' : 'Create & Close'}
             </button>
           </div>
+          {createdEventId && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-800">
+                <strong>Event created!</strong> Registration URL: 
+                <a 
+                  href={`/events-${createdEventId}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline ml-1"
+                >
+                  idaic.nexusclimate.co/events-{createdEventId}
+                </a>
+              </p>
+            </div>
+          )}
         </form>
       </div>
     </div>
