@@ -23,7 +23,17 @@ exports.handler = async function (event, context) {
       }
       case 'POST': {
         const eventData = JSON.parse(event.body);
-        if (eventData.id !== undefined) delete eventData.id;
+        // Allow custom UUID to be set, otherwise generate one
+        if (!eventData.id) {
+          eventData.id = require('crypto').randomUUID();
+        }
+        // Set timestamps if not provided
+        if (!eventData.created_at) {
+          eventData.created_at = new Date().toISOString();
+        }
+        if (!eventData.updated_at) {
+          eventData.updated_at = new Date().toISOString();
+        }
         const { data: newEvent, error: insertError } = await supabase
           .from('events')
           .insert([eventData])

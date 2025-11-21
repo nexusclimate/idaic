@@ -43,3 +43,9 @@
   from = "/newmember-form"
   to = "/newmember-form.html"
   status = 200
+
+# Event pages - redirect to event-page.html with UUID parameter
+[[redirects]]
+  from = "/events-*"
+  to = "/event-page.html"
+  status = 200

@@ -3,11 +3,13 @@ import { colors } from '../config/colors';
 import UserAdmin from './UserAdmin';
 import UserFormView from './UserFormView';
 import Organizations from './Organizations';
+import EventsAdmin from './EventsAdmin';
 
 const allTabs = [
   { name: 'Content Management', key: 'content' },
   { name: 'User Admin', key: 'user_admin' },
   { name: 'User Form', key: 'user_form' },
+  { name: 'Events', key: 'events' },
   { name: 'Members', key: 'members' },
 ];
 
@@ -92,6 +94,12 @@ export default function Admin({ user }) {
               initialUser={selectedUser} 
               onNavigateToUserAdmin={() => setActiveTab('user_admin')}
             />
+          </div>
+        )}
+
+        {activeTab === 'events' && (
+          <div className="w-full h-full min-h-0" style={{ overflow: 'hidden' }}>
+            <EventsAdmin />
           </div>
         )}
 
