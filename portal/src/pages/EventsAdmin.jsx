@@ -737,8 +737,8 @@ function EventFormModal({ event, onSave, onClose }) {
             setLastSaved(new Date());
           }
         } else {
-          // Create new event if we have title and date (exclude poll fields)
-          if (formData.title && formData.event_date) {
+          // Create new event if we have title (and date if not creating poll)
+          if (formData.title && (formData.create_poll || formData.event_date)) {
             const eventId = crypto.randomUUID();
             const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
             const newEvent = {
@@ -790,16 +790,24 @@ function EventFormModal({ event, onSave, onClose }) {
                       })
                     });
                     if (pollResponse.ok) {
-                      console.log('Poll created successfully');
+                      const createdPoll = await pollResponse.json();
+                      console.log('Poll created successfully in auto-save:', createdPoll);
+                      // Refresh events list to show poll URL
+                      if (onSave) {
+                        await onSave(createdEvent.id, formData);
+                      }
+                    } else {
+                      const errorData = await pollResponse.json().catch(() => ({ error: 'Unknown error' }));
+                      console.error('Failed to create poll in auto-save:', pollResponse.status, errorData);
                     }
                   }
                 } catch (pollErr) {
                   console.error('Error creating poll:', pollErr);
                 }
-              }
-              
+              } else {
               // Update parent component
               await onSave(createdEvent.id, formData);
+              }
             }
           }
         }
@@ -836,10 +844,7 @@ function EventFormModal({ event, onSave, onClose }) {
     setSaving(true);
     try {
       if (createdEventId) {
-        // Final save of existing event
-        await onSave(createdEventId, formData);
-        
-        // Create/update poll if needed
+        // Create/update poll first if needed (before final save)
         if (formData.create_poll && formData.poll_slot_1_date && formData.poll_slot_1_start && formData.poll_slot_1_end) {
           try {
             // Build time slots from date + time ranges
@@ -881,7 +886,7 @@ function EventFormModal({ event, onSave, onClose }) {
                 }
               } else {
                 // Create new poll
-                const createResponse = await fetch('/.netlify/functions/polls', {
+                const newPollResponse = await fetch('/.netlify/functions/polls', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -890,15 +895,30 @@ function EventFormModal({ event, onSave, onClose }) {
                     deadline: deadline
                   })
                 });
-                if (createResponse.ok && onSave) {
-                  await onSave(createdEventId, formData);
+                
+                if (newPollResponse.ok) {
+                  const createdPoll = await newPollResponse.json();
+                  console.log('Poll created successfully in handleSubmit:', createdPoll);
+                  // Wait a moment for database to update
+                  await new Promise(resolve => setTimeout(resolve, 500));
+                } else {
+                  const errorData = await newPollResponse.json().catch(() => ({ error: 'Unknown error' }));
+                  console.error('Failed to create poll in handleSubmit:', newPollResponse.status, errorData);
+                  throw new Error(`Failed to create poll: ${errorData.error || 'Unknown error'}`);
                 }
               }
             }
           } catch (pollErr) {
             console.error('Error creating/updating poll:', pollErr);
+            setError('Failed to create poll: ' + pollErr.message);
           }
-        } else if (!formData.create_poll && createdEventId) {
+        }
+        
+        // Final save of existing event (after poll creation/update)
+        await onSave(createdEventId, formData);
+        
+        // Handle poll deletion if unchecked
+        if (!formData.create_poll && createdEventId) {
           // If poll is unchecked, make sure it's deleted
           try {
             const pollCheckResponse = await fetch(`/.netlify/functions/polls?event_id=${createdEventId}`);

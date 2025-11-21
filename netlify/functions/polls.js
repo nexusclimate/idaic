@@ -56,6 +56,7 @@ exports.handler = async function (event, context) {
           };
         } else if (event_id) {
           // Get poll by event_id (for poll page using event UUID)
+          console.log('Fetching poll for event_id:', event_id);
           const { data: poll, error: pollError } = await supabase
             .from('polls')
             .select('*')
@@ -63,12 +64,23 @@ exports.handler = async function (event, context) {
             .maybeSingle();
           
           if (pollError) {
+            console.error('Error fetching poll:', pollError);
             return { statusCode: 500, body: JSON.stringify({ error: pollError.message }) };
           }
           
           if (!poll) {
-            return { statusCode: 404, body: JSON.stringify({ error: 'Poll not found' }) };
+            console.log('No poll found for event_id:', event_id);
+            // Also check if event exists
+            const { data: eventData } = await supabase
+              .from('events')
+              .select('id, title, poll_id')
+              .eq('id', event_id)
+              .maybeSingle();
+            console.log('Event data:', eventData);
+            return { statusCode: 404, body: JSON.stringify({ error: 'Poll not found for this event. The poll may not have been created yet.' }) };
           }
+          
+          console.log('Poll found:', poll.id);
 
           // Get votes for this poll
           const { data: votes, error: votesError } = await supabase
