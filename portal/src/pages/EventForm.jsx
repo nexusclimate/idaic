@@ -217,7 +217,7 @@ export default function EventForm({
                       </div>
                     ) : (
                       <div>
-                        <label htmlFor="registration-link" className="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
+                        <label htmlFor="registration-link" className="block text-sm font-medium text-gray-700 mb-1">Online Event Link</label>
                         <input
                           id="registration-link"
                           type="url"
@@ -226,7 +226,7 @@ export default function EventForm({
                           onChange={e => handleFieldChange('registration_link', e.target.value)}
                           className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                           readOnly={readOnly}
-                          placeholder="Paste registration link here"
+                          placeholder="Paste online event link here (e.g., Teams meeting link)"
                         />
                       </div>
                     )}

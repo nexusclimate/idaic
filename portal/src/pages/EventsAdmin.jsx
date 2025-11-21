@@ -344,7 +344,13 @@ export default function EventsAdmin() {
       {showEventForm && (
         <EventFormModal
           event={selectedEvent}
-          onSave={selectedEvent ? handleUpdateEvent : handleCreateEvent}
+          onSave={async (eventId, eventData) => {
+            if (eventId) {
+              await handleUpdateEvent(eventId, eventData);
+            } else {
+              await handleCreateEvent(eventData);
+            }
+          }}
           onClose={() => {
             setShowEventForm(false);
             setSelectedEvent(null);
@@ -375,7 +381,13 @@ function EventFormModal({ event, onSave, onClose }) {
 
     setSaving(true);
     try {
-      await onSave(event?.id, formData);
+      if (event?.id) {
+        // Update existing event
+        await onSave(event.id, formData);
+      } else {
+        // Create new event
+        await onSave(formData);
+      }
     } catch (err) {
       console.error('Error saving event:', err);
     } finally {
