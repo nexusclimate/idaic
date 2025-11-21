@@ -89,8 +89,8 @@ export default function EventsAdmin() {
 
       const createdEvent = await response.json();
       setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
-      setShowEventForm(false);
       await fetchEvents();
+      // Note: Modal will close itself via onClose in handleSubmit
     } catch (err) {
       setError('Failed to create event: ' + err.message);
     }
@@ -113,9 +113,8 @@ export default function EventsAdmin() {
       }
 
       setSuccess('Event updated successfully!');
-      setShowEventForm(false);
-      setSelectedEvent(null);
       await fetchEvents();
+      // Note: Modal will close itself via onClose in handleSubmit
     } catch (err) {
       setError('Failed to update event: ' + err.message);
     }
@@ -350,6 +349,7 @@ export default function EventsAdmin() {
             } else {
               await handleCreateEvent(eventData);
             }
+            // Note: Modal will close itself after successful save
           }}
           onClose={() => {
             setShowEventForm(false);
@@ -369,6 +369,7 @@ function EventFormModal({ event, onSave, onClose }) {
     location: event?.location || '',
     description: event?.description || '',
     agenda: event?.agenda || '',
+    registration_link: event?.registration_link || '',
     is_idaic_event: event?.is_idaic_event || false
   });
   const [saving, setSaving] = useState(false);
@@ -386,10 +387,13 @@ function EventFormModal({ event, onSave, onClose }) {
         await onSave(event.id, formData);
       } else {
         // Create new event
-        await onSave(formData);
+        await onSave(undefined, formData);
       }
+      // Close modal after successful save
+      onClose();
     } catch (err) {
       console.error('Error saving event:', err);
+      // Don't close on error - let user see the error
     } finally {
       setSaving(false);
     }
@@ -468,6 +472,22 @@ function EventFormModal({ event, onSave, onClose }) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Event agenda, schedule, or outline..."
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+              Online Event Link (Optional)
+            </label>
+            <input
+              type="url"
+              value={formData.registration_link}
+              onChange={(e) => setFormData({ ...formData, registration_link: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Teams, Google Meet, or other online event link"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Add a link to join the event online (e.g., Microsoft Teams, Google Meet)
+            </p>
           </div>
 
           <div className="flex items-center">
