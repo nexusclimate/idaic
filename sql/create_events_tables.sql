@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS events (
   event_date TIMESTAMPTZ NOT NULL,
   location TEXT,
   description TEXT,
+  agenda TEXT,
   registration_link TEXT,
   is_idaic_event BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -35,7 +36,8 @@ CREATE TABLE IF NOT EXISTS event_registrations (
   email TEXT NOT NULL,
   company TEXT,
   title TEXT, -- Job title/position
-  registration_type TEXT NOT NULL CHECK (registration_type IN ('internal', 'external')),
+  registration_type TEXT NOT NULL CHECK (registration_type IN ('internal', 'external', 'new')),
+  user_role TEXT, -- Role from users table (admin, moderator, member, etc.)
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   -- Prevent duplicate registrations for the same event and email

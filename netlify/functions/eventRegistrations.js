@@ -25,7 +25,31 @@ exports.handler = async function (event, context) {
           if (error) {
             return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
           }
-          return { statusCode: 200, body: JSON.stringify(data || []) };
+          
+          // For each registration, check if user still exists and update role if needed
+          const registrationsWithRoles = await Promise.all(
+            (data || []).map(async (reg) => {
+              if (reg.registration_type === 'internal' || reg.registration_type === 'new') {
+                const { data: userData } = await supabase
+                  .from('users')
+                  .select('role')
+                  .eq('email', reg.email)
+                  .maybeSingle();
+                
+                if (userData) {
+                  reg.user_role = userData.role || null;
+                  reg.registration_type = 'internal';
+                } else if (reg.registration_type === 'internal') {
+                  // User was internal but no longer exists, mark as new
+                  reg.registration_type = 'new';
+                  reg.user_role = null;
+                }
+              }
+              return reg;
+            })
+          );
+          
+          return { statusCode: 200, body: JSON.stringify(registrationsWithRoles) };
         } else {
           // Get all registrations
           const { data, error } = await supabase
@@ -65,19 +89,29 @@ exports.handler = async function (event, context) {
           };
         }
 
-        // Determine if internal or external registration
-        // Check if email exists in users table
+        // Check if email exists in users table and get their role
         const { data: userData } = await supabase
           .from('users')
-          .select('id, email')
+          .select('id, email, role')
           .eq('email', registrationData.email)
           .maybeSingle();
 
-        const registrationType = userData ? 'internal' : 'external';
+        // Set registration type and role
+        let registrationType = 'external';
+        let userRole = null;
+        
+        if (userData) {
+          registrationType = 'internal';
+          userRole = userData.role || null;
+        } else {
+          // Not in database, mark as "New"
+          registrationType = 'new';
+        }
 
         const newRegistration = {
           ...registrationData,
           registration_type: registrationType,
+          user_role: userRole, // Store the user's role from users table
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };

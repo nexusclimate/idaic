@@ -301,13 +301,27 @@ export default function EventsAdmin() {
                               {reg.company || '—'}
                             </td>
                             <td className="py-2 px-2" style={{ color: colors.text.primary }}>
-                              <span className={`px-2 py-0.5 rounded text-xs ${
-                                reg.registration_type === 'internal' 
-                                  ? 'bg-blue-100 text-blue-800' 
-                                  : 'bg-green-100 text-green-800'
-                              }`}>
-                                {reg.registration_type === 'internal' ? 'Internal' : 'External'}
-                              </span>
+                              {reg.registration_type === 'new' ? (
+                                <span className="px-2 py-0.5 rounded text-xs bg-orange-100 text-orange-800">
+                                  New
+                                </span>
+                              ) : reg.user_role ? (
+                                <span className={`px-2 py-0.5 rounded text-xs ${
+                                  reg.user_role === 'admin' 
+                                    ? 'bg-red-100 text-red-800'
+                                    : reg.user_role === 'moderator'
+                                    ? 'bg-purple-100 text-purple-800'
+                                    : reg.user_role === 'member'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {reg.user_role.charAt(0).toUpperCase() + reg.user_role.slice(1)}
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
+                                  External
+                                </span>
+                              )}
                             </td>
                             <td className="py-2 px-2" style={{ color: colors.text.secondary }}>
                               {formatDate(reg.created_at)}
@@ -348,6 +362,7 @@ function EventFormModal({ event, onSave, onClose }) {
     event_date: event?.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '',
     location: event?.location || '',
     description: event?.description || '',
+    agenda: event?.agenda || '',
     registration_link: event?.registration_link || '',
     is_idaic_event: event?.is_idaic_event || false
   });
@@ -428,6 +443,19 @@ function EventFormModal({ event, onSave, onClose }) {
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Event description and details..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+              Agenda / Outline
+            </label>
+            <textarea
+              value={formData.agenda}
+              onChange={(e) => setFormData({ ...formData, agenda: e.target.value })}
+              rows={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Event agenda, schedule, or outline..."
             />
           </div>
 
