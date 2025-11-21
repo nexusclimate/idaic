@@ -86,14 +86,18 @@ export default function UserAdmin({ onUserSelect }) {
   };
 
   // Get activity status color and label
-  const getActivityStatus = (lastLogin) => {
-    if (!lastLogin) {
+  // Prefer last_activity over last_login for more accurate status
+  const getActivityStatus = (user) => {
+    // Use last_activity if available, otherwise fall back to last_login
+    const lastActivity = user.last_activity || user.last_login;
+    
+    if (!lastActivity) {
       return { color: 'bg-red-500', label: 'Never logged in' };
     }
 
     const now = new Date();
-    const loginDate = new Date(lastLogin);
-    const hoursDiff = (now - loginDate) / (1000 * 60 * 60);
+    const activityDate = new Date(lastActivity);
+    const hoursDiff = (now - activityDate) / (1000 * 60 * 60);
     const daysDiff = hoursDiff / 24;
 
     if (hoursDiff <= 4) {
@@ -636,7 +640,7 @@ export default function UserAdmin({ onUserSelect }) {
                 </thead>
                 <tbody>
                   {filtered.map((user, userIdx) => {
-                    const status = getActivityStatus(user.last_login);
+                    const status = getActivityStatus(user);
                     return (
                       <tr
                         key={user.id || user.email || userIdx}

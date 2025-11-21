@@ -302,6 +302,66 @@ export default function App() {
     };
   }, []);
 
+  // Activity tracking heartbeat - send activity updates while user is active
+  useEffect(() => {
+    if (!user || !isAuthenticated) return;
+
+    // Get user ID and email
+    const userId = user.id;
+    const userEmail = user.email || user.user_metadata?.email;
+
+    if (!userId || !userEmail) return;
+
+    // Function to send activity update
+    const sendActivityUpdate = async () => {
+      try {
+        await fetch('/.netlify/functions/trackActivity', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            email: userEmail,
+            activity_time: new Date().toISOString()
+          })
+        });
+      } catch (err) {
+        console.error('Error tracking activity:', err);
+        // Silently fail - don't interrupt user experience
+      }
+    };
+
+    // Send initial activity update
+    sendActivityUpdate();
+
+    // Set up interval to send activity updates every 2 minutes while user is active
+    const activityInterval = setInterval(() => {
+      sendActivityUpdate();
+    }, 2 * 60 * 1000); // 2 minutes
+
+    // Also track activity on user interactions (mouse movement, clicks, keyboard)
+    let activityTimeout;
+    const resetActivityTimeout = () => {
+      clearTimeout(activityTimeout);
+      activityTimeout = setTimeout(() => {
+        sendActivityUpdate();
+      }, 30000); // Send update 30 seconds after last activity
+    };
+
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    activityEvents.forEach(event => {
+      document.addEventListener(event, resetActivityTimeout, { passive: true });
+    });
+
+    // Cleanup
+    return () => {
+      clearInterval(activityInterval);
+      clearTimeout(activityTimeout);
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, resetActivityTimeout);
+      });
+    };
+  }, [user, isAuthenticated]);
+
   // Allow public access to newuser-form page
   const isPublicPage = currentPage === 'newuser-form' || currentPage === 'newmember-signup';
 

@@ -52,11 +52,15 @@ exports.handler = async function (event, context) {
       }
     }
 
-    // Attach last_login and last_login_method to each user
+    // Attach last_login, last_login_method, and last_activity to each user
+    // Use last_activity if available, otherwise fall back to last_login
     const usersWithLogin = users.map(user => ({
       ...user,
-      last_login: latestLoginMap[user.id]?.login_time || null,
+      last_login: latestLoginMap[user.id]?.login_time || user.last_login || null,
       last_login_method: latestLoginMap[user.id]?.login_method || null,
+      // last_activity is already in the user object from the database query
+      // Use last_activity if available, otherwise use last_login
+      last_activity: user.last_activity || user.last_login || null,
     }));
 
     return {

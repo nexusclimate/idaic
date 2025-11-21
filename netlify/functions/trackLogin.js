@@ -107,10 +107,13 @@ exports.handler = async function (event, context) {
 
     console.log('✅ Login tracked successfully:', data[0]);
 
-    // Also update the last_login column in users table
+    // Also update the last_login and last_activity columns in users table
     const { error: updateError } = await supabase
       .from('users')
-      .update({ last_login: loginTime })
+      .update({ 
+        last_login: loginTime,
+        last_activity: loginTime  // Also set last_activity on login
+      })
       .eq('id', loginData.user_id);
 
     if (updateError) {
