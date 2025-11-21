@@ -268,7 +268,9 @@ exports.handler = async function (event, context) {
         if (updates.company !== undefined) mappedUpdates.company = updates.company;
         if (updates.title !== undefined) mappedUpdates.title = updates.title;
         if (updates.region !== undefined) mappedUpdates.region = updates.region;
+        // Support both camelCase and snake_case for linkedin_url
         if (updates.linkedinUrl !== undefined) mappedUpdates.linkedin_url = updates.linkedinUrl;
+        if (updates.linkedin_url !== undefined) mappedUpdates.linkedin_url = updates.linkedin_url;
         if (updates.category !== undefined) mappedUpdates.category = updates.category;
         if (updates.otherCategory !== undefined) mappedUpdates.other_category = updates.otherCategory;
         if (updates.organizationDescription !== undefined) mappedUpdates.organization_description = updates.organizationDescription;

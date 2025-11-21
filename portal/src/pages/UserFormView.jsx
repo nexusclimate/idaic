@@ -136,6 +136,12 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
     try {
       // Build payload, allow role change only for admins
       const payload = { ...formData, updated_by: user?.id };
+      
+      // Ensure linkedin_url is properly included (backend accepts both formats)
+      if (formData.linkedin_url !== undefined) {
+        payload.linkedin_url = formData.linkedin_url;
+      }
+      
       if ((user?.role || '').toLowerCase() !== 'admin') {
         delete payload.role;
       } else if (payload.role) {
@@ -249,9 +255,9 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
   return (
     <div className="h-full overflow-y-auto" style={{ fontFamily: font.primary }}>
       {/* Search at top - sticky */}
-      <div className="sticky top-0 bg-gray-50 z-10 pb-4 mb-2 border-b border-gray-200">
+      <div className="sticky top-0 bg-gray-50 pb-4 mb-2 border-b border-gray-200" style={{ zIndex: 10 }}>
         <div className="flex items-center gap-4">
-          <div className="flex-1 max-w-md relative">
+          <div className="flex-1 max-w-md relative" style={{ zIndex: 10000 }}>
             <label className="block text-sm font-medium mb-2" style={{ color: colors.text.primary }}>
               Search User
             </label>
@@ -265,8 +271,8 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
             />
             
             {/* User suggestions dropdown */}
-            {searchDebounced && filteredUsers.length > 0 && !selectedUser && (
-              <div className="absolute z-20 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+            {searchDebounced && filteredUsers.length > 0 && (
+              <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto" style={{ zIndex: 9999 }}>
                 {filteredUsers.slice(0, 10).map((user) => (
                   <div
                     key={user.id}
@@ -300,7 +306,7 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
               </div>
             )}
             {searchDebounced && filteredUsers.length === 0 && (
-              <div className="absolute z-20 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3 text-sm text-gray-500">
+              <div className="absolute z-50 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3 text-sm text-gray-500" style={{ zIndex: 9999 }}>
                 No users found matching "{searchDebounced}"
               </div>
             )}
