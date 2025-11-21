@@ -12,6 +12,9 @@ export default function EventsAdmin() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [registrations, setRegistrations] = useState({}); // event_id -> registrations array
   const [search, setSearch] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchEvents();
@@ -196,13 +199,17 @@ export default function EventsAdmin() {
     }
   };
 
-  const handleDeleteEvent = async (eventId) => {
-    if (!confirm('Are you sure you want to delete this event? This will also delete all registrations.')) {
-      return;
-    }
+  const handleDeleteEventClick = (event) => {
+    setEventToDelete(event);
+    setShowDeleteConfirm(true);
+  };
 
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+
+    setDeleting(true);
     try {
-      const response = await fetch(`/.netlify/functions/events?id=${eventId}`, {
+      const response = await fetch(`/.netlify/functions/events?id=${eventToDelete.id}`, {
         method: 'DELETE'
       });
 
@@ -212,9 +219,13 @@ export default function EventsAdmin() {
       }
 
       setSuccess('Event deleted successfully!');
+      setShowDeleteConfirm(false);
+      setEventToDelete(null);
       await fetchEvents();
     } catch (err) {
       setError('Failed to delete event: ' + err.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -354,7 +365,7 @@ export default function EventsAdmin() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteEvent(event.id)}
+                    onClick={() => handleDeleteEventClick(event)}
                     className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
                   >
                     Delete
@@ -470,6 +481,49 @@ export default function EventsAdmin() {
             setSelectedEvent(null);
           }}
         />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div className="mt-2 text-center">
+                <h3 className="text-lg font-medium text-gray-900">Delete Event</h3>
+                <div className="mt-2 px-7 py-3">
+                  <p className="text-sm text-gray-500">
+                    Are you sure you want to delete <strong>{eventToDelete?.title || 'this event'}</strong>? 
+                    This action cannot be undone and will permanently remove the event and all its registrations from the database.
+                  </p>
+                </div>
+                <div className="flex justify-center gap-3 mt-4">
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setEventToDelete(null);
+                    }}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-400"
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteEvent}
+                    disabled={deleting}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deleting ? 'Deleting...' : 'Delete Event'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -765,7 +819,7 @@ function EventFormModal({ event, onSave, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.title || !formData.event_date) {
+    if (!formData.title || (!formData.create_poll && !formData.event_date)) {
       return;
     }
 
@@ -814,7 +868,7 @@ function EventFormModal({ event, onSave, onClose }) {
               
               if (existingPoll && existingPoll.id) {
                 // Update existing poll
-                await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
+                const updateResponse = await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -822,9 +876,12 @@ function EventFormModal({ event, onSave, onClose }) {
                     deadline: deadline
                   })
                 });
+                if (updateResponse.ok && onSave) {
+                  await onSave(createdEventId, formData);
+                }
               } else {
                 // Create new poll
-                await fetch('/.netlify/functions/polls', {
+                const createResponse = await fetch('/.netlify/functions/polls', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
@@ -833,10 +890,44 @@ function EventFormModal({ event, onSave, onClose }) {
                     deadline: deadline
                   })
                 });
+                if (createResponse.ok && onSave) {
+                  await onSave(createdEventId, formData);
+                }
               }
             }
           } catch (pollErr) {
             console.error('Error creating/updating poll:', pollErr);
+          }
+        } else if (!formData.create_poll && createdEventId) {
+          // If poll is unchecked, make sure it's deleted
+          try {
+            const pollCheckResponse = await fetch(`/.netlify/functions/polls?event_id=${createdEventId}`);
+            if (pollCheckResponse.ok) {
+              const existingPoll = await pollCheckResponse.json();
+              if (existingPoll && existingPoll.id) {
+                // Delete the poll
+                await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
+                  method: 'DELETE'
+                });
+                
+                // Remove poll_id from event
+                await fetch(`/.netlify/functions/events?id=${createdEventId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    poll_id: null,
+                    updated_at: new Date().toISOString()
+                  })
+                });
+                
+                // Refresh events list
+                if (onSave) {
+                  await onSave(createdEventId, formData);
+                }
+              }
+            }
+          } catch (err) {
+            console.error('Error removing poll:', err);
           }
         }
       } else {
@@ -988,7 +1079,41 @@ function EventFormModal({ event, onSave, onClose }) {
                 type="checkbox"
                 id="create_poll"
                 checked={formData.create_poll}
-                onChange={(e) => setFormData({ ...formData, create_poll: e.target.checked })}
+                onChange={async (e) => {
+                  const wasChecked = formData.create_poll;
+                  const isChecked = e.target.checked;
+                  
+                  // If unchecking and we have a poll, delete it
+                  if (wasChecked && !isChecked && createdEventId) {
+                    try {
+                      // Get existing poll
+                      const pollCheckResponse = await fetch(`/.netlify/functions/polls?event_id=${createdEventId}`);
+                      if (pollCheckResponse.ok) {
+                        const existingPoll = await pollCheckResponse.json();
+                        if (existingPoll && existingPoll.id) {
+                          // Delete the poll
+                          await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
+                            method: 'DELETE'
+                          });
+                          
+                          // Remove poll_id from event
+                          await fetch(`/.netlify/functions/events?id=${createdEventId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              poll_id: null,
+                              updated_at: new Date().toISOString()
+                            })
+                          });
+                        }
+                      }
+                    } catch (err) {
+                      console.error('Error removing poll:', err);
+                    }
+                  }
+                  
+                  setFormData({ ...formData, create_poll: isChecked });
+                }}
                 className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
               />
               <label htmlFor="create_poll" className="ml-2 text-sm font-medium" style={{ color: colors.text.primary }}>
