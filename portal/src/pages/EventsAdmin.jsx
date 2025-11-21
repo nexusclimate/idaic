@@ -102,10 +102,10 @@ export default function EventsAdmin() {
       // Exclude poll fields from event data
       const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
       
-      // Convert empty strings to null for date fields
+      // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
       const cleanedEventFields = { ...eventFields };
       if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
-        cleanedEventFields.event_date = null;
+        delete cleanedEventFields.event_date;
       }
       
       const newEvent = {
@@ -188,11 +188,14 @@ export default function EventsAdmin() {
       // Exclude poll fields from event data
       const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
       
-      // Convert empty strings to null for date fields
+      // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
       const cleanedEventFields = { ...eventFields };
       if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
-        cleanedEventFields.event_date = null;
+        delete cleanedEventFields.event_date;
       }
+      
+      // Ensure is_idaic_event is always true (all events are IDAIC events)
+      cleanedEventFields.is_idaic_event = true;
       
       const response = await fetch(`/.netlify/functions/events?id=${eventId}`, {
         method: 'PUT',
@@ -790,7 +793,7 @@ function EventFormModal({ event, onSave, onClose }) {
     description: event?.description || '',
     agenda: event?.agenda || '',
     registration_link: event?.registration_link || '',
-    is_idaic_event: event?.is_idaic_event || false,
+    is_idaic_event: true, // All events are IDAIC events by default
     // Poll fields
     create_poll: event?.poll_id ? true : false,
     poll_slot_1_date: '',
@@ -854,11 +857,14 @@ function EventFormModal({ event, onSave, onClose }) {
           // Update existing event (exclude poll fields)
           const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
           
-          // Convert empty strings to null for date fields
+          // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
           const cleanedEventData = { ...eventData };
           if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
-            cleanedEventData.event_date = null;
+            delete cleanedEventData.event_date;
           }
+          
+          // Ensure is_idaic_event is always true (all events are IDAIC events)
+          cleanedEventData.is_idaic_event = true;
           
           const response = await fetch(`/.netlify/functions/events?id=${createdEventId}`, {
             method: 'PUT',
@@ -877,8 +883,18 @@ function EventFormModal({ event, onSave, onClose }) {
           if (formData.title && (formData.create_poll || formData.event_date)) {
             const eventId = crypto.randomUUID();
             const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
+            
+            // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
+            const cleanedEventData = { ...eventData };
+            if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
+              delete cleanedEventData.event_date;
+            }
+            
+            // Ensure is_idaic_event is always true (all events are IDAIC events)
+            cleanedEventData.is_idaic_event = true;
+            
             const newEvent = {
-              ...eventData,
+              ...cleanedEventData,
               id: eventId
             };
 
@@ -1215,18 +1231,6 @@ function EventFormModal({ event, onSave, onClose }) {
             </p>
           </div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="is_idaic_event"
-              checked={formData.is_idaic_event}
-              onChange={(e) => setFormData({ ...formData, is_idaic_event: e.target.checked })}
-              className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-            />
-            <label htmlFor="is_idaic_event" className="ml-2 text-sm" style={{ color: colors.text.primary }}>
-              IDAIC Event
-            </label>
-          </div>
 
           {/* Poll Section */}
           <div className="border-t pt-4 mt-4">

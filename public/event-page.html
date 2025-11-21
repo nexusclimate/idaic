@@ -281,7 +281,10 @@
         document.getElementById('event-meta').innerHTML = metaHtml.length > 0 ? metaHtml.join(' • ') : '';
         
         if (event.description) {
-          document.getElementById('event-description').innerHTML = event.description.replace(/\n/g, '<br>');
+          // Ensure description uses default gray color, not orange
+          const descElement = document.getElementById('event-description');
+          descElement.innerHTML = event.description.replace(/\n/g, '<br>');
+          descElement.className = 'prose max-w-none text-gray-700 mb-6';
         } else {
           document.getElementById('event-description').textContent = 'No description available.';
         }
@@ -292,7 +295,7 @@
           agendaContainer.innerHTML = `
             <div>
               <h3 class="text-sm font-bold text-gray-900 mb-2">Agenda</h3>
-              <div class="prose max-w-none text-gray-700 whitespace-pre-line">${event.agenda.replace(/\n/g, '<br>')}</div>
+              <div class="prose max-w-none text-gray-700 whitespace-pre-line" style="color: #374151;">${event.agenda.replace(/\n/g, '<br>')}</div>
             </div>
           `;
         }
