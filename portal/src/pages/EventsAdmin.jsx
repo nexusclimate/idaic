@@ -72,8 +72,10 @@ export default function EventsAdmin() {
     try {
       // Generate UUID for the event (backend will also generate if not provided)
       const eventId = crypto.randomUUID();
+      // Exclude poll fields from event data
+      const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
       const newEvent = {
-        ...eventData,
+        ...eventFields,
         id: eventId
       };
 
@@ -91,24 +93,44 @@ export default function EventsAdmin() {
       const createdEvent = await response.json();
       
       // Create poll if poll data is provided
-      if (eventData.create_poll && eventData.poll_time_slot_1 && eventData.poll_time_slot_2 && eventData.poll_time_slot_3 && eventData.poll_deadline) {
+      if (eventData.create_poll && eventData.poll_slot_1_date && eventData.poll_slot_1_start && eventData.poll_slot_1_end) {
         try {
-          const pollResponse = await fetch('/.netlify/functions/polls', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              event_id: createdEvent.id,
-              time_slots: [
-                eventData.poll_time_slot_1,
-                eventData.poll_time_slot_2,
-                eventData.poll_time_slot_3
-              ],
-              deadline: eventData.poll_deadline
-            })
-          });
+          // Build time slots from date + time ranges
+          const timeSlots = [];
+          for (let i = 1; i <= 3; i++) {
+            const date = eventData[`poll_slot_${i}_date`];
+            const start = eventData[`poll_slot_${i}_start`];
+            const end = eventData[`poll_slot_${i}_end`];
+            if (date && start && end) {
+              // Combine date and start time
+              const startDateTime = new Date(`${date}T${start}`).toISOString();
+              timeSlots.push(startDateTime);
+            }
+          }
           
-          if (pollResponse.ok) {
-            setSuccess(`Event and poll created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id} | Poll URL: idaic.nexusclimate.co/poll-${createdEvent.id}`);
+          // Build deadline (date + 23:59:59)
+          let deadline = null;
+          if (eventData.poll_deadline_date) {
+            deadline = new Date(`${eventData.poll_deadline_date}T23:59:59`).toISOString();
+          }
+          
+          if (timeSlots.length === 3) {
+            const pollResponse = await fetch('/.netlify/functions/polls', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                event_id: createdEvent.id,
+                time_slots: timeSlots,
+                deadline: deadline
+              })
+            });
+            
+            if (pollResponse.ok) {
+              const poll = await pollResponse.json();
+              setSuccess(`Event and poll created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id} | Poll URL: idaic.nexusclimate.co/poll-${createdEvent.id}`);
+            } else {
+              setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
+            }
           } else {
             setSuccess(`Event created successfully! Event URL: idaic.nexusclimate.co/events-${createdEvent.id}`);
           }
@@ -129,11 +151,13 @@ export default function EventsAdmin() {
 
   const handleUpdateEvent = async (eventId, eventData) => {
     try {
+      // Exclude poll fields from event data
+      const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
       const response = await fetch(`/.netlify/functions/events?id=${eventId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...eventData,
+          ...eventFields,
           updated_at: new Date().toISOString()
         })
       });
@@ -586,10 +610,16 @@ function EventFormModal({ event, onSave, onClose }) {
     is_idaic_event: event?.is_idaic_event || false,
     // Poll fields
     create_poll: event?.poll_id ? true : false,
-    poll_time_slot_1: '',
-    poll_time_slot_2: '',
-    poll_time_slot_3: '',
-    poll_deadline: ''
+    poll_slot_1_date: '',
+    poll_slot_1_start: '',
+    poll_slot_1_end: '',
+    poll_slot_2_date: '',
+    poll_slot_2_start: '',
+    poll_slot_2_end: '',
+    poll_slot_3_date: '',
+    poll_slot_3_start: '',
+    poll_slot_3_end: '',
+    poll_deadline_date: ''
   });
   const [saving, setSaving] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
@@ -616,12 +646,13 @@ function EventFormModal({ event, onSave, onClose }) {
       setAutoSaving(true);
       try {
         if (createdEventId) {
-          // Update existing event
+          // Update existing event (exclude poll fields)
+          const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
           const response = await fetch(`/.netlify/functions/events?id=${createdEventId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              ...formData,
+              ...eventData,
               updated_at: new Date().toISOString()
             })
           });
@@ -630,11 +661,12 @@ function EventFormModal({ event, onSave, onClose }) {
             setLastSaved(new Date());
           }
         } else {
-          // Create new event if we have title and date
+          // Create new event if we have title and date (exclude poll fields)
           if (formData.title && formData.event_date) {
             const eventId = crypto.randomUUID();
+            const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
             const newEvent = {
-              ...formData,
+              ...eventData,
               id: eventId
             };
 
@@ -650,23 +682,40 @@ function EventFormModal({ event, onSave, onClose }) {
               setLastSaved(new Date());
               
               // Create poll if poll fields are filled
-              if (formData.create_poll && formData.poll_time_slot_1 && formData.poll_time_slot_2 && formData.poll_time_slot_3 && formData.poll_deadline) {
+              if (formData.create_poll && formData.poll_slot_1_date && formData.poll_slot_1_start && formData.poll_slot_1_end) {
                 try {
-                  const pollResponse = await fetch('/.netlify/functions/polls', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      event_id: createdEvent.id,
-                      time_slots: [
-                        formData.poll_time_slot_1,
-                        formData.poll_time_slot_2,
-                        formData.poll_time_slot_3
-                      ],
-                      deadline: formData.poll_deadline
-                    })
-                  });
-                  if (pollResponse.ok) {
-                    console.log('Poll created successfully');
+                  // Build time slots from date + time ranges
+                  const timeSlots = [];
+                  for (let i = 1; i <= 3; i++) {
+                    const date = formData[`poll_slot_${i}_date`];
+                    const start = formData[`poll_slot_${i}_start`];
+                    const end = formData[`poll_slot_${i}_end`];
+                    if (date && start && end) {
+                      // Combine date and start time
+                      const startDateTime = new Date(`${date}T${start}`).toISOString();
+                      timeSlots.push(startDateTime);
+                    }
+                  }
+                  
+                  // Build deadline (date + 23:59:59)
+                  let deadline = null;
+                  if (formData.poll_deadline_date) {
+                    deadline = new Date(`${formData.poll_deadline_date}T23:59:59`).toISOString();
+                  }
+                  
+                  if (timeSlots.length === 3) {
+                    const pollResponse = await fetch('/.netlify/functions/polls', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        event_id: createdEvent.id,
+                        time_slots: timeSlots,
+                        deadline: deadline
+                      })
+                    });
+                    if (pollResponse.ok) {
+                      console.log('Poll created successfully');
+                    }
                   }
                 } catch (pollErr) {
                   console.error('Error creating poll:', pollErr);
@@ -700,7 +749,10 @@ function EventFormModal({ event, onSave, onClose }) {
 
     // Validate poll fields if poll is being created
     if (formData.create_poll) {
-      if (!formData.poll_time_slot_1 || !formData.poll_time_slot_2 || !formData.poll_time_slot_3 || !formData.poll_deadline) {
+      if (!formData.poll_slot_1_date || !formData.poll_slot_1_start || !formData.poll_slot_1_end ||
+          !formData.poll_slot_2_date || !formData.poll_slot_2_start || !formData.poll_slot_2_end ||
+          !formData.poll_slot_3_date || !formData.poll_slot_3_start || !formData.poll_slot_3_end ||
+          !formData.poll_deadline_date) {
         return;
       }
     }
@@ -712,41 +764,54 @@ function EventFormModal({ event, onSave, onClose }) {
         await onSave(createdEventId, formData);
         
         // Create/update poll if needed
-        if (formData.create_poll && formData.poll_time_slot_1 && formData.poll_time_slot_2 && formData.poll_time_slot_3 && formData.poll_deadline) {
+        if (formData.create_poll && formData.poll_slot_1_date && formData.poll_slot_1_start && formData.poll_slot_1_end) {
           try {
-            // Check if poll already exists
-            const pollCheckResponse = await fetch(`/.netlify/functions/polls?event_id=${createdEventId}`);
-            const existingPoll = pollCheckResponse.ok ? await pollCheckResponse.json() : null;
+            // Build time slots from date + time ranges
+            const timeSlots = [];
+            for (let i = 1; i <= 3; i++) {
+              const date = formData[`poll_slot_${i}_date`];
+              const start = formData[`poll_slot_${i}_start`];
+              const end = formData[`poll_slot_${i}_end`];
+              if (date && start && end) {
+                // Combine date and start time
+                const startDateTime = new Date(`${date}T${start}`).toISOString();
+                timeSlots.push(startDateTime);
+              }
+            }
             
-            if (existingPoll && existingPoll.id) {
-              // Update existing poll
-              await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  time_slots: [
-                    formData.poll_time_slot_1,
-                    formData.poll_time_slot_2,
-                    formData.poll_time_slot_3
-                  ],
-                  deadline: formData.poll_deadline
-                })
-              });
-            } else {
-              // Create new poll
-              await fetch('/.netlify/functions/polls', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  event_id: createdEventId,
-                  time_slots: [
-                    formData.poll_time_slot_1,
-                    formData.poll_time_slot_2,
-                    formData.poll_time_slot_3
-                  ],
-                  deadline: formData.poll_deadline
-                })
-              });
+            // Build deadline (date + 23:59:59)
+            let deadline = null;
+            if (formData.poll_deadline_date) {
+              deadline = new Date(`${formData.poll_deadline_date}T23:59:59`).toISOString();
+            }
+            
+            if (timeSlots.length === 3) {
+              // Check if poll already exists
+              const pollCheckResponse = await fetch(`/.netlify/functions/polls?event_id=${createdEventId}`);
+              const existingPoll = pollCheckResponse.ok ? await pollCheckResponse.json() : null;
+              
+              if (existingPoll && existingPoll.id) {
+                // Update existing poll
+                await fetch(`/.netlify/functions/polls?id=${existingPoll.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    time_slots: timeSlots,
+                    deadline: deadline
+                  })
+                });
+              } else {
+                // Create new poll
+                await fetch('/.netlify/functions/polls', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    event_id: createdEventId,
+                    time_slots: timeSlots,
+                    deadline: deadline
+                  })
+                });
+              }
             }
           } catch (pollErr) {
             console.error('Error creating/updating poll:', pollErr);
@@ -907,55 +972,143 @@ function EventFormModal({ event, onSave, onClose }) {
             </div>
 
             {formData.create_poll && (
-              <div className="space-y-4 pl-6 border-l-2 border-orange-200">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Poll Time Slot 1 *
+              <div className="space-y-6 pl-6 border-l-2 border-orange-200">
+                {/* Time Slot 1 */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+                    Time Slot 1 *
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.poll_time_slot_1}
-                    onChange={(e) => setFormData({ ...formData, poll_time_slot_1: e.target.value })}
-                    required={formData.create_poll}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={formData.poll_slot_1_date}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_1_date: e.target.value })}
+                        required={formData.create_poll}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Start Time</label>
+                      <input
+                        type="time"
+                        value={formData.poll_slot_1_start}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_1_start: e.target.value })}
+                        required={formData.create_poll}
+                        step="1800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">End Time</label>
+                      <input
+                        type="time"
+                        value={formData.poll_slot_1_end}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_1_end: e.target.value })}
+                        required={formData.create_poll}
+                        step="1800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Poll Time Slot 2 *
+
+                {/* Time Slot 2 */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+                    Time Slot 2 *
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.poll_time_slot_2}
-                    onChange={(e) => setFormData({ ...formData, poll_time_slot_2: e.target.value })}
-                    required={formData.create_poll}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={formData.poll_slot_2_date}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_2_date: e.target.value })}
+                        required={formData.create_poll}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Start Time</label>
+                      <input
+                        type="time"
+                        value={formData.poll_slot_2_start}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_2_start: e.target.value })}
+                        required={formData.create_poll}
+                        step="1800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">End Time</label>
+                      <input
+                        type="time"
+                        value={formData.poll_slot_2_end}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_2_end: e.target.value })}
+                        required={formData.create_poll}
+                        step="1800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Poll Time Slot 3 *
+
+                {/* Time Slot 3 */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: colors.text.primary }}>
+                    Time Slot 3 *
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.poll_time_slot_3}
-                    onChange={(e) => setFormData({ ...formData, poll_time_slot_3: e.target.value })}
-                    required={formData.create_poll}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={formData.poll_slot_3_date}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_3_date: e.target.value })}
+                        required={formData.create_poll}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Start Time</label>
+                      <input
+                        type="time"
+                        value={formData.poll_slot_3_start}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_3_start: e.target.value })}
+                        required={formData.create_poll}
+                        step="1800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">End Time</label>
+                      <input
+                        type="time"
+                        value={formData.poll_slot_3_end}
+                        onChange={(e) => setFormData({ ...formData, poll_slot_3_end: e.target.value })}
+                        required={formData.create_poll}
+                        step="1800"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                {/* Poll Deadline */}
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Poll Deadline *
+                    Poll Deadline (End Date) *
                   </label>
                   <input
-                    type="datetime-local"
-                    value={formData.poll_deadline}
-                    onChange={(e) => setFormData({ ...formData, poll_deadline: e.target.value })}
+                    type="date"
+                    value={formData.poll_deadline_date}
+                    onChange={(e) => setFormData({ ...formData, poll_deadline_date: e.target.value })}
                     required={formData.create_poll}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Voting will close at this date and time</p>
+                  <p className="text-xs text-gray-500 mt-1">Voting will close at 23:59 on this date</p>
                 </div>
               </div>
             )}
