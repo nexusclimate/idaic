@@ -92,7 +92,7 @@ export default function UserAdmin({ onUserSelect }) {
     const lastActivity = user.last_activity || user.last_login;
     
     if (!lastActivity) {
-      return { color: 'bg-red-500', label: 'Never logged in' };
+      return { color: 'bg-red-500', label: 'Never logged in', priority: 6 };
     }
 
     const now = new Date();
@@ -101,15 +101,15 @@ export default function UserAdmin({ onUserSelect }) {
     const daysDiff = hoursDiff / 24;
 
     if (hoursDiff <= 4) {
-      return { color: 'bg-green-400', label: 'Active within last 4 hours' };
+      return { color: 'bg-green-400', label: 'Active within last 4 hours', priority: 1 };
     } else if (hoursDiff <= 48) {
-      return { color: 'bg-green-600', label: 'Active within last 48 hours' };
+      return { color: 'bg-green-600', label: 'Active within last 48 hours', priority: 2 };
     } else if (daysDiff <= 5) {
-      return { color: 'bg-orange-500', label: 'Active within last 5 days' };
+      return { color: 'bg-orange-500', label: 'Active within last 5 days', priority: 3 };
     } else if (daysDiff <= 30) {
-      return { color: 'bg-purple-500', label: 'Last 30 days' };
+      return { color: 'bg-purple-500', label: 'Last 30 days', priority: 4 };
     } else {
-      return { color: 'bg-red-500', label: 'Over 30 days' };
+      return { color: 'bg-red-500', label: 'Over 30 days', priority: 5 };
     }
   };
 
@@ -128,16 +128,41 @@ export default function UserAdmin({ onUserSelect }) {
       if (aIsNew && !bIsNew) return -1;
       if (!aIsNew && bIsNew) return 1;
       
-      // If both are "new" or both are not "new", use the regular sorting
-      let aVal = a[sortBy];
-      let bVal = b[sortBy];
+      // If both are "new" or both are not "new", use multi-level sorting:
+      // 1. By status (activity priority)
+      // 2. By last login/activity (most recent first)
+      // 3. By name alphabetically
       
-      // Handle null/undefined values
-      if (aVal === null || aVal === undefined) aVal = '';
-      if (bVal === null || bVal === undefined) bVal = '';
+      const aStatus = getActivityStatus(a);
+      const bStatus = getActivityStatus(b);
       
-      if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+      // Sort by status priority (lower number = more active)
+      if (aStatus.priority !== bStatus.priority) {
+        return aStatus.priority - bStatus.priority;
+      }
+      
+      // If same status, sort by last login/activity (most recent first)
+      const aLastActivity = a.last_activity || a.last_login;
+      const bLastActivity = b.last_activity || b.last_login;
+      
+      if (aLastActivity && bLastActivity) {
+        const aDate = new Date(aLastActivity).getTime();
+        const bDate = new Date(bLastActivity).getTime();
+        if (aDate !== bDate) {
+          return bDate - aDate; // Most recent first
+        }
+      } else if (aLastActivity && !bLastActivity) {
+        return -1; // a has activity, b doesn't - a comes first
+      } else if (!aLastActivity && bLastActivity) {
+        return 1; // b has activity, a doesn't - b comes first
+      }
+      
+      // If same status and same/no login, sort by name alphabetically
+      const aName = (a.name || '').toLowerCase();
+      const bName = (b.name || '').toLowerCase();
+      
+      if (aName < bName) return -1;
+      if (aName > bName) return 1;
       return 0;
     });
 
