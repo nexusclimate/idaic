@@ -232,7 +232,7 @@ export default function EventsAdmin() {
                       </div>
                     )}
                     <div className="mt-2">
-                      <strong>Event URL:</strong>{' '}
+                      <strong>Registration URL:</strong>{' '}
                       <a
                         href={`/events-${event.id}`}
                         target="_blank"
@@ -363,7 +363,6 @@ function EventFormModal({ event, onSave, onClose }) {
     location: event?.location || '',
     description: event?.description || '',
     agenda: event?.agenda || '',
-    registration_link: event?.registration_link || '',
     is_idaic_event: event?.is_idaic_event || false
   });
   const [saving, setSaving] = useState(false);
@@ -456,19 +455,6 @@ function EventFormModal({ event, onSave, onClose }) {
               rows={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Event agenda, schedule, or outline..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-              Registration Link (Optional)
-            </label>
-            <input
-              type="url"
-              value={formData.registration_link}
-              onChange={(e) => setFormData({ ...formData, registration_link: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              placeholder="https://..."
             />
           </div>
 

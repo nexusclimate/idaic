@@ -268,9 +268,9 @@ export default function Events({ isAdminAuthenticated = false }) {
                 style={{ color: colors.text.primary, fontFamily: 'Inter, sans-serif' }}
               >
                 {/* Favicon/Logo in bottom-right corner */}
-                {(event.registration_link || isIdaicEvent(event)) && (
+                {(event.id || event.registration_link || isIdaicEvent(event)) && (
                   <div className="absolute bottom-2 right-2 z-10">
-                    {isIdaicEvent(event) ? (
+                    {(event.id || isIdaicEvent(event)) ? (
                       <div 
                         className="bg-white rounded-full p-1.5 shadow-sm border border-gray-200 flex items-center justify-center overflow-hidden"
                         style={{ width: 40, height: 40 }}
@@ -310,9 +310,29 @@ export default function Events({ isAdminAuthenticated = false }) {
                   <hr className="my-2 border-gray-300" />
                   {/* Registration Link below the line */}
                   <div className="text-xs sm:text-sm text-gray-700 w-full mt-0">
-                    {event.registration_link ? (
-                      <a href={event.registration_link} target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Registration Link</a>
-                    ) : <span className="text-gray-400">No registration link</span>}
+                    {event.id ? (
+                      <a 
+                        href={`/events-${event.id}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="underline text-blue-600"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Register for Event
+                      </a>
+                    ) : event.registration_link ? (
+                      <a 
+                        href={event.registration_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="underline text-blue-600"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Registration Link
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">No registration link</span>
+                    )}
                   </div>
                 </div>
                 <div className="absolute top-2 sm:top-3 right-2 sm:right-4 text-xs font-medium" style={{ color: colors.primary.orange }}>

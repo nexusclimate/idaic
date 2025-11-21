@@ -113,6 +113,7 @@ export default function EventForm({
                 <div className="flex items-center gap-2">
                   {/* IDAIC Icon in right corner when event is IDAIC organized */}
                   {localEvent && (localEvent.is_idaic_event === true || 
+                    localEvent.id || 
                     (localEvent.registration_link && (
                       localEvent.registration_link.toLowerCase().includes('idaic') ||
                       localEvent.registration_link.toLowerCase().includes('teams.microsoft')
@@ -199,19 +200,36 @@ export default function EventForm({
                         placeholder="Enter event description"
                       />
                     </div>
-                    <div>
-                      <label htmlFor="registration-link" className="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
-                      <input
-                        id="registration-link"
-                        type="url"
-                        name="registration_link"
-                        value={localEvent.registration_link}
-                        onChange={e => handleFieldChange('registration_link', e.target.value)}
-                        className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
-                        readOnly={readOnly}
-                        placeholder="Paste registration link here"
-                      />
-                    </div>
+                    {localEvent.id ? (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Registration URL</label>
+                        <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-700">
+                          <a 
+                            href={`/events-${localEvent.id}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            idaic.nexusclimate.co/events-{localEvent.id}
+                          </a>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">This event has an automatic registration page</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <label htmlFor="registration-link" className="block text-sm font-medium text-gray-700 mb-1">Registration Link</label>
+                        <input
+                          id="registration-link"
+                          type="url"
+                          name="registration_link"
+                          value={localEvent.registration_link || ''}
+                          onChange={e => handleFieldChange('registration_link', e.target.value)}
+                          className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm ${readOnly ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+                          readOnly={readOnly}
+                          placeholder="Paste registration link here"
+                        />
+                      </div>
+                    )}
                     <div>
                       <label className="flex items-center space-x-2">
                         <input
