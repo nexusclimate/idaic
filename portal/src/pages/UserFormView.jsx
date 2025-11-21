@@ -45,6 +45,26 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
     }
   }, [initialUser]);
 
+  // Auto-dismiss success messages after 5 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  // Auto-dismiss error messages after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -201,10 +221,21 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
     }
   };
 
+  // Debounced search for better performance
+  const [searchDebounced, setSearchDebounced] = useState('');
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchDebounced(search);
+    }, 300); // 300ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const filteredUsers = users.filter(u =>
-    u.name?.toLowerCase().includes(search.toLowerCase()) ||
-    u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.company?.toLowerCase().includes(search.toLowerCase())
+    u.name?.toLowerCase().includes(searchDebounced.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchDebounced.toLowerCase()) ||
+    u.company?.toLowerCase().includes(searchDebounced.toLowerCase())
   );
 
   if (loading) {
@@ -234,7 +265,7 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
             />
             
             {/* User suggestions dropdown */}
-            {search && filteredUsers.length > 0 && !selectedUser && (
+            {searchDebounced && filteredUsers.length > 0 && !selectedUser && (
               <div className="absolute z-20 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                 {filteredUsers.slice(0, 10).map((user) => (
                   <div
@@ -242,8 +273,11 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
                     onClick={() => {
                       loadUserData(user);
                       setSearch('');
+                      setSearchDebounced('');
                     }}
-                    className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
+                    className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0 transition-colors"
                   >
                     <div className="font-medium text-sm" style={{ color: colors.text.primary }}>
                       {user.name || 'Unnamed'}
@@ -258,6 +292,16 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
                     )}
                   </div>
                 ))}
+                {filteredUsers.length > 10 && (
+                  <div className="p-2 text-xs text-center text-gray-500 border-t">
+                    Showing 10 of {filteredUsers.length} results
+                  </div>
+                )}
+              </div>
+            )}
+            {searchDebounced && filteredUsers.length === 0 && (
+              <div className="absolute z-20 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg p-3 text-sm text-gray-500">
+                No users found matching "{searchDebounced}"
               </div>
             )}
           </div>
@@ -621,8 +665,8 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
               </div>
 
               {/* Messages */}
-              {error && <ErrorMessage message={error} />}
-              {success && <SuccessMessage message={success} />}
+              {error && <ErrorMessage message={error} onClose={() => setError('')} />}
+              {success && <SuccessMessage message={success} onClose={() => setSuccess('')} />}
 
               {/* Actions */}
               <div className="flex justify-between">
