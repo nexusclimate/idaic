@@ -244,6 +244,69 @@ export default function EventsAdmin() {
     }
   };
 
+  const handleClosePoll = async (event, poll) => {
+    try {
+      // Find the most voted option
+      const voteCounts = poll.voteCounts || {};
+      const timeSlots = poll.time_slots || [];
+      
+      if (timeSlots.length === 0) {
+        setError('No time slots available in poll');
+        return;
+      }
+
+      // Find the option with the most votes
+      let maxVotes = 0;
+      let mostVotedIndex = 0;
+      timeSlots.forEach((_, index) => {
+        const votes = voteCounts[index] || 0;
+        if (votes > maxVotes) {
+          maxVotes = votes;
+          mostVotedIndex = index;
+        }
+      });
+
+      // Get the most voted time slot
+      const mostVotedSlot = timeSlots[mostVotedIndex];
+      
+      // Close the poll by setting deadline to now
+      const updateResponse = await fetch(`/.netlify/functions/polls?id=${poll.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deadline: new Date().toISOString()
+        })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Failed to close poll');
+      }
+
+      // Update the event with the most voted time slot
+      const eventUpdateResponse = await fetch(`/.netlify/functions/events?id=${event.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_date: mostVotedSlot,
+          updated_at: new Date().toISOString()
+        })
+      });
+
+      if (!eventUpdateResponse.ok) {
+        const errorData = await eventUpdateResponse.json();
+        throw new Error(errorData.error || 'Failed to update event date');
+      }
+
+      setSuccess(`Poll closed successfully! Event date updated to the most voted option (${maxVotes} ${maxVotes === 1 ? 'vote' : 'votes'}).`);
+      await fetchEvents();
+      // Refresh poll data
+      await fetchPollData(event.id);
+    } catch (err) {
+      setError('Failed to close poll: ' + err.message);
+    }
+  };
+
   const handleDeleteEventClick = (event) => {
     setEventToDelete(event);
     setShowDeleteConfirm(true);
@@ -400,26 +463,6 @@ export default function EventsAdmin() {
                       Create Poll
                     </button>
                   )}
-                  {event.poll_id && polls[event.id] && (() => {
-                    const poll = polls[event.id];
-                    const deadline = poll.deadline ? new Date(poll.deadline) : null;
-                    const now = new Date();
-                    const isOpen = !deadline || now <= deadline;
-                    
-                    return (
-                      <button
-                        disabled
-                        className={`px-3 py-1 text-sm rounded ${
-                          isOpen
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}
-                        title={deadline ? `Deadline: ${deadline.toLocaleString()}` : 'No deadline set'}
-                      >
-                        {isOpen ? 'Poll Open' : 'Poll Closed'}
-                      </button>
-                    );
-                  })()}
                   <button
                     onClick={() => {
                       setSelectedEvent(event);
@@ -441,9 +484,42 @@ export default function EventsAdmin() {
               {/* Poll Results Section */}
               {event.poll_id && polls[event.id] && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <h4 className="font-semibold mb-2" style={{ color: colors.text.primary }}>
-                    Poll Results
-                  </h4>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold" style={{ color: colors.text.primary }}>
+                      Poll Results
+                    </h4>
+                    {(() => {
+                      const poll = polls[event.id];
+                      const deadline = poll.deadline ? new Date(poll.deadline) : null;
+                      const now = new Date();
+                      const isOpen = !deadline || now <= deadline;
+                      
+                      return (
+                        <div className="flex gap-2 items-center">
+                          <button
+                            disabled
+                            className={`px-3 py-1 text-sm rounded ${
+                              isOpen
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                            title={deadline ? `Deadline: ${deadline.toLocaleString()}` : 'No deadline set'}
+                          >
+                            {isOpen ? 'Poll Open' : 'Poll Closed'}
+                          </button>
+                          {isOpen && (
+                            <button
+                              onClick={() => handleClosePoll(event, poll)}
+                              className="px-3 py-1 text-sm bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
+                              title="Close poll and set event date to most voted option"
+                            >
+                              Close Poll
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
                   {(() => {
                     const poll = polls[event.id];
                     const voteCounts = poll.voteCounts || {};
@@ -473,35 +549,122 @@ export default function EventsAdmin() {
                       });
                     };
                     
+                    // Get votes for each option
+                    const votes = poll.votes || [];
+                    const votesByOption = {};
+                    timeSlots.forEach((_, index) => {
+                      votesByOption[index] = votes.filter(v => 
+                        (v.selected_slot_index !== undefined ? v.selected_slot_index : v.time_slot_index) === index
+                      );
+                    });
+                    
                     return (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {topSlots.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {topSlots.map(({ index, slot, votes }) => (
-                              <div
-                                key={index}
-                                className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-sm"
-                              >
-                                <div className="font-medium text-blue-900">
-                                  Option {index + 1}: {formatSlotDate(slot)}
-                                </div>
-                                <div className="text-xs text-blue-700 mt-0.5">
-                                  {votes} {votes === 1 ? 'vote' : 'votes'}
+                          <>
+                            <div className="flex flex-wrap gap-2">
+                              {topSlots.map(({ index, slot, votes }) => {
+                                const optionVotes = votesByOption[index] || [];
+                                const voterNames = optionVotes.map(v => {
+                                  const name = v.name || '';
+                                  const email = v.email || '';
+                                  const company = v.company ? ` (${v.company})` : '';
+                                  return name ? `${name}${company}` : email || 'Anonymous';
+                                }).filter(Boolean);
+                                
+                                return (
+                                  <div
+                                    key={index}
+                                    className="relative group px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-sm cursor-help"
+                                  >
+                                    <div className="font-medium text-blue-900">
+                                      Option {index + 1}: {formatSlotDate(slot)}
+                                    </div>
+                                    <div className="text-xs text-blue-700 mt-0.5">
+                                      {votes} {votes === 1 ? 'vote' : 'votes'}
+                                    </div>
+                                    
+                                    {/* Hover tooltip */}
+                                    {voterNames.length > 0 && (
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
+                                        <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg max-w-xs min-w-[200px]">
+                                          <div className="font-semibold mb-1 pb-1 border-b border-gray-700">
+                                            Voters ({voterNames.length}):
+                                          </div>
+                                          <div className="max-h-48 overflow-y-auto">
+                                            {voterNames.map((name, idx) => (
+                                              <div key={idx} className="py-0.5">
+                                                {name}
+                                              </div>
+                                            ))}
+                                          </div>
+                                          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                                            <div className="border-4 border-transparent border-t-gray-900"></div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            
+                            {/* Show all options with hover tooltips */}
+                            {timeSlots.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-gray-200">
+                                <div className="text-xs font-medium text-gray-600 mb-2">All Options:</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {timeSlots.map((slot, index) => {
+                                    const optionVotes = votesByOption[index] || [];
+                                    const voteCount = voteCounts[index] || 0;
+                                    const voterNames = optionVotes.map(v => {
+                                      const name = v.name || '';
+                                      const email = v.email || '';
+                                      const company = v.company ? ` (${v.company})` : '';
+                                      return name ? `${name}${company}` : email || 'Anonymous';
+                                    }).filter(Boolean);
+                                    
+                                    return (
+                                      <div
+                                        key={index}
+                                        className="relative group px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm cursor-help"
+                                      >
+                                        <div className="font-medium text-gray-900">
+                                          Option {index + 1}: {formatSlotDate(slot)}
+                                        </div>
+                                        <div className="text-xs text-gray-600 mt-0.5">
+                                          {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
+                                        </div>
+                                        
+                                        {/* Hover tooltip */}
+                                        {voterNames.length > 0 && (
+                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
+                                            <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg max-w-xs min-w-[200px]">
+                                              <div className="font-semibold mb-1 pb-1 border-b border-gray-700">
+                                                Voters ({voterNames.length}):
+                                              </div>
+                                              <div className="max-h-48 overflow-y-auto">
+                                                {voterNames.map((name, idx) => (
+                                                  <div key={idx} className="py-0.5">
+                                                    {name}
+                                                  </div>
+                                                ))}
+                                              </div>
+                                              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                                                <div className="border-4 border-transparent border-t-gray-900"></div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
-                            ))}
-                          </div>
+                            )}
+                          </>
                         ) : (
                           <p className="text-sm text-gray-500">No votes yet</p>
-                        )}
-                        {timeSlots.length > 0 && (
-                          <div className="text-xs text-gray-500 mt-2">
-                            All options: {timeSlots.map((slot, idx) => (
-                              <span key={idx} className="ml-2">
-                                Option {idx + 1}: {voteCounts[idx] || 0} {voteCounts[idx] === 1 ? 'vote' : 'votes'}
-                              </span>
-                            ))}
-                          </div>
                         )}
                       </div>
                     );

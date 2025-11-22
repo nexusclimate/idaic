@@ -66,7 +66,7 @@
       <!-- Header Banner -->
       <div class="poll-header text-white">
         <div class="poll-header-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 flex items-end min-h-full">
-          <div class="w-full pb-10 sm:pb-12 lg:pb-16">
+          <div class="w-full pb-16 sm:pb-20 lg:pb-24">
             <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6">
               <div class="flex-1 w-full">
                 <h1 id="poll-title" class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 break-words" style="color: #f97316;">Event Time Poll</h1>
@@ -511,14 +511,55 @@
       }
     });
 
-    // Auto-fill form fields from URL parameters or parent window (for members portal)
-    function autoFillForm() {
+    // Auto-fill form fields from URL parameters, localStorage, or parent window (for members portal)
+    async function autoFillForm() {
       const urlParams = new URLSearchParams(window.location.search);
       
       // Get data from URL parameters
       const name = urlParams.get('name');
       const email = urlParams.get('email');
       const company = urlParams.get('company');
+      
+      // Try to get user data from localStorage (for logged-in users)
+      try {
+        const isPasswordLogin = localStorage.getItem('idaic-password-login');
+        const passwordEmail = localStorage.getItem('idaic-password-email');
+        const localToken = localStorage.getItem('idaic-token');
+        
+        // Try to fetch user profile if we have an email
+        if (passwordEmail) {
+          try {
+            const response = await fetch(`/.netlify/functions/userProfile?email=${encodeURIComponent(passwordEmail)}`, {
+              headers: localToken ? {
+                'Authorization': `Bearer ${localToken}`
+              } : {}
+            });
+            
+            if (response.ok) {
+              const userData = await response.json();
+              if (userData) {
+                if (userData.name && !document.getElementById('name').value) {
+                  document.getElementById('name').value = userData.name;
+                }
+                if (userData.email && !document.getElementById('email').value) {
+                  document.getElementById('email').value = userData.email;
+                }
+                if (userData.company && !document.getElementById('company').value) {
+                  document.getElementById('company').value = userData.company;
+                }
+              }
+            }
+          } catch (err) {
+            console.log('Could not fetch user profile:', err);
+            // Fallback to email from localStorage if available
+            if (passwordEmail && !document.getElementById('email').value) {
+              document.getElementById('email').value = passwordEmail;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Error accessing localStorage:', e);
+      }
       
       // Try to get data from parent window if in iframe (members portal)
       try {
@@ -547,7 +588,7 @@
         console.log('Cannot access parent window:', e);
       }
       
-      // Fill from URL parameters if available
+      // Fill from URL parameters if available (lowest priority - won't overwrite existing values)
       if (name && !document.getElementById('name').value) {
         document.getElementById('name').value = decodeURIComponent(name);
       }
