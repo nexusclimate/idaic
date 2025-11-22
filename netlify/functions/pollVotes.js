@@ -56,7 +56,7 @@ exports.handler = async function (event, context) {
           const { data, error } = await supabase
             .from('poll_votes')
             .update({
-              selected_slot_index: slotIndex,
+              time_slot_index: slotIndex,
               name: voteData.name,
               updated_at: new Date().toISOString()
             })
@@ -72,7 +72,7 @@ exports.handler = async function (event, context) {
         // Create new vote
         const newVote = {
           poll_id: voteData.poll_id,
-          selected_slot_index: slotIndex,
+          time_slot_index: slotIndex,
           name: voteData.name,
           email: voteData.email,
           company: voteData.company || null,

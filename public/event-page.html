@@ -66,7 +66,7 @@
       <!-- Header Banner -->
       <div class="event-header text-white">
         <div class="event-header-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 flex items-end min-h-full">
-          <div class="w-full pb-4 sm:pb-6">
+          <div class="w-full pb-10 sm:pb-12 lg:pb-16">
             <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6">
               <div class="flex-1 w-full">
                 <h1 id="event-title" class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 break-words" style="color: #f97316;"></h1>
@@ -412,9 +412,63 @@
       }
     });
 
+    // Auto-fill form fields from URL parameters or parent window (for members portal)
+    function autoFillForm() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Get data from URL parameters
+      const name = urlParams.get('name');
+      const email = urlParams.get('email');
+      const company = urlParams.get('company');
+      
+      // Try to get data from parent window if in iframe (members portal)
+      let parentData = null;
+      try {
+        if (window.parent && window.parent !== window) {
+          // Request user data from parent (members portal)
+          window.parent.postMessage({ type: 'requestUserData' }, '*');
+          
+          // Listen for response
+          window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'userData') {
+              const data = event.data.data || {};
+              if (data.name && !document.getElementById('name').value) {
+                document.getElementById('name').value = data.name;
+              }
+              if (data.email && !document.getElementById('email').value) {
+                document.getElementById('email').value = data.email;
+              }
+              if (data.company && !document.getElementById('company').value) {
+                document.getElementById('company').value = data.company;
+              }
+            }
+          });
+        }
+      } catch (e) {
+        // Cross-origin restrictions - ignore
+        console.log('Cannot access parent window:', e);
+      }
+      
+      // Fill from URL parameters if available
+      if (name && !document.getElementById('name').value) {
+        document.getElementById('name').value = decodeURIComponent(name);
+      }
+      if (email && !document.getElementById('email').value) {
+        document.getElementById('email').value = decodeURIComponent(email);
+      }
+      if (company && !document.getElementById('company').value) {
+        document.getElementById('company').value = decodeURIComponent(company);
+      }
+    }
+
     // Initialize
     loadIdaicLogo();
-    loadEvent();
+    loadEvent().then(() => {
+      // Auto-fill after event loads and form is visible
+      setTimeout(() => {
+        autoFillForm();
+      }, 100);
+    });
   </script>
 </body>
 </html>
