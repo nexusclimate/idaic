@@ -528,14 +528,6 @@ export default function EventsAdmin() {
                     // Find max votes
                     const maxVotes = Math.max(...Object.values(voteCounts), 0);
                     
-                    // Find all slots with max votes (top votes)
-                    const topSlots = [];
-                    timeSlots.forEach((slot, index) => {
-                      if (voteCounts[index] === maxVotes && maxVotes > 0) {
-                        topSlots.push({ index, slot, votes: maxVotes });
-                      }
-                    });
-                    
                     // Format date helper
                     const formatSlotDate = (slotDate) => {
                       const date = new Date(slotDate);
@@ -559,110 +551,61 @@ export default function EventsAdmin() {
                     });
                     
                     return (
-                      <div className="space-y-3">
-                        {topSlots.length > 0 ? (
-                          <>
-                            <div className="flex flex-wrap gap-2">
-                              {topSlots.map(({ index, slot, votes }) => {
-                                const optionVotes = votesByOption[index] || [];
-                                const voterNames = optionVotes.map(v => {
-                                  const name = v.name || '';
-                                  const email = v.email || '';
-                                  const company = v.company ? ` (${v.company})` : '';
-                                  return name ? `${name}${company}` : email || 'Anonymous';
-                                }).filter(Boolean);
-                                
-                                return (
-                                  <div
-                                    key={index}
-                                    className="relative group px-3 py-2 bg-blue-50 border border-blue-200 rounded-md text-sm cursor-help"
-                                  >
-                                    <div className="font-medium text-blue-900">
-                                      Option {index + 1}: {formatSlotDate(slot)}
-                                    </div>
-                                    <div className="text-xs text-blue-700 mt-0.5">
-                                      {votes} {votes === 1 ? 'vote' : 'votes'}
-                                    </div>
-                                    
-                                    {/* Hover tooltip */}
-                                    {voterNames.length > 0 && (
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-                                        <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg max-w-xs min-w-[200px]">
-                                          <div className="font-semibold mb-1 pb-1 border-b border-gray-700">
-                                            Voters ({voterNames.length}):
-                                          </div>
-                                          <div className="max-h-48 overflow-y-auto">
-                                            {voterNames.map((name, idx) => (
-                                              <div key={idx} className="py-0.5">
-                                                {name}
-                                              </div>
-                                            ))}
-                                          </div>
-                                          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                                            <div className="border-4 border-transparent border-t-gray-900"></div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
+                      <div className="space-y-2">
+                        {timeSlots.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {timeSlots.map((slot, index) => {
+                              const optionVotes = votesByOption[index] || [];
+                              const voteCount = voteCounts[index] || 0;
+                              const isTopVoted = maxVotes > 0 && voteCount === maxVotes;
+                              const voterNames = optionVotes.map(v => {
+                                const name = v.name || '';
+                                const email = v.email || '';
+                                const company = v.company ? ` (${v.company})` : '';
+                                return name ? `${name}${company}` : email || 'Anonymous';
+                              }).filter(Boolean);
+                              
+                              return (
+                                <div
+                                  key={index}
+                                  className={`relative group px-3 py-2 rounded-md text-sm cursor-help ${
+                                    isTopVoted
+                                      ? 'bg-blue-50 border-2 border-blue-300'
+                                      : 'bg-gray-50 border border-gray-200'
+                                  }`}
+                                >
+                                  <div className={`font-medium ${isTopVoted ? 'text-blue-900' : 'text-gray-900'}`}>
+                                    Option {index + 1}: {formatSlotDate(slot)}
                                   </div>
-                                );
-                              })}
-                            </div>
-                            
-                            {/* Show all options with hover tooltips */}
-                            {timeSlots.length > 0 && (
-                              <div className="mt-3 pt-3 border-t border-gray-200">
-                                <div className="text-xs font-medium text-gray-600 mb-2">All Options:</div>
-                                <div className="flex flex-wrap gap-2">
-                                  {timeSlots.map((slot, index) => {
-                                    const optionVotes = votesByOption[index] || [];
-                                    const voteCount = voteCounts[index] || 0;
-                                    const voterNames = optionVotes.map(v => {
-                                      const name = v.name || '';
-                                      const email = v.email || '';
-                                      const company = v.company ? ` (${v.company})` : '';
-                                      return name ? `${name}${company}` : email || 'Anonymous';
-                                    }).filter(Boolean);
-                                    
-                                    return (
-                                      <div
-                                        key={index}
-                                        className="relative group px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm cursor-help"
-                                      >
-                                        <div className="font-medium text-gray-900">
-                                          Option {index + 1}: {formatSlotDate(slot)}
+                                  <div className={`text-xs mt-0.5 ${isTopVoted ? 'text-blue-700' : 'text-gray-600'}`}>
+                                    {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
+                                    {isTopVoted && <span className="ml-1 font-semibold">(Most Voted)</span>}
+                                  </div>
+                                  
+                                  {/* Hover tooltip */}
+                                  {voterNames.length > 0 && (
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
+                                      <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg max-w-xs min-w-[200px]">
+                                        <div className="font-semibold mb-1 pb-1 border-b border-gray-700">
+                                          Voters ({voterNames.length}):
                                         </div>
-                                        <div className="text-xs text-gray-600 mt-0.5">
-                                          {voteCount} {voteCount === 1 ? 'vote' : 'votes'}
-                                        </div>
-                                        
-                                        {/* Hover tooltip */}
-                                        {voterNames.length > 0 && (
-                                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-                                            <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg max-w-xs min-w-[200px]">
-                                              <div className="font-semibold mb-1 pb-1 border-b border-gray-700">
-                                                Voters ({voterNames.length}):
-                                              </div>
-                                              <div className="max-h-48 overflow-y-auto">
-                                                {voterNames.map((name, idx) => (
-                                                  <div key={idx} className="py-0.5">
-                                                    {name}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                                                <div className="border-4 border-transparent border-t-gray-900"></div>
-                                              </div>
+                                        <div className="max-h-48 overflow-y-auto">
+                                          {voterNames.map((name, idx) => (
+                                            <div key={idx} className="py-0.5">
+                                              {name}
                                             </div>
-                                          </div>
-                                        )}
+                                          ))}
+                                        </div>
+                                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                                          <div className="border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
                                       </div>
-                                    );
-                                  })}
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                            )}
-                          </>
+                              );
+                            })}
+                          </div>
                         ) : (
                           <p className="text-sm text-gray-500">No votes yet</p>
                         )}

@@ -43,6 +43,19 @@ exports.handler = async function (event, context) {
           };
         }
 
+        // Get poll to find event_id
+        const { data: poll, error: pollError } = await supabase
+          .from('polls')
+          .select('event_id')
+          .eq('id', voteData.poll_id)
+          .maybeSingle();
+
+        if (pollError || !poll) {
+          return { statusCode: 500, body: JSON.stringify({ error: 'Failed to fetch poll information' }) };
+        }
+
+        const eventId = poll.event_id;
+
         // Check if user already voted
         const { data: existing } = await supabase
           .from('poll_votes')
@@ -51,6 +64,7 @@ exports.handler = async function (event, context) {
           .eq('email', voteData.email)
           .maybeSingle();
 
+        let voteResult;
         if (existing) {
           // Update existing vote
           const { data, error } = await supabase
@@ -66,29 +80,89 @@ exports.handler = async function (event, context) {
           if (error) {
             return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
           }
-          return { statusCode: 200, body: JSON.stringify(data[0]) };
+          voteResult = data[0];
+        } else {
+          // Create new vote
+          const newVote = {
+            poll_id: voteData.poll_id,
+            time_slot_index: slotIndex,
+            name: voteData.name,
+            email: voteData.email,
+            company: voteData.company || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          const { data, error } = await supabase
+            .from('poll_votes')
+            .insert([newVote])
+            .select();
+
+          if (error) {
+            return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+          }
+          voteResult = data[0];
         }
 
-        // Create new vote
-        const newVote = {
-          poll_id: voteData.poll_id,
-          time_slot_index: slotIndex,
-          name: voteData.name,
-          email: voteData.email,
-          company: voteData.company || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+        // Automatically register the voter for the event if event_id exists
+        if (eventId) {
+          try {
+            // Check if user already registered for this event
+            const { data: existingRegistration } = await supabase
+              .from('event_registrations')
+              .select('id')
+              .eq('event_id', eventId)
+              .eq('email', voteData.email)
+              .maybeSingle();
 
-        const { data, error } = await supabase
-          .from('poll_votes')
-          .insert([newVote])
-          .select();
+            if (!existingRegistration) {
+              // Check if email exists in users table and get their role
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, email, role')
+                .eq('email', voteData.email)
+                .maybeSingle();
 
-        if (error) {
-          return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+              // Set registration type and role
+              let registrationType = 'external';
+              let userRole = null;
+              
+              if (userData) {
+                registrationType = 'internal';
+                userRole = userData.role || null;
+              } else {
+                // Not in database, mark as "New"
+                registrationType = 'new';
+              }
+
+              const newRegistration = {
+                event_id: eventId,
+                name: voteData.name,
+                email: voteData.email,
+                company: voteData.company || null,
+                title: voteData.title || null,
+                registration_type: registrationType,
+                user_role: userRole,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              };
+
+              const { error: regError } = await supabase
+                .from('event_registrations')
+                .insert([newRegistration]);
+
+              if (regError) {
+                // Log error but don't fail the vote submission
+                console.error('Error creating event registration:', regError);
+              }
+            }
+          } catch (regErr) {
+            // Log error but don't fail the vote submission
+            console.error('Error processing event registration:', regErr);
+          }
         }
-        return { statusCode: 201, body: JSON.stringify(data[0]) };
+
+        return { statusCode: existing ? 200 : 201, body: JSON.stringify(voteResult) };
       }
       
       default:
