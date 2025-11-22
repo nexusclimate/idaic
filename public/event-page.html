@@ -65,8 +65,8 @@
     <div id="event-content" class="hidden">
       <!-- Header Banner -->
       <div class="event-header text-white">
-        <div class="event-header-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 flex items-center min-h-full">
-          <div class="w-full">
+        <div class="event-header-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 flex items-end min-h-full">
+          <div class="w-full pb-4 sm:pb-6">
             <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6">
               <div class="flex-1 w-full">
                 <h1 id="event-title" class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 break-words" style="color: #f97316;"></h1>
@@ -286,9 +286,7 @@
         
         // Display date in normal text (not bold, not orange) in event details
         document.getElementById('event-date').textContent = dateStr;
-        document.getElementById('event-location').innerHTML = event.location 
-          ? `<strong style="color: #f97316;">${event.location}</strong>` 
-          : 'TBA';
+        document.getElementById('event-location').textContent = event.location || 'TBA';
         
         // Show date and time in header meta in orange
         const metaHtml = [];

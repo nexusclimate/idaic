@@ -855,6 +855,64 @@ function EventFormModal({ event, onSave, onClose }) {
     return `${String(newHour).padStart(2, '0')}:${minutes}`;
   };
 
+  // Load poll data when editing an event with an existing poll
+  useEffect(() => {
+    const loadPollData = async () => {
+      if (event?.poll_id && event?.id) {
+        try {
+          const response = await fetch(`/.netlify/functions/polls?event_id=${event.id}`);
+          if (response.ok) {
+            const poll = await response.json();
+            if (poll && poll.time_slots && poll.time_slots.length >= 3) {
+              // Parse time slots and convert to form format
+              setFormData(prevFormData => {
+                const pollFormData = { ...prevFormData };
+                
+                poll.time_slots.forEach((slot, index) => {
+                  if (index < 3) {
+                    const slotDate = new Date(slot);
+                    // Get local date components
+                    const year = slotDate.getFullYear();
+                    const month = String(slotDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(slotDate.getDate()).padStart(2, '0');
+                    const dateStr = `${year}-${month}-${day}`;
+                    
+                    // Get local time components
+                    const hours = String(slotDate.getHours()).padStart(2, '0');
+                    const minutes = String(slotDate.getMinutes()).padStart(2, '0');
+                    const startTime = `${hours}:${minutes}`;
+                    
+                    // Calculate end time (start + 2 hours)
+                    const endTime = addTwoHours(startTime);
+                    
+                    pollFormData[`poll_slot_${index + 1}_date`] = dateStr;
+                    pollFormData[`poll_slot_${index + 1}_start`] = startTime;
+                    pollFormData[`poll_slot_${index + 1}_end`] = endTime;
+                  }
+                });
+                
+                // Parse deadline
+                if (poll.deadline) {
+                  const deadlineDate = new Date(poll.deadline);
+                  const year = deadlineDate.getFullYear();
+                  const month = String(deadlineDate.getMonth() + 1).padStart(2, '0');
+                  const day = String(deadlineDate.getDate()).padStart(2, '0');
+                  pollFormData.poll_deadline_date = `${year}-${month}-${day}`;
+                }
+                
+                return pollFormData;
+              });
+            }
+          }
+        } catch (err) {
+          console.error('Error loading poll data:', err);
+        }
+      }
+    };
+    
+    loadPollData();
+  }, [event?.poll_id, event?.id]); // Only run when event or poll_id changes
+
   // Auto-save effect - debounced
   useEffect(() => {
     // Only auto-save if we have title (and date if not creating poll)
@@ -1004,11 +1062,11 @@ function EventFormModal({ event, onSave, onClose }) {
     }
 
     // Validate poll fields if poll is being created
+    // Note: deadline is optional, so we don't require poll_deadline_date
     if (formData.create_poll) {
       if (!formData.poll_slot_1_date || !formData.poll_slot_1_start || !formData.poll_slot_1_end ||
           !formData.poll_slot_2_date || !formData.poll_slot_2_start || !formData.poll_slot_2_end ||
-          !formData.poll_slot_3_date || !formData.poll_slot_3_start || !formData.poll_slot_3_end ||
-          !formData.poll_deadline_date) {
+          !formData.poll_slot_3_date || !formData.poll_slot_3_start || !formData.poll_slot_3_end) {
         return;
       }
     }
@@ -1053,9 +1111,12 @@ function EventFormModal({ event, onSave, onClose }) {
                     deadline: deadline
                   })
                 });
-                if (updateResponse.ok && onSave) {
-                  await onSave(createdEventId, formData);
+                if (!updateResponse.ok) {
+                  const errorData = await updateResponse.json().catch(() => ({ error: 'Unknown error' }));
+                  console.error('Failed to update poll:', updateResponse.status, errorData);
+                  throw new Error(`Failed to update poll: ${errorData.error || 'Unknown error'}`);
                 }
+                console.log('Poll updated successfully');
               } else {
                 // Create new poll
                 const newPollResponse = await fetch('/.netlify/functions/polls', {
