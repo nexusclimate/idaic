@@ -12,6 +12,7 @@
   <style>
     body { 
       font-family: 'Inter', sans-serif;
+      overflow-x: hidden; /* Prevent horizontal scrolling */
     }
     .poll-header {
       background-image: url('https://xnjpbkcqfuvegiwdxypw.supabase.co/storage/v1/object/public/logos/download_events.jpeg');
@@ -19,6 +20,19 @@
       background-position: center;
       background-repeat: no-repeat;
       position: relative;
+      min-height: 300px; /* Minimum height for mobile */
+      width: 100%;
+      max-width: 100vw; /* Prevent overflow */
+    }
+    @media (min-width: 640px) {
+      .poll-header {
+        min-height: 400px;
+      }
+    }
+    @media (min-width: 1024px) {
+      .poll-header {
+        min-height: 500px;
+      }
     }
     .poll-header::before {
       content: '';
@@ -33,6 +47,11 @@
       position: relative;
       z-index: 1;
     }
+    /* Ensure images are responsive */
+    img {
+      max-width: 100%;
+      height: auto;
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -46,47 +65,52 @@
     <div id="poll-content" class="hidden">
       <!-- Header Banner -->
       <div class="poll-header text-white">
-        <div class="poll-header-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
-          <div class="flex items-center mb-6">
-            <a href="https://www.idaic.org" target="_blank" rel="noopener noreferrer" class="mr-6">
-              <img id="idaic-logo" alt="IDAIC Logo" class="h-12 w-auto object-contain" style="display: none;" />
-            </a>
-            <div class="flex-1">
-              <h1 id="poll-title" class="text-3xl sm:text-4xl font-bold mb-2" style="color: #f97316;">Event Time Poll</h1>
-              <div id="poll-subtitle" class="text-gray-100 text-sm sm:text-base"></div>
+        <div class="poll-header-content max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32 flex items-center min-h-full">
+          <div class="w-full">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6">
+              <a href="https://www.idaic.org" target="_blank" rel="noopener noreferrer" class="mb-4 sm:mb-0 sm:mr-6">
+                <img id="idaic-logo" alt="IDAIC Logo" class="h-10 sm:h-12 w-auto object-contain max-w-full" style="display: none;" />
+              </a>
+              <div class="flex-1 w-full">
+                <h1 id="poll-title" class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 break-words" style="color: #f97316;">Event Time Poll</h1>
+                <div id="poll-subtitle" class="text-gray-100 text-xs sm:text-sm lg:text-base"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Main Content -->
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <!-- Success Message -->
-        <div id="success-message" class="hidden mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-          <div class="flex items-center">
-            <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div id="success-message" class="hidden mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-md">
+          <div class="flex items-start sm:items-center">
+            <svg class="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <p class="text-sm text-green-800">Your vote has been recorded!</p>
+            <p class="text-xs sm:text-sm text-green-800 break-words">Your vote has been recorded!</p>
           </div>
         </div>
 
         <!-- Error Message -->
-        <div id="error-message" class="hidden mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p class="text-sm text-red-800" id="error-text"></p>
+        <div id="error-message" class="hidden mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md">
+          <p class="text-xs sm:text-sm text-red-800 break-words" id="error-text"></p>
         </div>
 
+        <!-- Deadline Notice -->
+        <div id="deadline-notice" class="mb-4 sm:mb-6"></div>
+
         <!-- Poll Details -->
-        <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6">
-          <h2 class="text-xl font-semibold mb-4 text-gray-900">Vote for Your Preferred Time</h2>
-          <p class="text-gray-700 mb-6">Please select your preferred time slot for this event:</p>
+        <div class="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-6">
+          <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900">Vote for Your Preferred Time</h2>
+          <p class="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6">Please select your preferred time slot for this event:</p>
           
-          <div id="time-slots" class="space-y-4 mb-6"></div>
+          <div id="time-slots" class="space-y-3 sm:space-y-4 mb-4 sm:mb-6"></div>
         </div>
 
         <!-- Voting Form -->
-        <div id="voting-form-container" class="bg-white rounded-lg shadow-lg p-6 sm:p-8">
-          <h2 class="text-xl font-semibold mb-4 text-gray-900">Cast Your Vote</h2>
+        <div id="voting-form-container" class="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8">
+          <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900">Cast Your Vote</h2>
           
           <form id="voting-form" class="space-y-4">
             <div>
@@ -137,7 +161,7 @@
             <button
               type="submit"
               id="submit-btn"
-              class="w-full px-6 py-3 bg-orange-500 text-white rounded-md text-base font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-500 text-white rounded-md text-sm sm:text-base font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Submit Vote
             </button>
@@ -146,8 +170,8 @@
       </div>
 
       <!-- Footer -->
-      <footer class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8 border-t border-gray-200">
-        <p class="text-xs text-gray-600 text-center leading-relaxed">
+      <footer class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mt-6 sm:mt-8 border-t border-gray-200">
+        <p class="text-xs sm:text-sm text-gray-600 text-center leading-relaxed px-2">
           This event is created and managed by IDAIC, under the direction of the meeting organizer. The data processing that occurs for purposes of this event is subject to the terms of the meeting organiser.
         </p>
       </footer>
@@ -315,22 +339,22 @@
           
           if (isDeadlinePassed) {
             deadlineNotice.innerHTML = `
-              <div class="p-4 bg-red-50 border border-red-200 rounded-md">
-                <p class="text-sm text-red-800">
+              <div class="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-md mb-4 sm:mb-6">
+                <p class="text-xs sm:text-sm text-red-800 break-words">
                   <strong>Voting Closed:</strong> The poll deadline has passed
                 </p>
-                <div class="text-sm text-red-700 mt-1" style="color: #f97316; font-weight: bold;">${deadlineStr}</div>
+                <div class="text-xs sm:text-sm text-red-700 mt-1 break-words" style="color: #f97316; font-weight: bold;">${deadlineStr}</div>
               </div>
             `;
             // Disable voting form
             document.getElementById('voting-form-container').classList.add('hidden');
           } else {
             deadlineNotice.innerHTML = `
-              <div class="p-4 bg-blue-50 border border-blue-200 rounded-md">
-                <p class="text-sm text-blue-800">
+              <div class="p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-md mb-4 sm:mb-6">
+                <p class="text-xs sm:text-sm text-blue-800 break-words">
                   <strong>Voting Deadline:</strong>
                 </p>
-                <div class="text-sm text-blue-700 mt-1" style="color: #f97316; font-weight: bold;">${deadlineStr}</div>
+                <div class="text-xs sm:text-sm text-blue-700 mt-1 break-words" style="color: #f97316; font-weight: bold;">${deadlineStr}</div>
               </div>
             `;
           }
@@ -348,14 +372,14 @@
           
           // Display slot with vote count
           const slotDiv = document.createElement('div');
-          slotDiv.className = 'p-4 border border-gray-200 rounded-lg';
+          slotDiv.className = 'p-3 sm:p-4 border border-gray-200 rounded-lg';
           slotDiv.innerHTML = `
-            <div class="flex justify-between items-center">
-              <div>
-                <div class="font-semibold text-gray-900">Option ${index + 1}</div>
-                <div style="color: #f97316; font-weight: bold;">${formattedDate}</div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm sm:text-base text-gray-900">Option ${index + 1}</div>
+                <div class="text-sm sm:text-base break-words" style="color: #f97316; font-weight: bold;">${formattedDate}</div>
               </div>
-              <div class="text-sm text-gray-600">
+              <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
                 ${voteCount} ${voteCount === 1 ? 'vote' : 'votes'}
               </div>
             </div>
@@ -364,7 +388,7 @@
 
           // Radio button option
           const radioDiv = document.createElement('div');
-          radioDiv.className = 'flex items-center p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer';
+          radioDiv.className = 'flex items-center p-3 sm:p-4 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer';
           radioDiv.innerHTML = `
             <input
               type="radio"
@@ -372,10 +396,10 @@
               name="time_slot"
               value="${index}"
               required
-              class="mr-3"
+              class="mr-2 sm:mr-3 flex-shrink-0"
             />
-            <label for="slot-${index}" class="flex-1 cursor-pointer">
-              <div style="color: #f97316; font-weight: bold;">${formattedDate}</div>
+            <label for="slot-${index}" class="flex-1 cursor-pointer min-w-0">
+              <div class="text-sm sm:text-base break-words" style="color: #f97316; font-weight: bold;">${formattedDate}</div>
               <div class="text-xs text-gray-500 mt-1">${voteCount} ${voteCount === 1 ? 'vote' : 'votes'}</div>
             </label>
           `;

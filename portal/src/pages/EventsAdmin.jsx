@@ -233,7 +233,7 @@ export default function EventsAdmin() {
       }
 
       const createdPoll = await response.json();
-      setSuccess(`Poll created successfully! Poll URL: idaic.nexusclimate.co/poll-${createdPoll.id}`);
+      setSuccess(`Poll created successfully! Poll URL: idaic.nexusclimate.co/poll-${pollData.event_id}`);
       await fetchEvents();
       // Refresh poll data for the event
       if (pollData.event_id) {
@@ -377,12 +377,12 @@ export default function EventsAdmin() {
                       <div className="mt-2">
                         <strong>Poll URL:</strong>{' '}
                         <a
-                          href={`/poll-${event.poll_id}`}
+                          href={`/poll-${event.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:underline"
                         >
-                          idaic.nexusclimate.co/poll-{event.poll_id}
+                          idaic.nexusclimate.co/poll-{event.id}
                         </a>
                       </div>
                     )}
@@ -400,6 +400,26 @@ export default function EventsAdmin() {
                       Create Poll
                     </button>
                   )}
+                  {event.poll_id && polls[event.id] && (() => {
+                    const poll = polls[event.id];
+                    const deadline = poll.deadline ? new Date(poll.deadline) : null;
+                    const now = new Date();
+                    const isOpen = !deadline || now <= deadline;
+                    
+                    return (
+                      <button
+                        disabled
+                        className={`px-3 py-1 text-sm rounded ${
+                          isOpen
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                        title={deadline ? `Deadline: ${deadline.toLocaleString()}` : 'No deadline set'}
+                      >
+                        {isOpen ? 'Poll Open' : 'Poll Closed'}
+                      </button>
+                    );
+                  })()}
                   <button
                     onClick={() => {
                       setSelectedEvent(event);
