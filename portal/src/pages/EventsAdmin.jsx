@@ -266,8 +266,22 @@ export default function EventsAdmin() {
         }
       });
 
+      // If no votes, default to first option
+      if (maxVotes === 0) {
+        console.warn('No votes found, using first time slot as default');
+        mostVotedIndex = 0;
+      }
+
       // Get the most voted time slot
       const mostVotedSlot = timeSlots[mostVotedIndex];
+      
+      if (!mostVotedSlot) {
+        throw new Error('No valid time slot found to update event date');
+      }
+      
+      // Ensure the date is in ISO format
+      const eventDateToSet = new Date(mostVotedSlot).toISOString();
+      console.log('Most voted slot:', mostVotedSlot, 'Index:', mostVotedIndex, 'Votes:', maxVotes, 'Formatted date:', eventDateToSet);
       
       // Close the poll by setting deadline to now
       const updateResponse = await fetch(`/.netlify/functions/polls?id=${poll.id}`, {
@@ -284,23 +298,32 @@ export default function EventsAdmin() {
       }
 
       // Update the event with the most voted time slot
+      console.log('Updating event:', event.id, 'with date:', eventDateToSet);
       const eventUpdateResponse = await fetch(`/.netlify/functions/events?id=${event.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          event_date: mostVotedSlot,
+          event_date: eventDateToSet,
           updated_at: new Date().toISOString()
         })
       });
 
       if (!eventUpdateResponse.ok) {
         const errorData = await eventUpdateResponse.json();
+        console.error('Failed to update event date. Response:', errorData);
         throw new Error(errorData.error || 'Failed to update event date');
       }
 
+      const updatedEvent = await eventUpdateResponse.json();
+      console.log('Event updated successfully. New event_date:', updatedEvent.event_date);
+
+      // Wait a moment to ensure database is updated
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Send Slack notification (non-blocking)
       try {
-        await fetch('/.netlify/functions/notifySlackPollClosed', {
+        console.log('Sending Slack notification for poll:', poll.id, 'event:', event.id);
+        const slackResponse = await fetch('/.netlify/functions/notifySlackPollClosed', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -308,6 +331,15 @@ export default function EventsAdmin() {
             event_id: event.id
           })
         });
+        
+        const slackResult = await slackResponse.json();
+        console.log('Slack notification response:', slackResult);
+        
+        if (!slackResponse.ok) {
+          console.error('Slack notification failed:', slackResult);
+        } else {
+          console.log('Slack notification sent successfully');
+        }
       } catch (slackErr) {
         // Log but don't fail the operation if Slack notification fails
         console.error('Failed to send Slack notification:', slackErr);

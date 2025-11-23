@@ -53,9 +53,13 @@ exports.handler = async function (event, context) {
         if (!id) {
           return { statusCode: 400, body: JSON.stringify({ error: 'Event ID is required' }) };
         }
+        console.log('Updating event:', id, 'with updates:', JSON.stringify(updates));
         // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
         if (updates.event_date === '' || updates.event_date === null || updates.event_date === undefined) {
+          console.log('Removing empty event_date field');
           delete updates.event_date;
+        } else {
+          console.log('Setting event_date to:', updates.event_date);
         }
         const { data: updatedEvent, error: updateError } = await supabase
           .from('events')
@@ -63,8 +67,10 @@ exports.handler = async function (event, context) {
           .eq('id', id)
           .select();
         if (updateError) {
+          console.error('Error updating event:', updateError);
           return { statusCode: 500, body: JSON.stringify({ error: updateError.message }) };
         }
+        console.log('Event updated successfully:', updatedEvent[0]);
         return { statusCode: 200, body: JSON.stringify(updatedEvent[0]) };
       }
       case 'DELETE': {

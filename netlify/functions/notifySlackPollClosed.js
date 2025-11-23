@@ -18,9 +18,12 @@ exports.handler = async function (event, context) {
   }
 
   try {
+    console.log('notifySlackPollClosed called with body:', event.body);
     const { poll_id, event_id } = JSON.parse(event.body || '{}');
+    console.log('Parsed poll_id:', poll_id, 'event_id:', event_id);
 
     if (!poll_id || !event_id) {
+      console.error('Missing required parameters: poll_id or event_id');
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'poll_id and event_id are required' })
@@ -111,6 +114,7 @@ exports.handler = async function (event, context) {
 
     // Send to Slack if webhook URL is configured
     const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+    console.log('SLACK_WEBHOOK_URL configured:', !!SLACK_WEBHOOK_URL);
 
     if (!SLACK_WEBHOOK_URL) {
       // If no webhook URL, just return success (don't fail)
@@ -119,11 +123,13 @@ exports.handler = async function (event, context) {
         statusCode: 200,
         body: JSON.stringify({ 
           message: 'Notification skipped (no webhook configured)',
-          slackMessage: message 
+          slackMessage: message,
+          warning: 'SLACK_WEBHOOK_URL environment variable is not set'
         })
       };
     }
 
+    console.log('Sending message to Slack:', message);
     // Send to Slack
     const slackResponse = await fetch(SLACK_WEBHOOK_URL, {
       method: 'POST',
@@ -135,20 +141,30 @@ exports.handler = async function (event, context) {
       })
     });
 
+    console.log('Slack response status:', slackResponse.status, slackResponse.statusText);
+
     if (!slackResponse.ok) {
       const errorText = await slackResponse.text();
       console.error('Slack API error:', errorText);
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'Failed to send Slack notification' })
+        body: JSON.stringify({ 
+          error: 'Failed to send Slack notification',
+          details: errorText,
+          slackMessage: message
+        })
       };
     }
+
+    const slackResponseText = await slackResponse.text();
+    console.log('Slack notification sent successfully. Response:', slackResponseText);
 
     return {
       statusCode: 200,
       body: JSON.stringify({ 
         success: true,
-        message: 'Slack notification sent successfully'
+        message: 'Slack notification sent successfully',
+        slackMessage: message
       })
     };
 
