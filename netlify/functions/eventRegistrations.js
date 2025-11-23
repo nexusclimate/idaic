@@ -124,7 +124,167 @@ exports.handler = async function (event, context) {
         if (error) {
           return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
         }
-        return { statusCode: 201, body: JSON.stringify(data[0]) };
+
+        const registration = data[0];
+
+        // Send confirmation email (non-blocking)
+        try {
+          // Get event details
+          const { data: eventData } = await supabase
+            .from('events')
+            .select('*')
+            .eq('id', registrationData.event_id)
+            .maybeSingle();
+
+          if (eventData) {
+            // Generate cancellation token (using registration ID + a simple hash)
+            const crypto = require('crypto');
+            const cancellationToken = crypto
+              .createHash('sha256')
+              .update(`${registration.id}-${registration.email}-${process.env.SECRET_KEY || 'default-secret'}`)
+              .digest('hex')
+              .substring(0, 32);
+
+            // Store cancellation token in registration
+            await supabase
+              .from('event_registrations')
+              .update({ cancellation_token: cancellationToken })
+              .eq('id', registration.id);
+
+            // Format event date
+            const formatDate = (dateString) => {
+              if (!dateString) return 'TBA';
+              const date = new Date(dateString);
+              return date.toLocaleDateString('en-GB', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Asia/Dubai'
+              }) + ' GST';
+            };
+
+            const eventDate = formatDate(eventData.event_date);
+            const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
+            const cancelUrl = `${baseUrl}/cancel-registration?token=${cancellationToken}&id=${registration.id}`;
+
+            const emailHtml = `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <style>
+                  body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                  .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                  .header { background-color: #f97316; color: white; padding: 20px; text-align: center; }
+                  .content { padding: 20px; background-color: #f9f9f9; }
+                  .button { display: inline-block; padding: 12px 24px; background-color: #f97316; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+                  .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <div class="header">
+                    <h1>Event Registration Confirmed</h1>
+                  </div>
+                  <div class="content">
+                    <p>Dear ${registrationData.name},</p>
+                    <p>Thank you for registering for <strong>${eventData.title || 'the event'}</strong>.</p>
+                    <p><strong>Event Details:</strong></p>
+                    <ul>
+                      <li><strong>Date & Time:</strong> ${eventDate}</li>
+                      ${eventData.location ? `<li><strong>Location:</strong> ${eventData.location}</li>` : ''}
+                    </ul>
+                    ${eventData.description ? `<p>${eventData.description.substring(0, 200)}${eventData.description.length > 200 ? '...' : ''}</p>` : ''}
+                    <p>If you need to cancel your registration, please click the link below:</p>
+                    <p style="text-align: center;">
+                      <a href="${cancelUrl}" class="button">Cancel Registration</a>
+                    </p>
+                    <p style="font-size: 12px; color: #666;">Or copy this link: ${cancelUrl}</p>
+                  </div>
+                  <div class="footer">
+                    <p>This is an automated message from IDAIC.</p>
+                  </div>
+                </div>
+              </body>
+              </html>
+            `;
+
+            // Send email via email service
+            const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                to: registrationData.email,
+                subject: `Registration Confirmed: ${eventData.title || 'Event'}`,
+                html: emailHtml
+              })
+            });
+
+            if (!emailResponse.ok) {
+              console.error('Failed to send confirmation email:', await emailResponse.text());
+            }
+          }
+        } catch (emailErr) {
+          // Log but don't fail registration if email fails
+          console.error('Error sending confirmation email:', emailErr);
+        }
+
+        return { statusCode: 201, body: JSON.stringify(registration) };
+      }
+      
+      case 'PUT': {
+        const { id, token } = event.queryStringParameters || {};
+        const updates = JSON.parse(event.body || '{}');
+        
+        if (!id) {
+          return { statusCode: 400, body: JSON.stringify({ error: 'Registration ID is required' }) };
+        }
+
+        // If token is provided, verify it for cancellation
+        if (token) {
+          const { data: registration } = await supabase
+            .from('event_registrations')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+          if (!registration) {
+            return { statusCode: 404, body: JSON.stringify({ error: 'Registration not found' }) };
+          }
+
+          // Verify cancellation token
+          const crypto = require('crypto');
+          const expectedToken = crypto
+            .createHash('sha256')
+            .update(`${registration.id}-${registration.email}-${process.env.SECRET_KEY || 'default-secret'}`)
+            .digest('hex')
+            .substring(0, 32);
+
+          if (token !== expectedToken && token !== registration.cancellation_token) {
+            return { statusCode: 403, body: JSON.stringify({ error: 'Invalid cancellation token' }) };
+          }
+
+          // Update status to cancelled
+          updates.status = 'cancelled';
+          updates.cancelled_at = new Date().toISOString();
+        }
+        
+        const { data: updatedRegistration, error: updateError } = await supabase
+          .from('event_registrations')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .select();
+        
+        if (updateError) {
+          return { statusCode: 500, body: JSON.stringify({ error: updateError.message }) };
+        }
+        return { statusCode: 200, body: JSON.stringify(updatedRegistration[0]) };
       }
       
       case 'DELETE': {

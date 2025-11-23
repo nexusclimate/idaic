@@ -1003,6 +1003,10 @@ function EventFormModal({ event, onSave, onClose }) {
     agenda: event?.agenda || '',
     registration_link: event?.registration_link || '',
     is_idaic_event: true, // All events are IDAIC events by default
+    // Email reminder settings
+    enable_reminders: event?.enable_reminders || false,
+    reminder_days_before: event?.reminder_days_before || 1,
+    reminder_hour: event?.reminder_hour || 9,
     // Poll fields
     create_poll: event?.poll_id ? true : false,
     poll_slot_1_date: '',
@@ -1122,7 +1126,12 @@ function EventFormModal({ event, onSave, onClose }) {
       try {
         if (createdEventId) {
           // Update existing event (exclude poll fields)
-          const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
+          const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, enable_reminders, reminder_days_before, reminder_hour, ...eventData } = formData;
+          
+          // Add reminder settings back
+          eventData.enable_reminders = enable_reminders;
+          eventData.reminder_days_before = reminder_days_before;
+          eventData.reminder_hour = reminder_hour;
           
           // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
           const cleanedEventData = { ...eventData };
@@ -1149,7 +1158,12 @@ function EventFormModal({ event, onSave, onClose }) {
           // Create new event if we have title (and date if not creating poll)
           if (formData.title && (formData.create_poll || formData.event_date)) {
             const eventId = crypto.randomUUID();
-            const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventData } = formData;
+            const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, enable_reminders, reminder_days_before, reminder_hour, ...eventData } = formData;
+            
+            // Add reminder settings
+            eventData.enable_reminders = enable_reminders;
+            eventData.reminder_days_before = reminder_days_before;
+            eventData.reminder_hour = reminder_hour;
             
             // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
             const cleanedEventData = { ...eventData };
@@ -1731,6 +1745,60 @@ function EventFormModal({ event, onSave, onClose }) {
                 </div>
               </div>
             )}
+
+            {/* Email Reminder Settings */}
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <h3 className="text-sm font-semibold mb-3" style={{ color: colors.text.primary }}>
+                Email Reminder Settings
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="enable_reminders"
+                    checked={formData.enable_reminders}
+                    onChange={(e) => setFormData({ ...formData, enable_reminders: e.target.checked })}
+                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="enable_reminders" className="ml-2 text-sm" style={{ color: colors.text.primary }}>
+                    Enable email reminders for registrants
+                  </label>
+                </div>
+
+                {formData.enable_reminders && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                        Days Before Event
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="30"
+                        value={formData.reminder_days_before}
+                        onChange={(e) => setFormData({ ...formData, reminder_days_before: parseInt(e.target.value) || 1 })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Send reminder X days before the event</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                        Reminder Time (Hour)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={formData.reminder_hour}
+                        onChange={(e) => setFormData({ ...formData, reminder_hour: parseInt(e.target.value) || 9 })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Hour of day to send (0-23, 24-hour format)</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
