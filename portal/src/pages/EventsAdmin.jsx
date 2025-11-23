@@ -298,12 +298,55 @@ export default function EventsAdmin() {
         throw new Error(errorData.error || 'Failed to update event date');
       }
 
+      // Send Slack notification (non-blocking)
+      try {
+        await fetch('/.netlify/functions/notifySlackPollClosed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            poll_id: poll.id,
+            event_id: event.id
+          })
+        });
+      } catch (slackErr) {
+        // Log but don't fail the operation if Slack notification fails
+        console.error('Failed to send Slack notification:', slackErr);
+      }
+
       setSuccess(`Poll closed successfully! Event date updated to the most voted option (${maxVotes} ${maxVotes === 1 ? 'vote' : 'votes'}).`);
       await fetchEvents();
       // Refresh poll data
       await fetchPollData(event.id);
     } catch (err) {
       setError('Failed to close poll: ' + err.message);
+    }
+  };
+
+  const handleReopenPoll = async (event, poll) => {
+    try {
+      // Reopen the poll by setting deadline to 7 days from now
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 7);
+      
+      const updateResponse = await fetch(`/.netlify/functions/polls?id=${poll.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deadline: futureDate.toISOString()
+        })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || 'Failed to reopen poll');
+      }
+
+      setSuccess('Poll reopened successfully! New deadline set to 7 days from now.');
+      await fetchEvents();
+      // Refresh poll data
+      await fetchPollData(event.id);
+    } catch (err) {
+      setError('Failed to reopen poll: ' + err.message);
     }
   };
 
@@ -507,13 +550,21 @@ export default function EventsAdmin() {
                           >
                             {isOpen ? 'Poll Open' : 'Poll Closed'}
                           </button>
-                          {isOpen && (
+                          {isOpen ? (
                             <button
                               onClick={() => handleClosePoll(event, poll)}
                               className="px-3 py-1 text-sm bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
                               title="Close poll and set event date to most voted option"
                             >
                               Close Poll
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleReopenPoll(event, poll)}
+                              className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                              title="Reopen poll with new deadline"
+                            >
+                              Reopen Poll
                             </button>
                           )}
                         </div>
