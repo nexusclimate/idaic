@@ -99,7 +99,7 @@ export default function EventsAdmin() {
     try {
       // Generate UUID for the event (backend will also generate if not provided)
       const eventId = crypto.randomUUID();
-      // Exclude poll fields from event data
+      // Exclude poll fields from event data, but keep reminder fields
       const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
       
       // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
@@ -185,8 +185,21 @@ export default function EventsAdmin() {
 
   const handleUpdateEvent = async (eventId, eventData) => {
     try {
-      // Exclude poll fields from event data
-      const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
+      // Exclude poll fields from event data, but keep reminder fields
+      const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, enable_reminders, reminder_days_before, reminder_hour, ...eventFields } = eventData;
+      
+      // Handle reminder settings - only include if enabled
+      if (enable_reminders !== undefined) {
+        eventFields.enable_reminders = enable_reminders || false;
+        if (enable_reminders) {
+          eventFields.reminder_days_before = reminder_days_before || 1;
+          eventFields.reminder_hour = reminder_hour || 9;
+        } else {
+          // Clear reminder settings when disabled
+          eventFields.reminder_days_before = null;
+          eventFields.reminder_hour = null;
+        }
+      }
       
       // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
       const cleanedEventFields = { ...eventFields };
@@ -1151,10 +1164,16 @@ function EventFormModal({ event, onSave, onClose }) {
           // Update existing event (exclude poll fields)
           const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, enable_reminders, reminder_days_before, reminder_hour, ...eventData } = formData;
           
-          // Add reminder settings back
-          eventData.enable_reminders = enable_reminders;
-          eventData.reminder_days_before = reminder_days_before;
-          eventData.reminder_hour = reminder_hour;
+          // Add reminder settings only if reminders are enabled
+          eventData.enable_reminders = enable_reminders || false;
+          if (enable_reminders) {
+            eventData.reminder_days_before = reminder_days_before || 1;
+            eventData.reminder_hour = reminder_hour || 9;
+          } else {
+            // Clear reminder settings when disabled
+            eventData.reminder_days_before = null;
+            eventData.reminder_hour = null;
+          }
           
           // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
           const cleanedEventData = { ...eventData };
@@ -1183,10 +1202,16 @@ function EventFormModal({ event, onSave, onClose }) {
             const eventId = crypto.randomUUID();
             const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, enable_reminders, reminder_days_before, reminder_hour, ...eventData } = formData;
             
-            // Add reminder settings
-            eventData.enable_reminders = enable_reminders;
-            eventData.reminder_days_before = reminder_days_before;
-            eventData.reminder_hour = reminder_hour;
+            // Add reminder settings only if reminders are enabled
+            eventData.enable_reminders = enable_reminders || false;
+            if (enable_reminders) {
+              eventData.reminder_days_before = reminder_days_before || 1;
+              eventData.reminder_hour = reminder_hour || 9;
+            } else {
+              // Don't include reminder settings when disabled
+              delete eventData.reminder_days_before;
+              delete eventData.reminder_hour;
+            }
             
             // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
             const cleanedEventData = { ...eventData };
@@ -1800,6 +1825,7 @@ function EventFormModal({ event, onSave, onClose }) {
                         max="30"
                         value={formData.reminder_days_before}
                         onChange={(e) => setFormData({ ...formData, reminder_days_before: parseInt(e.target.value) || 1 })}
+                        required={formData.enable_reminders}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                       <p className="text-xs text-gray-500 mt-1">Send reminder X days before the event</p>
@@ -1814,6 +1840,7 @@ function EventFormModal({ event, onSave, onClose }) {
                         max="23"
                         value={formData.reminder_hour}
                         onChange={(e) => setFormData({ ...formData, reminder_hour: parseInt(e.target.value) || 9 })}
+                        required={formData.enable_reminders}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
                       <p className="text-xs text-gray-500 mt-1">Hour of day to send (0-23, 24-hour format)</p>

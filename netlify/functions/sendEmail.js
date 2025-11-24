@@ -24,7 +24,8 @@ exports.handler = async function (event, context) {
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@idaic.org';
+    const FROM_EMAIL = process.env.FROM_EMAIL || 'IDAIC Events <no-reply@idaic.nexusclimate.co>';
+    const REPLY_TO = process.env.REPLY_TO || 'info@idaic.org';
 
     // If Resend is configured, use it
     if (RESEND_API_KEY) {
@@ -36,6 +37,7 @@ exports.handler = async function (event, context) {
         },
         body: JSON.stringify({
           from: FROM_EMAIL,
+          reply_to: REPLY_TO,
           to: Array.isArray(to) ? to : [to],
           subject: subject,
           html: html || text,
@@ -61,6 +63,8 @@ exports.handler = async function (event, context) {
 
     // Fallback: Log email (for development/testing)
     console.log('Email service not configured. Would send email:', {
+      from: FROM_EMAIL,
+      reply_to: REPLY_TO,
       to,
       subject,
       html: html || text
