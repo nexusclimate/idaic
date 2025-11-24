@@ -312,6 +312,11 @@ export default function App() {
 
     if (!userId || !userEmail) return;
 
+    // Track error counts to avoid spamming console
+    let errorCount = 0;
+    let lastErrorTime = 0;
+    const ERROR_LOG_INTERVAL = 60000; // Only log errors once per minute
+
     // Function to send activity update
     const sendActivityUpdate = async () => {
       try {
@@ -328,12 +333,30 @@ export default function App() {
         // Only log errors if response is not ok and it's not a network error
         if (!response.ok) {
           const errorText = await response.text().catch(() => 'Unknown error');
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { message: errorText };
+          }
+          
           // Only log if it's not a network-related error
           if (!errorText.includes('ERR_INTERNET_DISCONNECTED') && 
               !errorText.includes('Failed to fetch') &&
               !errorText.includes('network')) {
-            console.warn('Activity tracking failed:', response.status, errorText);
+            // Rate limit error logging - only log once per minute
+            const now = Date.now();
+            if (now - lastErrorTime > ERROR_LOG_INTERVAL) {
+              console.warn('Activity tracking failed:', response.status, errorData);
+              lastErrorTime = now;
+              errorCount = 0;
+            } else {
+              errorCount++;
+            }
           }
+        } else {
+          // Reset error count on success
+          errorCount = 0;
         }
       } catch (err) {
         // Suppress network-related errors (offline, disconnected, etc.)
@@ -345,8 +368,15 @@ export default function App() {
                                err.name === 'TypeError' && errorMessage.includes('fetch');
         
         if (!isNetworkError) {
-          // Only log non-network errors
-          console.warn('Error tracking activity:', err);
+          // Rate limit error logging
+          const now = Date.now();
+          if (now - lastErrorTime > ERROR_LOG_INTERVAL) {
+            console.warn('Error tracking activity:', err);
+            lastErrorTime = now;
+            errorCount = 0;
+          } else {
+            errorCount++;
+          }
         }
         // Silently fail for network errors - don't interrupt user experience
       }
