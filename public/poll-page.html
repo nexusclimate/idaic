@@ -235,6 +235,81 @@
       }
     }
 
+    // Fetch and pre-fill user details from active session
+    async function prefillUserDetails() {
+      try {
+        // Check for password login first
+        const isPasswordLogin = localStorage.getItem('idaic-password-login');
+        const passwordEmail = localStorage.getItem('idaic-password-email');
+        const token = localStorage.getItem('idaic-token');
+        
+        let userEmail = null;
+        
+        if (isPasswordLogin === 'true' && passwordEmail && token) {
+          // Password login - use email from localStorage
+          userEmail = passwordEmail;
+        } else if (token) {
+          // Try to get email from Supabase session using the token
+          // First, try to decode the token to get user info (if it's a JWT)
+          try {
+            // Call Supabase auth API to get user info
+            const supabaseUrl = 'https://xnjpbkcqfuvegiwdxypw.supabase.co';
+            const authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuanBia2NxZnV2ZWdpd2R4eXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTI3NDE3NDAsImV4cCI6MjAyODMxNzc0MH0.7qJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJq'
+              }
+            });
+            
+            if (authResponse.ok) {
+              const userData = await authResponse.json();
+              if (userData && userData.email) {
+                userEmail = userData.email;
+              }
+            }
+          } catch (err) {
+            console.log('Could not get user from token:', err);
+          }
+        }
+        
+        if (!userEmail) {
+          // No active session found
+          return;
+        }
+        
+        // Fetch user profile using email
+        const profileUrl = `/.netlify/functions/userProfile?email=${encodeURIComponent(userEmail)}`;
+        
+        const profileResponse = await fetch(profileUrl, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+        
+        if (profileResponse.ok) {
+          const userProfile = await profileResponse.json();
+          
+          if (userProfile) {
+            // Pre-fill form fields
+            const nameField = document.getElementById('name');
+            const emailField = document.getElementById('email');
+            const companyField = document.getElementById('company');
+            
+            if (nameField && userProfile.name) {
+              nameField.value = userProfile.name;
+            }
+            if (emailField && userProfile.email) {
+              emailField.value = userProfile.email;
+            }
+            if (companyField && userProfile.company) {
+              companyField.value = userProfile.company;
+            }
+          }
+        }
+      } catch (err) {
+        console.log('Could not pre-fill user details:', err);
+        // Silently fail - user can still fill form manually
+      }
+    }
+
     // Load poll data
     async function loadPoll() {
       try {
@@ -426,6 +501,9 @@
           document.getElementById('success-message').classList.remove('hidden');
           document.getElementById('voting-form-container').classList.add('hidden');
         }
+
+        // Pre-fill user details from active session
+        await prefillUserDetails();
 
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('poll-content').classList.remove('hidden');
