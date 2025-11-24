@@ -770,6 +770,7 @@ export default function EventsAdmin() {
                               <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Email</th>
                               <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Company</th>
                               <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Type</th>
+                              <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Status</th>
                               <th className="text-left py-2 px-2" style={{ color: colors.text.primary }}>Registered</th>
                             </tr>
                           </thead>
@@ -805,6 +806,17 @@ export default function EventsAdmin() {
                                   ) : (
                                     <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
                                       External
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 px-2" style={{ color: colors.text.primary }}>
+                                  {reg.status === 'cancelled' ? (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-red-100 text-red-800">
+                                      Cancelled
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
+                                      Confirmed
                                     </span>
                                   )}
                                 </td>

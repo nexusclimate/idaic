@@ -112,6 +112,7 @@ exports.handler = async function (event, context) {
           ...registrationData,
           registration_type: registrationType,
           user_role: userRole, // Store the user's role from users table
+          status: null, // Default to null (which displays as "Confirmed")
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
