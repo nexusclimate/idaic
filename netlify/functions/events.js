@@ -23,6 +23,8 @@ exports.handler = async function (event, context) {
       }
       case 'POST': {
         const eventData = JSON.parse(event.body);
+        console.log('Creating event with data:', JSON.stringify(eventData, null, 2));
+        
         // Allow custom UUID to be set, otherwise generate one
         if (!eventData.id) {
           eventData.id = require('crypto').randomUUID();
@@ -38,12 +40,35 @@ exports.handler = async function (event, context) {
         if (eventData.event_date === '' || eventData.event_date === null || eventData.event_date === undefined) {
           delete eventData.event_date;
         }
+        
+        // Handle reminder fields - filter out if columns don't exist in database
+        // Only include if they have explicit values (not undefined/null)
+        // This prevents errors if the columns don't exist in the database yet
+        const reminderFields = ['enable_reminders', 'reminder_days_before', 'reminder_hour'];
+        reminderFields.forEach(field => {
+          if (eventData[field] === undefined || eventData[field] === null) {
+            delete eventData[field];
+          }
+        });
+        
+        console.log('Cleaned event data before insert:', JSON.stringify(eventData, null, 2));
+        
         const { data: newEvent, error: insertError } = await supabase
           .from('events')
           .insert([eventData])
           .select();
         if (insertError) {
-          return { statusCode: 500, body: JSON.stringify({ error: insertError.message }) };
+          console.error('Error inserting event:', insertError);
+          console.error('Event data that failed:', JSON.stringify(eventData, null, 2));
+          return { 
+            statusCode: 500, 
+            body: JSON.stringify({ 
+              error: insertError.message,
+              details: insertError.details,
+              hint: insertError.hint,
+              code: insertError.code
+            }) 
+          };
         }
         return { statusCode: 201, body: JSON.stringify(newEvent[0]) };
       }
@@ -61,6 +86,18 @@ exports.handler = async function (event, context) {
         } else {
           console.log('Setting event_date to:', updates.event_date);
         }
+        
+        // Handle reminder fields - filter out if columns don't exist in database
+        // Only include if they have explicit values (not undefined/null)
+        const reminderFields = ['enable_reminders', 'reminder_days_before', 'reminder_hour'];
+        reminderFields.forEach(field => {
+          if (updates[field] === undefined || updates[field] === null) {
+            delete updates[field];
+          }
+        });
+        
+        console.log('Cleaned updates before applying:', JSON.stringify(updates, null, 2));
+        
         const { data: updatedEvent, error: updateError } = await supabase
           .from('events')
           .update(updates)
@@ -68,7 +105,16 @@ exports.handler = async function (event, context) {
           .select();
         if (updateError) {
           console.error('Error updating event:', updateError);
-          return { statusCode: 500, body: JSON.stringify({ error: updateError.message }) };
+          console.error('Updates that failed:', JSON.stringify(updates, null, 2));
+          return { 
+            statusCode: 500, 
+            body: JSON.stringify({ 
+              error: updateError.message,
+              details: updateError.details,
+              hint: updateError.hint,
+              code: updateError.code
+            }) 
+          };
         }
         console.log('Event updated successfully:', updatedEvent[0]);
         return { statusCode: 200, body: JSON.stringify(updatedEvent[0]) };
