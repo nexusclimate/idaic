@@ -316,9 +316,21 @@ export default function EventsAdmin() {
 
       const updatedEvent = await eventUpdateResponse.json();
       console.log('Event updated successfully. New event_date:', updatedEvent.event_date);
+      
+      // Verify the date was actually updated
+      if (!updatedEvent.event_date) {
+        throw new Error('Event date was not updated - event_date is still null');
+      }
+      
+      // Verify it matches what we sent (allowing for slight time differences in formatting)
+      const updatedDate = new Date(updatedEvent.event_date).toISOString();
+      const expectedDate = new Date(eventDateToSet).toISOString();
+      if (updatedDate !== expectedDate) {
+        console.warn('Event date may have timezone differences. Expected:', expectedDate, 'Got:', updatedDate);
+      }
 
-      // Wait a moment to ensure database is updated
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait a moment to ensure database is fully updated
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Send Slack notification (non-blocking)
       try {
@@ -345,7 +357,18 @@ export default function EventsAdmin() {
         console.error('Failed to send Slack notification:', slackErr);
       }
 
-      setSuccess(`Poll closed successfully! Event date updated to the most voted option (${maxVotes} ${maxVotes === 1 ? 'vote' : 'votes'}).`);
+      // Format the date for display in success message
+      const formattedDate = new Date(eventDateToSet).toLocaleDateString('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Dubai'
+      }) + ' GST';
+      
+      setSuccess(`Poll closed successfully! Event date updated to ${formattedDate} (${maxVotes} ${maxVotes === 1 ? 'vote' : 'votes'}). Event is now active with a confirmed date and time.`);
       await fetchEvents();
       // Refresh poll data
       await fetchPollData(event.id);
