@@ -837,7 +837,11 @@ export default function EventsAdmin() {
             } else {
               await handleCreateEvent(eventData);
             }
-            // Note: Modal will close itself after successful save
+            // Don't close modal automatically - let user close it manually
+          }}
+          onEventCreated={(createdEvent) => {
+            // Update selectedEvent when auto-save creates a new event
+            setSelectedEvent(createdEvent);
           }}
           onClose={() => {
             setShowEventForm(false);
@@ -1237,6 +1241,12 @@ function EventFormModal({ event, onSave, onClose }) {
               const createdEvent = await response.json();
               setCreatedEventId(createdEvent.id);
               setLastSaved(new Date());
+              
+              // Notify parent component about the created event
+              // This prevents the modal from closing and reopening with a blank form
+              if (!event && onEventCreated) {
+                onEventCreated(createdEvent);
+              }
               
               // Create poll if poll fields are filled
               if (formData.create_poll && formData.poll_slot_1_date && formData.poll_slot_1_start && formData.poll_slot_1_end) {
