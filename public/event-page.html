@@ -423,13 +423,15 @@
       
       // Try to get data from parent window if in iframe (members portal)
       let parentData = null;
+      let messageListener = null;
       try {
         if (window.parent && window.parent !== window) {
           // Request user data from parent (members portal)
           window.parent.postMessage({ type: 'requestUserData' }, '*');
           
-          // Listen for response
-          window.addEventListener('message', function(event) {
+          // Listen for response with timeout and cleanup
+          messageListener = function(event) {
+            // Only process messages from expected origin
             if (event.data && event.data.type === 'userData') {
               const data = event.data.data || {};
               if (data.name && !document.getElementById('name').value) {
@@ -441,12 +443,30 @@
               if (data.company && !document.getElementById('company').value) {
                 document.getElementById('company').value = data.company;
               }
+              // Remove listener after receiving data
+              if (messageListener) {
+                window.removeEventListener('message', messageListener);
+                messageListener = null;
+              }
             }
-          });
+          };
+          
+          window.addEventListener('message', messageListener);
+          
+          // Cleanup listener after 5 seconds to prevent memory leaks
+          setTimeout(() => {
+            if (messageListener) {
+              window.removeEventListener('message', messageListener);
+              messageListener = null;
+            }
+          }, 5000);
         }
       } catch (e) {
         // Cross-origin restrictions - ignore
         console.log('Cannot access parent window:', e);
+        if (messageListener) {
+          window.removeEventListener('message', messageListener);
+        }
       }
       
       // Fill from URL parameters if available

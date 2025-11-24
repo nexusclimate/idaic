@@ -8,9 +8,14 @@ import { BrowserRouter } from 'react-router-dom';
 window.addEventListener('error', (event) => {
   // Suppress errors from browser extensions (message channel errors)
   const errorMessage = event.message || event.error?.message || '';
-  if (errorMessage.includes('message channel closed') || 
-      errorMessage.includes('asynchronous response')) {
+  const errorString = String(errorMessage).toLowerCase();
+  
+  if (errorString.includes('message channel closed') || 
+      errorString.includes('asynchronous response') ||
+      errorString.includes('listener indicated') ||
+      errorString.includes('channel closed before')) {
     event.preventDefault();
+    event.stopPropagation();
     return false;
   }
 });
@@ -21,15 +26,19 @@ window.addEventListener('unhandledrejection', (event) => {
   const errorMessage = event.reason?.message || 
                        (typeof event.reason === 'string' ? event.reason : '') ||
                        String(event.reason || '');
+  const errorString = String(errorMessage).toLowerCase();
   
-  if (errorMessage.includes('message channel closed') || 
-      errorMessage.includes('asynchronous response')) {
+  if (errorString.includes('message channel closed') || 
+      errorString.includes('asynchronous response') ||
+      errorString.includes('listener indicated') ||
+      errorString.includes('channel closed before')) {
     event.preventDefault();
     return false;
   }
   // Log other unhandled rejections for debugging (but not extension errors)
-  if (!errorMessage.includes('message channel') && 
-      !errorMessage.includes('asynchronous response')) {
+  if (!errorString.includes('message channel') && 
+      !errorString.includes('asynchronous response') &&
+      !errorString.includes('listener indicated')) {
     console.error('Unhandled promise rejection:', event.reason);
   }
 });
