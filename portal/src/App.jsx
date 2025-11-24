@@ -315,7 +315,7 @@ export default function App() {
     // Function to send activity update
     const sendActivityUpdate = async () => {
       try {
-        await fetch('/.netlify/functions/trackActivity', {
+        const response = await fetch('/.netlify/functions/trackActivity', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -324,9 +324,31 @@ export default function App() {
             activity_time: new Date().toISOString()
           })
         });
+        
+        // Only log errors if response is not ok and it's not a network error
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          // Only log if it's not a network-related error
+          if (!errorText.includes('ERR_INTERNET_DISCONNECTED') && 
+              !errorText.includes('Failed to fetch') &&
+              !errorText.includes('network')) {
+            console.warn('Activity tracking failed:', response.status, errorText);
+          }
+        }
       } catch (err) {
-        console.error('Error tracking activity:', err);
-        // Silently fail - don't interrupt user experience
+        // Suppress network-related errors (offline, disconnected, etc.)
+        const errorMessage = err.message || String(err || '');
+        const isNetworkError = errorMessage.includes('Failed to fetch') ||
+                               errorMessage.includes('ERR_INTERNET_DISCONNECTED') ||
+                               errorMessage.includes('network') ||
+                               errorMessage.includes('NetworkError') ||
+                               err.name === 'TypeError' && errorMessage.includes('fetch');
+        
+        if (!isNetworkError) {
+          // Only log non-network errors
+          console.warn('Error tracking activity:', err);
+        }
+        // Silently fail for network errors - don't interrupt user experience
       }
     };
 

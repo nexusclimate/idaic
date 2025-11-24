@@ -22,12 +22,13 @@ window.addEventListener('error', (event) => {
 
 // Handle unhandled promise rejections
 window.addEventListener('unhandledrejection', (event) => {
-  // Suppress promise rejections from browser extensions
+  // Suppress promise rejections from browser extensions and network errors
   const errorMessage = event.reason?.message || 
                        (typeof event.reason === 'string' ? event.reason : '') ||
                        String(event.reason || '');
   const errorString = String(errorMessage).toLowerCase();
   
+  // Suppress browser extension errors
   if (errorString.includes('message channel closed') || 
       errorString.includes('asynchronous response') ||
       errorString.includes('listener indicated') ||
@@ -35,10 +36,23 @@ window.addEventListener('unhandledrejection', (event) => {
     event.preventDefault();
     return false;
   }
-  // Log other unhandled rejections for debugging (but not extension errors)
+  
+  // Suppress network-related errors (offline, disconnected, etc.)
+  if (errorString.includes('failed to fetch') ||
+      errorString.includes('err_internet_disconnected') ||
+      errorString.includes('networkerror') ||
+      errorString.includes('network request failed') ||
+      (event.reason?.name === 'TypeError' && errorString.includes('fetch'))) {
+    event.preventDefault();
+    return false;
+  }
+  
+  // Log other unhandled rejections for debugging (but not extension/network errors)
   if (!errorString.includes('message channel') && 
       !errorString.includes('asynchronous response') &&
-      !errorString.includes('listener indicated')) {
+      !errorString.includes('listener indicated') &&
+      !errorString.includes('failed to fetch') &&
+      !errorString.includes('network')) {
     console.error('Unhandled promise rejection:', event.reason);
   }
 });
