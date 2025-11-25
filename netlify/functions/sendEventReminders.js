@@ -2,6 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { createClient } = require('@supabase/supabase-js');
+const { generateICS, icsToBase64 } = require('./generateCalendarInvite');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -104,6 +105,43 @@ exports.handler = async function (event, context) {
 
       for (const registration of registrations) {
         try {
+          // Generate calendar invitation for reminder email
+          let calendarAttachment = null;
+          if (eventData.event_date) {
+            try {
+              let endDate = eventData.event_date;
+              if (eventData.event_end_date) {
+                endDate = eventData.event_end_date;
+              } else {
+                const start = new Date(eventData.event_date);
+                start.setHours(start.getHours() + 1);
+                endDate = start.toISOString();
+              }
+
+              const icsContent = generateICS({
+                title: eventData.title || 'IDAIC Event',
+                description: eventData.description || `Reminder: You are registered for ${eventData.title || 'this event'}.`,
+                startDate: eventData.event_date,
+                endDate: endDate,
+                location: eventData.location || '',
+                organizerEmail: process.env.ORGANIZER_EMAIL || 'info@idaic.org',
+                organizerName: 'IDAIC',
+                attendeeEmail: registration.email,
+                attendeeName: registration.name,
+                url: eventData.registration_link || `${baseUrl}/events-${eventData.id}`
+              });
+
+              const icsBase64 = icsToBase64(icsContent);
+              calendarAttachment = {
+                filename: `${(eventData.title || 'event').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`,
+                content: icsBase64,
+                contentType: 'text/calendar; charset=utf-8; method=REQUEST'
+              };
+            } catch (calendarErr) {
+              console.error('Error generating calendar invitation for reminder:', calendarErr);
+            }
+          }
+
           const emailHtml = `
             <!DOCTYPE html>
             <html>
@@ -116,6 +154,7 @@ exports.handler = async function (event, context) {
                 .content { padding: 20px; background-color: #f9f9f9; }
                 .button { display: inline-block; padding: 12px 24px; background-color: #f97316; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
                 .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+                .calendar-note { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3; }
               </style>
             </head>
             <body>
@@ -132,6 +171,12 @@ exports.handler = async function (event, context) {
                     ${eventData.location ? `<li><strong>Location:</strong> ${eventData.location}</li>` : ''}
                   </ul>
                   ${eventData.description ? `<p>${eventData.description.substring(0, 200)}${eventData.description.length > 200 ? '...' : ''}</p>` : ''}
+                  ${calendarAttachment ? `
+                  <div class="calendar-note">
+                    <p><strong>📅 Add to Calendar</strong></p>
+                    <p>A calendar invitation has been attached to this email. Open the attachment (.ics file) to add this event to your Google Calendar, Outlook, or other calendar application.</p>
+                  </div>
+                  ` : ''}
                   ${registration.cancellation_token ? `
                     <p>If you need to cancel your registration, please click the link below:</p>
                     <p style="text-align: center;">
@@ -147,14 +192,20 @@ exports.handler = async function (event, context) {
             </html>
           `;
 
+          const emailPayload = {
+            to: registration.email,
+            subject: `Reminder: ${eventData.title || 'Event'} - ${reminderDays} day${reminderDays > 1 ? 's' : ''} away`,
+            html: emailHtml
+          };
+
+          if (calendarAttachment) {
+            emailPayload.attachments = [calendarAttachment];
+          }
+
           const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: registration.email,
-              subject: `Reminder: ${eventData.title || 'Event'} - ${reminderDays} day${reminderDays > 1 ? 's' : ''} away`,
-              html: emailHtml
-            })
+            body: JSON.stringify(emailPayload)
           });
 
           if (emailResponse.ok) {

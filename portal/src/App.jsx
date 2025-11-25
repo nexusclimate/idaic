@@ -7,13 +7,31 @@ import DisclaimerPopup from "./components/DisclaimerPopup";
 import { supabase } from './config/supabase.js';
 
 export default function App() {
-  // Initialize currentPage from URL pathname or localStorage, otherwise default to 'home'
+  // Initialize currentPage from URL pathname, query params, or localStorage, otherwise default to 'home'
   const [currentPage, setCurrentPage] = useState(() => {
     // Check URL pathname first for public pages
     const pathname = window.location.pathname;
     if (pathname === '/newuser-form' || pathname === '/newmember-signup') {
       return pathname.replace('/', '');
     }
+    
+    // Check for page parameter in URL (for protected deep links)
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get('page');
+    if (pageParam) {
+      // Store the requested page for after login
+      localStorage.setItem('idaic-requested-page', pageParam);
+      return pageParam;
+    }
+    
+    // Check for requested page from login redirect
+    const requestedPage = localStorage.getItem('idaic-requested-page');
+    if (requestedPage) {
+      // Clear it after using it
+      localStorage.removeItem('idaic-requested-page');
+      return requestedPage;
+    }
+    
     const savedPage = localStorage.getItem('idaic-current-page');
     return savedPage || 'home';
   });
@@ -140,18 +158,26 @@ export default function App() {
             if (userData && !roleError) {
               const userRole = userData.role;
               
-              // Check if user role is "new" or "declined" - block access
-              if (userRole === 'new' || userRole === 'declined') {
-                // Sign out the user
-                await supabase.auth.signOut();
-                setIsAuthenticated(false);
-                setUser(null);
-                localStorage.removeItem('idaic-token');
-                // Store role for message display
-                localStorage.setItem('idaic-blocked-role', userRole);
-                window.location.href = '/login.html';
-                return;
-              }
+          // Check if user role is "new" or "declined" - block access
+          if (userRole === 'new' || userRole === 'declined') {
+            // Sign out the user
+            await supabase.auth.signOut();
+            setIsAuthenticated(false);
+            setUser(null);
+            localStorage.removeItem('idaic-token');
+            // Store role for message display
+            localStorage.setItem('idaic-blocked-role', userRole);
+            
+            // Preserve requested page if any
+            const requestedPage = currentPage;
+            if (requestedPage && requestedPage !== 'home') {
+              localStorage.setItem('idaic-requested-page', requestedPage);
+              window.location.href = `/login.html?returnTo=${encodeURIComponent(requestedPage)}`;
+            } else {
+              window.location.href = '/login.html';
+            }
+            return;
+          }
               
               setUser({
                 ...session.user,
@@ -243,7 +269,16 @@ export default function App() {
     const handleAuthFailure = () => {
       setIsAuthenticated(false);
       setUser(null);
-      window.location.href = '/login.html';
+      
+      // Preserve the requested page in the login redirect
+      const requestedPage = currentPage;
+      if (requestedPage && requestedPage !== 'home' && requestedPage !== 'newuser-form' && requestedPage !== 'newmember-signup') {
+        // Store the requested page for redirect after login
+        localStorage.setItem('idaic-requested-page', requestedPage);
+        window.location.href = `/login.html?returnTo=${encodeURIComponent(requestedPage)}`;
+      } else {
+        window.location.href = '/login.html';
+      }
     };
 
     // Listen for auth changes
@@ -262,14 +297,22 @@ export default function App() {
           if (userData && !roleError) {
             const userRole = userData.role;
             
-            // Block access for "new" and "declined" roles
+              // Block access for "new" and "declined" roles
             if (userRole === 'new' || userRole === 'declined') {
               await supabase.auth.signOut();
               setIsAuthenticated(false);
               setUser(null);
               localStorage.removeItem('idaic-token');
               localStorage.setItem('idaic-blocked-role', userRole);
-              window.location.href = '/login.html';
+              
+              // Preserve requested page if any
+              const requestedPage = currentPage;
+              if (requestedPage && requestedPage !== 'home') {
+                localStorage.setItem('idaic-requested-page', requestedPage);
+                window.location.href = `/login.html?returnTo=${encodeURIComponent(requestedPage)}`;
+              } else {
+                window.location.href = '/login.html';
+              }
               return;
             }
           }
@@ -280,13 +323,21 @@ export default function App() {
         setUser(session.user);
         setIsAuthenticated(true);
         localStorage.setItem('idaic-token', session.access_token);
-      } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
         if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsAuthenticated(false);
           localStorage.removeItem('idaic-token');
           localStorage.removeItem('idaic-password-email');
-          window.location.href = '/login.html';
+          
+          // Preserve requested page if any
+          const requestedPage = currentPage;
+          if (requestedPage && requestedPage !== 'home') {
+            localStorage.setItem('idaic-requested-page', requestedPage);
+            window.location.href = `/login.html?returnTo=${encodeURIComponent(requestedPage)}`;
+          } else {
+            window.location.href = '/login.html';
+          }
         } else if (event === 'TOKEN_REFRESHED' && session) {
           // Update token in localStorage
           localStorage.setItem('idaic-token', session.access_token);

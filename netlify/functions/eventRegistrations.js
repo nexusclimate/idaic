@@ -2,6 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const { createClient } = require('@supabase/supabase-js');
+const { generateICS, icsToBase64 } = require('./generateCalendarInvite');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -170,6 +171,48 @@ exports.handler = async function (event, context) {
             const eventDate = formatDate(eventData.event_date);
             const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
             const cancelUrl = `${baseUrl}/cancel-registration?token=${cancellationToken}&id=${registration.id}`;
+            const eventUrl = eventData.registration_link || `${baseUrl}/events-${eventData.id}`;
+
+            // Generate calendar invitation (.ics file)
+            let calendarAttachment = null;
+            if (eventData.event_date) {
+              try {
+                // Calculate end date (default to 1 hour after start if not specified)
+                let endDate = eventData.event_date;
+                if (eventData.event_end_date) {
+                  endDate = eventData.event_end_date;
+                } else {
+                  // Default to 1 hour duration
+                  const start = new Date(eventData.event_date);
+                  start.setHours(start.getHours() + 1);
+                  endDate = start.toISOString();
+                }
+
+                const icsContent = generateICS({
+                  title: eventData.title || 'IDAIC Event',
+                  description: eventData.description || `You are registered for ${eventData.title || 'this event'}.`,
+                  startDate: eventData.event_date,
+                  endDate: endDate,
+                  location: eventData.location || '',
+                  organizerEmail: process.env.ORGANIZER_EMAIL || 'info@idaic.org',
+                  organizerName: 'IDAIC',
+                  attendeeEmail: registrationData.email,
+                  attendeeName: registrationData.name,
+                  url: eventUrl
+                });
+
+                // Convert to base64 for email attachment
+                const icsBase64 = icsToBase64(icsContent);
+                calendarAttachment = {
+                  filename: `${(eventData.title || 'event').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`,
+                  content: icsBase64,
+                  contentType: 'text/calendar; charset=utf-8; method=REQUEST'
+                };
+              } catch (calendarErr) {
+                console.error('Error generating calendar invitation:', calendarErr);
+                // Continue without calendar attachment if generation fails
+              }
+            }
 
             const emailHtml = `
               <!DOCTYPE html>
@@ -183,6 +226,7 @@ exports.handler = async function (event, context) {
                   .content { padding: 20px; background-color: #f9f9f9; }
                   .button { display: inline-block; padding: 12px 24px; background-color: #f97316; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
                   .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+                  .calendar-note { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #2196f3; }
                 </style>
               </head>
               <body>
@@ -199,6 +243,12 @@ exports.handler = async function (event, context) {
                       ${eventData.location ? `<li><strong>Location:</strong> ${eventData.location}</li>` : ''}
                     </ul>
                     ${eventData.description ? `<p>${eventData.description.substring(0, 200)}${eventData.description.length > 200 ? '...' : ''}</p>` : ''}
+                    ${calendarAttachment ? `
+                    <div class="calendar-note">
+                      <p><strong>📅 Add to Calendar</strong></p>
+                      <p>A calendar invitation has been attached to this email. Open the attachment (.ics file) to add this event to your Google Calendar, Outlook, or other calendar application.</p>
+                    </div>
+                    ` : ''}
                     <p>If you need to cancel your registration, please click the link below:</p>
                     <p style="text-align: center;">
                       <a href="${cancelUrl}" class="button">Cancel Registration</a>
@@ -213,15 +263,22 @@ exports.handler = async function (event, context) {
               </html>
             `;
 
+            // Prepare email payload with optional calendar attachment
+            const emailPayload = {
+              to: registrationData.email,
+              subject: `Registration Confirmed: ${eventData.title || 'Event'}`,
+              html: emailHtml
+            };
+
+            if (calendarAttachment) {
+              emailPayload.attachments = [calendarAttachment];
+            }
+
             // Send email via email service
             const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                to: registrationData.email,
-                subject: `Registration Confirmed: ${eventData.title || 'Event'}`,
-                html: emailHtml
-              })
+              body: JSON.stringify(emailPayload)
             });
 
             if (!emailResponse.ok) {

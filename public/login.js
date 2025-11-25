@@ -8,6 +8,28 @@ const N8N_URL  = window.ENV.N8N_URL
 const N8N_AUTH = window.ENV.N8N_AUTH
 const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+// Helper function to get redirect URL after login
+function getRedirectUrl() {
+  // Check URL parameter first
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnTo = urlParams.get('returnTo');
+  
+  if (returnTo) {
+    // Store in localStorage for App.jsx to pick up
+    localStorage.setItem('idaic-requested-page', returnTo);
+    return `/app?page=${encodeURIComponent(returnTo)}`;
+  }
+  
+  // Check localStorage for requested page
+  const requestedPage = localStorage.getItem('idaic-requested-page');
+  if (requestedPage) {
+    return `/app?page=${encodeURIComponent(requestedPage)}`;
+  }
+  
+  // Default redirect
+  return '/app';
+}
+
 // Check if user was redirected due to blocked role
 window.addEventListener('DOMContentLoaded', () => {
   const blockedRole = localStorage.getItem('idaic-blocked-role');
@@ -446,7 +468,7 @@ document
         });
       }
 
-      window.location.href = '/app'
+      window.location.href = getRedirectUrl()
 
     } catch (err) {
       let friendlyMessage = err.message

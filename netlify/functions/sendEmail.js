@@ -14,7 +14,7 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const { to, subject, html, text } = JSON.parse(event.body || '{}');
+    const { to, subject, html, text, attachments } = JSON.parse(event.body || '{}');
 
     if (!to || !subject || (!html && !text)) {
       return {
@@ -29,19 +29,32 @@ exports.handler = async function (event, context) {
 
     // If Resend is configured, use it
     if (RESEND_API_KEY) {
+      const emailPayload = {
+        from: FROM_EMAIL,
+        reply_to: REPLY_TO,
+        to: Array.isArray(to) ? to : [to],
+        subject: subject,
+        html: html || text,
+      };
+
+      // Add attachments if provided
+      // Resend expects attachments in format: [{ filename, content, contentType? }]
+      // content should be base64 encoded string
+      if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+        emailPayload.attachments = attachments.map(att => ({
+          filename: att.filename || 'attachment',
+          content: att.content, // Should be base64 encoded
+          contentType: att.contentType || att.type || 'application/octet-stream'
+        }));
+      }
+
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${RESEND_API_KEY}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          from: FROM_EMAIL,
-          reply_to: REPLY_TO,
-          to: Array.isArray(to) ? to : [to],
-          subject: subject,
-          html: html || text,
-        }),
+        body: JSON.stringify(emailPayload),
       });
 
       if (!response.ok) {
@@ -67,7 +80,8 @@ exports.handler = async function (event, context) {
       reply_to: REPLY_TO,
       to,
       subject,
-      html: html || text
+      html: html || text,
+      attachments: attachments ? `${attachments.length} attachment(s)` : 'none'
     });
 
     return {
