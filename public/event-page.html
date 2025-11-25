@@ -420,6 +420,29 @@
         if (registered) {
           document.getElementById('success-message').classList.remove('hidden');
           document.getElementById('registration-form-container').classList.add('hidden');
+          
+          // Auto-close after 5 seconds if already registered
+          const successText = document.getElementById('success-message').querySelector('p');
+          let countdown = 5;
+          successText.textContent = `You have successfully registered for this event! This page will close in ${countdown} seconds...`;
+          
+          const countdownInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+              successText.textContent = `You have successfully registered for this event! This page will close in ${countdown} second${countdown !== 1 ? 's' : ''}...`;
+            } else {
+              clearInterval(countdownInterval);
+              try {
+                if (window.opener) {
+                  window.close();
+                } else {
+                  window.location.href = 'https://www.idaic.org';
+                }
+              } catch (e) {
+                window.location.href = 'https://www.idaic.org';
+              }
+            }
+          }, 1000);
         }
 
         // Pre-fill user details from active session
@@ -472,7 +495,7 @@
           throw new Error(data.error || 'Failed to register');
         }
 
-        // Show success and redirect
+        // Show success message
         successMessage.classList.remove('hidden');
         document.getElementById('registration-form-container').classList.add('hidden');
         
@@ -481,6 +504,35 @@
         
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Update success message to show countdown
+        const successText = successMessage.querySelector('p');
+        let countdown = 5;
+        successText.textContent = `You have successfully registered for this event! This page will close in ${countdown} seconds...`;
+        
+        const countdownInterval = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            successText.textContent = `You have successfully registered for this event! This page will close in ${countdown} second${countdown !== 1 ? 's' : ''}...`;
+          } else {
+            clearInterval(countdownInterval);
+            // Try to close the window/tab
+            // If window was opened by script, it can be closed
+            // Otherwise, redirect to IDAIC homepage
+            try {
+              if (window.opener) {
+                // Window was opened by another window - can close it
+                window.close();
+              } else {
+                // Regular tab - redirect to IDAIC homepage
+                window.location.href = 'https://www.idaic.org';
+              }
+            } catch (e) {
+              // If closing fails (some browsers block this), redirect instead
+              window.location.href = 'https://www.idaic.org';
+            }
+          }
+        }, 1000);
       } catch (err) {
         errorText.textContent = err.message;
         errorMessage.classList.remove('hidden');
