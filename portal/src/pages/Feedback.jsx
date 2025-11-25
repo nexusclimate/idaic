@@ -279,9 +279,9 @@ export default function FeedbackForm({ onNavigate }) {
 
           {/* File Upload Section */}
           <div className="border rounded-lg p-4" style={{ borderColor: colors.border.light, backgroundColor: '#fafafa' }}>
-            <label htmlFor="attachments" className="block text-sm font-medium mb-3" style={{ color: colors.text.primary }}>
+            <div className="block text-sm font-medium mb-3" style={{ color: colors.text.primary }}>
               Upload Files or Screenshots (Optional)
-            </label>
+            </div>
             
             <div className="mt-3 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-colors hover:border-gray-400"
               style={{ borderColor: colors.border.light }}
