@@ -34,6 +34,13 @@ export default function NewUserForm() {
     setSuccess(false);
 
     try {
+      // Validate category field
+      if (formData.category === 'Other' && !formData.other_category.trim()) {
+        setError('Please specify your category when selecting "Other".');
+        setSubmitting(false);
+        return;
+      }
+
       // Map form fields to API format
       const payload = {
         name: formData.name,
@@ -44,7 +51,7 @@ export default function NewUserForm() {
         linkedin_url: formData.linkedin_url,
         data_permission: formData.data_permission,
         category: formData.category,
-        other_category: formData.other_category,
+        other_category: formData.category === 'Other' ? formData.other_category : '',
         organization_description: formData.organization_description,
         ai_decarbonisation: formData.ai_decarbonisation,
         challenges: formData.challenges,
@@ -241,19 +248,43 @@ export default function NewUserForm() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="lg:col-span-2">
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Category
+                    What Category fits best:
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
+                    onChange={(e) => {
+                      setFormData({ ...formData, category: e.target.value, other_category: e.target.value === 'Other' ? formData.other_category : '' });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  >
+                    <option value="">Select a category</option>
+                    <option value="Represent industrial company">Represent industrial company</option>
+                    <option value="Represent AI developer / provider">Represent AI developer / provider</option>
+                    <option value="Represent research centre / university">Represent research centre / university</option>
+                    <option value="Represent investor">Represent investor</option>
+                    <option value="Other">Other: (please specify)</option>
+                  </select>
                 </div>
+
+                {formData.category === 'Other' && (
+                  <div className="lg:col-span-2">
+                    <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
+                      Please specify:
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.other_category}
+                      onChange={(e) => setFormData({ ...formData, other_category: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      placeholder="Specify your category"
+                      required={formData.category === 'Other'}
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Organization Description
+                    What does the organization you represent do?
                   </label>
                   <textarea
                     value={formData.organization_description}
@@ -265,7 +296,7 @@ export default function NewUserForm() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    AI Decarbonisation
+                    In what ways are you exploring or planning to use AI to accelerate decarbonisation within your organization?
                   </label>
                   <textarea
                     value={formData.ai_decarbonisation}
@@ -277,7 +308,7 @@ export default function NewUserForm() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Challenges
+                    What are the key challenges you face in implementing AI for decarbonisation?
                   </label>
                   <textarea
                     value={formData.challenges}
@@ -289,7 +320,7 @@ export default function NewUserForm() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Contribution
+                    How might you contribute to addressing those challenges?
                   </label>
                   <textarea
                     value={formData.contribution}
@@ -301,7 +332,7 @@ export default function NewUserForm() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    Projects
+                    Are there any specific projects or initiatives you would like to share with the community?
                   </label>
                   <textarea
                     value={formData.projects}
@@ -313,7 +344,7 @@ export default function NewUserForm() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: colors.text.primary }}>
-                    AI Tools
+                    What AI tools and technologies are you currently using or planning to use?
                   </label>
                   <textarea
                     value={formData.ai_tools}
