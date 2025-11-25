@@ -4,6 +4,7 @@ import UserAdmin from './UserAdmin';
 import UserFormView from './UserFormView';
 import Organizations from './Organizations';
 import EventsAdmin from './EventsAdmin';
+import ProtectedUrls from './ProtectedUrls';
 
 const allTabs = [
   { name: 'Content Management', key: 'content' },
@@ -11,6 +12,7 @@ const allTabs = [
   { name: 'User Form', key: 'user_form' },
   { name: 'Events', key: 'events' },
   { name: 'Members', key: 'members' },
+  { name: 'Protected URLs', key: 'protected_urls' },
 ];
 
 export default function Admin({ user }) {
@@ -106,6 +108,12 @@ export default function Admin({ user }) {
         {activeTab === 'members' && (
           <div className="w-full h-full min-h-0" style={{ overflow: 'hidden' }}>
             <Organizations user={user} />
+          </div>
+        )}
+
+        {activeTab === 'protected_urls' && (
+          <div className="w-full h-full min-h-0" style={{ overflow: 'auto' }}>
+            <ProtectedUrls />
           </div>
         )}
       </div>
