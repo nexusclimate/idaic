@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { parseMentions, getAvailablePages } from '../utils/pageMentions';
+import { getProtectedUrl } from '../utils/protectedUrls';
 import { colors, font } from '../config/colors';
 
 /**
@@ -145,10 +146,11 @@ export default function LinkableTextarea({
 
   // Handle click on mention link in preview
   const handleMentionClick = (e, pageRoute) => {
-    e.preventDefault();
+    // Still call onNavigate for backwards compatibility if provided
     if (onNavigate && pageRoute) {
       onNavigate(pageRoute);
     }
+    // The link will navigate naturally via href, so we don't preventDefault
   };
 
   // Get textarea position for suggestions dropdown
@@ -239,16 +241,20 @@ export default function LinkableTextarea({
           <div className="text-sm" style={{ color: colors.text.primary, fontFamily: font.primary }}>
             {mentionParts.map((part, index) => {
               if (part.isMention && part.pageRoute) {
+                // Generate protected URL for this page route
+                const protectedUrl = getProtectedUrl(part.pageRoute);
                 return (
                   <span key={index}>
-                    <button
-                      type="button"
+                    <a
+                      href={protectedUrl}
                       onClick={(e) => handleMentionClick(e, part.pageRoute)}
-                      className="text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline font-medium cursor-pointer hover:opacity-80 transition-opacity"
                       style={{ color: colors.primary.orange }}
                     >
                       {part.text}
-                    </button>
+                    </a>
                   </span>
                 );
               } else if (part.isMention && !part.pageRoute) {
