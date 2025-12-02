@@ -58,20 +58,21 @@ export default function UserAdmin({ onUserSelect }) {
   const [addUserLoading, setAddUserLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/.netlify/functions/userAdminFetch');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      setUsers(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load users');
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('/.netlify/functions/userAdminFetch');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        setUsers(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load users');
-      }
-      setLoading(false);
-    };
     fetchUsers();
   }, []);
 
@@ -271,18 +272,13 @@ export default function UserAdmin({ onUserSelect }) {
 
       const newUser = await response.json();
       
-      // Add the new user to the local state
-      setUsers([...users, newUser]);
-      
       // Reset form and close
       setAddUserForm({ name: '', email: '', role: 'member' });
       setShowAddUser(false);
       setSuccessMessage(`User ${newUser.name} created successfully!`);
       
-      // Refresh the page after a short delay to show the new user
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // Refresh the user list to show the new user without reloading the page
+      await fetchUsers();
       
     } catch (err) {
       setError(err.message);
