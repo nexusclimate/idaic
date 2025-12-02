@@ -132,10 +132,13 @@ export default function RichTextSection({ section, isAdmin = false }) {
         // Check if this looks like a page mention (starts with @)
         if (linkText.startsWith('@')) {
           const route = link.getAttribute('data-route') || 
-                       (href ? href.replace('#', '') : null);
+                       (href ? href.replace('#', '').replace(/^https?:\/\/[^\/]+/, '') : null);
           
           if (route) {
             console.log('Setting up click handler for link:', linkText, 'route:', route);
+            
+            // Get the protected URL for this route
+            const protectedUrl = getProtectedUrl(route);
             
             // Ensure data attributes are set
             if (!link.getAttribute('data-route')) {
@@ -144,6 +147,11 @@ export default function RichTextSection({ section, isAdmin = false }) {
             if (!link.getAttribute('data-mention')) {
               link.setAttribute('data-mention', 'true');
             }
+            
+            // Set the href to the protected URL
+            link.setAttribute('href', protectedUrl);
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
             
             // Make sure link is clickable
             link.style.cursor = 'pointer';
@@ -189,12 +197,15 @@ export default function RichTextSection({ section, isAdmin = false }) {
             newLink.onclick = handleLinkClick;
             newLink.onmousedown = handleLinkClick;
             
-            // Re-apply styles
+            // Re-apply styles and attributes
             newLink.style.cursor = 'pointer';
             newLink.style.pointerEvents = 'auto';
             newLink.style.userSelect = 'none';
             newLink.style.textDecoration = 'underline';
             newLink.style.color = '#ea580c';
+            newLink.setAttribute('href', protectedUrl);
+            newLink.setAttribute('target', '_blank');
+            newLink.setAttribute('rel', 'noopener noreferrer');
           }
         }
       });
@@ -560,6 +571,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
                             const linkMark = state.schema.marks.link;
                             
                             if (linkMark) {
+                              const protectedUrl = getProtectedUrl(route);
                               const tr = state.tr
                                 .delete(from, to)
                                 .insertText(text, from)
@@ -567,32 +579,36 @@ export default function RichTextSection({ section, isAdmin = false }) {
                                   from,
                                   from + text.length - 1, // -1 to exclude the trailing space
                                   linkMark.create({
-                                    href: `#${route}`,
+                                    href: protectedUrl,
+                                    'data-route': route,
+                                    'data-mention': 'true',
                                   })
                                 );
                               
                               view.dispatch(tr);
                               
-                              // Add data attributes to the DOM element
+                              // Add data attributes and click handler to the DOM element
                               setTimeout(() => {
                                 // Find all links in the editor and update the one we just created
                                 const editorDom = view.dom;
-                                const allLinks = editorDom.querySelectorAll('a[href="#' + route + '"]');
+                                const allLinks = editorDom.querySelectorAll('a[data-route="' + route + '"]');
                                 
                                 // Find the link that contains our text
                                 allLinks.forEach(link => {
                                   if (link.textContent.trim() === `@${page}`) {
                                     link.setAttribute('data-route', route);
                                     link.setAttribute('data-mention', 'true');
+                                    link.setAttribute('href', protectedUrl);
+                                    link.setAttribute('target', '_blank');
+                                    link.setAttribute('rel', 'noopener noreferrer');
                                     link.style.cursor = 'pointer';
+                                    link.style.textDecoration = 'underline';
+                                    link.style.color = '#ea580c';
                                     // Ensure it's clickable
                                     link.onclick = (e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      const navEvent = new CustomEvent('pageMentionClick', { 
-                                        detail: { route } 
-                                      });
-                                      window.dispatchEvent(navEvent);
+                                      window.open(protectedUrl, '_blank', 'noopener,noreferrer');
                                       return false;
                                     };
                                   }

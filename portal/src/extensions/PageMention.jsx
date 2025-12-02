@@ -3,6 +3,7 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { ReactRenderer } from '@tiptap/react';
 import React from 'react';
 import { PAGE_MAP, getAvailablePages } from '../utils/pageMentions';
+import { getProtectedUrl } from '../utils/protectedUrls';
 
 // Suggestion list component
 const MentionList = React.forwardRef((props, ref) => {
@@ -199,6 +200,7 @@ export const PageMention = Extension.create({
                 // Insert mention as link using HTML
                 const linkMark = view.state.schema.marks.link;
                 if (linkMark) {
+                  const protectedUrl = getProtectedUrl(route);
                   view.dispatch(
                     view.state.tr
                       .delete(range.from, range.to)
@@ -207,7 +209,7 @@ export const PageMention = Extension.create({
                         range.from,
                         range.from + label.length + 1,
                         linkMark.create({
-                          href: `#${route}`,
+                          href: protectedUrl,
                           'data-route': route,
                           'data-mention': 'true',
                         })
@@ -372,6 +374,7 @@ export const PageMention = Extension.create({
                 
                 const linkMark = view.state.schema.marks.link;
                 if (linkMark) {
+                  const protectedUrl = getProtectedUrl(route);
                   view.dispatch(
                     view.state.tr
                       .delete(range.from, range.to)
@@ -380,7 +383,7 @@ export const PageMention = Extension.create({
                         range.from,
                         range.from + label.length + 1,
                         linkMark.create({
-                          href: `#${route}`,
+                          href: protectedUrl,
                           'data-route': route,
                           'data-mention': 'true',
                         })
