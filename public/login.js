@@ -481,7 +481,7 @@ document
     }
   })
 
-// 5. Admin-only Password Login
+// 5. Admin/Moderator Password Login
 document.getElementById('password-form')?.addEventListener('submit', async (e) => {
   e.preventDefault()
   const emailEl = document.getElementById('password-email')
@@ -496,7 +496,7 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
   }
 
   try {
-    // Check user exists and is admin
+    // Check user exists and is admin or moderator
     const { data: userRow, error: userErr } = await supabase
       .from('users')
       .select('id, name, email, role')
@@ -533,8 +533,8 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
       return;
     }
 
-    if (userRole !== 'admin') {
-      createNotification({ message: 'Admin access required. Please use Email Code instead.', success: false })
+    if (userRole !== 'admin' && userRole !== 'moderator') {
+      createNotification({ message: 'Admin or Moderator access required. Please use Email Code instead.', success: false })
       return
     }
 
