@@ -8,6 +8,7 @@ import { useUser } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../config/supabase';
 import { getAvailablePages, PAGE_MAP } from '../utils/pageMentions';
+import { getProtectedUrl } from '../utils/protectedUrls';
 
 export default function RichTextSection({ section, isAdmin = false }) {
   const { user } = useUser();
@@ -69,19 +70,10 @@ export default function RichTextSection({ section, isAdmin = false }) {
                            (href ? href.replace('#', '') : null);
               
               if (route) {
-                console.log('handleClick - Navigating to page:', route);
-                // Directly trigger navigation without custom event
-                localStorage.setItem('idaic-current-page', route);
-                window.dispatchEvent(new CustomEvent('navigateToPage', { 
-                  detail: { page: route },
-                  bubbles: true
-                }));
-                
-                // Also dispatch pageMentionClick for backwards compatibility
-                window.dispatchEvent(new CustomEvent('pageMentionClick', { 
-                  detail: { route },
-                  bubbles: true
-                }));
+                // Use protected URL (opens in new tab)
+                const protectedUrl = getProtectedUrl(route);
+                console.log('handleClick - Opening protected URL:', protectedUrl);
+                window.open(protectedUrl, '_blank', 'noopener,noreferrer');
               }
               return true; // Tell ProseMirror we handled this
             }
@@ -176,21 +168,11 @@ export default function RichTextSection({ section, isAdmin = false }) {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                console.log('Link clicked directly - Navigating to page:', linkRoute);
                 
-                // Direct navigation
-                localStorage.setItem('idaic-current-page', linkRoute);
-                window.dispatchEvent(new CustomEvent('navigateToPage', { 
-                  detail: { page: linkRoute },
-                  bubbles: true
-                }));
-                
-                const navEvent = new CustomEvent('pageMentionClick', { 
-                  detail: { route: linkRoute },
-                  bubbles: true,
-                  cancelable: true
-                });
-                window.dispatchEvent(navEvent);
+                // Use protected URL (opens in new tab)
+                const protectedUrl = getProtectedUrl(linkRoute);
+                console.log('Link clicked - Opening protected URL:', protectedUrl);
+                window.open(protectedUrl, '_blank', 'noopener,noreferrer');
               } catch (error) {
                 console.error('Error handling link click:', error);
               }
@@ -239,20 +221,10 @@ export default function RichTextSection({ section, isAdmin = false }) {
             const route = linkElement.getAttribute('data-route') || 
                          (href ? href.replace('#', '') : null);
             if (route) {
-              console.log('Editor click handler - Navigating to page:', route);
-              // Direct navigation
-              localStorage.setItem('idaic-current-page', route);
-              window.dispatchEvent(new CustomEvent('navigateToPage', { 
-                detail: { page: route },
-                bubbles: true
-              }));
-              // Dispatch navigation event
-              const navEvent = new CustomEvent('pageMentionClick', { 
-                detail: { route },
-                bubbles: true,
-                cancelable: true
-              });
-              window.dispatchEvent(navEvent);
+              // Use protected URL (opens in new tab)
+              const protectedUrl = getProtectedUrl(route);
+              console.log('Editor click - Opening protected URL:', protectedUrl);
+              window.open(protectedUrl, '_blank', 'noopener,noreferrer');
             }
             return false;
           }
@@ -276,13 +248,10 @@ export default function RichTextSection({ section, isAdmin = false }) {
             const route = linkElement.getAttribute('data-route') || 
                          (href ? href.replace('#', '') : null);
             if (route) {
-              console.log('Editor mousedown - Navigating to page:', route);
-              const navEvent = new CustomEvent('pageMentionClick', { 
-                detail: { route },
-                bubbles: true,
-                cancelable: true
-              });
-              window.dispatchEvent(navEvent);
+              // Use protected URL (opens in new tab)
+              const protectedUrl = getProtectedUrl(route);
+              console.log('Editor mousedown - Opening protected URL:', protectedUrl);
+              window.open(protectedUrl, '_blank', 'noopener,noreferrer');
             }
             return false;
           }

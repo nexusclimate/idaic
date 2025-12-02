@@ -550,7 +550,9 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
     localStorage.setItem('idaic-password-login', 'true')
     localStorage.setItem('idaic-password-email', email)
 
-    createNotification({ message: 'Successfully signed in (admin). Redirecting…', success: true })
+    // Show role-specific notification
+    const roleLabel = userRole === 'admin' ? 'admin' : 'moderator'
+    createNotification({ message: `Successfully signed in (${roleLabel}). Redirecting…`, success: true })
 
     // Track password login with full metadata (IP, location, device, browser, OS, etc.)
     try {
