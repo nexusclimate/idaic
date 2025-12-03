@@ -48,7 +48,8 @@ export default function RichTextSection({ section, isAdmin = false }) {
           & h1 { font-size: 2.5em; margin-bottom: 0.5em; }
           & h2 { font-size: 1.75em; margin-bottom: 0.5em; }
           & p { font-size: 1.1em; margin-bottom: 0.5em; }
-          & a[data-mention="true"] { color: #ea580c; font-weight: 500; cursor: pointer; text-decoration: underline; }
+          & a[data-mention="true"] { color: #ea580c !important; font-weight: 500 !important; cursor: pointer !important; text-decoration: underline !important; }
+          & a[data-mention="true"]:hover { color: #c2410c !important; }
         `
       },
       handleClick: (view, pos, event) => {
@@ -66,14 +67,37 @@ export default function RichTextSection({ section, isAdmin = false }) {
               event.stopPropagation();
               event.stopImmediatePropagation();
               
-              const route = linkElement.getAttribute('data-route') || 
-                           (href ? href.replace('#', '') : null);
+              // Try to get route from data-route attribute first
+              let route = linkElement.getAttribute('data-route');
+              
+              // If no route in data attribute, try to extract from href
+              if (!route && href) {
+                if (href.startsWith('#')) {
+                  route = href.substring(1);
+                } else if (href.includes('?page=')) {
+                  try {
+                    const url = new URL(href);
+                    route = url.searchParams.get('page');
+                  } catch (e) {
+                    const match = href.match(/[?&]page=([^&]+)/);
+                    route = match ? decodeURIComponent(match[1]) : null;
+                  }
+                } else {
+                  // Try to match from PAGE_MAP
+                  const mentionName = linkText.substring(1).trim();
+                  route = PAGE_MAP[mentionName] || null;
+                }
+              }
               
               if (route) {
                 // Use protected URL (opens in new tab)
                 const protectedUrl = getProtectedUrl(route);
                 console.log('handleClick - Opening protected URL:', protectedUrl);
                 window.open(protectedUrl, '_blank', 'noopener,noreferrer');
+              } else if (href && (href.startsWith('http://') || href.startsWith('https://'))) {
+                // If it's already a full URL, just open it
+                console.log('handleClick - Opening URL:', href);
+                window.open(href, '_blank', 'noopener,noreferrer');
               }
               return true; // Tell ProseMirror we handled this
             }
@@ -129,10 +153,38 @@ export default function RichTextSection({ section, isAdmin = false }) {
           tagName: link.tagName
         });
         
-        // Check if this looks like a page mention (starts with @)
-        if (linkText.startsWith('@')) {
-          const route = link.getAttribute('data-route') || 
-                       (href ? href.replace('#', '').replace(/^https?:\/\/[^\/]+/, '') : null);
+        // Check if this looks like a page mention (starts with @) or has data-mention
+        const isMention = linkText.startsWith('@') || link.getAttribute('data-mention') === 'true';
+        
+        if (isMention) {
+          // Try to extract route from various sources
+          let route = link.getAttribute('data-route');
+          
+          if (!route && href) {
+            // Try to extract route from href
+            if (href.startsWith('#')) {
+              route = href.substring(1);
+            } else if (href.includes('?page=')) {
+              const match = href.match(/[?&]page=([^&]+)/);
+              route = match ? decodeURIComponent(match[1]) : null;
+            } else {
+              // If it's already a full URL, try to extract the page parameter
+              try {
+                const url = new URL(href);
+                route = url.searchParams.get('page');
+              } catch (e) {
+                // If URL parsing fails, try regex
+                const match = href.match(/[?&]page=([^&]+)/);
+                route = match ? decodeURIComponent(match[1]) : null;
+              }
+            }
+          }
+          
+          // If still no route, try to match from PAGE_MAP based on link text
+          if (!route && linkText.startsWith('@')) {
+            const mentionName = linkText.substring(1).trim();
+            route = PAGE_MAP[mentionName] || null;
+          }
           
           if (route) {
             console.log('Setting up click handler for link:', linkText, 'route:', route);
@@ -141,32 +193,25 @@ export default function RichTextSection({ section, isAdmin = false }) {
             const protectedUrl = getProtectedUrl(route);
             
             // Ensure data attributes are set
-            if (!link.getAttribute('data-route')) {
-              link.setAttribute('data-route', route);
-            }
-            if (!link.getAttribute('data-mention')) {
-              link.setAttribute('data-mention', 'true');
-            }
+            link.setAttribute('data-route', route);
+            link.setAttribute('data-mention', 'true');
             
             // Set the href to the protected URL
             link.setAttribute('href', protectedUrl);
             link.setAttribute('target', '_blank');
             link.setAttribute('rel', 'noopener noreferrer');
             
-            // Make sure link is clickable
+            // Make sure link is clickable and styled orange
             link.style.cursor = 'pointer';
             link.style.pointerEvents = 'auto';
             link.style.userSelect = 'none';
             link.style.textDecoration = 'underline';
             link.style.color = '#ea580c';
+            link.style.fontWeight = '500';
             
-            // Store route in a way we can access it
-            if (!link.dataset.route) {
-              link.dataset.route = route;
-            }
-            if (!link.dataset.mention) {
-              link.dataset.mention = 'true';
-            }
+            // Store route in dataset
+            link.dataset.route = route;
+            link.dataset.mention = 'true';
             
             // Create a unique handler function for this link
             const linkRoute = route; // Capture route in closure
@@ -187,7 +232,7 @@ export default function RichTextSection({ section, isAdmin = false }) {
               return false;
             };
             
-            // Remove ALL existing listeners by cloning
+            // Remove existing listeners by cloning
             const newLink = link.cloneNode(true);
             link.parentNode?.replaceChild(newLink, link);
             
@@ -197,15 +242,20 @@ export default function RichTextSection({ section, isAdmin = false }) {
             newLink.onclick = handleLinkClick;
             newLink.onmousedown = handleLinkClick;
             
-            // Re-apply styles and attributes
+            // Re-apply styles and attributes to ensure they stick
             newLink.style.cursor = 'pointer';
             newLink.style.pointerEvents = 'auto';
             newLink.style.userSelect = 'none';
             newLink.style.textDecoration = 'underline';
             newLink.style.color = '#ea580c';
+            newLink.style.fontWeight = '500';
             newLink.setAttribute('href', protectedUrl);
             newLink.setAttribute('target', '_blank');
             newLink.setAttribute('rel', 'noopener noreferrer');
+            newLink.setAttribute('data-route', route);
+            newLink.setAttribute('data-mention', 'true');
+            newLink.dataset.route = route;
+            newLink.dataset.mention = 'true';
           }
         }
       });
@@ -676,6 +726,23 @@ export default function RichTextSection({ section, isAdmin = false }) {
               </div>
             )}
             <div className="prose max-w-none">
+              <style>{`
+                .ProseMirror a[data-mention="true"],
+                .prose a[data-mention="true"] {
+                  color: #ea580c !important;
+                  font-weight: 500 !important;
+                  cursor: pointer !important;
+                  text-decoration: underline !important;
+                }
+                .ProseMirror a[data-mention="true"]:hover,
+                .prose a[data-mention="true"]:hover {
+                  color: #c2410c !important;
+                }
+                .ProseMirror a[data-mention="true"]:visited,
+                .prose a[data-mention="true"]:visited {
+                  color: #ea580c !important;
+                }
+              `}</style>
               <EditorContent 
                 editor={editor} 
                 className="min-h-[100px] [&_h1]:text-4xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mb-3 [&_p]:text-base [&_p]:mb-2" 
