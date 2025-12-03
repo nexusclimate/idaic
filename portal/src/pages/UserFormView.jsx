@@ -511,6 +511,26 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
                       </p>
                     </div>
                   </div>
+                  
+                  {/* Welcome Email and Save Changes buttons in Role section */}
+                  <div className="mt-4 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={handleSendWelcomeEmail}
+                      disabled={sendingEmail || !selectedUser?.email}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Send welcome email to this user"
+                    >
+                      {sendingEmail ? 'Sending...' : 'Send Welcome Email'}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="px-6 py-2 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
                 </div>
               )}
               {/* Basic Information */}
@@ -731,28 +751,6 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
                     Delete User
                   </button>
                 )}
-                
-                {/* Save button and Welcome Email button */}
-                <div className="flex gap-3">
-                  {(user?.role || '').toLowerCase() === 'admin' && (
-                    <button
-                      type="button"
-                      onClick={handleSendWelcomeEmail}
-                      disabled={sendingEmail || !selectedUser?.email}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Send welcome email to this user"
-                    >
-                      {sendingEmail ? 'Sending...' : 'Send Welcome Email'}
-                    </button>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="px-6 py-2 bg-orange-500 text-white rounded-md text-sm font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
               </div>
             </form>
           </div>
