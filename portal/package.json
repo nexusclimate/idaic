@@ -4,6 +4,7 @@
   "version": "0.11.0.0",
   "type": "module",
   "scripts": {
+    "preinstall": "rm -f package-lock.json || true",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
