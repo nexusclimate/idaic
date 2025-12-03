@@ -108,7 +108,7 @@ export default function UserAdm() {
   };
 
   return (
-    <div className="bg-white border rounded-lg p-8">
+    <div className="bg-white border rounded-lg p-8 overflow-x-auto">
       <div className="mb-4 max-w-xs">
         <label htmlFor="search" className="block text-sm font-medium text-gray-900">Quick search</label>
         <div className="mt-2">
@@ -137,8 +137,8 @@ export default function UserAdm() {
       ) : (
         <div className="mt-8 flow-root">
           <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle">
-              <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary }}>
+            <div className="inline-block min-w-full py-2 align-middle" style={{ minWidth: '1000px' }}>
+              <table className="min-w-full border-separate border-spacing-0" style={{ fontFamily: font.primary, minWidth: '1000px' }}>
                 <thead>
                   <tr>
                     <th onClick={() => handleSort('name')} className="sticky top-0 z-10 border-b bg-white/75 py-2 pr-2 pl-4 text-left text-sm font-semibold backdrop-blur-sm backdrop-filter sm:pl-4 lg:pl-6 cursor-pointer select-none">Name {sortBy === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>

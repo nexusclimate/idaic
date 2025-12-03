@@ -308,7 +308,7 @@ export default function UserAdmin({ onUserSelect }) {
   }
 
   return (
-    <div className="px-3 sm:px-4 lg:px-6" style={{ fontFamily: font.primary, background: colors.background.main }}>
+    <div className="px-3 sm:px-4 lg:px-6 overflow-x-auto" style={{ fontFamily: font.primary, background: colors.background.main }}>
       <div className="mb-4">
         <h1 className="text-2xl font-bold" style={{ color: colors.text.primary }}>User Administration</h1>
         <p className="text-sm mt-1" style={{ color: colors.text.secondary }}>
@@ -464,26 +464,20 @@ export default function UserAdmin({ onUserSelect }) {
 
       <div className="mt-2 flow-root">
         <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
-          <div className="w-full overflow-x-auto">
+          <div className="inline-block min-w-full align-middle shadow ring-1 ring-black ring-opacity-5 rounded-lg" style={{ minWidth: '1200px' }}>
             <div 
-              className="inline-block min-w-full align-middle shadow ring-1 ring-black ring-opacity-5 rounded-lg" 
+              className="overflow-y-auto" 
               style={{ 
-                minWidth: '1200px' // Ensure minimum width for all columns
+                maxHeight: 'calc(100vh - 300px)'
               }}
             >
-              <div 
-                className="overflow-y-auto" 
+              <table 
+                className="min-w-full border-separate border-spacing-0" 
                 style={{ 
-                  maxHeight: 'calc(100vh - 300px)'
+                  fontFamily: font.primary,
+                  minWidth: '1200px' // Ensure minimum width for all columns
                 }}
               >
-                <table 
-                  className="min-w-full border-separate border-spacing-0" 
-                  style={{ 
-                    fontFamily: font.primary,
-                    minWidth: '1200px' // Ensure minimum width for all columns
-                  }}
-                >
                 <thead>
                   <tr>
                     <th

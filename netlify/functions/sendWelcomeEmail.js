@@ -1,13 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 // Welcome email HTML template
 function getWelcomeEmailHTML(userName) {
   return `
@@ -167,6 +160,10 @@ function getWelcomeEmailHTML(userName) {
   `;
 }
 
+// Welcome Email Function
+// IMPORTANT: This function should ONLY be called manually via the "Send Welcome Email" button
+// in the UserFormView component. It should NEVER be called automatically on user creation,
+// approval, or any other automatic trigger.
 exports.handler = async function (event, context) {
   console.log('sendWelcomeEmail called with method:', event.httpMethod);
   
@@ -203,91 +200,62 @@ exports.handler = async function (event, context) {
     }
 
     // Generate welcome email HTML
-    console.log('Generating welcome email HTML...');
     const emailHTML = getWelcomeEmailHTML(userName || 'there');
 
-    // Send email directly using Resend API (same as sendEmail function)
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = 'IDAIC Welcome <no-reply@idaic.org>';
-    const REPLY_TO = 'info@idaic.org';
+    // Send email via email service (same pattern as eventRegistrations)
+    const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
+    const emailPayload = {
+      to: userEmail,
+      subject: 'Welcome to IDAIC Members Portal - Beta Program',
+      html: emailHTML,
+      from: 'IDAIC Welcome <no-reply@idaic.org>',
+      reply_to: 'info@idaic.org'
+    };
 
-    console.log('Sending email via Resend API...');
-    
-    if (RESEND_API_KEY) {
-      const emailPayload = {
-        from: FROM_EMAIL,
-        reply_to: REPLY_TO,
-        to: userEmail,
-        subject: 'Welcome to IDAIC Members Portal - Beta Program',
-        html: emailHTML,
-      };
+    // Send email via email service
+    try {
+      const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailPayload)
+      });
 
-      try {
-        const emailResponse = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(emailPayload),
-        });
-
-        if (!emailResponse.ok) {
-          const errorData = await emailResponse.json().catch(() => ({ error: 'Unknown error' }));
-          console.error('Resend API error:', errorData);
-          return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to send welcome email', details: errorData })
-          };
-        }
-
-        const result = await emailResponse.json();
-        console.log('Welcome email sent successfully via Resend:', result);
-      } catch (resendError) {
-        console.error('Error calling Resend API:', resendError);
+      if (!emailResponse.ok) {
+        const errorText = await emailResponse.text();
+        console.error('Failed to send welcome email:', errorText);
         return {
           statusCode: 500,
-          body: JSON.stringify({ 
-            error: 'Failed to send welcome email via Resend API', 
-            details: resendError.message
-          })
+          body: JSON.stringify({ error: 'Failed to send welcome email', details: errorText })
         };
       }
-    } else {
-      // Fallback: Log email (for development/testing)
-      console.log('Email service not configured. Would send welcome email:', {
-        from: FROM_EMAIL,
-        reply_to: REPLY_TO,
-        to: userEmail,
-        subject: 'Welcome to IDAIC Members Portal - Beta Program',
-      });
-      // Still return success in dev mode
-      console.warn('⚠️ RESEND_API_KEY not set - email not actually sent');
-    }
 
-    // Update user record to mark welcome email as sent
-    // Note: This will fail if the welcome_email_sent column doesn't exist in the database yet
-    console.log('Updating database...');
-    try {
-      const { error: updateError } = await supabase
-        .from('users')
-        .update({ welcome_email_sent: true })
-        .eq('id', userId);
+      console.log('Welcome email sent successfully');
 
-      if (updateError) {
-        console.error('Error updating welcome_email_sent status:', updateError);
-        // If column doesn't exist, log a helpful message
-        if (updateError.message && (updateError.message.includes('column') || updateError.message.includes('does not exist'))) {
-          console.error('⚠️ Database column "welcome_email_sent" does not exist. Please add it to the users table.');
+      // Update user record to mark welcome email as sent via userProfile API
+      try {
+        const updateResponse = await fetch(`${baseUrl}/.netlify/functions/userProfile?id=${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ welcome_email_sent: true })
+        });
+
+        if (!updateResponse.ok) {
+          console.error('Failed to update welcome_email_sent status:', await updateResponse.text());
+          // Don't fail the request if email was sent but DB update failed
+        } else {
+          console.log('✅ Welcome email status updated in database');
         }
-        // Don't fail the request if email was sent but DB update failed
-        // Log it for manual follow-up
-      } else {
-        console.log('✅ Welcome email status updated in database');
+      } catch (updateErr) {
+        console.error('Error updating welcome_email_sent status:', updateErr);
+        // Continue even if DB update fails - email was sent successfully
       }
-    } catch (dbError) {
-      console.error('Database update error:', dbError);
-      // Continue even if DB update fails - email was sent successfully
+    } catch (emailErr) {
+      // Log but don't fail if email fails
+      console.error('Error sending welcome email:', emailErr);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Failed to send welcome email', details: emailErr.message })
+      };
     }
 
     return {

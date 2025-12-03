@@ -172,6 +172,8 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
     }
   };
 
+  // Send welcome email - ONLY called when admin clicks the "Send Welcome Email" button
+  // This is a manual action and should never be triggered automatically
   const handleSendWelcomeEmail = async () => {
     if (!selectedUser || !selectedUser.email) {
       setError('User email is required to send welcome email');
