@@ -6,3 +6,7 @@ dist
 public/app
 .vite
 
+# Package lock files (corrupted, will be regenerated on install)
+package-lock.json
+portal/package-lock.json
+
