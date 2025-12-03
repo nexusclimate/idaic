@@ -588,6 +588,13 @@ export default function UserAdmin({ onUserSelect }) {
                       className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter"
                       style={{ color: colors.text.primary, borderColor: colors.border.medium }}
                     >
+                      Welcome Email
+                    </th>
+                    <th
+                      scope="col"
+                      className="sticky top-0 z-10 border-b bg-white/75 px-1 sm:px-2 py-1 text-left text-xs sm:text-sm font-semibold backdrop-blur-sm backdrop-filter"
+                      style={{ color: colors.text.primary, borderColor: colors.border.medium }}
+                    >
                       Actions
                     </th>
                     <th
@@ -612,7 +619,7 @@ export default function UserAdmin({ onUserSelect }) {
                   </tr>
                   <tr>
                     <th 
-                      colSpan="11" 
+                      colSpan="12" 
                       className="sticky top-0 z-10 border-b bg-white/75 backdrop-blur-sm backdrop-filter"
                       style={{ borderColor: colors.border.medium }}
                     ></th>
@@ -822,6 +829,22 @@ export default function UserAdmin({ onUserSelect }) {
                               title="Click to edit role"
                             >
                               {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Member'}
+                            </span>
+                          )}
+                        </td>
+                        <td
+                          className={classNames(
+                            'px-1 sm:px-2 py-1 text-xs sm:text-sm whitespace-nowrap text-center',
+                          )}
+                          style={{ color: colors.text.primary, borderBottom: userIdx !== filtered.length - 1 ? `1px solid ${colors.border.light}` : undefined }}
+                        >
+                          {user.welcome_email_sent ? (
+                            <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                              Yes
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800">
+                              No
                             </span>
                           )}
                         </td>

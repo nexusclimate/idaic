@@ -71,6 +71,7 @@ exports.handler = async function (event, context) {
             newsletter_idaic_mena: profile.newsletter_idaic_mena,
             newsletter_csn_news: profile.newsletter_csn_news,
             newsletter_uae_climate: profile.newsletter_uae_climate,
+            welcome_email_sent: profile.welcome_email_sent,
             updated_at: profile.updated_at,
             updated_by: profile.updated_by
           };
@@ -287,6 +288,7 @@ exports.handler = async function (event, context) {
         if (updates.newsletter_idaic_mena !== undefined) mappedUpdates.newsletter_idaic_mena = updates.newsletter_idaic_mena;
         if (updates.newsletter_csn_news !== undefined) mappedUpdates.newsletter_csn_news = updates.newsletter_csn_news;
         if (updates.newsletter_uae_climate !== undefined) mappedUpdates.newsletter_uae_climate = updates.newsletter_uae_climate;
+        if (updates.welcome_email_sent !== undefined) mappedUpdates.welcome_email_sent = updates.welcome_email_sent;
         if (updates.approved !== undefined) mappedUpdates.approved = updates.approved;
         
         // Track who updated this record and when
@@ -341,6 +343,7 @@ exports.handler = async function (event, context) {
           newsletter_idaic_mena: profile.newsletter_idaic_mena,
           newsletter_csn_news: profile.newsletter_csn_news,
           newsletter_uae_climate: profile.newsletter_uae_climate,
+          welcome_email_sent: profile.welcome_email_sent,
           updated_at: profile.updated_at,
           updated_by: profile.updated_by
         };

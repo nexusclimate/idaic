@@ -14,7 +14,7 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const { to, subject, html, text, attachments } = JSON.parse(event.body || '{}');
+    const { to, subject, html, text, attachments, from, reply_to } = JSON.parse(event.body || '{}');
 
     if (!to || !subject || (!html && !text)) {
       return {
@@ -24,8 +24,9 @@ exports.handler = async function (event, context) {
     }
 
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = process.env.FROM_EMAIL || 'IDAIC Events <no-reply@idaic.nexusclimate.co>';
-    const REPLY_TO = process.env.REPLY_TO || 'info@idaic.org';
+    // Allow custom from/reply_to from request, fallback to environment variables
+    const FROM_EMAIL = from || process.env.FROM_EMAIL || 'IDAIC Events <no-reply@idaic.nexusclimate.co>';
+    const REPLY_TO = reply_to || process.env.REPLY_TO || 'info@idaic.org';
 
     // If Resend is configured, use it
     if (RESEND_API_KEY) {

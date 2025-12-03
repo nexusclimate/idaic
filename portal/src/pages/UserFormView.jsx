@@ -14,6 +14,7 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
   const [success, setSuccess] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [formData, setFormData] = useState({
     role: '',
     name: '',
@@ -168,6 +169,50 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSendWelcomeEmail = async () => {
+    if (!selectedUser || !selectedUser.email) {
+      setError('User email is required to send welcome email');
+      return;
+    }
+
+    setSendingEmail(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch('/.netlify/functions/sendWelcomeEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: selectedUser.id,
+          userEmail: selectedUser.email,
+          userName: selectedUser.name || formData.name
+        })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send welcome email');
+      }
+
+      setSuccess('Welcome email sent successfully!');
+      // Refresh users list to update welcome_email_sent status
+      await fetchUsers();
+      // Reload user data to get updated status
+      const updatedUsers = await fetch('/.netlify/functions/userAdminFetch').then(r => r.json());
+      const updatedUser = updatedUsers.find(u => u.id === selectedUser.id);
+      if (updatedUser) {
+        loadUserData(updatedUser);
+      }
+    } catch (err) {
+      setError('Failed to send welcome email: ' + err.message);
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -687,8 +732,19 @@ export default function UserFormView({ initialUser, onNavigateToUserAdmin }) {
                   </button>
                 )}
                 
-                {/* Save button */}
+                {/* Save button and Welcome Email button */}
                 <div className="flex gap-3">
+                  {(user?.role || '').toLowerCase() === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={handleSendWelcomeEmail}
+                      disabled={sendingEmail || !selectedUser?.email}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Send welcome email to this user"
+                    >
+                      {sendingEmail ? 'Sending...' : 'Send Welcome Email'}
+                    </button>
+                  )}
                   <button
                     type="submit"
                     disabled={saving}
