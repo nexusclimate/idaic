@@ -168,6 +168,8 @@ function getWelcomeEmailHTML(userName) {
 }
 
 exports.handler = async function (event, context) {
+  console.log('sendWelcomeEmail called with method:', event.httpMethod);
+  
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -176,9 +178,24 @@ exports.handler = async function (event, context) {
   }
 
   try {
-    const { userId, userEmail, userName } = JSON.parse(event.body || '{}');
+    console.log('Parsing request body...');
+    const body = event.body || '{}';
+    let requestData;
+    try {
+      requestData = JSON.parse(body);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid JSON in request body', details: parseError.message })
+      };
+    }
+
+    const { userId, userEmail, userName } = requestData;
+    console.log('Request data:', { userId, userEmail, userName: userName || 'not provided' });
 
     if (!userId || !userEmail) {
+      console.error('Missing required fields:', { userId: !!userId, userEmail: !!userEmail });
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'userId and userEmail are required' })
@@ -186,38 +203,71 @@ exports.handler = async function (event, context) {
     }
 
     // Generate welcome email HTML
+    console.log('Generating welcome email HTML...');
     const emailHTML = getWelcomeEmailHTML(userName || 'there');
 
-    // Send email via email service (same pattern as eventRegistrations)
-    const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
-    const emailPayload = {
-      to: userEmail,
-      subject: 'Welcome to IDAIC Members Portal - Beta Program',
-      html: emailHTML,
-      from: 'IDAIC Welcome <no-reply@idaic.org>',
-      reply_to: 'info@idaic.org'
-    };
+    // Send email directly using Resend API (same as sendEmail function)
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    const FROM_EMAIL = 'IDAIC Welcome <no-reply@idaic.org>';
+    const REPLY_TO = 'info@idaic.org';
 
-    // Send email via email service
-    const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emailPayload)
-    });
-
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error('Failed to send welcome email:', errorText);
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: 'Failed to send welcome email', details: errorText })
+    console.log('Sending email via Resend API...');
+    
+    if (RESEND_API_KEY) {
+      const emailPayload = {
+        from: FROM_EMAIL,
+        reply_to: REPLY_TO,
+        to: userEmail,
+        subject: 'Welcome to IDAIC Members Portal - Beta Program',
+        html: emailHTML,
       };
-    }
 
-    console.log('Welcome email sent successfully');
+      try {
+        const emailResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(emailPayload),
+        });
+
+        if (!emailResponse.ok) {
+          const errorData = await emailResponse.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Resend API error:', errorData);
+          return {
+            statusCode: 500,
+            body: JSON.stringify({ error: 'Failed to send welcome email', details: errorData })
+          };
+        }
+
+        const result = await emailResponse.json();
+        console.log('Welcome email sent successfully via Resend:', result);
+      } catch (resendError) {
+        console.error('Error calling Resend API:', resendError);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ 
+            error: 'Failed to send welcome email via Resend API', 
+            details: resendError.message
+          })
+        };
+      }
+    } else {
+      // Fallback: Log email (for development/testing)
+      console.log('Email service not configured. Would send welcome email:', {
+        from: FROM_EMAIL,
+        reply_to: REPLY_TO,
+        to: userEmail,
+        subject: 'Welcome to IDAIC Members Portal - Beta Program',
+      });
+      // Still return success in dev mode
+      console.warn('⚠️ RESEND_API_KEY not set - email not actually sent');
+    }
 
     // Update user record to mark welcome email as sent
     // Note: This will fail if the welcome_email_sent column doesn't exist in the database yet
+    console.log('Updating database...');
     try {
       const { error: updateError } = await supabase
         .from('users')
@@ -227,7 +277,7 @@ exports.handler = async function (event, context) {
       if (updateError) {
         console.error('Error updating welcome_email_sent status:', updateError);
         // If column doesn't exist, log a helpful message
-        if (updateError.message && updateError.message.includes('column') && updateError.message.includes('does not exist')) {
+        if (updateError.message && (updateError.message.includes('column') || updateError.message.includes('does not exist'))) {
           console.error('⚠️ Database column "welcome_email_sent" does not exist. Please add it to the users table.');
         }
         // Don't fail the request if email was sent but DB update failed
@@ -250,10 +300,14 @@ exports.handler = async function (event, context) {
     };
 
   } catch (error) {
-    console.error('Error in sendWelcomeEmail:', error);
+    console.error('Unexpected error in sendWelcomeEmail:', error);
+    console.error('Error stack:', error.stack);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ 
+        error: error.message || 'Internal server error',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      })
     };
   }
 };
