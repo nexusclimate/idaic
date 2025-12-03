@@ -188,49 +188,33 @@ exports.handler = async function (event, context) {
     // Generate welcome email HTML
     const emailHTML = getWelcomeEmailHTML(userName || 'there');
 
-    // Send email directly using Resend API
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = 'IDAIC Welcome <no-reply@idaic.org>';
-    const REPLY_TO = 'info@idaic.org';
+    // Send email via email service (same pattern as eventRegistrations)
+    const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
+    const emailPayload = {
+      to: userEmail,
+      subject: 'Welcome to IDAIC Members Portal - Beta Program',
+      html: emailHTML,
+      from: 'IDAIC Welcome <no-reply@idaic.org>',
+      reply_to: 'info@idaic.org'
+    };
 
-    if (RESEND_API_KEY) {
-      const emailPayload = {
-        from: FROM_EMAIL,
-        reply_to: REPLY_TO,
-        to: userEmail,
-        subject: 'Welcome to IDAIC Members Portal - Beta Program',
-        html: emailHTML,
+    // Send email via email service
+    const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(emailPayload)
+    });
+
+    if (!emailResponse.ok) {
+      const errorText = await emailResponse.text();
+      console.error('Failed to send welcome email:', errorText);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Failed to send welcome email', details: errorText })
       };
-
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailPayload),
-      });
-
-      if (!emailResponse.ok) {
-        const errorData = await emailResponse.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Resend API error:', errorData);
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ error: 'Failed to send welcome email', details: errorData })
-        };
-      }
-
-      const result = await emailResponse.json();
-      console.log('Welcome email sent successfully via Resend:', result);
-    } else {
-      // Fallback: Log email (for development/testing)
-      console.log('Email service not configured. Would send welcome email:', {
-        from: FROM_EMAIL,
-        reply_to: REPLY_TO,
-        to: userEmail,
-        subject: 'Welcome to IDAIC Members Portal - Beta Program',
-      });
     }
+
+    console.log('Welcome email sent successfully');
 
     // Update user record to mark welcome email as sent
     // Note: This will fail if the welcome_email_sent column doesn't exist in the database yet
