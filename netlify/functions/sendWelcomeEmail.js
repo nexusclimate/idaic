@@ -1,5 +1,11 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // Welcome email HTML template
 function getWelcomeEmailHTML(userName) {
@@ -202,45 +208,60 @@ exports.handler = async function (event, context) {
     // Generate welcome email HTML
     const emailHTML = getWelcomeEmailHTML(userName || 'there');
 
-    // Send email via email service (same pattern as eventRegistrations)
-    const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
+    // Send email directly via Resend API (same pattern as sendEmail.js)
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    const FROM_EMAIL = 'IDAIC Welcome <no-reply@idaic.org>';
+    const REPLY_TO = 'info@idaic.org';
+
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY not configured');
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Email service not configured' })
+      };
+    }
+
     const emailPayload = {
-      to: userEmail,
+      from: FROM_EMAIL,
+      reply_to: REPLY_TO,
+      to: [userEmail],
       subject: 'Welcome to IDAIC Members Portal - Beta Program',
-      html: emailHTML,
-      from: 'IDAIC Welcome <no-reply@idaic.org>',
-      reply_to: 'info@idaic.org'
+      html: emailHTML
     };
 
-    // Send email via email service
+    console.log('Sending email via Resend API to:', userEmail);
+
     try {
-      const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
+      const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailPayload)
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emailPayload),
       });
 
-      if (!emailResponse.ok) {
-        const errorText = await emailResponse.text();
-        console.error('Failed to send welcome email:', errorText);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Resend API error:', errorData);
         return {
           statusCode: 500,
-          body: JSON.stringify({ error: 'Failed to send welcome email', details: errorText })
+          body: JSON.stringify({ error: 'Failed to send email', details: errorData })
         };
       }
 
-      console.log('Welcome email sent successfully');
+      const result = await response.json();
+      console.log('Welcome email sent successfully via Resend:', result);
 
-      // Update user record to mark welcome email as sent via userProfile API
+      // Update user record to mark welcome email as sent
       try {
-        const updateResponse = await fetch(`${baseUrl}/.netlify/functions/userProfile?id=${userId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ welcome_email_sent: true })
-        });
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({ welcome_email_sent: true })
+          .eq('id', userId);
 
-        if (!updateResponse.ok) {
-          console.error('Failed to update welcome_email_sent status:', await updateResponse.text());
+        if (updateError) {
+          console.error('Failed to update welcome_email_sent status:', updateError);
           // Don't fail the request if email was sent but DB update failed
         } else {
           console.log('✅ Welcome email status updated in database');
@@ -250,7 +271,6 @@ exports.handler = async function (event, context) {
         // Continue even if DB update fails - email was sent successfully
       }
     } catch (emailErr) {
-      // Log but don't fail if email fails
       console.error('Error sending welcome email:', emailErr);
       return {
         statusCode: 500,
