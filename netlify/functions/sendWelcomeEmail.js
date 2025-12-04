@@ -36,10 +36,11 @@ function getWelcomeEmailHTML(userName) {
       padding: 30px 20px;
       text-align: center;
     }
-    .logo {
-      max-width: 200px;
+    .footer-logo {
+      max-width: 150px;
       height: auto;
-      margin-bottom: 20px;
+      margin: 20px auto;
+      opacity: 0.8;
     }
     .header h1 {
       margin: 0;
@@ -121,7 +122,6 @@ function getWelcomeEmailHTML(userName) {
 <body>
   <div class="email-container">
     <div class="header">
-      <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="logo" />
       <h1>Welcome to IDAIC</h1>
       <p style="margin: 10px 0 0 0; font-size: 16px;">Members Portal Beta Program</p>
     </div>
@@ -155,11 +155,12 @@ function getWelcomeEmailHTML(userName) {
       
       <p style="margin-top: 30px;">
         Best regards,<br>
-        <strong>The idaic.org Team</strong>
+        <strong>The IDAIC Team</strong>
       </p>
     </div>
     
     <div class="footer">
+      <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_white.png" alt="IDAIC Logo" class="footer-logo" />
       <p>This email was sent from <strong>IDAIC Welcome (no-reply@idaic.nexusclimate.co)</strong></p>
       <p>Please reply to <a href="mailto:info@idaic.org">info@idaic.org</a> for any inquiries</p>
       <p style="margin-top: 15px;">
