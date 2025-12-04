@@ -7,9 +7,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Read version from version.txt
-const versionPath = path.join(__dirname, '../version.txt');
-const version = fs.readFileSync(versionPath, 'utf8').trim();
+// Read version from package.json
+const packageJsonPath = path.join(__dirname, '../package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+const version = packageJson.version;
 
 console.log(`🔄 Updating version to ${version}`);
 
