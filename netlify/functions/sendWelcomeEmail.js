@@ -160,7 +160,7 @@ function getWelcomeEmailHTML(userName) {
     </div>
     
     <div class="footer">
-      <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_white.png" alt="IDAIC Logo" class="footer-logo" />
+      <img src="https://xnjpbkcqfuvegiwdxypw.supabase.co/storage/v1/object/public/logos/31688ed3-d132-420e-b5a6-e202460db9fc_1761903959448_woimd8pvdnk.png" alt="IDAIC Logo" class="footer-logo" />
       <p>This email was sent from <strong>IDAIC Welcome (no-reply@idaic.nexusclimate.co)</strong></p>
       <p>Please reply to <a href="mailto:info@idaic.org">info@idaic.org</a> for any inquiries</p>
       <p style="margin-top: 15px;">
