@@ -85,7 +85,7 @@ export default function Admin({ user }) {
         )}
 
         {activeTab === 'user_admin' && (
-          <div className="w-full h-full min-h-0 overflow-auto">
+          <div className="w-full h-full min-h-0 flex flex-col">
             <UserAdmin onUserSelect={handleUserSelect} />
           </div>
         )}

@@ -308,7 +308,7 @@ export default function UserAdmin({ onUserSelect }) {
   }
 
   return (
-    <div className="px-3 sm:px-4 lg:px-6 overflow-x-auto" style={{ fontFamily: font.primary, background: colors.background.main }}>
+    <div className="px-3 sm:px-4 lg:px-6 h-full flex flex-col" style={{ fontFamily: font.primary, background: colors.background.main }}>
       <div className="mb-4">
         <h1 className="text-2xl font-bold" style={{ color: colors.text.primary }}>User Administration</h1>
         <p className="text-sm mt-1" style={{ color: colors.text.secondary }}>
@@ -462,16 +462,9 @@ export default function UserAdmin({ onUserSelect }) {
         </div>
       </div>
 
-      <div className="mt-2 flow-root">
-        <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
-          <div className="w-full overflow-x-auto">
-            <div className="inline-block min-w-full align-middle shadow ring-1 ring-black ring-opacity-5 rounded-lg" style={{ minWidth: '1200px' }}>
-              <div 
-                className="overflow-y-auto" 
-                style={{ 
-                  maxHeight: 'calc(100vh - 300px)'
-                }}
-              >
+      <div className="mt-2 flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-auto">
+          <div className="inline-block min-w-full align-middle shadow ring-1 ring-black ring-opacity-5 rounded-lg" style={{ minWidth: '1200px' }}>
               <table 
                 className="min-w-full border-separate border-spacing-0" 
                 style={{ 
@@ -967,9 +960,7 @@ export default function UserAdmin({ onUserSelect }) {
                   })}
                 </tbody>
               </table>
-            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
