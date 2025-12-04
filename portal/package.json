@@ -13,6 +13,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
+    "@supabase/supabase-js": "^2.50.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.0",
     "@tiptap/core": "^2.2.4",
@@ -26,7 +27,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
-    "@jridgewell/resolve-uri": "^3.1.2",
     "@tailwindcss/cli": "^4.1.11",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/react": "^19.1.8",
