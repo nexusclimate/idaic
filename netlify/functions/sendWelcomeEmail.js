@@ -36,6 +36,11 @@ function getWelcomeEmailHTML(userName) {
       padding: 30px 20px;
       text-align: center;
     }
+    .logo {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 20px;
+    }
     .header h1 {
       margin: 0;
       font-size: 28px;
@@ -116,6 +121,7 @@ function getWelcomeEmailHTML(userName) {
 <body>
   <div class="email-container">
     <div class="header">
+      <img src="https://raw.githubusercontent.com/nexusclimate/idaic/main/idaic_black.png" alt="IDAIC Logo" class="logo" />
       <h1>Welcome to IDAIC</h1>
       <p style="margin: 10px 0 0 0; font-size: 16px;">Members Portal Beta Program</p>
     </div>
@@ -140,7 +146,7 @@ function getWelcomeEmailHTML(userName) {
       <p>We're committed to creating a space where innovation, collaboration, and knowledge sharing thrive. Together, we can drive meaningful impact in AI and decarbonisation.</p>
       
       <p style="text-align: center;">
-        <a href="https://portal.idaic.org" class="button">Access Members Portal</a>
+        <a href="https://idaic.nexusclimate.co" class="button">Access Members Portal</a>
       </p>
       
       <p>If you have any questions or need assistance, please don't hesitate to reach out to us at <a href="mailto:info@idaic.org" style="color: #f97316;">info@idaic.org</a>.</p>
@@ -149,7 +155,7 @@ function getWelcomeEmailHTML(userName) {
       
       <p style="margin-top: 30px;">
         Best regards,<br>
-        <strong>The IDAIC Team</strong>
+        <strong>The idaic.org Team</strong>
       </p>
     </div>
     
@@ -157,7 +163,7 @@ function getWelcomeEmailHTML(userName) {
       <p>This email was sent from <strong>IDAIC Welcome (no-reply@idaic.nexusclimate.co)</strong></p>
       <p>Please reply to <a href="mailto:info@idaic.org">info@idaic.org</a> for any inquiries</p>
       <p style="margin-top: 15px;">
-        &copy; ${new Date().getFullYear()} IDAIC. All rights reserved.
+        &copy; ${new Date().getFullYear()} idaic.org. All rights reserved.
       </p>
     </div>
   </div>
