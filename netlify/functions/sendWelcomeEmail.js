@@ -154,7 +154,7 @@ function getWelcomeEmailHTML(userName) {
     </div>
     
     <div class="footer">
-      <p>This email was sent from <strong>IDAIC Welcome (no-reply@idaic.org)</strong></p>
+      <p>This email was sent from <strong>IDAIC Welcome (no-reply@idaic.nexusclimate.co)</strong></p>
       <p>Please reply to <a href="mailto:info@idaic.org">info@idaic.org</a> for any inquiries</p>
       <p style="margin-top: 15px;">
         &copy; ${new Date().getFullYear()} IDAIC. All rights reserved.
@@ -210,7 +210,7 @@ exports.handler = async function (event, context) {
 
     // Send email directly via Resend API (same pattern as sendEmail.js)
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const FROM_EMAIL = 'IDAIC Welcome <no-reply@idaic.org>';
+    const FROM_EMAIL = 'IDAIC Welcome <no-reply@idaic.nexusclimate.co>';
     const REPLY_TO = 'info@idaic.org';
 
     if (!RESEND_API_KEY) {
