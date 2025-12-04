@@ -464,13 +464,14 @@ export default function UserAdmin({ onUserSelect }) {
 
       <div className="mt-2 flow-root">
         <div className="-mx-1 -my-1 sm:-mx-2 lg:-mx-4">
-          <div className="inline-block min-w-full align-middle shadow ring-1 ring-black ring-opacity-5 rounded-lg" style={{ minWidth: '1200px' }}>
-            <div 
-              className="overflow-y-auto" 
-              style={{ 
-                maxHeight: 'calc(100vh - 300px)'
-              }}
-            >
+          <div className="w-full overflow-x-auto">
+            <div className="inline-block min-w-full align-middle shadow ring-1 ring-black ring-opacity-5 rounded-lg" style={{ minWidth: '1200px' }}>
+              <div 
+                className="overflow-y-auto" 
+                style={{ 
+                  maxHeight: 'calc(100vh - 300px)'
+                }}
+              >
               <table 
                 className="min-w-full border-separate border-spacing-0" 
                 style={{ 
@@ -966,9 +967,9 @@ export default function UserAdmin({ onUserSelect }) {
                   })}
                 </tbody>
               </table>
-              </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
