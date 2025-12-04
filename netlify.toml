@@ -1,9 +1,8 @@
 [build]
   base = "portal"
-  command = "npm run build && mv dist/index.html dist/app.html && cp -r dist/* ../public/"
+  command = "cd .. && npm install && cd portal && npm run build && mv dist/index.html dist/app.html && cp -r dist/* ../public/"
   publish = "../public"
   functions = "../netlify/functions"
-  environment = { NPM_FLAGS = "--legacy-peer-deps" }
 
 [dev]
   functions = "../netlify/functions"
