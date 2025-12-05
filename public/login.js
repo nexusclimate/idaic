@@ -81,13 +81,22 @@ function detectOS() {
   return 'Unknown';
 }
 
-// Shared function to fetch IP and geolocation data with improved accuracy
+// Shared function to fetch IP and geolocation data with enhanced metadata
 async function fetchIPAndLocation() {
   let ip = 'Unknown';
   let geo = {
     country: 'Unknown',
+    countryCode: 'Unknown',
     city: 'Unknown',
-    region: 'Unknown'
+    region: 'Unknown',
+    regionCode: 'Unknown',
+    timezone: 'Unknown',
+    isp: 'Unknown',
+    org: 'Unknown',
+    asn: 'Unknown',
+    latitude: null,
+    longitude: null,
+    postalCode: 'Unknown'
   };
 
   try {
@@ -108,9 +117,10 @@ async function fetchIPAndLocation() {
   // If we got an IP, fetch geolocation data
   if (ip && ip !== 'Unknown') {
     try {
-      // Try ip-api.com first (free, good accuracy)
+      // Try ip-api.com first (free, comprehensive data, no API key required)
+      // Fields: status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,asname,zip,query
       const geoResponse = await Promise.race([
-        fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp`),
+        fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`),
         new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 5000))
       ]);
 
@@ -120,10 +130,20 @@ async function fetchIPAndLocation() {
         // ip-api.com returns status field - check if successful
         if (geoData.status === 'success') {
           geo = {
-            country: geoData.country || geoData.countryCode || 'Unknown',
+            country: geoData.country || 'Unknown',
+            countryCode: geoData.countryCode || 'Unknown',
             city: geoData.city || 'Unknown',
-            region: geoData.regionName || geoData.region || 'Unknown'
+            region: geoData.regionName || geoData.region || 'Unknown',
+            regionCode: geoData.region || 'Unknown',
+            timezone: geoData.timezone || 'Unknown',
+            isp: geoData.isp || 'Unknown',
+            org: geoData.org || 'Unknown',
+            asn: geoData.as ? geoData.as.split(' ')[0] : 'Unknown', // Extract ASN number from "AS12345 ISP Name"
+            latitude: geoData.lat || null,
+            longitude: geoData.lon || null,
+            postalCode: geoData.zip || 'Unknown'
           };
+          console.log('✅ Enhanced geolocation data fetched from ip-api.com:', geo);
         } else {
           console.warn('⚠️ ip-api.com returned error:', geoData.message);
         }
@@ -131,7 +151,7 @@ async function fetchIPAndLocation() {
     } catch (geoErr) {
       console.error('❌ Failed to fetch geolocation from ip-api.com:', geoErr);
       
-      // Fallback: Try ipapi.co as backup
+      // Fallback: Try ipapi.co as backup (also free, no API key required)
       try {
         const fallbackResponse = await Promise.race([
           fetch(`https://ipapi.co/${ip}/json/`),
@@ -143,13 +163,54 @@ async function fetchIPAndLocation() {
           if (!fallbackData.error) {
             geo = {
               country: fallbackData.country_name || fallbackData.country || 'Unknown',
+              countryCode: fallbackData.country_code || fallbackData.country || 'Unknown',
               city: fallbackData.city || 'Unknown',
-              region: fallbackData.region || fallbackData.region_code || 'Unknown'
+              region: fallbackData.region || 'Unknown',
+              regionCode: fallbackData.region_code || 'Unknown',
+              timezone: fallbackData.timezone || 'Unknown',
+              isp: fallbackData.org || fallbackData.isp || 'Unknown',
+              org: fallbackData.org || 'Unknown',
+              asn: fallbackData.asn || 'Unknown',
+              latitude: fallbackData.latitude || null,
+              longitude: fallbackData.longitude || null,
+              postalCode: fallbackData.postal || 'Unknown'
             };
+            console.log('✅ Enhanced geolocation data fetched from ipapi.co (fallback):', geo);
           }
         }
       } catch (fallbackErr) {
         console.error('❌ Fallback geolocation also failed:', fallbackErr);
+        
+        // Last resort: Try ipgeolocation.io (free tier available)
+        try {
+          const lastResortResponse = await Promise.race([
+            fetch(`https://api.ipgeolocation.io/ipgeo?ip=${ip}&apiKey=free`),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Last resort geo fetch timeout')), 5000))
+          ]);
+          
+          if (lastResortResponse.ok) {
+            const lastResortData = await lastResortResponse.json();
+            if (lastResortData.ip) {
+              geo = {
+                country: lastResortData.country_name || 'Unknown',
+                countryCode: lastResortData.country_code2 || 'Unknown',
+                city: lastResortData.city || 'Unknown',
+                region: lastResortData.state_prov || 'Unknown',
+                regionCode: lastResortData.state_code || 'Unknown',
+                timezone: lastResortData.time_zone?.name || 'Unknown',
+                isp: lastResortData.isp || 'Unknown',
+                org: lastResortData.organization || 'Unknown',
+                asn: lastResortData.asn || 'Unknown',
+                latitude: lastResortData.latitude || null,
+                longitude: lastResortData.longitude || null,
+                postalCode: lastResortData.zipcode || 'Unknown'
+              };
+              console.log('✅ Enhanced geolocation data fetched from ipgeolocation.io (last resort):', geo);
+            }
+          }
+        } catch (lastResortErr) {
+          console.error('❌ All geolocation services failed:', lastResortErr);
+        }
       }
     }
   }
@@ -418,7 +479,7 @@ document
       localStorage.setItem('idaic-token', data.session.access_token)
       createNotification({ message: 'Successfully signed in!', success: true })
 
-      // Track user login stats with improved geolocation
+      // Track user login stats with enhanced geolocation metadata
       try {
         const { ip, geo } = await fetchIPAndLocation();
 
@@ -430,8 +491,17 @@ document
           email: user.email || document.getElementById('email').value.trim(),
           ip_address: ip,
           country: geo.country,
+          country_code: geo.countryCode,
           city: geo.city,
           region: geo.region,
+          region_code: geo.regionCode,
+          timezone: geo.timezone,
+          isp: geo.isp,
+          organization: geo.org,
+          asn: geo.asn,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          postal_code: geo.postalCode,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
           browser: detectBrowser(),
           os: detectOS(),
@@ -554,19 +624,28 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
     const roleLabel = userRole === 'admin' ? 'admin' : 'moderator'
     createNotification({ message: `Successfully signed in (${roleLabel}). Redirecting…`, success: true })
 
-    // Track password login with full metadata (IP, location, device, browser, OS, etc.)
+    // Track password login with enhanced metadata (IP, location, device, browser, OS, etc.)
     try {
-      // Fetch IP and geolocation with improved accuracy
+      // Fetch IP and geolocation with enhanced metadata
       const { ip, geo } = await fetchIPAndLocation();
 
-      // Prepare metadata with all tracking information
+      // Prepare metadata with all enhanced tracking information
       const metadata = {
         user_id: userRow.id,
         email: userRow.email,
         ip_address: ip,
         country: geo.country,
+        country_code: geo.countryCode,
         city: geo.city,
         region: geo.region,
+        region_code: geo.regionCode,
+        timezone: geo.timezone,
+        isp: geo.isp,
+        organization: geo.org,
+        asn: geo.asn,
+        latitude: geo.latitude,
+        longitude: geo.longitude,
+        postal_code: geo.postalCode,
         device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
         browser: detectBrowser(),
         os: detectOS(),

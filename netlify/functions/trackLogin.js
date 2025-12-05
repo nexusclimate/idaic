@@ -26,8 +26,17 @@ exports.handler = async function (event, context) {
       login_method: loginData.login_method,
       ip_address: loginData.ip_address,
       country: loginData.country,
+      country_code: loginData.country_code,
       city: loginData.city,
-      region: loginData.region
+      region: loginData.region,
+      region_code: loginData.region_code,
+      timezone: loginData.timezone,
+      isp: loginData.isp,
+      organization: loginData.organization,
+      asn: loginData.asn,
+      latitude: loginData.latitude,
+      longitude: loginData.longitude,
+      postal_code: loginData.postal_code
     });
 
     // Validate required fields
@@ -51,14 +60,23 @@ exports.handler = async function (event, context) {
 
     const loginTime = loginData.login_time || new Date().toISOString();
 
-    // Prepare the insert data with proper defaults
+    // Prepare the insert data with proper defaults and enhanced metadata
     const insertData = {
       user_id: loginData.user_id,
       email: loginData.email,
       ip_address: loginData.ip_address || 'Unknown',
       country: loginData.country || 'Unknown',
+      country_code: loginData.country_code || 'Unknown',
       city: loginData.city || 'Unknown',
       region: loginData.region || 'Unknown',
+      region_code: loginData.region_code || 'Unknown',
+      timezone: loginData.timezone || 'Unknown',
+      isp: loginData.isp || 'Unknown',
+      organization: loginData.organization || 'Unknown',
+      asn: loginData.asn || 'Unknown',
+      latitude: loginData.latitude !== null && loginData.latitude !== undefined ? loginData.latitude : null,
+      longitude: loginData.longitude !== null && loginData.longitude !== undefined ? loginData.longitude : null,
+      postal_code: loginData.postal_code || 'Unknown',
       device: loginData.device || 'Unknown',
       browser: loginData.browser || 'Unknown',
       os: loginData.os || 'Unknown',
