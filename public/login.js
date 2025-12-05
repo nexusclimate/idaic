@@ -201,137 +201,135 @@ async function fetchIPAndLocation() {
     console.warn('⚠️ Client-side IP fetch failed. Server will attempt to capture IP from request headers:', ipErr.message);
   }
 
-  // If we got an IP, fetch geolocation data
+  // If we got an IP, fetch geolocation data from multiple sources
   if (ip && ip !== 'Unknown') {
-    try {
-      // Try ip-api.com first (free, comprehensive data, no API key required)
-      // Fields: status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,asname,zip,query
-      const geoResponse = await Promise.race([
-        fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 5000))
-      ]);
-
-      if (geoResponse.ok) {
-        const geoData = await geoResponse.json();
-        
-        // ip-api.com returns status field - check if successful
-        if (geoData.status === 'success') {
-          geo = {
-            country: geoData.country || 'Unknown',
-            countryCode: geoData.countryCode || 'Unknown',
-            city: geoData.city || 'Unknown',
-            region: geoData.regionName || geoData.region || 'Unknown',
-            regionCode: geoData.region || 'Unknown',
-            timezone: geoData.timezone || 'Unknown',
-            isp: geoData.isp || 'Unknown',
-            org: geoData.org || 'Unknown',
-            asn: geoData.as ? geoData.as.split(' ')[0] : 'Unknown', // Extract ASN number from "AS12345 ISP Name"
-            latitude: geoData.lat || null,
-            longitude: geoData.lon || null,
-            postalCode: geoData.zip || 'Unknown'
-          };
-          console.log('✅ Enhanced geolocation data fetched from ip-api.com:', geo);
-        } else {
-          console.warn('⚠️ ip-api.com returned error:', geoData.message);
-        }
-      }
-    } catch (geoErr) {
-      console.error('❌ Failed to fetch geolocation from ip-api.com:', geoErr);
-      
-      // Fallback: Try ipapi.co as backup (also free, no API key required)
-      try {
-        const fallbackResponse = await Promise.race([
-          fetch(`https://ipapi.co/${ip}/json/`),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Fallback geo fetch timeout')), 5000))
-        ]);
-        
-        if (fallbackResponse.ok) {
-          const fallbackData = await fallbackResponse.json();
-          if (!fallbackData.error) {
-            geo = {
-              country: fallbackData.country_name || fallbackData.country || 'Unknown',
-              countryCode: fallbackData.country_code || fallbackData.country || 'Unknown',
-              city: fallbackData.city || 'Unknown',
-              region: fallbackData.region || 'Unknown',
-              regionCode: fallbackData.region_code || 'Unknown',
-              timezone: fallbackData.timezone || 'Unknown',
-              isp: fallbackData.org || fallbackData.isp || 'Unknown',
-              org: fallbackData.org || 'Unknown',
-              asn: fallbackData.asn || 'Unknown',
-              latitude: fallbackData.latitude || null,
-              longitude: fallbackData.longitude || null,
-              postalCode: fallbackData.postal || 'Unknown'
+    // Try multiple geolocation services in order
+    const geoServices = [
+      {
+        name: 'ipapi.co',
+        url: `https://ipapi.co/${ip}/json/`,
+        parser: (data) => {
+          if (!data.error) {
+            return {
+              country: data.country_name || data.country || 'Unknown',
+              countryCode: data.country_code || 'Unknown',
+              city: data.city || 'Unknown',
+              region: data.region || 'Unknown',
+              regionCode: data.region_code || 'Unknown',
+              timezone: data.timezone || 'Unknown',
+              isp: data.org || data.isp || 'Unknown',
+              org: data.org || 'Unknown',
+              asn: data.asn || 'Unknown',
+              latitude: data.latitude || null,
+              longitude: data.longitude || null,
+              postalCode: data.postal || 'Unknown'
             };
-            console.log('✅ Enhanced geolocation data fetched from ipapi.co (fallback):', geo);
           }
-        } else {
-          console.warn(`⚠️ ipapi.co returned HTTP ${fallbackResponse.status}`);
+          return null;
         }
-      } catch (fallbackErr) {
-        console.error('❌ Fallback geolocation also failed:', fallbackErr);
-        
-        // Additional fallback: Try ip-api.com with HTTP (non-HTTPS) endpoint
-        try {
-          const altResponse = await Promise.race([
-            fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Alt geo fetch timeout')), 5000))
-          ]);
-          
-          if (altResponse.ok) {
-            const altData = await altResponse.json();
-            if (altData.status === 'success') {
-              geo = {
-                country: altData.country || 'Unknown',
-                countryCode: altData.countryCode || 'Unknown',
-                city: altData.city || 'Unknown',
-                region: altData.regionName || altData.region || 'Unknown',
-                regionCode: altData.region || 'Unknown',
-                timezone: altData.timezone || 'Unknown',
-                isp: altData.isp || 'Unknown',
-                org: altData.org || 'Unknown',
-                asn: altData.as ? altData.as.split(' ')[0] : 'Unknown',
-                latitude: altData.lat || null,
-                longitude: altData.lon || null,
-                postalCode: altData.zip || 'Unknown'
-              };
-              console.log('✅ Enhanced geolocation data fetched from ip-api.com (HTTP endpoint):', geo);
-            }
+      },
+      {
+        name: 'ip-api.com (HTTP)',
+        url: `http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`,
+        parser: (data) => {
+          if (data.status === 'success') {
+            return {
+              country: data.country || 'Unknown',
+              countryCode: data.countryCode || 'Unknown',
+              city: data.city || 'Unknown',
+              region: data.regionName || data.region || 'Unknown',
+              regionCode: data.region || 'Unknown',
+              timezone: data.timezone || 'Unknown',
+              isp: data.isp || 'Unknown',
+              org: data.org || 'Unknown',
+              asn: data.as ? data.as.split(' ')[0] : 'Unknown',
+              latitude: data.lat || null,
+              longitude: data.lon || null,
+              postalCode: data.zip || 'Unknown'
+            };
           }
-        } catch (altErr) {
-          console.warn('⚠️ Alternative geolocation endpoint also failed:', altErr.message);
+          return null;
         }
-        
-        // Last resort: Try ipgeolocation.io (free tier available)
-        try {
-          const lastResortResponse = await Promise.race([
-            fetch(`https://api.ipgeolocation.io/ipgeo?ip=${ip}&apiKey=free`),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Last resort geo fetch timeout')), 5000))
-          ]);
-          
-          if (lastResortResponse.ok) {
-            const lastResortData = await lastResortResponse.json();
-            if (lastResortData.ip) {
-              geo = {
-                country: lastResortData.country_name || 'Unknown',
-                countryCode: lastResortData.country_code2 || 'Unknown',
-                city: lastResortData.city || 'Unknown',
-                region: lastResortData.state_prov || 'Unknown',
-                regionCode: lastResortData.state_code || 'Unknown',
-                timezone: lastResortData.time_zone?.name || 'Unknown',
-                isp: lastResortData.isp || 'Unknown',
-                org: lastResortData.organization || 'Unknown',
-                asn: lastResortData.asn || 'Unknown',
-                latitude: lastResortData.latitude || null,
-                longitude: lastResortData.longitude || null,
-                postalCode: lastResortData.zipcode || 'Unknown'
-              };
-              console.log('✅ Enhanced geolocation data fetched from ipgeolocation.io (last resort):', geo);
-            }
+      },
+      {
+        name: 'ipwho.is',
+        url: `https://ipwho.is/${ip}`,
+        parser: (data) => {
+          if (data.success) {
+            return {
+              country: data.country || 'Unknown',
+              countryCode: data.country_code || 'Unknown',
+              city: data.city || 'Unknown',
+              region: data.region || 'Unknown',
+              regionCode: data.region_code || 'Unknown',
+              timezone: data.timezone?.name || data.timezone?.id || 'Unknown',
+              isp: data.connection?.isp || 'Unknown',
+              org: data.connection?.org || 'Unknown',
+              asn: data.connection?.asn ? String(data.connection.asn) : 'Unknown',
+              latitude: data.latitude || null,
+              longitude: data.longitude || null,
+              postalCode: data.postal || 'Unknown'
+            };
           }
-        } catch (lastResortErr) {
-          console.error('❌ All geolocation services failed:', lastResortErr);
+          return null;
+        }
+      },
+      {
+        name: 'ip-api.com (HTTPS)',
+        url: `https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`,
+        parser: (data) => {
+          if (data.status === 'success') {
+            return {
+              country: data.country || 'Unknown',
+              countryCode: data.countryCode || 'Unknown',
+              city: data.city || 'Unknown',
+              region: data.regionName || data.region || 'Unknown',
+              regionCode: data.region || 'Unknown',
+              timezone: data.timezone || 'Unknown',
+              isp: data.isp || 'Unknown',
+              org: data.org || 'Unknown',
+              asn: data.as ? data.as.split(' ')[0] : 'Unknown',
+              latitude: data.lat || null,
+              longitude: data.lon || null,
+              postalCode: data.zip || 'Unknown'
+            };
+          }
+          return null;
         }
       }
+    ];
+
+    // Try each service until one succeeds
+    for (const service of geoServices) {
+      try {
+        const geoResponse = await Promise.race([
+          fetch(service.url),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 4000))
+        ]);
+
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json();
+          const parsedGeo = service.parser(geoData);
+          
+          if (parsedGeo) {
+            geo = parsedGeo;
+            console.log(`✅ Enhanced geolocation data fetched from ${service.name}:`, geo);
+            break; // Success, exit loop
+          } else {
+            console.warn(`⚠️ ${service.name} returned invalid data`);
+          }
+        } else {
+          console.warn(`⚠️ ${service.name} returned HTTP ${geoResponse.status}`);
+        }
+      } catch (serviceErr) {
+        console.warn(`⚠️ Failed to fetch from ${service.name}:`, serviceErr.message);
+        // Continue to next service
+      }
+    }
+    
+    // If all client-side services failed, log that server will try
+    if (geo.country === 'Unknown' && geo.city === 'Unknown') {
+      console.warn('⚠️ All client-side geolocation services failed. Server will attempt geolocation lookup.');
     }
   }
 
