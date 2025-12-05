@@ -100,18 +100,71 @@ async function fetchIPAndLocation() {
   };
 
   try {
-    // Fetch IP address with timeout
-    const ipResponse = await Promise.race([
-      fetch('https://api.ipify.org?format=json'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('IP fetch timeout')), 5000))
-    ]);
+    // Try multiple IP services with fallbacks for better reliability
+    const ipServices = [
+      'https://api.ipify.org?format=json',
+      'https://api64.ipify.org?format=json',
+      'https://icanhazip.com',
+      'https://ifconfig.me/ip'
+    ];
+
+    for (const service of ipServices) {
+      try {
+        const ipResponse = await Promise.race([
+          fetch(service, { 
+            method: 'GET',
+            headers: service.includes('ipify') ? { 'Accept': 'application/json' } : {}
+          }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('IP fetch timeout')), 3000))
+        ]);
+        
+        if (ipResponse.ok) {
+          let fetchedIP = 'Unknown';
+          
+          // Handle different response formats
+          if (service.includes('ipify')) {
+            try {
+              const ipData = await ipResponse.json();
+              fetchedIP = ipData.ip || 'Unknown';
+            } catch (jsonErr) {
+              console.warn(`⚠️ Failed to parse JSON from ${service}:`, jsonErr);
+              continue; // Try next service
+            }
+          } else {
+            // For text-based services like icanhazip.com and ifconfig.me
+            try {
+              const ipText = await ipResponse.text();
+              fetchedIP = ipText.trim() || 'Unknown';
+            } catch (textErr) {
+              console.warn(`⚠️ Failed to read text from ${service}:`, textErr);
+              continue; // Try next service
+            }
+          }
+          
+          // Validate IP format (basic IPv4 check)
+          const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+          if (fetchedIP && fetchedIP !== 'Unknown' && ipv4Regex.test(fetchedIP)) {
+            ip = fetchedIP;
+            console.log(`✅ IP address fetched successfully from ${service}:`, ip);
+            break; // Success, exit loop
+          } else {
+            console.warn(`⚠️ Invalid IP format from ${service}:`, fetchedIP);
+            // Continue to next service
+          }
+        } else {
+          console.warn(`⚠️ HTTP error from ${service}:`, ipResponse.status, ipResponse.statusText);
+        }
+      } catch (serviceErr) {
+        console.warn(`⚠️ Failed to fetch IP from ${service}:`, serviceErr.message);
+        // Continue to next service
+      }
+    }
     
-    if (ipResponse.ok) {
-      const ipData = await ipResponse.json();
-      ip = ipData.ip || 'Unknown';
+    if (ip === 'Unknown') {
+      console.warn('⚠️ All client-side IP fetch services failed. Server will attempt to capture IP from request headers.');
     }
   } catch (ipErr) {
-    console.error('❌ Failed to fetch IP address:', ipErr);
+    console.warn('⚠️ Client-side IP fetch failed. Server will attempt to capture IP from request headers:', ipErr.message);
   }
 
   // If we got an IP, fetch geolocation data
