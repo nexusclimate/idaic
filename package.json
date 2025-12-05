@@ -11,7 +11,11 @@
     "node-fetch": "^2.6.7",
     "superagent": "^9.0.2"
   },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  },
   "scripts": {
-    "dev": "netlify dev"
+    "dev": "netlify dev",
+    "build:tailwind": "tailwindcss -i ./public/tailwind-input.css -o ./public/tailwind.css --minify -c ./tailwind.public.config.js"
   }
 }
