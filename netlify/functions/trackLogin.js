@@ -32,10 +32,20 @@ async function fetchGeolocationData(ip) {
 
   try {
     // Try ip-api.com first (free, comprehensive data, no API key required)
-    const geoResponse = await Promise.race([
+    // Try HTTPS first, fallback to HTTP if 403
+    let geoResponse = await Promise.race([
       fetch(`https://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`),
       new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 5000))
     ]);
+
+    // If HTTPS returns 403, try HTTP endpoint
+    if (geoResponse.status === 403) {
+      console.log('⚠️ HTTPS endpoint returned 403, trying HTTP endpoint');
+      geoResponse = await Promise.race([
+        fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 5000))
+      ]);
+    }
 
     if (geoResponse.ok) {
       const geoData = await geoResponse.json();
@@ -141,7 +151,12 @@ exports.handler = async function (event, context) {
       asn: loginData.asn,
       latitude: loginData.latitude,
       longitude: loginData.longitude,
-      postal_code: loginData.postal_code
+      postal_code: loginData.postal_code,
+      browser: loginData.browser,
+      browser_version: loginData.browser_version,
+      device: loginData.device,
+      screen_resolution: `${loginData.screen_width}x${loginData.screen_height}`,
+      language: loginData.language
     });
 
     // Validate required fields
@@ -227,8 +242,24 @@ exports.handler = async function (event, context) {
       postal_code: geoData.postal_code,
       device: loginData.device || 'Unknown',
       browser: loginData.browser || 'Unknown',
+      browser_version: loginData.browser_version || 'Unknown',
       os: loginData.os || 'Unknown',
       user_agent: loginData.user_agent || 'Unknown',
+      language: loginData.language || 'Unknown',
+      languages: loginData.languages || 'Unknown',
+      platform: loginData.platform || 'Unknown',
+      cookie_enabled: loginData.cookie_enabled || 'Unknown',
+      do_not_track: loginData.do_not_track || 'Unknown',
+      screen_width: loginData.screen_width !== null && loginData.screen_width !== undefined ? loginData.screen_width : null,
+      screen_height: loginData.screen_height !== null && loginData.screen_height !== undefined ? loginData.screen_height : null,
+      screen_color_depth: loginData.screen_color_depth !== null && loginData.screen_color_depth !== undefined ? loginData.screen_color_depth : null,
+      viewport_width: loginData.viewport_width !== null && loginData.viewport_width !== undefined ? loginData.viewport_width : null,
+      viewport_height: loginData.viewport_height !== null && loginData.viewport_height !== undefined ? loginData.viewport_height : null,
+      browser_timezone: loginData.browser_timezone || 'Unknown',
+      timezone_offset: loginData.timezone_offset !== null && loginData.timezone_offset !== undefined ? loginData.timezone_offset : null,
+      online_status: loginData.online_status || 'Unknown',
+      hardware_concurrency: loginData.hardware_concurrency !== null && loginData.hardware_concurrency !== undefined ? loginData.hardware_concurrency : null,
+      device_memory: loginData.device_memory !== null && loginData.device_memory !== undefined ? loginData.device_memory : null,
       login_time: loginTime,
       login_method: loginData.login_method || 'unknown'
     };

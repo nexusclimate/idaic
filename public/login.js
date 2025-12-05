@@ -50,7 +50,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Shared browser and OS detection functions
+// Enhanced browser and OS detection functions
 function detectBrowser() {
   if (navigator.userAgentData && navigator.userAgentData.brands) {
     const brands = navigator.userAgentData.brands.map(b => b.brand);
@@ -68,6 +68,12 @@ function detectBrowser() {
   return 'Unknown';
 }
 
+function detectBrowserVersion() {
+  const ua = navigator.userAgent;
+  const match = ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera)\/(\d+)/i);
+  return match ? match[1] : 'Unknown';
+}
+
 function detectOS() {
   if (navigator.userAgentData && navigator.userAgentData.platform) {
     return navigator.userAgentData.platform;
@@ -79,6 +85,34 @@ function detectOS() {
   if (/android/i.test(ua)) return 'Android';
   if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
   return 'Unknown';
+}
+
+// Enhanced device and browser metadata collection
+function getEnhancedDeviceMetadata() {
+  const metadata = {
+    device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+    browser: detectBrowser(),
+    browser_version: detectBrowserVersion(),
+    os: detectOS(),
+    user_agent: navigator.userAgent,
+    language: navigator.language || 'Unknown',
+    languages: navigator.languages ? navigator.languages.join(',') : 'Unknown',
+    platform: navigator.platform || 'Unknown',
+    cookie_enabled: navigator.cookieEnabled ? 'Yes' : 'No',
+    do_not_track: navigator.doNotTrack || 'Unknown',
+    screen_width: window.screen ? window.screen.width : null,
+    screen_height: window.screen ? window.screen.height : null,
+    screen_color_depth: window.screen ? window.screen.colorDepth : null,
+    viewport_width: window.innerWidth || null,
+    viewport_height: window.innerHeight || null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+    timezone_offset: new Date().getTimezoneOffset(),
+    online_status: navigator.onLine ? 'Online' : 'Offline',
+    hardware_concurrency: navigator.hardwareConcurrency || null,
+    device_memory: navigator.deviceMemory || null
+  };
+  
+  return metadata;
 }
 
 // Shared function to fetch IP and geolocation data with enhanced metadata
@@ -230,9 +264,42 @@ async function fetchIPAndLocation() {
             };
             console.log('✅ Enhanced geolocation data fetched from ipapi.co (fallback):', geo);
           }
+        } else {
+          console.warn(`⚠️ ipapi.co returned HTTP ${fallbackResponse.status}`);
         }
       } catch (fallbackErr) {
         console.error('❌ Fallback geolocation also failed:', fallbackErr);
+        
+        // Additional fallback: Try ip-api.com with HTTP (non-HTTPS) endpoint
+        try {
+          const altResponse = await Promise.race([
+            fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,lat,lon,timezone,isp,org,as,zip`),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Alt geo fetch timeout')), 5000))
+          ]);
+          
+          if (altResponse.ok) {
+            const altData = await altResponse.json();
+            if (altData.status === 'success') {
+              geo = {
+                country: altData.country || 'Unknown',
+                countryCode: altData.countryCode || 'Unknown',
+                city: altData.city || 'Unknown',
+                region: altData.regionName || altData.region || 'Unknown',
+                regionCode: altData.region || 'Unknown',
+                timezone: altData.timezone || 'Unknown',
+                isp: altData.isp || 'Unknown',
+                org: altData.org || 'Unknown',
+                asn: altData.as ? altData.as.split(' ')[0] : 'Unknown',
+                latitude: altData.lat || null,
+                longitude: altData.lon || null,
+                postalCode: altData.zip || 'Unknown'
+              };
+              console.log('✅ Enhanced geolocation data fetched from ip-api.com (HTTP endpoint):', geo);
+            }
+          }
+        } catch (altErr) {
+          console.warn('⚠️ Alternative geolocation endpoint also failed:', altErr.message);
+        }
         
         // Last resort: Try ipgeolocation.io (free tier available)
         try {
@@ -539,6 +606,9 @@ document
         const user = data.user || {}; // data.user may be undefined, fallback to empty object
         const userId = data.user?.id || null;
 
+        // Get enhanced device metadata
+        const deviceMeta = getEnhancedDeviceMetadata();
+        
         const metadata = {
           user_id: userId, // Store the Auth UUID
           email: user.email || document.getElementById('email').value.trim(),
@@ -555,10 +625,26 @@ document
           latitude: geo.latitude,
           longitude: geo.longitude,
           postal_code: geo.postalCode,
-          device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-          browser: detectBrowser(),
-          os: detectOS(),
-          user_agent: navigator.userAgent,
+          device: deviceMeta.device,
+          browser: deviceMeta.browser,
+          browser_version: deviceMeta.browser_version,
+          os: deviceMeta.os,
+          user_agent: deviceMeta.user_agent,
+          language: deviceMeta.language,
+          languages: deviceMeta.languages,
+          platform: deviceMeta.platform,
+          cookie_enabled: deviceMeta.cookie_enabled,
+          do_not_track: deviceMeta.do_not_track,
+          screen_width: deviceMeta.screen_width,
+          screen_height: deviceMeta.screen_height,
+          screen_color_depth: deviceMeta.screen_color_depth,
+          viewport_width: deviceMeta.viewport_width,
+          viewport_height: deviceMeta.viewport_height,
+          browser_timezone: deviceMeta.timezone,
+          timezone_offset: deviceMeta.timezone_offset,
+          online_status: deviceMeta.online_status,
+          hardware_concurrency: deviceMeta.hardware_concurrency,
+          device_memory: deviceMeta.device_memory,
           login_time: new Date().toISOString(),
           login_method: 'otp'
         };
@@ -682,6 +768,9 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
       // Fetch IP and geolocation with enhanced metadata
       const { ip, geo } = await fetchIPAndLocation();
 
+      // Get enhanced device metadata
+      const deviceMeta = getEnhancedDeviceMetadata();
+      
       // Prepare metadata with all enhanced tracking information
       const metadata = {
         user_id: userRow.id,
@@ -699,10 +788,26 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
         latitude: geo.latitude,
         longitude: geo.longitude,
         postal_code: geo.postalCode,
-        device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-        browser: detectBrowser(),
-        os: detectOS(),
-        user_agent: navigator.userAgent,
+        device: deviceMeta.device,
+        browser: deviceMeta.browser,
+        browser_version: deviceMeta.browser_version,
+        os: deviceMeta.os,
+        user_agent: deviceMeta.user_agent,
+        language: deviceMeta.language,
+        languages: deviceMeta.languages,
+        platform: deviceMeta.platform,
+        cookie_enabled: deviceMeta.cookie_enabled,
+        do_not_track: deviceMeta.do_not_track,
+        screen_width: deviceMeta.screen_width,
+        screen_height: deviceMeta.screen_height,
+        screen_color_depth: deviceMeta.screen_color_depth,
+        viewport_width: deviceMeta.viewport_width,
+        viewport_height: deviceMeta.viewport_height,
+        browser_timezone: deviceMeta.timezone,
+        timezone_offset: deviceMeta.timezone_offset,
+        online_status: deviceMeta.online_status,
+        hardware_concurrency: deviceMeta.hardware_concurrency,
+        device_memory: deviceMeta.device_memory,
         login_time: new Date().toISOString(),
         login_method: 'password'
       };
