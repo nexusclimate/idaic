@@ -703,22 +703,26 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
   }
 
   try {
-    // Check user exists and is admin or moderator
-    const { data: userRow, error: userErr } = await supabase
-      .from('users')
-      .select('id, name, email, role')
-      .eq('email', email)
-      .maybeSingle()
+    // Check user exists and is admin or moderator via server-side function to avoid CORS
+    const userCheckResponse = await fetch('/.netlify/functions/checkUser', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
 
-    if (userErr) {
-      console.error('Error fetching user:', userErr)
-      createNotification({ message: 'Error checking user. Please try again.', success: false })
-      return
+    if (!userCheckResponse.ok) {
+      const errorData = await userCheckResponse.json().catch(() => ({}));
+      console.error('Error checking user:', userCheckResponse.statusText, errorData);
+      createNotification({ message: 'Error checking user. Please try again.', success: false });
+      return;
     }
 
+    const userCheckData = await userCheckResponse.json();
+    const userRow = userCheckData.user;
+
     if (!userRow) {
-      createNotification({ message: 'User not authorized. Please contact IDAIC admin.', success: false })
-      return
+      createNotification({ message: 'User not authorized. Please contact IDAIC admin.', success: false });
+      return;
     }
 
     // Check if user role is "new" or "declined" - block login
