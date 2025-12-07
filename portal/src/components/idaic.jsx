@@ -44,6 +44,7 @@ import {
   NewspaperIcon,
   SunIcon,
   BookOpenIcon,
+  BuildingOffice2Icon,
 } from '@heroicons/react/20/solid'
 import idaicLogo from '../../../idaic_black.png'
 import { colors } from '../config/colors'
@@ -303,7 +304,7 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               }}
               title={collapsed ? 'Decarbonisation' : undefined}
             >
-              <NewspaperIcon />
+              <BuildingOffice2Icon />
               {!collapsed && <SidebarLabel>Decarbonisation</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
