@@ -11,6 +11,7 @@ export const PAGE_MAP = {
   'UK': 'uk',
   'MENA': 'mena',
   'CSN': 'climate-solutions',
+  'Decarbonisation': 'decarbonisation',
   'UAE': 'uae-climate',
   'Feedback': 'feedback',
   'Changelog': 'changelog',

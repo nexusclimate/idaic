@@ -288,6 +288,25 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               {!collapsed && <SidebarLabel>CSN</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
+              onClick={() => handlePageChange('decarbonisation')}
+              current={currentPage === 'decarbonisation' ? true : undefined}
+              style={sidebarItemStyle}
+              onMouseEnter={(e) => {
+                if (currentPage !== 'decarbonisation') {
+                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== 'decarbonisation') {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
+              title={collapsed ? 'Decarbonisation' : undefined}
+            >
+              <NewspaperIcon />
+              {!collapsed && <SidebarLabel>Decarbonisation</SidebarLabel>}
+            </SidebarItem>
+            <SidebarItem 
               onClick={() => handlePageChange('uae-climate')}
               current={currentPage === 'uae-climate' ? true : undefined}
               style={sidebarItemStyle}

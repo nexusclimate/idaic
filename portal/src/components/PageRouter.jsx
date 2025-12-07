@@ -75,6 +75,20 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
           />
         </div>
       );
+    case 'decarbonisation':
+      return (
+        <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
+          <iframe
+            src="https://decarbonisation.news/"
+            title="Decarbonisation News"
+            style={{ width: '100%', height: '100%', border: 'none', margin: 0, padding: 0, background: 'none', flex: 1 }}
+            allowFullScreen
+            onLoad={() => handleIframeLoad("Decarbonisation News")}
+            onError={(e) => handleIframeError("Decarbonisation News", e)}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
+          />
+        </div>
+      );
     case 'uae-climate':
         return (
             <div className="w-full h-full min-h-0 flex" style={{ margin: 0, padding: 0, background: 'none', border: 'none' }}>
