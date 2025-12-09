@@ -551,13 +551,24 @@ document
     ?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Try to initialize Supabase if not ready
+    // Ensure Supabase is initialized
     if (!supabase) {
-      supabase = initSupabase();
+      console.log('⏳ Supabase not ready, initializing...');
+      await initSupabase();
+      
+      // Wait a bit more for initialization to complete
       if (!supabase) {
+        console.error('❌ Supabase failed to initialize');
         createNotification({ message: 'System is initializing. Please wait a moment and try again.', success: false });
         return;
       }
+    }
+    
+    // Verify supabase is actually usable
+    if (!supabase || typeof supabase.from !== 'function') {
+      console.error('❌ Supabase client is not ready:', supabase);
+      createNotification({ message: 'System is still loading. Please wait a moment and try again.', success: false });
+      return;
     }
     
     const email = document.getElementById('email').value.trim();
@@ -567,14 +578,23 @@ document
     // 1. Check if domain is approved
     let domainApproved = false;
     try {
+      console.log('Querying org_domains for:', domain);
       const { data, error } = await supabase
         .from('org_domains')
         .select('*')
         .ilike('domain_email', domain)
         .maybeSingle();
-      console.log('Supabase org_domains result:', data, error);
+      console.log('Supabase org_domains result:', { data, error });
+      
+      if (error) {
+        console.error('Supabase query error:', error);
+        createNotification({ message: 'Error checking organization membership: ' + error.message, success: false });
+        return;
+      }
+      
       if (data) domainApproved = true;
     } catch (err) {
+      console.error('Catch block error:', err);
       createNotification({ message: 'Error checking organization membership. Please try again.', success: false });
       return;
     }
@@ -725,9 +745,9 @@ document
     ?.addEventListener('submit', async (e) => {
     e.preventDefault()
     
-    // Try to initialize Supabase if not ready
+    // Ensure Supabase is initialized
     if (!supabase) {
-      supabase = initSupabase();
+      await initSupabase();
       if (!supabase) {
         createNotification({ message: 'System is initializing. Please wait a moment and try again.', success: false });
         return;
