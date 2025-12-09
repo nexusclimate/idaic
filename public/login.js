@@ -21,18 +21,14 @@ async function initSupabase() {
   const url = window.ENV.SUPABASE_URL;
   const key = window.ENV.SUPABASE_ANON_KEY;
   
-  console.log('🔍 Checking ENV values:', { 
+  console.log('🔍 ENV values:', { 
     hasUrl: !!url, 
-    hasKey: !!key,
-    urlLength: url ? url.length : 0,
-    keyLength: key ? key.length : 0
+    hasKey: !!key
   });
   
   // Validate we have actual values (not undefined, null, or empty strings)
   if (!url || !key || url === '' || key === '' || url === 'undefined' || key === 'undefined') {
     console.error('❌ Supabase credentials are missing or invalid');
-    console.error('URL:', url);
-    console.error('Key:', key ? 'exists but invalid' : 'missing');
     return null;
   }
   
@@ -51,9 +47,7 @@ async function initSupabase() {
     
     // Lazy load the Supabase library only when we have valid credentials
     if (!createClient) {
-      console.log('📦 About to load Supabase library...');
-      console.log('Pre-import check - URL:', SUPABASE_URL ? 'valid' : 'INVALID');
-      console.log('Pre-import check - Key:', SUPABASE_ANON_KEY ? 'valid' : 'INVALID');
+      console.log('📦 Loading Supabase library...');
       
       // One more safety check before import
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -106,16 +100,11 @@ async function initSupabase() {
     
     // Final validation right before calling createClient
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      console.error('❌ Credentials became null before createClient call');
-      console.error('URL:', SUPABASE_URL);
-      console.error('Key:', SUPABASE_ANON_KEY ? 'exists' : 'NULL');
+      console.error('❌ Credentials invalid before createClient call');
       return null;
     }
     
-    console.log('🔧 Creating Supabase client with:', {
-      urlStart: SUPABASE_URL.substring(0, 20) + '...',
-      keyStart: SUPABASE_ANON_KEY.substring(0, 20) + '...'
-    });
+    console.log('🔧 Creating Supabase client...');
     
     // Call createClient with explicit, validated parameters
     supabase = createClient(String(SUPABASE_URL), String(SUPABASE_ANON_KEY));
@@ -130,11 +119,7 @@ async function initSupabase() {
     console.log('✅ Supabase client created successfully');
     return supabase;
   } catch (error) {
-    console.error('❌ Error creating Supabase client:', error);
-    console.error('Error message:', error.message);
-    console.error('Stack:', error.stack);
-    console.error('URL at error time:', SUPABASE_URL);
-    console.error('Key at error time:', SUPABASE_ANON_KEY ? 'exists' : 'NULL');
+    console.error('❌ Error creating Supabase client:', error.message);
     return null;
   }
 }
@@ -143,13 +128,11 @@ async function initSupabase() {
 window.addEventListener('envReady', () => {
   console.log('📡 envReady event received');
   
-  // Log ENV state with more detail
+  // Log ENV state
   if (window.ENV) {
-    console.log('🔍 ENV object exists');
-    console.log('  - SUPABASE_URL:', window.ENV.SUPABASE_URL ? `${window.ENV.SUPABASE_URL.substring(0, 30)}...` : 'MISSING');
-    console.log('  - SUPABASE_ANON_KEY:', window.ENV.SUPABASE_ANON_KEY ? `${window.ENV.SUPABASE_ANON_KEY.substring(0, 20)}...` : 'MISSING');
+    console.log('🔍 ENV loaded');
   } else {
-    console.error('❌ ENV object does not exist!');
+    console.error('❌ ENV missing');
   }
   
   if (!supabaseInitialized) {
@@ -347,7 +330,7 @@ async function fetchIPAndLocation() {
           const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
           if (fetchedIP && fetchedIP !== 'Unknown' && ipv4Regex.test(fetchedIP)) {
             ip = fetchedIP;
-            console.log(`✅ IP address fetched successfully from ${service}:`, ip);
+            console.log(`✅ IP fetched from ${service}`);
             break; // Success, exit loop
           } else {
             console.warn(`⚠️ Invalid IP format from ${service}:`, fetchedIP);
@@ -481,7 +464,7 @@ async function fetchIPAndLocation() {
           
           if (parsedGeo) {
             geo = parsedGeo;
-            console.log(`✅ Enhanced geolocation data fetched from ${service.name}:`, geo);
+            console.log(`✅ Geolocation data fetched from ${service.name}`);
             break; // Success, exit loop
           } else {
             console.warn(`⚠️ ${service.name} returned invalid data`);
@@ -578,13 +561,12 @@ document
     // 1. Check if domain is approved
     let domainApproved = false;
     try {
-      console.log('Querying org_domains for:', domain);
       const { data, error } = await supabase
         .from('org_domains')
         .select('*')
         .ilike('domain_email', domain)
         .maybeSingle();
-      console.log('Supabase org_domains result:', { data, error });
+      console.log('Domain check:', data ? 'approved' : 'not found');
       
       if (error) {
         console.error('Supabase query error:', error);
@@ -855,32 +837,20 @@ document
           login_method: 'otp'
         };
 
-        // Use the trackLogin function for consistency
-        console.log('📤 Sending login tracking data:', metadata);
+        // Track login
         const trackResponse = await fetch('/.netlify/functions/trackLogin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(metadata)
         });
         
-        const trackResult = await trackResponse.json();
-        
         if (trackResponse.ok) {
-          console.log('✅ OTP login tracked successfully!');
-          console.log('✅ Server response:', trackResult);
+          console.log('✅ OTP login tracked');
         } else {
-          console.error('❌ Failed to track OTP login:', {
-            status: trackResponse.status,
-            statusText: trackResponse.statusText,
-            error: trackResult
-          });
+          console.error('❌ Failed to track OTP login');
         }
       } catch (trackErr) {
-        console.error('❌ Failed to track user login:', {
-          error: trackErr,
-          message: trackErr.message,
-          stack: trackErr.stack
-        });
+        console.error('❌ Failed to track user login');
       }
 
       window.location.href = getRedirectUrl()
@@ -907,32 +877,27 @@ document
 
   // Handle button click - button is type="button" so no form submission happens automatically
   const passwordBtn = document.getElementById('password-submit-btn');
-  console.log('🔘 Password submit button:', passwordBtn ? 'Found' : 'NOT FOUND');
   
   if (passwordBtn) {
     passwordBtn.addEventListener('click', async (e) => {
-      console.log('🖱️ Password button clicked!');
-      e.preventDefault()
-      e.stopPropagation()
-      
-      // Ensure password tab stays active immediately - do this synchronously
-      if (window.switchTab) {
-        window.switchTab('password')
-      }
-      
-      // Force focus to stay on password field immediately
+  e.preventDefault()
+  e.stopPropagation()
+  
+  // Ensure password tab stays active immediately - do this synchronously
+  if (window.switchTab) {
+    window.switchTab('password')
+  }
+  
+  // Force focus to stay on password field immediately
   const pwdEl = document.getElementById('password')
-      const emailEl = document.getElementById('password-email')
-      
-      if (pwdEl) {
-        pwdEl.focus()
-      }
-      
+  const emailEl = document.getElementById('password-email')
+  
+  if (pwdEl) {
+    pwdEl.focus()
+  }
+  
   const email = emailEl ? emailEl.value.trim() : ''
   const password = pwdEl ? pwdEl.value.trim() : ''
-      
-      console.log('📧 Email:', email ? 'provided' : 'empty');
-      console.log('🔑 Password:', password ? 'provided' : 'empty');
 
   // Basic validation
   if (!email || !password) {
@@ -954,8 +919,7 @@ document
     });
 
     if (!userCheckResponse.ok) {
-      const errorData = await userCheckResponse.json().catch(() => ({}));
-      console.error('Error checking user:', userCheckResponse.statusText, errorData);
+      console.error('Error checking user:', userCheckResponse.statusText);
       createNotification({ message: 'Error checking user. Please try again.', success: false });
       if (window.switchTab) window.switchTab('password');
       if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
@@ -1072,31 +1036,19 @@ document
         login_method: 'password'
       };
 
-      console.log('📤 Sending login tracking data:', metadata);
       const trackResponse = await fetch('/.netlify/functions/trackLogin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(metadata)
       })
       
-      const trackResult = await trackResponse.json();
-      
       if (trackResponse.ok) {
-        console.log('✅ Password login tracked successfully!');
-        console.log('✅ Server response:', trackResult);
+        console.log('✅ Password login tracked');
       } else {
-        console.error('❌ Failed to track password login:', {
-          status: trackResponse.status,
-          statusText: trackResponse.statusText,
-          error: trackResult
-        });
+        console.error('❌ Failed to track password login');
       }
     } catch (trackErr) {
-      console.error('❌ Track login error:', {
-        error: trackErr,
-        message: trackErr.message,
-        stack: trackErr.stack
-      });
+      console.error('❌ Track login error');
     }
 
     // Redirect to app
