@@ -33,9 +33,22 @@ rel="stylesheet"
       if (otpContent) otpContent.classList.remove('hidden');
       if (passwordContent) passwordContent.classList.add('hidden');
 
-      // Reset password form
+      // Make password form fields non-focusable
       const pwdEl = document.getElementById('password');
-      if (pwdEl) pwdEl.value = '';
+      const pwdEmailEl = document.getElementById('password-email');
+      if (pwdEl) {
+        pwdEl.value = '';
+        pwdEl.setAttribute('tabindex', '-1');
+      }
+      if (pwdEmailEl) {
+        pwdEmailEl.setAttribute('tabindex', '-1');
+      }
+
+      // Make OTP form fields focusable
+      const emailEl = document.getElementById('email');
+      const codeEl = document.getElementById('code');
+      if (emailEl) emailEl.removeAttribute('tabindex');
+      if (codeEl) codeEl.removeAttribute('tabindex');
     } else if (tab === 'password') {
       // Activate password tab
       if (passwordTab) {
@@ -51,19 +64,40 @@ rel="stylesheet"
       if (passwordContent) passwordContent.classList.remove('hidden');
       if (otpContent) otpContent.classList.add('hidden');
 
-      // Reset OTP forms
+      // Make OTP form fields non-focusable
       const emailEl = document.getElementById('email');
       const codeEl = document.getElementById('code');
-      if (emailEl) emailEl.value = '';
-      if (codeEl) codeEl.value = '';
+      if (emailEl) {
+        emailEl.value = '';
+        emailEl.setAttribute('tabindex', '-1');
+      }
+      if (codeEl) {
+        codeEl.value = '';
+        codeEl.setAttribute('tabindex', '-1');
+      }
+
+      // Make password form fields focusable
+      const pwdEl = document.getElementById('password');
+      const pwdEmailEl = document.getElementById('password-email');
+      if (pwdEl) pwdEl.removeAttribute('tabindex');
+      if (pwdEmailEl) pwdEmailEl.removeAttribute('tabindex');
+
+      // Reset OTP forms
       const req = document.getElementById('otp-request-form');
       const ver = document.getElementById('otp-verify-form');
       if (req) req.classList.remove('hidden');
       if (ver) ver.classList.add('hidden');
-      const pwdEmailEl = document.getElementById('password-email');
-      if (pwdEmailEl) pwdEmailEl.value = '';
     }
   };
+
+  // Initialize tabindex on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    // OTP tab is active by default, so password fields should be non-focusable
+    const pwdEl = document.getElementById('password');
+    const pwdEmailEl = document.getElementById('password-email');
+    if (pwdEl) pwdEl.setAttribute('tabindex', '-1');
+    if (pwdEmailEl) pwdEmailEl.setAttribute('tabindex', '-1');
+  });
 </script>
 </head>
 <body
