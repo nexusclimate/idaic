@@ -1,12 +1,11 @@
 // login.js
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+// DO NOT import createClient at module level - lazy load it instead
+let createClient = null;
+let SUPABASE_URL, SUPABASE_ANON_KEY, N8N_URL, N8N_AUTH, supabase;
+let supabaseInitialized = false;
 
-// 1. Variables for Supabase - don't initialize until ENV is confirmed ready
-let SUPABASE_URL, SUPABASE_ANON_KEY, N8N_URL, N8N_AUTH, supabase
-let supabaseInitialized = false
-
-// Initialize Supabase - ONLY called when we're sure ENV is ready
-function initSupabase() {
+// Lazy load Supabase library and initialize client
+async function initSupabase() {
   // Skip if already initialized
   if (supabaseInitialized) {
     return supabase;
@@ -28,6 +27,13 @@ function initSupabase() {
   }
   
   try {
+    // Lazy load the Supabase library only when we have valid credentials
+    if (!createClient) {
+      console.log('📦 Loading Supabase library...');
+      const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+      createClient = module.createClient;
+    }
+    
     SUPABASE_URL = url;
     SUPABASE_ANON_KEY = key;
     N8N_URL = window.ENV.N8N_URL;
@@ -765,25 +771,33 @@ function setupListeners() {
   }, true) // Use capture phase
 
   // Handle button click - button is type="button" so no form submission happens automatically
-  document.getElementById('password-submit-btn')?.addEventListener('click', async (e) => {
-  e.preventDefault()
-  e.stopPropagation()
+  const passwordBtn = document.getElementById('password-submit-btn');
+  console.log('🔘 Password submit button:', passwordBtn ? 'Found' : 'NOT FOUND');
   
-  // Ensure password tab stays active immediately - do this synchronously
-  if (window.switchTab) {
-    window.switchTab('password')
-  }
-  
-  // Force focus to stay on password field immediately
-  const pwdEl = document.getElementById('password')
-  const emailEl = document.getElementById('password-email')
-  
-  if (pwdEl) {
-    pwdEl.focus()
-  }
-  
-  const email = emailEl ? emailEl.value.trim() : ''
-  const password = pwdEl ? pwdEl.value.trim() : ''
+  if (passwordBtn) {
+    passwordBtn.addEventListener('click', async (e) => {
+      console.log('🖱️ Password button clicked!');
+      e.preventDefault()
+      e.stopPropagation()
+      
+      // Ensure password tab stays active immediately - do this synchronously
+      if (window.switchTab) {
+        window.switchTab('password')
+      }
+      
+      // Force focus to stay on password field immediately
+      const pwdEl = document.getElementById('password')
+      const emailEl = document.getElementById('password-email')
+      
+      if (pwdEl) {
+        pwdEl.focus()
+      }
+      
+      const email = emailEl ? emailEl.value.trim() : ''
+      const password = pwdEl ? pwdEl.value.trim() : ''
+      
+      console.log('📧 Email:', email ? 'provided' : 'empty');
+      console.log('🔑 Password:', password ? 'provided' : 'empty');
 
   // Basic validation
   if (!email || !password) {
@@ -957,10 +971,13 @@ function setupListeners() {
     createNotification({ message: `Login failed: ${err.message || 'Please try again.'}`, success: false })
     // Ensure password tab stays active on error
     if (window.switchTab) window.switchTab('password');
-    const pwdEl = document.getElementById('password');
-    if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
+      const pwdEl = document.getElementById('password');
+      if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
+    }
+    });
+  } else {
+    console.error('❌ Password submit button not found!');
   }
-  });
 }
 
 // Set up listeners when DOM is ready

@@ -33,33 +33,25 @@ rel="stylesheet"
       if (otpContent) otpContent.classList.remove('hidden');
       if (passwordContent) passwordContent.classList.add('hidden');
 
-      // Make password form fields non-focusable and disabled
+      // Make password form fields non-focusable (but don't disable - just hide the container)
       const pwdEl = document.getElementById('password');
       const pwdEmailEl = document.getElementById('password-email');
       if (pwdEl) {
         pwdEl.value = '';
         pwdEl.setAttribute('tabindex', '-1');
-        pwdEl.setAttribute('disabled', 'true');
-        pwdEl.removeAttribute('required');
       }
       if (pwdEmailEl) {
         pwdEmailEl.setAttribute('tabindex', '-1');
-        pwdEmailEl.setAttribute('disabled', 'true');
-        pwdEmailEl.removeAttribute('required');
       }
 
-      // Make OTP form fields focusable and enabled
+      // Make OTP form fields focusable
       const emailEl = document.getElementById('email');
       const codeEl = document.getElementById('code');
       if (emailEl) {
         emailEl.removeAttribute('tabindex');
-        emailEl.removeAttribute('disabled');
-        emailEl.setAttribute('required', 'true');
       }
       if (codeEl) {
         codeEl.removeAttribute('tabindex');
-        codeEl.removeAttribute('disabled');
-        codeEl.setAttribute('required', 'true');
       }
     } else if (tab === 'password') {
       // Activate password tab
@@ -76,34 +68,26 @@ rel="stylesheet"
       if (passwordContent) passwordContent.classList.remove('hidden');
       if (otpContent) otpContent.classList.add('hidden');
 
-      // Make OTP form fields non-focusable and disabled
+      // Make OTP form fields non-focusable (but don't disable - just hide the container)
       const emailEl = document.getElementById('email');
       const codeEl = document.getElementById('code');
       if (emailEl) {
         emailEl.value = '';
         emailEl.setAttribute('tabindex', '-1');
-        emailEl.setAttribute('disabled', 'true');
-        emailEl.removeAttribute('required');
       }
       if (codeEl) {
         codeEl.value = '';
         codeEl.setAttribute('tabindex', '-1');
-        codeEl.setAttribute('disabled', 'true');
-        codeEl.removeAttribute('required');
       }
 
-      // Make password form fields focusable and enabled
+      // Make password form fields focusable
       const pwdEl = document.getElementById('password');
       const pwdEmailEl = document.getElementById('password-email');
       if (pwdEl) {
         pwdEl.removeAttribute('tabindex');
-        pwdEl.removeAttribute('disabled');
-        pwdEl.setAttribute('required', 'true');
       }
       if (pwdEmailEl) {
         pwdEmailEl.removeAttribute('tabindex');
-        pwdEmailEl.removeAttribute('disabled');
-        pwdEmailEl.setAttribute('required', 'true');
       }
 
       // Reset OTP forms
@@ -116,18 +100,14 @@ rel="stylesheet"
 
   // Initialize tabindex on page load
   window.addEventListener('DOMContentLoaded', () => {
-    // OTP tab is active by default, so password fields should be non-focusable and disabled
+    // OTP tab is active by default, so password fields should be non-focusable
     const pwdEl = document.getElementById('password');
     const pwdEmailEl = document.getElementById('password-email');
     if (pwdEl) {
       pwdEl.setAttribute('tabindex', '-1');
-      pwdEl.setAttribute('disabled', 'true');
-      pwdEl.removeAttribute('required');
     }
     if (pwdEmailEl) {
       pwdEmailEl.setAttribute('tabindex', '-1');
-      pwdEmailEl.setAttribute('disabled', 'true');
-      pwdEmailEl.removeAttribute('required');
     }
   });
 </script>
