@@ -280,6 +280,29 @@ id="notification-list"
 
 <!-- Start cookieyes banner --> <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/bcf616ad15c9632332d8f07f/script.js"></script> <!-- End cookieyes banner -->
 
+<!-- Load environment variables before loading login.js -->
+<script>
+  // Initialize window.ENV if not already set
+  if (!window.ENV) {
+    window.ENV = {};
+    // Fetch environment variables from Netlify function
+    fetch('/.netlify/functions/getEnv')
+      .then(response => response.json())
+      .then(data => {
+        window.ENV = data;
+        // Dispatch event to notify that ENV is ready
+        window.dispatchEvent(new Event('envReady'));
+      })
+      .catch(error => {
+        console.error('Failed to load environment variables:', error);
+        // Dispatch event anyway so login.js can handle the error
+        window.dispatchEvent(new Event('envReady'));
+      });
+  } else {
+    // ENV already set, dispatch event immediately
+    window.dispatchEvent(new Event('envReady'));
+  }
+</script>
 
 <!-- Load your module -->
 <script type="module" src="login.js"></script>

@@ -1,12 +1,62 @@
 // login.js
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 1. Read the injected env
-const SUPABASE_URL      = window.ENV.SUPABASE_URL
-const SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
-const N8N_URL  = window.ENV.N8N_URL
-const N8N_AUTH = window.ENV.N8N_AUTH
-const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// 1. Read the injected env with safety checks
+let SUPABASE_URL, SUPABASE_ANON_KEY, N8N_URL, N8N_AUTH, supabase
+
+// Initialize Supabase client when ENV is available
+function initSupabase() {
+  if (!window.ENV) {
+    console.warn('window.ENV is not available yet. Supabase client will be initialized when ENV is ready.')
+    return null
+  }
+  
+  try {
+    SUPABASE_URL = window.ENV.SUPABASE_URL
+    SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
+    N8N_URL = window.ENV.N8N_URL
+    N8N_AUTH = window.ENV.N8N_AUTH
+    
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.error('Supabase environment variables are missing')
+      return null
+    }
+    
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    return supabase
+  } catch (error) {
+    console.error('Error initializing Supabase client:', error)
+    return null
+  }
+}
+
+// Try to initialize immediately
+supabase = initSupabase()
+
+// If not available, wait for ENV to be set (for cases where it's injected asynchronously)
+if (!supabase) {
+  // Wait for envReady event
+  window.addEventListener('envReady', () => {
+    supabase = initSupabase()
+    if (!supabase) {
+      console.error('Failed to initialize Supabase client. Some features may not work.')
+    }
+  }, { once: true })
+  
+  // Fallback: also check periodically in case event doesn't fire
+  let attempts = 0
+  const maxAttempts = 50
+  const checkEnv = setInterval(() => {
+    attempts++
+    if (window.ENV && window.ENV.SUPABASE_URL) {
+      supabase = initSupabase()
+      clearInterval(checkEnv)
+    } else if (attempts >= maxAttempts) {
+      console.error('window.ENV was not available after 5 seconds')
+      clearInterval(checkEnv)
+    }
+  }, 100)
+}
 
 // Helper function to get redirect URL after login
 function getRedirectUrl() {
@@ -375,12 +425,25 @@ function createNotification({ message, success = true, warning = false }) {
   wrapper.querySelector('button').addEventListener('click', () => wrapper.remove())
 }
 
-// 3. Request OTP
-document
-  .getElementById('otp-request-form')
-  .addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
+// Wait for DOM to be ready before setting up event listeners
+function setupEventListeners() {
+  // 3. Request OTP
+  document
+    .getElementById('otp-request-form')
+    ?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Check if Supabase is initialized
+      if (!supabase) {
+        createNotification({ message: 'System is initializing. Please wait a moment and try again.', success: false });
+        // Try to initialize again
+        supabase = initSupabase();
+        if (!supabase) {
+          return;
+        }
+      }
+      
+      const email = document.getElementById('email').value.trim();
     const domain = email.split('@')[1]?.toLowerCase();
     console.log('Checking domain:', domain);
 
@@ -539,13 +602,22 @@ document
     }
   });
 
-// (Reveal helper removed; password tab is visible by default)
-
-// 4. Verify OTP
-document
-  .getElementById('otp-verify-form')
-  .addEventListener('submit', async (e) => {
+  // 4. Verify OTP
+  document
+    .getElementById('otp-verify-form')
+    ?.addEventListener('submit', async (e) => {
     e.preventDefault()
+    
+    // Check if Supabase is initialized
+    if (!supabase) {
+      createNotification({ message: 'System is initializing. Please wait a moment and try again.', success: false });
+      // Try to initialize again
+      supabase = initSupabase();
+      if (!supabase) {
+        return;
+      }
+    }
+    
     const email = document.getElementById('email').value.trim()
     const code  = document.getElementById('code').value.trim()
 
@@ -686,19 +758,19 @@ document
 
       createNotification({ message: friendlyMessage, success: false })
     }
-  })
+  });
 
-// 5. Admin/Moderator Password Login
-// Prevent any form submission (safety net)
-document.getElementById('password-form')?.addEventListener('submit', (e) => {
-  e.preventDefault()
-  e.stopPropagation()
-  e.stopImmediatePropagation()
-  return false
-}, true) // Use capture phase
+  // 5. Admin/Moderator Password Login
+  // Prevent any form submission (safety net)
+  document.getElementById('password-form')?.addEventListener('submit', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.stopImmediatePropagation()
+    return false
+  }, true) // Use capture phase
 
-// Handle button click - button is type="button" so no form submission happens automatically
-document.getElementById('password-submit-btn')?.addEventListener('click', async (e) => {
+  // Handle button click - button is type="button" so no form submission happens automatically
+  document.getElementById('password-submit-btn')?.addEventListener('click', async (e) => {
   e.preventDefault()
   e.stopPropagation()
   
@@ -893,4 +965,13 @@ document.getElementById('password-submit-btn')?.addEventListener('click', async 
     const pwdEl = document.getElementById('password');
     if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
   }
-})
+  });
+}
+
+// Set up event listeners when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupEventListeners);
+} else {
+  // DOM is already ready
+  setupEventListeners();
+}
