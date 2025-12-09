@@ -62,12 +62,38 @@ async function initSupabase() {
       }
       
       try {
-        const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-        createClient = module.createClient;
-        console.log('✅ Supabase library loaded successfully');
+        // Load the browser UMD bundle instead of ESM (avoids Node.js-specific issues)
+        console.log('Loading Supabase browser bundle...');
+        
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.js';
+          script.async = true;
+          
+          script.onload = () => {
+            // UMD bundle adds to window.supabase
+            if (window.supabase && window.supabase.createClient) {
+              createClient = window.supabase.createClient;
+              console.log('✅ Supabase UMD library loaded successfully');
+              resolve(null); // Return null to continue in the function
+            } else {
+              console.error('❌ Supabase loaded but createClient not found');
+              reject(new Error('createClient not found'));
+            }
+          };
+          
+          script.onerror = (error) => {
+            console.error('❌ Failed to load Supabase script:', error);
+            reject(error);
+          };
+          
+          document.head.appendChild(script);
+        }).catch(scriptError => {
+          console.error('Script loading failed:', scriptError);
+          return null;
+        });
       } catch (importError) {
-        console.error('❌ Failed to import Supabase library:', importError);
-        console.error('Import error details:', importError.message);
+        console.error('❌ Error in Supabase loading process:', importError);
         return null;
       }
       

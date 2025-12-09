@@ -258,6 +258,28 @@ id="notification-list"
 ></div>
 </div>
 
+<!-- Version update notification -->
+<div
+id="version-update-banner"
+class="hidden fixed top-0 left-0 right-0 bg-[#FF9900] text-black py-3 px-4 shadow-lg z-50"
+style="display: none;"
+>
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
+<span class="font-semibold">A new version is available!</span>
+</div>
+<button
+onclick="location.reload(true)"
+class="bg-black text-[#FF9900] px-4 py-2 rounded-lg font-semibold hover:bg-gray-900 transition-colors"
+>
+Refresh Now
+</button>
+</div>
+</div>
+
 <!-- Start cookieyes banner --> <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/bcf616ad15c9632332d8f07f/script.js"></script> <!-- End cookieyes banner -->
 
 <!-- Inject environment variables placeholder - Netlify will replace these at build time -->
@@ -266,9 +288,19 @@ id="notification-list"
   window.ENV = window.ENV || {};
   
   // Fetch environment variables before loading login module
+  // Clear any problematic service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister();
+        console.log('🧹 Service worker unregistered');
+      }
+    });
+  }
+  
   (async function() {
     try {
-      const response = await fetch('/.netlify/functions/getEnv');
+      const response = await fetch('/.netlify/functions/getEnv?t=' + Date.now());
       if (response.ok) {
         const data = await response.json();
         window.ENV = data;
@@ -282,6 +314,58 @@ id="notification-list"
     
     // Always dispatch event even if fetch failed
     window.dispatchEvent(new Event('envReady'));
+  })();
+</script>
+
+<!-- Version checker -->
+<script>
+  (function() {
+    const CURRENT_VERSION = '0.12.50';
+    const VERSION_CHECK_INTERVAL = 60000; // Check every 60 seconds
+    
+    // Store current version on first load
+    const storedVersion = localStorage.getItem('app-version');
+    if (!storedVersion) {
+      localStorage.setItem('app-version', CURRENT_VERSION);
+    }
+    
+    async function checkVersion() {
+      try {
+        const response = await fetch('/version.txt?t=' + Date.now());
+        if (response.ok) {
+          const latestVersion = (await response.text()).trim();
+          const currentVersion = localStorage.getItem('app-version') || CURRENT_VERSION;
+          
+          if (latestVersion !== currentVersion && latestVersion !== CURRENT_VERSION) {
+            console.log('🆕 New version available:', latestVersion, '(current:', currentVersion + ')');
+            showUpdateBanner();
+          }
+        }
+      } catch (error) {
+        console.debug('Version check failed:', error);
+      }
+    }
+    
+    function showUpdateBanner() {
+      const banner = document.getElementById('version-update-banner');
+      if (banner) {
+        banner.style.display = 'block';
+        banner.classList.remove('hidden');
+      }
+    }
+    
+    // Check version periodically
+    setInterval(checkVersion, VERSION_CHECK_INTERVAL);
+    
+    // Check on visibility change (when user returns to tab)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        checkVersion();
+      }
+    });
+    
+    // Initial check after 5 seconds
+    setTimeout(checkVersion, 5000);
   })();
 </script>
 
