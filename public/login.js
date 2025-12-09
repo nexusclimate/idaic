@@ -689,37 +689,28 @@ document
   })
 
 // 5. Admin/Moderator Password Login
-// Handle button click to ensure tab stays active before form submission
-document.getElementById('password-submit-btn')?.addEventListener('click', (e) => {
-  // Ensure password tab stays active immediately - do this synchronously before any other handlers
-  if (window.switchTab) {
-    window.switchTab('password')
-  }
-  
-  // Force focus to stay on password field
-  const pwdEl = document.getElementById('password')
-  if (pwdEl) {
-    // Use requestAnimationFrame to ensure focus happens after any browser autofill
-    requestAnimationFrame(() => {
-      pwdEl.focus()
-    })
-  }
-}, true) // Use capture phase to catch it early
+// Prevent any form submission (safety net)
+document.getElementById('password-form')?.addEventListener('submit', (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  e.stopImmediatePropagation()
+  return false
+}, true) // Use capture phase
 
-// Handle form submit
-document.getElementById('password-form')?.addEventListener('submit', async (e) => {
+// Handle button click - button is type="button" so no form submission happens automatically
+document.getElementById('password-submit-btn')?.addEventListener('click', async (e) => {
   e.preventDefault()
   e.stopPropagation()
   
-  // Ensure password tab stays active - do this immediately
+  // Ensure password tab stays active immediately - do this synchronously
   if (window.switchTab) {
     window.switchTab('password')
   }
   
-  const emailEl = document.getElementById('password-email')
+  // Force focus to stay on password field immediately
   const pwdEl = document.getElementById('password')
+  const emailEl = document.getElementById('password-email')
   
-  // Keep focus on password field
   if (pwdEl) {
     pwdEl.focus()
   }
@@ -733,9 +724,7 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
     // Keep focus on password field and ensure tab is active
     if (window.switchTab) window.switchTab('password')
     if (pwdEl) {
-      requestAnimationFrame(() => {
-        pwdEl.focus()
-      })
+      pwdEl.focus()
     }
     return
   }
