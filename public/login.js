@@ -51,20 +51,64 @@ async function initSupabase() {
     
     // Lazy load the Supabase library only when we have valid credentials
     if (!createClient) {
-      console.log('📦 Loading Supabase library...');
-      const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-      createClient = module.createClient;
-      console.log('✅ Supabase library loaded');
+      console.log('📦 About to load Supabase library...');
+      console.log('Pre-import check - URL:', SUPABASE_URL ? 'valid' : 'INVALID');
+      console.log('Pre-import check - Key:', SUPABASE_ANON_KEY ? 'valid' : 'INVALID');
+      
+      // One more safety check before import
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        console.error('❌ Cannot import Supabase - credentials not ready');
+        return null;
+      }
+      
+      try {
+        const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        createClient = module.createClient;
+        console.log('✅ Supabase library loaded successfully');
+      } catch (importError) {
+        console.error('❌ Failed to import Supabase library:', importError);
+        console.error('Import error details:', importError.message);
+        return null;
+      }
+      
+      // Verify createClient is actually a function
+      if (typeof createClient !== 'function') {
+        console.error('❌ createClient is not a function:', typeof createClient);
+        return null;
+      }
     }
     
-    console.log('🔧 Creating Supabase client...');
-    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Final validation right before calling createClient
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.error('❌ Credentials became null before createClient call');
+      console.error('URL:', SUPABASE_URL);
+      console.error('Key:', SUPABASE_ANON_KEY ? 'exists' : 'NULL');
+      return null;
+    }
+    
+    console.log('🔧 Creating Supabase client with:', {
+      urlStart: SUPABASE_URL.substring(0, 20) + '...',
+      keyStart: SUPABASE_ANON_KEY.substring(0, 20) + '...'
+    });
+    
+    // Call createClient with explicit, validated parameters
+    supabase = createClient(String(SUPABASE_URL), String(SUPABASE_ANON_KEY));
+    
+    // Verify the client was created
+    if (!supabase || typeof supabase !== 'object') {
+      console.error('❌ Supabase client creation returned invalid object');
+      return null;
+    }
+    
     supabaseInitialized = true;
     console.log('✅ Supabase client created successfully');
     return supabase;
   } catch (error) {
     console.error('❌ Error creating Supabase client:', error);
+    console.error('Error message:', error.message);
     console.error('Stack:', error.stack);
+    console.error('URL at error time:', SUPABASE_URL);
+    console.error('Key at error time:', SUPABASE_ANON_KEY ? 'exists' : 'NULL');
     return null;
   }
 }
@@ -72,19 +116,37 @@ async function initSupabase() {
 // Wait for ENV to be ready before initializing
 window.addEventListener('envReady', () => {
   console.log('📡 envReady event received');
-  console.log('🔍 Current ENV state:', window.ENV);
+  
+  // Log ENV state with more detail
+  if (window.ENV) {
+    console.log('🔍 ENV object exists');
+    console.log('  - SUPABASE_URL:', window.ENV.SUPABASE_URL ? `${window.ENV.SUPABASE_URL.substring(0, 30)}...` : 'MISSING');
+    console.log('  - SUPABASE_ANON_KEY:', window.ENV.SUPABASE_ANON_KEY ? `${window.ENV.SUPABASE_ANON_KEY.substring(0, 20)}...` : 'MISSING');
+  } else {
+    console.error('❌ ENV object does not exist!');
+  }
   
   if (!supabaseInitialized) {
-    // Wait a bit to ensure ENV is fully set
+    // Wait longer to ensure ENV is fully set
     setTimeout(async () => {
-      // Double check ENV has valid values before proceeding
-      if (window.ENV && window.ENV.SUPABASE_URL && window.ENV.SUPABASE_URL.length > 0) {
+      // Triple check ENV has valid values before proceeding
+      if (window.ENV && 
+          window.ENV.SUPABASE_URL && 
+          window.ENV.SUPABASE_ANON_KEY &&
+          window.ENV.SUPABASE_URL.length > 0 && 
+          window.ENV.SUPABASE_ANON_KEY.length > 0) {
+        console.log('✅ ENV validated, initializing Supabase...');
         await initSupabase();
       } else {
         console.warn('⚠️ ENV ready but values not valid, skipping Supabase init');
-        console.warn('ENV:', window.ENV);
+        if (!window.ENV) {
+          console.error('  - ENV is null/undefined');
+        } else {
+          console.warn('  - SUPABASE_URL valid:', !!(window.ENV.SUPABASE_URL && window.ENV.SUPABASE_URL.length > 0));
+          console.warn('  - SUPABASE_ANON_KEY valid:', !!(window.ENV.SUPABASE_ANON_KEY && window.ENV.SUPABASE_ANON_KEY.length > 0));
+        }
       }
-    }, 200); // Increased to 200ms
+    }, 300); // Increased to 300ms to ensure ENV is fully populated
   }
 }, { once: true });
 
@@ -457,9 +519,9 @@ function createNotification({ message, success = true, warning = false }) {
 
 // Set up event listeners when DOM is ready
 function setupListeners() {
-  // 3. Request OTP
-  document
-    .getElementById('otp-request-form')
+// 3. Request OTP
+document
+  .getElementById('otp-request-form')
     ?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -631,9 +693,9 @@ function setupListeners() {
     }
   });
 
-  // 4. Verify OTP
-  document
-    .getElementById('otp-verify-form')
+// 4. Verify OTP
+document
+  .getElementById('otp-verify-form')
     ?.addEventListener('submit', async (e) => {
     e.preventDefault()
     
@@ -788,10 +850,10 @@ function setupListeners() {
     }
   })
 
-  // 5. Admin/Moderator Password Login
+// 5. Admin/Moderator Password Login
   // Prevent any form submission (safety net)
   document.getElementById('password-form')?.addEventListener('submit', (e) => {
-    e.preventDefault()
+  e.preventDefault()
     e.stopPropagation()
     e.stopImmediatePropagation()
     return false
@@ -813,15 +875,15 @@ function setupListeners() {
       }
       
       // Force focus to stay on password field immediately
-      const pwdEl = document.getElementById('password')
+  const pwdEl = document.getElementById('password')
       const emailEl = document.getElementById('password-email')
       
       if (pwdEl) {
         pwdEl.focus()
       }
       
-      const email = emailEl ? emailEl.value.trim() : ''
-      const password = pwdEl ? pwdEl.value.trim() : ''
+  const email = emailEl ? emailEl.value.trim() : ''
+  const password = pwdEl ? pwdEl.value.trim() : ''
       
       console.log('📧 Email:', email ? 'provided' : 'empty');
       console.log('🔑 Password:', password ? 'provided' : 'empty');
