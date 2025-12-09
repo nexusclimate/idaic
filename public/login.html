@@ -33,22 +33,34 @@ rel="stylesheet"
       if (otpContent) otpContent.classList.remove('hidden');
       if (passwordContent) passwordContent.classList.add('hidden');
 
-      // Make password form fields non-focusable
+      // Make password form fields non-focusable and disabled
       const pwdEl = document.getElementById('password');
       const pwdEmailEl = document.getElementById('password-email');
       if (pwdEl) {
         pwdEl.value = '';
         pwdEl.setAttribute('tabindex', '-1');
+        pwdEl.setAttribute('disabled', 'true');
+        pwdEl.removeAttribute('required');
       }
       if (pwdEmailEl) {
         pwdEmailEl.setAttribute('tabindex', '-1');
+        pwdEmailEl.setAttribute('disabled', 'true');
+        pwdEmailEl.removeAttribute('required');
       }
 
-      // Make OTP form fields focusable
+      // Make OTP form fields focusable and enabled
       const emailEl = document.getElementById('email');
       const codeEl = document.getElementById('code');
-      if (emailEl) emailEl.removeAttribute('tabindex');
-      if (codeEl) codeEl.removeAttribute('tabindex');
+      if (emailEl) {
+        emailEl.removeAttribute('tabindex');
+        emailEl.removeAttribute('disabled');
+        emailEl.setAttribute('required', 'true');
+      }
+      if (codeEl) {
+        codeEl.removeAttribute('tabindex');
+        codeEl.removeAttribute('disabled');
+        codeEl.setAttribute('required', 'true');
+      }
     } else if (tab === 'password') {
       // Activate password tab
       if (passwordTab) {
@@ -64,23 +76,35 @@ rel="stylesheet"
       if (passwordContent) passwordContent.classList.remove('hidden');
       if (otpContent) otpContent.classList.add('hidden');
 
-      // Make OTP form fields non-focusable
+      // Make OTP form fields non-focusable and disabled
       const emailEl = document.getElementById('email');
       const codeEl = document.getElementById('code');
       if (emailEl) {
         emailEl.value = '';
         emailEl.setAttribute('tabindex', '-1');
+        emailEl.setAttribute('disabled', 'true');
+        emailEl.removeAttribute('required');
       }
       if (codeEl) {
         codeEl.value = '';
         codeEl.setAttribute('tabindex', '-1');
+        codeEl.setAttribute('disabled', 'true');
+        codeEl.removeAttribute('required');
       }
 
-      // Make password form fields focusable
+      // Make password form fields focusable and enabled
       const pwdEl = document.getElementById('password');
       const pwdEmailEl = document.getElementById('password-email');
-      if (pwdEl) pwdEl.removeAttribute('tabindex');
-      if (pwdEmailEl) pwdEmailEl.removeAttribute('tabindex');
+      if (pwdEl) {
+        pwdEl.removeAttribute('tabindex');
+        pwdEl.removeAttribute('disabled');
+        pwdEl.setAttribute('required', 'true');
+      }
+      if (pwdEmailEl) {
+        pwdEmailEl.removeAttribute('tabindex');
+        pwdEmailEl.removeAttribute('disabled');
+        pwdEmailEl.setAttribute('required', 'true');
+      }
 
       // Reset OTP forms
       const req = document.getElementById('otp-request-form');
@@ -92,11 +116,19 @@ rel="stylesheet"
 
   // Initialize tabindex on page load
   window.addEventListener('DOMContentLoaded', () => {
-    // OTP tab is active by default, so password fields should be non-focusable
+    // OTP tab is active by default, so password fields should be non-focusable and disabled
     const pwdEl = document.getElementById('password');
     const pwdEmailEl = document.getElementById('password-email');
-    if (pwdEl) pwdEl.setAttribute('tabindex', '-1');
-    if (pwdEmailEl) pwdEmailEl.setAttribute('tabindex', '-1');
+    if (pwdEl) {
+      pwdEl.setAttribute('tabindex', '-1');
+      pwdEl.setAttribute('disabled', 'true');
+      pwdEl.removeAttribute('required');
+    }
+    if (pwdEmailEl) {
+      pwdEmailEl.setAttribute('tabindex', '-1');
+      pwdEmailEl.setAttribute('disabled', 'true');
+      pwdEmailEl.removeAttribute('required');
+    }
   });
 </script>
 </head>
@@ -149,6 +181,7 @@ Password
 id="email"
 type="email"
 required
+autocomplete="email"
 class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
 placeholder="you@example.com"
 />
@@ -170,6 +203,7 @@ id="code"
 type="text"
 maxlength="6"
 required
+autocomplete="one-time-code"
 class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
 placeholder="123456"
 />
@@ -185,13 +219,14 @@ Verify &amp; Sign in
 
 <!-- Password Login Tab Content -->
 <div id="password-content" class="space-y-5 hidden">
-<form id="password-form" class="space-y-5">
+<form id="password-form" class="space-y-5" novalidate>
 <div>
 <label for="password-email" class="block mb-1">Email</label>
 <input
 id="password-email"
 type="email"
 required
+autocomplete="email"
 class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
 placeholder="admin@idaic.org"
 />
@@ -202,12 +237,14 @@ placeholder="admin@idaic.org"
 id="password"
 type="password"
 required
+autocomplete="current-password"
 class="w-full px-4 py-2 rounded-lg bg-[#2b2b2b] border border-[#DCDCDC] text-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#FF9900]"
 placeholder="Enter password"
 />
 </div>
 <button
 type="submit"
+id="password-submit-btn"
 class="w-full py-2 bg-[#FF9900] hover:bg-orange-600 text-black rounded-lg font-semibold"
 >
 Sign in (Admin/Moderator)

@@ -689,25 +689,53 @@ document
   })
 
 // 5. Admin/Moderator Password Login
+// Handle button click to ensure tab stays active before form submission
+document.getElementById('password-submit-btn')?.addEventListener('click', (e) => {
+  // Ensure password tab stays active immediately - do this synchronously before any other handlers
+  if (window.switchTab) {
+    window.switchTab('password')
+  }
+  
+  // Force focus to stay on password field
+  const pwdEl = document.getElementById('password')
+  if (pwdEl) {
+    // Use requestAnimationFrame to ensure focus happens after any browser autofill
+    requestAnimationFrame(() => {
+      pwdEl.focus()
+    })
+  }
+}, true) // Use capture phase to catch it early
+
+// Handle form submit
 document.getElementById('password-form')?.addEventListener('submit', async (e) => {
   e.preventDefault()
+  e.stopPropagation()
   
-  // Ensure password tab stays active
+  // Ensure password tab stays active - do this immediately
   if (window.switchTab) {
     window.switchTab('password')
   }
   
   const emailEl = document.getElementById('password-email')
   const pwdEl = document.getElementById('password')
+  
+  // Keep focus on password field
+  if (pwdEl) {
+    pwdEl.focus()
+  }
+  
   const email = emailEl ? emailEl.value.trim() : ''
   const password = pwdEl ? pwdEl.value.trim() : ''
 
   // Basic validation
   if (!email || !password) {
     createNotification({ message: 'Please enter both email and password.', success: false })
-    // Keep focus on password field
+    // Keep focus on password field and ensure tab is active
+    if (window.switchTab) window.switchTab('password')
     if (pwdEl) {
-      setTimeout(() => pwdEl.focus(), 100)
+      requestAnimationFrame(() => {
+        pwdEl.focus()
+      })
     }
     return
   }
