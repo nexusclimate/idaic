@@ -6,26 +6,47 @@ let SUPABASE_URL, SUPABASE_ANON_KEY, N8N_URL, N8N_AUTH, supabase
 
 // Initialize Supabase when ENV is ready
 function initSupabase() {
-  if (window.ENV && window.ENV.SUPABASE_URL && window.ENV.SUPABASE_ANON_KEY) {
-    try {
-      SUPABASE_URL = window.ENV.SUPABASE_URL
-      SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
-      N8N_URL = window.ENV.N8N_URL
-      N8N_AUTH = window.ENV.N8N_AUTH
-      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      return supabase
-    } catch (error) {
-      console.error('Error initializing Supabase:', error)
-      return null
-    }
+  // Ensure window.ENV exists and has required values before calling createClient
+  if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
+    console.warn('Cannot initialize Supabase: ENV not ready or missing values');
+    return null;
   }
-  return null
+  
+  try {
+    SUPABASE_URL = window.ENV.SUPABASE_URL
+    SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
+    N8N_URL = window.ENV.N8N_URL
+    N8N_AUTH = window.ENV.N8N_AUTH
+    
+    // IMPORTANT: Only call createClient if we have valid, non-empty strings
+    if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '') {
+      console.log('Initializing Supabase client...');
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      console.log('Supabase client initialized');
+      return supabase
+    } else {
+      console.error('Supabase URL or ANON_KEY is empty');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error initializing Supabase:', error)
+    return null
+  }
 }
 
-// Wait for envReady event
-window.addEventListener('envReady', () => {
+// Try to initialize immediately if ENV is already available
+if (window.ENV && window.ENV.SUPABASE_URL) {
   supabase = initSupabase()
-}, { once: true })
+}
+
+// Also listen for envReady event as backup
+if (!supabase) {
+  window.addEventListener('envReady', () => {
+    if (!supabase) {
+      supabase = initSupabase()
+    }
+  }, { once: true })
+}
 
 // Helper function to get redirect URL after login
 function getRedirectUrl() {
