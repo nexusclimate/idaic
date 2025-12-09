@@ -8,36 +8,54 @@ let supabaseInitialized = false;
 async function initSupabase() {
   // Skip if already initialized
   if (supabaseInitialized) {
+    console.log('✅ Supabase already initialized');
     return supabase;
   }
   
   // Wait for ENV to be available
-  if (!window.ENV) {
-    console.warn('⏳ ENV not yet available, waiting...');
+  if (!window.ENV || typeof window.ENV !== 'object') {
+    console.warn('⏳ ENV not yet available or invalid type');
     return null;
   }
   
   const url = window.ENV.SUPABASE_URL;
   const key = window.ENV.SUPABASE_ANON_KEY;
   
+  console.log('🔍 Checking ENV values:', { 
+    hasUrl: !!url, 
+    hasKey: !!key,
+    urlLength: url ? url.length : 0,
+    keyLength: key ? key.length : 0
+  });
+  
   // Validate we have actual values (not undefined, null, or empty strings)
   if (!url || !key || url === '' || key === '' || url === 'undefined' || key === 'undefined') {
-    console.error('❌ Supabase credentials are missing or invalid:', { url: !!url, key: !!key });
+    console.error('❌ Supabase credentials are missing or invalid');
+    console.error('URL:', url);
+    console.error('Key:', key ? 'exists but invalid' : 'missing');
+    return null;
+  }
+  
+  // Additional validation - must be actual URLs/keys
+  if (!url.startsWith('http') || key.length < 20) {
+    console.error('❌ Supabase credentials format is invalid');
     return null;
   }
   
   try {
+    // Set values first
+    SUPABASE_URL = url;
+    SUPABASE_ANON_KEY = key;
+    N8N_URL = window.ENV.N8N_URL;
+    N8N_AUTH = window.ENV.N8N_AUTH;
+    
     // Lazy load the Supabase library only when we have valid credentials
     if (!createClient) {
       console.log('📦 Loading Supabase library...');
       const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
       createClient = module.createClient;
+      console.log('✅ Supabase library loaded');
     }
-    
-    SUPABASE_URL = url;
-    SUPABASE_ANON_KEY = key;
-    N8N_URL = window.ENV.N8N_URL;
-    N8N_AUTH = window.ENV.N8N_AUTH;
     
     console.log('🔧 Creating Supabase client...');
     supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -46,6 +64,7 @@ async function initSupabase() {
     return supabase;
   } catch (error) {
     console.error('❌ Error creating Supabase client:', error);
+    console.error('Stack:', error.stack);
     return null;
   }
 }
@@ -53,11 +72,19 @@ async function initSupabase() {
 // Wait for ENV to be ready before initializing
 window.addEventListener('envReady', () => {
   console.log('📡 envReady event received');
+  console.log('🔍 Current ENV state:', window.ENV);
+  
   if (!supabaseInitialized) {
     // Wait a bit to ensure ENV is fully set
-    setTimeout(() => {
-      initSupabase();
-    }, 100);
+    setTimeout(async () => {
+      // Double check ENV has valid values before proceeding
+      if (window.ENV && window.ENV.SUPABASE_URL && window.ENV.SUPABASE_URL.length > 0) {
+        await initSupabase();
+      } else {
+        console.warn('⚠️ ENV ready but values not valid, skipping Supabase init');
+        console.warn('ENV:', window.ENV);
+      }
+    }, 200); // Increased to 200ms
   }
 }, { once: true });
 
