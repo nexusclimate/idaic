@@ -1,52 +1,59 @@
 // login.js
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 1. Read the injected env - wait for it to be available
+// 1. Variables for Supabase - don't initialize until ENV is confirmed ready
 let SUPABASE_URL, SUPABASE_ANON_KEY, N8N_URL, N8N_AUTH, supabase
+let supabaseInitialized = false
 
-// Initialize Supabase when ENV is ready
+// Initialize Supabase - ONLY called when we're sure ENV is ready
 function initSupabase() {
-  // Ensure window.ENV exists and has required values before calling createClient
-  if (!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY) {
-    console.warn('Cannot initialize Supabase: ENV not ready or missing values');
+  // Skip if already initialized
+  if (supabaseInitialized) {
+    return supabase;
+  }
+  
+  // Wait for ENV to be available
+  if (!window.ENV) {
+    console.warn('⏳ ENV not yet available, waiting...');
+    return null;
+  }
+  
+  const url = window.ENV.SUPABASE_URL;
+  const key = window.ENV.SUPABASE_ANON_KEY;
+  
+  // Validate we have actual values (not undefined, null, or empty strings)
+  if (!url || !key || url === '' || key === '' || url === 'undefined' || key === 'undefined') {
+    console.error('❌ Supabase credentials are missing or invalid:', { url: !!url, key: !!key });
     return null;
   }
   
   try {
-    SUPABASE_URL = window.ENV.SUPABASE_URL
-    SUPABASE_ANON_KEY = window.ENV.SUPABASE_ANON_KEY
-    N8N_URL = window.ENV.N8N_URL
-    N8N_AUTH = window.ENV.N8N_AUTH
+    SUPABASE_URL = url;
+    SUPABASE_ANON_KEY = key;
+    N8N_URL = window.ENV.N8N_URL;
+    N8N_AUTH = window.ENV.N8N_AUTH;
     
-    // IMPORTANT: Only call createClient if we have valid, non-empty strings
-    if (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '') {
-      console.log('Initializing Supabase client...');
-      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      console.log('Supabase client initialized');
-      return supabase
-    } else {
-      console.error('Supabase URL or ANON_KEY is empty');
-      return null;
-    }
+    console.log('🔧 Creating Supabase client...');
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseInitialized = true;
+    console.log('✅ Supabase client created successfully');
+    return supabase;
   } catch (error) {
-    console.error('Error initializing Supabase:', error)
-    return null
+    console.error('❌ Error creating Supabase client:', error);
+    return null;
   }
 }
 
-// Try to initialize immediately if ENV is already available
-if (window.ENV && window.ENV.SUPABASE_URL) {
-  supabase = initSupabase()
-}
-
-// Also listen for envReady event as backup
-if (!supabase) {
-  window.addEventListener('envReady', () => {
-    if (!supabase) {
-      supabase = initSupabase()
-    }
-  }, { once: true })
-}
+// Wait for ENV to be ready before initializing
+window.addEventListener('envReady', () => {
+  console.log('📡 envReady event received');
+  if (!supabaseInitialized) {
+    // Wait a bit to ensure ENV is fully set
+    setTimeout(() => {
+      initSupabase();
+    }, 100);
+  }
+}, { once: true });
 
 // Helper function to get redirect URL after login
 function getRedirectUrl() {
