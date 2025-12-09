@@ -691,6 +691,12 @@ document
 // 5. Admin/Moderator Password Login
 document.getElementById('password-form')?.addEventListener('submit', async (e) => {
   e.preventDefault()
+  
+  // Ensure password tab stays active
+  if (window.switchTab) {
+    window.switchTab('password')
+  }
+  
   const emailEl = document.getElementById('password-email')
   const pwdEl = document.getElementById('password')
   const email = emailEl ? emailEl.value.trim() : ''
@@ -699,6 +705,10 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
   // Basic validation
   if (!email || !password) {
     createNotification({ message: 'Please enter both email and password.', success: false })
+    // Keep focus on password field
+    if (pwdEl) {
+      setTimeout(() => pwdEl.focus(), 100)
+    }
     return
   }
 
@@ -714,6 +724,8 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
       const errorData = await userCheckResponse.json().catch(() => ({}));
       console.error('Error checking user:', userCheckResponse.statusText, errorData);
       createNotification({ message: 'Error checking user. Please try again.', success: false });
+      if (window.switchTab) window.switchTab('password');
+      if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
       return;
     }
 
@@ -722,6 +734,8 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
 
     if (!userRow) {
       createNotification({ message: 'User not authorized. Please contact IDAIC admin.', success: false });
+      if (window.switchTab) window.switchTab('password');
+      if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
       return;
     }
 
@@ -733,6 +747,8 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
         success: false, 
         warning: true 
       });
+      if (window.switchTab) window.switchTab('password');
+      if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
       return;
     }
 
@@ -741,17 +757,26 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
         message: 'Access to your account has been declined. Please contact the IDAIC team if you believe this is an error.', 
         success: false 
       });
+      if (window.switchTab) window.switchTab('password');
+      if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
       return;
     }
 
     if (userRole !== 'admin' && userRole !== 'moderator') {
       createNotification({ message: 'Admin or Moderator access required. Please use Email Code instead.', success: false })
+      if (window.switchTab) window.switchTab('password');
+      if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
       return
     }
 
     // Simple shared secret password check
     if (password !== 'IDAIC2025!') {
       createNotification({ message: 'Invalid password. Please try again.', success: false })
+      if (window.switchTab) window.switchTab('password');
+      if (pwdEl) {
+        pwdEl.value = '';
+        setTimeout(() => pwdEl.focus(), 100);
+      }
       return
     }
 
@@ -846,5 +871,9 @@ document.getElementById('password-form')?.addEventListener('submit', async (e) =
   } catch (err) {
     console.error('Password login error:', err)
     createNotification({ message: `Login failed: ${err.message || 'Please try again.'}`, success: false })
+    // Ensure password tab stays active on error
+    if (window.switchTab) window.switchTab('password');
+    const pwdEl = document.getElementById('password');
+    if (pwdEl) setTimeout(() => pwdEl.focus(), 100);
   }
 })
