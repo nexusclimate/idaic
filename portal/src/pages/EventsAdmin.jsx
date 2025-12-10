@@ -100,7 +100,9 @@ export default function EventsAdmin() {
     if (!datetimeLocal) return null;
     // datetime-local gives us "YYYY-MM-DDTHH:mm" in local time
     // We create a Date object which interprets it as local time, then convert to ISO (UTC)
-    return new Date(datetimeLocal).toISOString();
+    const isoString = new Date(datetimeLocal).toISOString();
+    console.log('🕐 Converting datetime-local to ISO:', { input: datetimeLocal, output: isoString });
+    return isoString;
   };
 
   const handleCreateEvent = async (eventData) => {
@@ -1063,12 +1065,16 @@ function EventFormModal({ event, onSave, onClose }) {
   const toLocalDateTimeString = (utcDateString) => {
     if (!utcDateString) return '';
     const date = new Date(utcDateString);
-    // Get local timezone offset
-    const offset = date.getTimezoneOffset();
-    // Adjust for local timezone
-    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-    // Format as datetime-local (YYYY-MM-DDTHH:mm)
-    return localDate.toISOString().slice(0, 16);
+    // Use local time methods to get the components in user's timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    // Return in datetime-local format (YYYY-MM-DDTHH:mm)
+    const result = `${year}-${month}-${day}T${hours}:${minutes}`;
+    console.log('🕐 Converting UTC to datetime-local:', { input: utcDateString, output: result, userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+    return result;
   };
   
   const [formData, setFormData] = useState({
