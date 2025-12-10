@@ -1129,6 +1129,18 @@ function EventFormModal({ event, onSave, onClose }) {
   const [lastSaved, setLastSaved] = useState(null);
   const autoSaveTimeoutRef = useRef(null);
 
+  // Debug: Log when event prop changes
+  useEffect(() => {
+    if (event) {
+      console.log('📅 Event loaded:', {
+        id: event.id,
+        title: event.title,
+        raw_event_date: event.event_date,
+        converted_event_date: event.event_date ? toLocalDateTimeString(event.event_date) : 'N/A'
+      });
+    }
+  }, [event]);
+
   // Helper function to round time to :00 or :30
   const roundTimeToHalfHour = (timeString) => {
     if (!timeString) return '';
@@ -1578,8 +1590,13 @@ function EventFormModal({ event, onSave, onClose }) {
               value={formData.event_date}
               onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
               required={!formData.create_poll}
+              step="60"
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Enter time in your local timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). 
+              Viewers will see it in their local time.
+            </p>
             {formData.create_poll && (
               <p className="text-xs text-gray-500 mt-1">Optional when creating a poll - can be set later</p>
             )}
