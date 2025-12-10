@@ -1064,6 +1064,17 @@ function EventFormModal({ event, onSave, onClose }) {
   // Helper to convert UTC datetime to local datetime-local format
   const toLocalDateTimeString = (utcDateString) => {
     if (!utcDateString) return '';
+    
+    // Handle date-only strings (YYYY-MM-DD) by treating them as local dates, not UTC
+    const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
+    if (dateOnlyPattern.test(utcDateString)) {
+      // Date-only string - add default time of noon to avoid timezone issues
+      const result = `${utcDateString}T12:00`;
+      console.log('🕐 Converting date-only to datetime-local:', { input: utcDateString, output: result, note: 'Set to 12:00 noon' });
+      return result;
+    }
+    
+    // Full datetime string - parse and convert to local timezone
     const date = new Date(utcDateString);
     // Use local time methods to get the components in user's timezone
     const year = date.getFullYear();
@@ -1075,6 +1086,16 @@ function EventFormModal({ event, onSave, onClose }) {
     const result = `${year}-${month}-${day}T${hours}:${minutes}`;
     console.log('🕐 Converting UTC to datetime-local:', { input: utcDateString, output: result, userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
     return result;
+  };
+
+  // Helper to convert datetime-local string to ISO string
+  const datetimeLocalToISO = (datetimeLocal) => {
+    if (!datetimeLocal) return null;
+    // datetime-local gives us "YYYY-MM-DDTHH:mm" in local time
+    // We create a Date object which interprets it as local time, then convert to ISO (UTC)
+    const isoString = new Date(datetimeLocal).toISOString();
+    console.log('🕐 Converting datetime-local to ISO:', { input: datetimeLocal, output: isoString });
+    return isoString;
   };
   
   const [formData, setFormData] = useState({
