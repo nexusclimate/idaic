@@ -356,32 +356,41 @@
         // Store poll data globally for form submission
         pollData = poll;
 
-        // Helper function to format date with GST timezone
-        function formatDateWithGST(date) {
+        // Helper function to format date in user's local timezone
+        function formatDateInLocalTime(date) {
           const options = {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Asia/Dubai'
+            minute: '2-digit'
+            // No timeZone specified = uses user's local timezone
           };
           const formatted = date.toLocaleDateString('en-GB', options);
-          // Replace timezone abbreviation with GST
-          return formatted.replace(/\sGMT\+4|\sGST/, '') + ' GST';
+          
+          // Get timezone abbreviation
+          const timeZoneName = new Intl.DateTimeFormat('en-GB', { timeZoneName: 'short' }).format(date);
+          const tzAbbr = timeZoneName.split(' ').pop();
+          
+          return formatted + ' ' + tzAbbr;
         }
         
-        function formatEventDateWithGST(date) {
+        function formatEventDateInLocalTime(date) {
           const options = {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
-            year: 'numeric',
-            timeZone: 'Asia/Dubai'
+            year: 'numeric'
+            // No timeZone specified = uses user's local timezone
           };
           const formatted = date.toLocaleDateString('en-GB', options);
-          return formatted.replace(/\sGMT\+4|\sGST/, '') + ' GST';
+          
+          // Get timezone abbreviation
+          const timeZoneName = new Intl.DateTimeFormat('en-GB', { timeZoneName: 'short' }).format(date);
+          const tzAbbr = timeZoneName.split(' ').pop();
+          
+          return formatted + ' ' + tzAbbr;
         }
 
         // Get event details from poll response
@@ -391,7 +400,7 @@
         const eventLocation = event.location || '';
         
         const eventDateObj = event.event_date ? new Date(event.event_date) : null;
-        const eventDate = eventDateObj ? formatEventDateWithGST(eventDateObj) : '';
+        const eventDate = eventDateObj ? formatEventDateInLocalTime(eventDateObj) : '';
 
         document.getElementById('poll-title').textContent = `Time Poll: ${eventTitle}`;
         document.getElementById('poll-subtitle').textContent = 'Select your preferred time slot';
@@ -423,7 +432,7 @@
         // Display deadline notice
         const deadlineNotice = document.getElementById('deadline-notice');
         if (deadline) {
-          const deadlineStr = formatDateWithGST(deadline);
+          const deadlineStr = formatDateInLocalTime(deadline);
           
           if (isDeadlinePassed) {
             deadlineNotice.innerHTML = `
@@ -454,7 +463,7 @@
         
         poll.time_slots.forEach((slot, index) => {
           const date = new Date(slot);
-          const formattedDate = formatDateWithGST(date);
+          const formattedDate = formatDateInLocalTime(date);
           
           const voteCount = poll.voteCounts?.[index] || 0;
           

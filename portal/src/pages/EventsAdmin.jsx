@@ -95,6 +95,14 @@ export default function EventsAdmin() {
     }));
   };
 
+  // Helper to convert datetime-local string to ISO string
+  const datetimeLocalToISO = (datetimeLocal) => {
+    if (!datetimeLocal) return null;
+    // datetime-local gives us "YYYY-MM-DDTHH:mm" in local time
+    // We create a Date object which interprets it as local time, then convert to ISO (UTC)
+    return new Date(datetimeLocal).toISOString();
+  };
+
   const handleCreateEvent = async (eventData) => {
     try {
       // Generate UUID for the event (backend will also generate if not provided)
@@ -102,9 +110,11 @@ export default function EventsAdmin() {
       // Exclude poll fields from event data, but keep reminder fields
       const { create_poll, poll_slot_1_date, poll_slot_1_start, poll_slot_1_end, poll_slot_2_date, poll_slot_2_start, poll_slot_2_end, poll_slot_3_date, poll_slot_3_start, poll_slot_3_end, poll_deadline_date, ...eventFields } = eventData;
       
-      // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
+      // Convert event_date from datetime-local format to ISO string
       const cleanedEventFields = { ...eventFields };
-      if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
+      if (cleanedEventFields.event_date) {
+        cleanedEventFields.event_date = datetimeLocalToISO(cleanedEventFields.event_date);
+      } else if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
         delete cleanedEventFields.event_date;
       }
       
@@ -201,9 +211,11 @@ export default function EventsAdmin() {
         }
       }
       
-      // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
+      // Convert event_date from datetime-local format to ISO string
       const cleanedEventFields = { ...eventFields };
-      if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
+      if (cleanedEventFields.event_date) {
+        cleanedEventFields.event_date = datetimeLocalToISO(cleanedEventFields.event_date);
+      } else if (cleanedEventFields.event_date === '' || cleanedEventFields.event_date === null || cleanedEventFields.event_date === undefined) {
         delete cleanedEventFields.event_date;
       }
       
@@ -1047,9 +1059,21 @@ function PollFormModal({ event, onSave, onClose }) {
 
 // Event Form Modal Component
 function EventFormModal({ event, onSave, onClose }) {
+  // Helper to convert UTC datetime to local datetime-local format
+  const toLocalDateTimeString = (utcDateString) => {
+    if (!utcDateString) return '';
+    const date = new Date(utcDateString);
+    // Get local timezone offset
+    const offset = date.getTimezoneOffset();
+    // Adjust for local timezone
+    const localDate = new Date(date.getTime() - (offset * 60 * 1000));
+    // Format as datetime-local (YYYY-MM-DDTHH:mm)
+    return localDate.toISOString().slice(0, 16);
+  };
+  
   const [formData, setFormData] = useState({
     title: event?.title || '',
-    event_date: event?.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '',
+    event_date: event?.event_date ? toLocalDateTimeString(event.event_date) : '',
     location: event?.location || '',
     description: event?.description || '',
     agenda: event?.agenda || '',
@@ -1191,9 +1215,11 @@ function EventFormModal({ event, onSave, onClose }) {
             eventData.reminder_hour = null;
           }
           
-          // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
+          // Convert event_date from datetime-local format to ISO string
           const cleanedEventData = { ...eventData };
-          if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
+          if (cleanedEventData.event_date) {
+            cleanedEventData.event_date = datetimeLocalToISO(cleanedEventData.event_date);
+          } else if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
             delete cleanedEventData.event_date;
           }
           
@@ -1229,9 +1255,11 @@ function EventFormModal({ event, onSave, onClose }) {
               delete eventData.reminder_hour;
             }
             
-            // Remove event_date field if it's empty (don't send null to avoid NOT NULL constraint error)
+            // Convert event_date from datetime-local format to ISO string
             const cleanedEventData = { ...eventData };
-            if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
+            if (cleanedEventData.event_date) {
+              cleanedEventData.event_date = datetimeLocalToISO(cleanedEventData.event_date);
+            } else if (cleanedEventData.event_date === '' || cleanedEventData.event_date === null || cleanedEventData.event_date === undefined) {
               delete cleanedEventData.event_date;
             }
             

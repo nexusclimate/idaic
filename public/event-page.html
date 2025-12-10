@@ -336,27 +336,31 @@
         // Populate event data
         document.getElementById('event-title').textContent = event.title || 'Event';
         
-        // Helper function to format date with GST timezone
-        function formatDateWithGST(date) {
+        // Helper function to format date in user's local timezone
+        function formatDateInLocalTime(date) {
           const options = {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Asia/Dubai'
+            minute: '2-digit'
+            // No timeZone specified = uses user's local timezone
           };
           const formatted = date.toLocaleDateString('en-GB', options);
-          // Replace timezone abbreviation with GST
-          return formatted.replace(/\sGMT\+4|\sGST/, '') + ' GST';
+          
+          // Get timezone abbreviation
+          const timeZoneName = new Intl.DateTimeFormat('en-GB', { timeZoneName: 'short' }).format(date);
+          const tzAbbr = timeZoneName.split(' ').pop();
+          
+          return formatted + ' ' + tzAbbr;
         }
         
         const eventDate = event.event_date ? new Date(event.event_date) : null;
         let dateStr = 'TBA';
         
         if (eventDate) {
-          dateStr = formatDateWithGST(eventDate);
+          dateStr = formatDateInLocalTime(eventDate);
         }
         
         // Display date in normal text (not bold, not orange) in event details
