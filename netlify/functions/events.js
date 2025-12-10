@@ -70,6 +70,8 @@ exports.handler = async function (event, context) {
             }) 
           };
         }
+        console.log('Event created successfully:', newEvent[0]);
+        console.log('Returned event_date type:', typeof newEvent[0].event_date, 'value:', newEvent[0].event_date);
         return { statusCode: 201, body: JSON.stringify(newEvent[0]) };
       }
       case 'PUT': {
@@ -117,6 +119,7 @@ exports.handler = async function (event, context) {
           };
         }
         console.log('Event updated successfully:', updatedEvent[0]);
+        console.log('Returned event_date type:', typeof updatedEvent[0].event_date, 'value:', updatedEvent[0].event_date);
         return { statusCode: 200, body: JSON.stringify(updatedEvent[0]) };
       }
       case 'DELETE': {

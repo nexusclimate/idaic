@@ -1129,9 +1129,9 @@ function EventFormModal({ event, onSave, onClose }) {
   const [lastSaved, setLastSaved] = useState(null);
   const autoSaveTimeoutRef = useRef(null);
 
-  // Debug: Log when event prop changes
+  // Debug: Log when event prop changes (but not during save to avoid flicker)
   useEffect(() => {
-    if (event) {
+    if (event && !saving) {
       console.log('📅 Event loaded:', {
         id: event.id,
         title: event.title,
@@ -1139,7 +1139,7 @@ function EventFormModal({ event, onSave, onClose }) {
         converted_event_date: event.event_date ? toLocalDateTimeString(event.event_date) : 'N/A'
       });
     }
-  }, [event]);
+  }, [event, saving]);
 
   // Helper function to round time to :00 or :30
   const roundTimeToHalfHour = (timeString) => {
@@ -1490,6 +1490,11 @@ function EventFormModal({ event, onSave, onClose }) {
         // Final save of existing event (after poll creation/update)
         await onSave(createdEventId, formData);
         
+        // Close modal immediately after save to prevent flicker from refetch
+        onClose();
+        setSaving(false);
+        return; // Exit early to prevent further execution
+        
         // Handle poll deletion if unchecked
         if (!formData.create_poll && createdEventId) {
           // If poll is unchecked, make sure it's deleted
@@ -1526,13 +1531,13 @@ function EventFormModal({ event, onSave, onClose }) {
       } else {
         // Create new event (shouldn't happen if auto-save worked, but fallback)
         await onSave(undefined, formData);
+        onClose();
+        setSaving(false);
+        return;
       }
-      // Close modal after successful save
-      onClose();
     } catch (err) {
       console.error('Error saving event:', err);
       // Don't close on error - let user see the error
-    } finally {
       setSaving(false);
     }
   };
