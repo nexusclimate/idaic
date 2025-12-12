@@ -837,6 +837,13 @@ document
           login_method: 'otp'
         };
 
+        console.log('📤 Sending OTP login tracking data:', {
+          user_id: metadata.user_id,
+          email: metadata.email,
+          login_method: metadata.login_method,
+          ip_address: metadata.ip_address
+        });
+
         // Track login
         const trackResponse = await fetch('/.netlify/functions/trackLogin', {
           method: 'POST',
@@ -847,11 +854,16 @@ document
         if (trackResponse.ok) {
           console.log('✅ OTP login tracked');
         } else {
-          console.error('❌ Failed to track OTP login');
+          console.error('❌ Failed to track OTP login:', trackResponse.status);
+          const errorText = await trackResponse.text();
+          console.error('Error details:', errorText);
         }
       } catch (trackErr) {
-        console.error('❌ Failed to track user login');
+        console.error('❌ Failed to track user login:', trackErr);
       }
+
+      // Small delay to ensure tracking completes before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       window.location.href = getRedirectUrl()
 
@@ -1036,6 +1048,13 @@ document
         login_method: 'password'
       };
 
+      console.log('📤 Sending password login tracking data:', {
+        user_id: metadata.user_id,
+        email: metadata.email,
+        login_method: metadata.login_method,
+        ip_address: metadata.ip_address
+      });
+
       const trackResponse = await fetch('/.netlify/functions/trackLogin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1045,11 +1064,16 @@ document
       if (trackResponse.ok) {
         console.log('✅ Password login tracked');
       } else {
-        console.error('❌ Failed to track password login');
+        console.error('❌ Failed to track password login:', trackResponse.status);
+        const errorText = await trackResponse.text();
+        console.error('Error details:', errorText);
       }
     } catch (trackErr) {
-      console.error('❌ Track login error');
+      console.error('❌ Track login error:', trackErr);
     }
+
+    // Small delay to ensure tracking completes before redirect
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Redirect to app
     window.location.href = '/app'
