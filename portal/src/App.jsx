@@ -198,7 +198,6 @@ async function trackLoginEvent(userId, userEmail, loginMethod) {
       screen_color_depth: deviceMeta.screen_color_depth,
       viewport_width: deviceMeta.viewport_width,
       viewport_height: deviceMeta.viewport_height,
-      browser_timezone: deviceMeta.timezone,
       timezone_offset: deviceMeta.timezone_offset,
       online_status: deviceMeta.online_status,
       hardware_concurrency: deviceMeta.hardware_concurrency,

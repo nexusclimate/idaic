@@ -293,7 +293,6 @@ exports.handler = async function (event, context) {
       screen_color_depth: loginData.screen_color_depth !== null && loginData.screen_color_depth !== undefined ? loginData.screen_color_depth : null,
       viewport_width: loginData.viewport_width !== null && loginData.viewport_width !== undefined ? loginData.viewport_width : null,
       viewport_height: loginData.viewport_height !== null && loginData.viewport_height !== undefined ? loginData.viewport_height : null,
-      browser_timezone: loginData.browser_timezone || 'Unknown',
       timezone_offset: loginData.timezone_offset !== null && loginData.timezone_offset !== undefined ? loginData.timezone_offset : null,
       online_status: loginData.online_status || 'Unknown',
       hardware_concurrency: loginData.hardware_concurrency !== null && loginData.hardware_concurrency !== undefined ? loginData.hardware_concurrency : null,
