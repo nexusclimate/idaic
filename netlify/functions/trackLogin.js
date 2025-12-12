@@ -179,22 +179,10 @@ exports.handler = async function (event, context) {
       server_ip: serverIP,
       final_ip: finalIP,
       country: loginData.country,
-      country_code: loginData.country_code,
       city: loginData.city,
-      region: loginData.region,
-      region_code: loginData.region_code,
-      timezone: loginData.timezone,
-      isp: loginData.isp,
-      organization: loginData.organization,
-      asn: loginData.asn,
-      latitude: loginData.latitude,
-      longitude: loginData.longitude,
-      postal_code: loginData.postal_code,
       browser: loginData.browser,
-      browser_version: loginData.browser_version,
       device: loginData.device,
-      screen_resolution: `${loginData.screen_width}x${loginData.screen_height}`,
-      language: loginData.language
+      os: loginData.os
     });
 
     // Validate required fields
@@ -261,42 +249,17 @@ exports.handler = async function (event, context) {
       }
     }
 
-    // Prepare the insert data with proper defaults and enhanced metadata
+    // Prepare the insert data - only include columns that exist in the database
+    // Based on userlogins.js query: id,user_id,email,login_time,login_method,ip_address,country,city,browser,device,os
     const insertData = {
       user_id: loginData.user_id,
       email: loginData.email,
       ip_address: finalIP, // Use server-side IP as fallback if client-side failed
       country: geoData.country,
-      country_code: geoData.country_code,
       city: geoData.city,
-      region: geoData.region,
-      region_code: geoData.region_code,
-      timezone: geoData.timezone,
-      isp: geoData.isp,
-      organization: geoData.organization,
-      asn: geoData.asn,
-      latitude: geoData.latitude,
-      longitude: geoData.longitude,
-      postal_code: geoData.postal_code,
       device: loginData.device || 'Unknown',
       browser: loginData.browser || 'Unknown',
-      browser_version: loginData.browser_version || 'Unknown',
       os: loginData.os || 'Unknown',
-      user_agent: loginData.user_agent || 'Unknown',
-      language: loginData.language || 'Unknown',
-      languages: loginData.languages || 'Unknown',
-      platform: loginData.platform || 'Unknown',
-      cookie_enabled: loginData.cookie_enabled || 'Unknown',
-      do_not_track: loginData.do_not_track || 'Unknown',
-      screen_width: loginData.screen_width !== null && loginData.screen_width !== undefined ? loginData.screen_width : null,
-      screen_height: loginData.screen_height !== null && loginData.screen_height !== undefined ? loginData.screen_height : null,
-      screen_color_depth: loginData.screen_color_depth !== null && loginData.screen_color_depth !== undefined ? loginData.screen_color_depth : null,
-      viewport_width: loginData.viewport_width !== null && loginData.viewport_width !== undefined ? loginData.viewport_width : null,
-      viewport_height: loginData.viewport_height !== null && loginData.viewport_height !== undefined ? loginData.viewport_height : null,
-      timezone_offset: loginData.timezone_offset !== null && loginData.timezone_offset !== undefined ? loginData.timezone_offset : null,
-      online_status: loginData.online_status || 'Unknown',
-      hardware_concurrency: loginData.hardware_concurrency !== null && loginData.hardware_concurrency !== undefined ? loginData.hardware_concurrency : null,
-      device_memory: loginData.device_memory !== null && loginData.device_memory !== undefined ? loginData.device_memory : null,
       login_time: loginTime,
       login_method: loginData.login_method || 'unknown'
     };
