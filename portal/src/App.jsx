@@ -1,10 +1,227 @@
 import "./index.css";
 import { VERSION } from './config/version.js';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Idaic from "./components/idaic";
 import PageRouter from "./components/PageRouter";
 import DisclaimerPopup from "./components/DisclaimerPopup";
 import { supabase } from './config/supabase.js';
+
+// Helper functions for login tracking
+function detectBrowser() {
+  if (navigator.userAgentData && navigator.userAgentData.brands) {
+    const brands = navigator.userAgentData.brands.map(b => b.brand);
+    if (brands.includes('Google Chrome')) return 'Chrome';
+    if (brands.includes('Microsoft Edge')) return 'Edge';
+    if (brands.includes('Chromium')) return 'Chromium';
+    return brands[0] || 'Unknown';
+  }
+  const ua = navigator.userAgent;
+  if (/chrome|crios|crmo/i.test(ua)) return 'Chrome';
+  if (/firefox|fxios/i.test(ua)) return 'Firefox';
+  if (/safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)) return 'Safari';
+  if (/edg/i.test(ua)) return 'Edge';
+  if (/opr\//i.test(ua)) return 'Opera';
+  return 'Unknown';
+}
+
+function detectBrowserVersion() {
+  const ua = navigator.userAgent;
+  const match = ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera)\/(\d+)/i);
+  return match ? match[1] : 'Unknown';
+}
+
+function detectOS() {
+  if (navigator.userAgentData && navigator.userAgentData.platform) {
+    return navigator.userAgentData.platform;
+  }
+  const ua = navigator.userAgent;
+  if (/windows/i.test(ua)) return 'Windows';
+  if (/macintosh|mac os x/i.test(ua)) return 'Mac';
+  if (/linux/i.test(ua)) return 'Linux';
+  if (/android/i.test(ua)) return 'Android';
+  if (/iphone|ipad|ipod/i.test(ua)) return 'iOS';
+  return 'Unknown';
+}
+
+function getEnhancedDeviceMetadata() {
+  return {
+    device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+    browser: detectBrowser(),
+    browser_version: detectBrowserVersion(),
+    os: detectOS(),
+    user_agent: navigator.userAgent,
+    language: navigator.language || 'Unknown',
+    languages: navigator.languages ? navigator.languages.join(',') : 'Unknown',
+    platform: navigator.platform || 'Unknown',
+    cookie_enabled: navigator.cookieEnabled ? 'Yes' : 'No',
+    do_not_track: navigator.doNotTrack || 'Unknown',
+    screen_width: window.screen ? window.screen.width : null,
+    screen_height: window.screen ? window.screen.height : null,
+    screen_color_depth: window.screen ? window.screen.colorDepth : null,
+    viewport_width: window.innerWidth || null,
+    viewport_height: window.innerHeight || null,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown',
+    timezone_offset: new Date().getTimezoneOffset(),
+    online_status: navigator.onLine ? 'Online' : 'Offline',
+    hardware_concurrency: navigator.hardwareConcurrency || null,
+    device_memory: navigator.deviceMemory || null
+  };
+}
+
+async function fetchIPAndLocation() {
+  let ip = 'Unknown';
+  let geo = {
+    country: 'Unknown',
+    countryCode: 'Unknown',
+    city: 'Unknown',
+    region: 'Unknown',
+    regionCode: 'Unknown',
+    timezone: 'Unknown',
+    isp: 'Unknown',
+    org: 'Unknown',
+    asn: 'Unknown',
+    latitude: null,
+    longitude: null,
+    postalCode: 'Unknown'
+  };
+
+  try {
+    const ipServices = [
+      'https://api.ipify.org?format=json',
+      'https://api64.ipify.org?format=json'
+    ];
+
+    for (const service of ipServices) {
+      try {
+        const ipResponse = await Promise.race([
+          fetch(service, { method: 'GET', headers: { 'Accept': 'application/json' } }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('IP fetch timeout')), 3000))
+        ]);
+        
+        if (ipResponse.ok) {
+          const ipData = await ipResponse.json();
+          ip = ipData.ip || 'Unknown';
+          if (ip !== 'Unknown') break;
+        }
+      } catch (err) {
+        console.warn('IP fetch failed:', err.message);
+      }
+    }
+  } catch (err) {
+    console.warn('Client-side IP fetch failed:', err.message);
+  }
+
+  if (ip && ip !== 'Unknown') {
+    const geoServices = [
+      {
+        name: 'ipapi.co',
+        url: `https://ipapi.co/${ip}/json/`,
+        parser: (data) => {
+          if (!data.error) {
+            return {
+              country: data.country_name || data.country || 'Unknown',
+              countryCode: data.country_code || 'Unknown',
+              city: data.city || 'Unknown',
+              region: data.region || 'Unknown',
+              regionCode: data.region_code || 'Unknown',
+              timezone: data.timezone || 'Unknown',
+              isp: data.org || data.isp || 'Unknown',
+              org: data.org || 'Unknown',
+              asn: data.asn || 'Unknown',
+              latitude: data.latitude || null,
+              longitude: data.longitude || null,
+              postalCode: data.postal || 'Unknown'
+            };
+          }
+          return null;
+        }
+      }
+    ];
+
+    for (const service of geoServices) {
+      try {
+        const geoResponse = await Promise.race([
+          fetch(service.url),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Geo fetch timeout')), 4000))
+        ]);
+
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json();
+          const parsedGeo = service.parser(geoData);
+          if (parsedGeo) {
+            geo = parsedGeo;
+            break;
+          }
+        }
+      } catch (err) {
+        console.warn('Geolocation fetch failed:', err.message);
+      }
+    }
+  }
+
+  return { ip, geo };
+}
+
+async function trackLoginEvent(userId, userEmail, loginMethod) {
+  try {
+    const { ip, geo } = await fetchIPAndLocation();
+    const deviceMeta = getEnhancedDeviceMetadata();
+    
+    const metadata = {
+      user_id: userId,
+      email: userEmail,
+      ip_address: ip,
+      country: geo.country,
+      country_code: geo.countryCode,
+      city: geo.city,
+      region: geo.region,
+      region_code: geo.regionCode,
+      timezone: geo.timezone,
+      isp: geo.isp,
+      organization: geo.org,
+      asn: geo.asn,
+      latitude: geo.latitude,
+      longitude: geo.longitude,
+      postal_code: geo.postalCode,
+      device: deviceMeta.device,
+      browser: deviceMeta.browser,
+      browser_version: deviceMeta.browser_version,
+      os: deviceMeta.os,
+      user_agent: deviceMeta.user_agent,
+      language: deviceMeta.language,
+      languages: deviceMeta.languages,
+      platform: deviceMeta.platform,
+      cookie_enabled: deviceMeta.cookie_enabled,
+      do_not_track: deviceMeta.do_not_track,
+      screen_width: deviceMeta.screen_width,
+      screen_height: deviceMeta.screen_height,
+      screen_color_depth: deviceMeta.screen_color_depth,
+      viewport_width: deviceMeta.viewport_width,
+      viewport_height: deviceMeta.viewport_height,
+      browser_timezone: deviceMeta.timezone,
+      timezone_offset: deviceMeta.timezone_offset,
+      online_status: deviceMeta.online_status,
+      hardware_concurrency: deviceMeta.hardware_concurrency,
+      device_memory: deviceMeta.device_memory,
+      login_time: new Date().toISOString(),
+      login_method: loginMethod
+    };
+
+    const trackResponse = await fetch('/.netlify/functions/trackLogin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(metadata)
+    });
+    
+    if (trackResponse.ok) {
+      console.log('✅ Login tracked successfully');
+    } else {
+      console.error('❌ Failed to track login');
+    }
+  } catch (err) {
+    console.error('❌ Error tracking login:', err);
+  }
+}
 
 export default function App() {
   // Initialize currentPage from URL pathname, query params, or localStorage, otherwise default to 'home'
@@ -39,6 +256,9 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [user, setUser] = useState(null);
+  
+  // Track if we've already logged this session to avoid duplicates
+  const loginTrackedRef = useRef(false);
 
   // Save current page to localStorage whenever it changes
   useEffect(() => {
@@ -129,6 +349,14 @@ export default function App() {
           });
           setIsAuthenticated(true);
           
+          // Track password login if not already tracked
+          if (!loginTrackedRef.current) {
+            loginTrackedRef.current = true;
+            trackLoginEvent(userId, passwordEmail, 'password').catch(err => {
+              console.warn('Password login tracking failed:', err);
+            });
+          }
+          
           // Check if user needs to accept disclaimer (from database)
           await checkDisclaimerStatus(userId, passwordEmail);
           return;
@@ -195,6 +423,14 @@ export default function App() {
           
           // Update localStorage with current token (in case it was refreshed)
           localStorage.setItem('idaic-token', session.access_token);
+          
+          // Track OTP login if not already tracked
+          if (!loginTrackedRef.current) {
+            loginTrackedRef.current = true;
+            trackLoginEvent(session.user.id, session.user.email, 'otp').catch(err => {
+              console.warn('OTP login tracking failed:', err);
+            });
+          }
           
           // Check if user needs to accept disclaimer (from database)
           await checkDisclaimerStatus(session.user.id, session.user.email);
@@ -270,6 +506,9 @@ export default function App() {
       setIsAuthenticated(false);
       setUser(null);
       
+      // Reset login tracking flag
+      loginTrackedRef.current = false;
+      
       // Preserve the requested page in the login redirect
       const requestedPage = currentPage;
       if (requestedPage && requestedPage !== 'home' && requestedPage !== 'newuser-form' && requestedPage !== 'newmember-signup') {
@@ -323,12 +562,23 @@ export default function App() {
         setUser(session.user);
         setIsAuthenticated(true);
         localStorage.setItem('idaic-token', session.access_token);
+        
+        // Track login event if not already tracked in this session
+        if (!loginTrackedRef.current) {
+          loginTrackedRef.current = true;
+          trackLoginEvent(session.user.id, session.user.email, 'otp').catch(err => {
+            console.warn('Login tracking failed:', err);
+          });
+        }
         } else if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
         if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsAuthenticated(false);
           localStorage.removeItem('idaic-token');
           localStorage.removeItem('idaic-password-email');
+          
+          // Reset login tracking flag
+          loginTrackedRef.current = false;
           
           // Preserve requested page if any
           const requestedPage = currentPage;
@@ -529,6 +779,9 @@ export default function App() {
   };
 
   const handleDisclaimerDecline = async () => {
+    // Reset login tracking flag
+    loginTrackedRef.current = false;
+    
     // Check if this is a password login
     const isPasswordLogin = localStorage.getItem('idaic-password-login');
     
