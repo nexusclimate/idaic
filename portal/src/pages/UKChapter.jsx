@@ -253,24 +253,14 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
                   </div>
                   <p className="text-gray-600">
                     These challenges covered building a greater understanding of the supply chain and therefore where improvements 
-                    could be made. This topic does not seem to be directly related to the ADViCE Grand Challenges.
+                    could be made.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 border-t border-gray-200 pt-6">
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-3">Additional Areas of Interest</h4>
-              <p className="text-gray-600">
-                There were also challenges related to using AI to support decision making and encourage more sustainable, 
-                lower carbon choices of products. We intend to explore these themes further in future UK Chapter IDAIC sessions.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 border rounded-lg p-6" style={{ backgroundColor: `${colors.primary.orange}10`, borderColor: `${colors.primary.orange}40` }}>
+          <div className="mt-8 border rounded-lg p-6" style={{ backgroundColor: `${colors.primary.orange}10`, borderColor: `${colors.primary.orange}40` }}>
             <div className="flex items-start gap-3">
               <svg className="h-6 w-6 flex-shrink-0" style={{ color: colors.primary.orange }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
