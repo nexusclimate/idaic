@@ -12,6 +12,7 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
   const tabs = [
     { name: 'Main', key: 'main' },
     { name: 'UK Updates', key: 'uk updates' },
+    { name: 'Initiatives', key: 'initiatives' },
   ];
 
   // Fetch users, organizations, and total count
@@ -168,6 +169,123 @@ export default function UKChapter({ isAdminAuthenticated = false }) {
             onError={(e) => console.error('UK iframe failed to load', e)}
             sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
           />
+        </div>
+      )}
+      {activeTab === 'initiatives' && (
+        <div className="max-w-6xl">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">UK Chapter Initiatives</h2>
+            <p className="text-base text-gray-600">
+              Exploring the top challenges and opportunities in industrial decarbonisation identified by the UK Chapter through AI and data-driven approaches.
+            </p>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6 mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Top 3 Selected Initiatives</h3>
+            <p className="text-base text-gray-600 mb-6">
+              The following initiatives were selected by the UK Chapter and grouped into themes using the ADViCE Grand Challenges framework.
+              These represent the most pressing challenges identified by our UK members:
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {/* Initiative 1 */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-1 h-full bg-orange-500 rounded-full" style={{ backgroundColor: colors.primary.orange }} />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xl font-semibold text-gray-900">
+                      1. Manufacturing Process Efficiency
+                    </h4>
+                  </div>
+                  <div className="mb-3">
+                    <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium" 
+                          style={{ backgroundColor: `${colors.primary.orange}20`, color: colors.primary.orange }}>
+                      Grand Challenge 5
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    These challenges covered a range of issues from optimisation of production processes (e.g. furnace optimisation 
+                    and chemistry variations) through to production scheduling and more general operational efficiencies (e.g. robots, cobots).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Initiative 2 */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-1 h-full bg-orange-500 rounded-full" style={{ backgroundColor: colors.primary.orange }} />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xl font-semibold text-gray-900">
+                      2. Decarbonising Manufacturing Inputs
+                    </h4>
+                  </div>
+                  <div className="mb-3">
+                    <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium" 
+                          style={{ backgroundColor: `${colors.primary.orange}20`, color: colors.primary.orange }}>
+                      Grand Challenge 4
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    These challenges covered designing processes with new feedstocks and greater visibility of their embodied carbon.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Initiative 3 */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-1 h-full bg-orange-500 rounded-full" style={{ backgroundColor: colors.primary.orange }} />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-xl font-semibold text-gray-900">
+                      3. Enhancing Supply Chain Transparency
+                    </h4>
+                  </div>
+                  <div className="mb-3">
+                    <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+                      Independent Theme
+                    </span>
+                  </div>
+                  <p className="text-gray-600">
+                    These challenges covered building a greater understanding of the supply chain and therefore where improvements 
+                    could be made. This topic does not seem to be directly related to the ADViCE Grand Challenges.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-3">Additional Areas of Interest</h4>
+              <p className="text-gray-600">
+                There were also challenges related to using AI to support decision making and encourage more sustainable, 
+                lower carbon choices of products. We intend to explore these themes further in future UK Chapter IDAIC sessions.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 border rounded-lg p-6" style={{ backgroundColor: `${colors.primary.orange}10`, borderColor: `${colors.primary.orange}40` }}>
+            <div className="flex items-start gap-3">
+              <svg className="h-6 w-6 flex-shrink-0" style={{ color: colors.primary.orange }} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+              </svg>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2">About ADViCE Grand Challenges</h4>
+                <p className="text-gray-700 text-sm">
+                  The ADViCE Grand Challenges framework provides a structured approach to identifying and addressing 
+                  the most critical challenges in industrial decarbonisation. These challenges represent key areas where 
+                  AI and data-driven solutions can have the greatest impact on reducing carbon emissions in manufacturing 
+                  and industrial processes.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

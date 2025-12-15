@@ -11,7 +11,6 @@ import Changelog from '../pages/Changelog';
 import Admin from '../pages/Admin';
 import Settings from '../pages/Settings';
 import Projects from '../pages/projects';
-import Initiatives from '../pages/Initiatives';
 import NewUserForm from '../pages/NewUserForm';
 
 export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdminAuthenticated, user, onPageChange }) {
@@ -164,8 +163,6 @@ export default function PageRouter({ currentPage, isAdminAuthenticated, setIsAdm
       return <Settings user={user} />;
     case 'projects':
       return <Projects />;
-    case 'initiatives':
-      return <Initiatives />;
     case 'newuser-form':
     case 'newmember-signup':
       return <NewUserForm />;
