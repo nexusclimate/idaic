@@ -199,6 +199,25 @@ export default function Idaic({ onPageChange, currentPage, isAdminAuthenticated,
               {!collapsed && <SidebarLabel>Projects</SidebarLabel>}
             </SidebarItem>
             <SidebarItem 
+              onClick={() => handlePageChange('initiatives')}
+              current={currentPage === 'initiatives' ? true : undefined}
+              style={sidebarItemStyle}
+              onMouseEnter={(e) => {
+                if (currentPage !== 'initiatives') {
+                  e.currentTarget.style.backgroundColor = colors.primary.orangeHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPage !== 'initiatives') {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
+              title={collapsed ? 'Initiatives' : undefined}
+            >
+              <LightBulbIcon />
+              {!collapsed && <SidebarLabel>Initiatives</SidebarLabel>}
+            </SidebarItem>
+            <SidebarItem 
               onClick={() => handlePageChange('members')}
               current={currentPage === 'members' ? true : undefined}
               style={sidebarItemStyle}
