@@ -626,7 +626,10 @@ document
       createNotification({ message: 'Sending OTP…', success: true });
       return await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` }
+        options: { 
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          shouldCreateUser: true
+        }
       });
     }
 
@@ -673,7 +676,12 @@ document
             document.getElementById('code').focus();
             return;
           } else {
-            createNotification({ message: retry.error.message, success: false });
+            console.error('❌ Error sending OTP after provisioning:', retry.error);
+            let errorMsg = retry.error.message || 'Failed to send OTP';
+            if (retry.error.message && retry.error.message.includes('Signups not allowed')) {
+              errorMsg = 'Account provisioned but email service is not configured. Please contact support.';
+            }
+            createNotification({ message: errorMsg, success: false });
             return;
           }
         } else {
