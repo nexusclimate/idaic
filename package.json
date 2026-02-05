@@ -1,6 +1,8 @@
 {
+  "name": "idaic-root",
   "private": true,
   "version": "0.12.50",
+  "description": "IDAIC Root Package",
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
     "axios": "^1.10.0",
@@ -17,5 +19,9 @@
   "scripts": {
     "dev": "netlify dev",
     "build:tailwind": "tailwindcss -i ./public/tailwind-input.css -o ./public/tailwind.css --minify -c ./tailwind.public.config.js"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

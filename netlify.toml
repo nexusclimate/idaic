@@ -1,6 +1,6 @@
 [build]
   base = "portal"
-  command = "cd .. && rm -f package-lock.json && npm install && cd portal && rm -rf node_modules && npm install --force && VITE_SUPABASE_URL=$SUPABASE_URL VITE_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npm run build && mv dist/index.html dist/app.html && mkdir -p ../public && cp -r dist/* ../public/"
+  command = "cd .. && npm install --omit=dev && cd portal && npm install && VITE_SUPABASE_URL=$SUPABASE_URL VITE_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY npm run build && mv dist/index.html dist/app.html && mkdir -p ../public && cp -r dist/* ../public/"
   publish = "../public"
   functions = "../netlify/functions"
 
