@@ -4,6 +4,7 @@
   "version": "0.12.50",
   "type": "module",
   "scripts": {
+    "preinstall": "rm -f package-lock.json || true",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -59,6 +60,5 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
-  },
-  "packageManager": "npm@10.8.2"
+  }
 }
