@@ -555,38 +555,9 @@ document
     }
     
     const email = document.getElementById('email').value.trim();
-    const domain = email.split('@')[1]?.toLowerCase();
-    console.log('Checking domain:', domain);
+    console.log('Checking user:', email);
 
-    // 1. Check if domain is approved
-    let domainApproved = false;
-    try {
-      const { data, error } = await supabase
-        .from('org_domains')
-        .select('*')
-        .ilike('domain_email', domain)
-        .maybeSingle();
-      console.log('Domain check:', data ? 'approved' : 'not found');
-      
-      if (error) {
-        console.error('Supabase query error:', error);
-        createNotification({ message: 'Error checking organization membership: ' + error.message, success: false });
-        return;
-      }
-      
-      if (data) domainApproved = true;
-    } catch (err) {
-      console.error('Catch block error:', err);
-      createNotification({ message: 'Error checking organization membership. Please try again.', success: false });
-      return;
-    }
-
-    if (!domainApproved) {
-      createNotification({ message: 'Your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false, warning: true });
-      return;
-    }
-
-    // 2. Check if user exists in users table and their role
+    // 1. Check if user exists in users table and their role
     let userExists = false;
     let userRole = null;
     try {
@@ -634,98 +605,50 @@ document
     }
 
     if (!userExists) {
-      createNotification({ message: 'You are not a registered user yet, but your organization is a member. We are setting you up now. Expect an OTP soon!', success: false });
-      await new Promise(res => setTimeout(res, 700)); // was 1500ms, now 700ms
-      try {
-        // Extract project reference from SUPABASE_URL
-        const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
-        if (!projectRef) {
-          throw new Error('Invalid Supabase URL format');
-        }
-        const provisionRes = await fetch(`https://${projectRef}.functions.supabase.co/UserLogin`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        const provisionResult = await provisionRes.json();
-        if (provisionRes.ok) {
-          // Wait for user to appear in users table (poll up to 1s)
-          let userRowExists = false;
-          for (let i = 0; i < 5; i++) { // was 10, now 5
-            const { data: userData } = await supabase
-              .from('users')
-              .select('id')
-              .eq('email', email)
-              .maybeSingle();
-            if (userData) {
-              userRowExists = true;
-              break;
-            }
-            await new Promise(res => setTimeout(res, 200));
-          }
-          if (!userRowExists) {
-            createNotification({ message: 'Provisioned, but user record not found. Please try again in a moment.', success: false });
-            return;
-          }
-          await new Promise(res => setTimeout(res, 200)); // was 500ms, now 200ms
-          let retry = await sendOtp();
-          if (!retry.error) {
-            document.getElementById('otp-request-form').classList.add('hidden');
-            document.getElementById('otp-verify-form').classList.remove('hidden');
-            createNotification({ message: 'OTP sent! Please check your email for the login code.', success: true });
-            document.getElementById('code').focus();
-            return;
-          } else {
-            console.error('❌ Error sending OTP after provisioning:', retry.error);
-            let errorMsg = retry.error.message || 'Failed to send OTP';
-            if (retry.error.message && retry.error.message.includes('Signups not allowed')) {
-              errorMsg = 'Account provisioned but email service is not configured. Please contact support.';
-            }
-            createNotification({ message: errorMsg, success: false });
-            return;
-          }
-        } else {
-          createNotification({ message: provisionResult.error || 'Provisioning failed. Please contact support.', success: false });
-          return;
-        }
-      } catch (fetchErr) {
-        createNotification({ message: 'You are not a registered user and your organization is not a member yet. Sign up or get in touch with the IDAIC team.', success: false });
+      createNotification({ 
+        message: 'You are not an approved user. Please contact the IDAIC team to get access.', 
+        success: false,
+        warning: true 
+      });
+      return;
+    }
+
+    // User exists and has approved role, send OTP
+    try {
+      let { error } = await sendOtp();
+      if (!error) {
+        document.getElementById('otp-request-form').classList.add('hidden');
+        document.getElementById('otp-verify-form').classList.remove('hidden');
+        createNotification({ message: 'OTP sent! Check your email.', success: true });
+        document.getElementById('code').focus();
         return;
-      }
-    } else {
-      // User exists, send OTP as normal
-      try {
-        let { error } = await sendOtp();
-        if (!error) {
-          document.getElementById('otp-request-form').classList.add('hidden');
-          document.getElementById('otp-verify-form').classList.remove('hidden');
-          createNotification({ message: 'OTP sent! Check your email.', success: true });
-          document.getElementById('code').focus();
-          return;
-        } else if (error.status === 500) {
-          createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
-          return;
-        } else {
-          let friendlyMessage = error.message;
-          if (error.message.includes('Invalid login credentials')) {
-            friendlyMessage = 'Invalid login credentials. Please check your input.';
-          } else if (error.message.includes('Rate limit exceeded')) {
-            friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
-          }
-          createNotification({ message: friendlyMessage, success: false });
-          return;
-        }
-      } catch (err) {
-        let friendlyMessage = err.message;
-        if (err.message.includes('Signups not allowed')) {
-          friendlyMessage = 'This email is not registered. Please register as a member or contact support.';
-        } else if (err.message.includes('Invalid login credentials')) {
+      } else if (error.status === 500) {
+        createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+        return;
+      } else {
+        console.error('❌ Error sending OTP:', error);
+        let friendlyMessage = error.message;
+        if (error.message.includes('Invalid login credentials')) {
           friendlyMessage = 'Invalid login credentials. Please check your input.';
-        } else if (err.message.includes('Rate limit exceeded')) {
+        } else if (error.message.includes('Rate limit exceeded')) {
           friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+        } else if (error.message.includes('Signups not allowed')) {
+          friendlyMessage = 'Email service configuration issue. Please contact support.';
         }
         createNotification({ message: friendlyMessage, success: false });
+        return;
       }
+    } catch (err) {
+      console.error('❌ Catch block error:', err);
+      let friendlyMessage = err.message;
+      if (err.message.includes('Signups not allowed')) {
+        friendlyMessage = 'Email service configuration issue. Please contact support.';
+      } else if (err.message.includes('Invalid login credentials')) {
+        friendlyMessage = 'Invalid login credentials. Please check your input.';
+      } else if (err.message.includes('Rate limit exceeded')) {
+        friendlyMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+      }
+      createNotification({ message: friendlyMessage, success: false });
     }
   });
 

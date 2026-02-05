@@ -306,7 +306,7 @@ export default function App() {
           // Handle password-based authentication
           console.log('✅ Valid password login session found');
           // Get the email from localStorage (stored during login)
-          const passwordEmail = localStorage.getItem('idaic-password-email') || 'admin@idaic.org';
+          const passwordEmail = localStorage.getItem('idaic-password-email') || 'info@idaic.org';
           
           // Fetch user ID from database
           const { data: userData, error: userError } = await supabase
