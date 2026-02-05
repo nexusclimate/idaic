@@ -6,6 +6,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  NETLIFY_SKIP_INSTALL = "true"
+  NETLIFY_INSTALL_COMMAND = "echo \"Skipping Netlify install\""
 
 [dev]
   functions = "../netlify/functions"
