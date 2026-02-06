@@ -623,7 +623,8 @@ document
         document.getElementById('code').focus();
         return;
       } else if (error.status === 500) {
-        createNotification({ message: 'There was a problem sending your login code. Please try again or contact support.', success: false });
+        console.error('❌ Supabase Auth returned 500 – usually email (SMTP) not configured in Supabase Dashboard', error);
+        createNotification({ message: 'Login email could not be sent (server error). Please try again later or contact support.', success: false });
         return;
       } else {
         console.error('❌ Error sending OTP:', error);
