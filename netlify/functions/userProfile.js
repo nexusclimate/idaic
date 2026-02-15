@@ -218,6 +218,44 @@ exports.handler = async function (event, context) {
           
           console.log('✅ User created successfully:', insertData[0]);
           result = insertData[0];
+
+          // Notify info@idaic.org about new member (external form submission)
+          try {
+            const baseUrl = process.env.BASE_URL || 'https://idaic.nexusclimate.co';
+            const notifyEmail = process.env.NEW_MEMBER_NOTIFY_EMAIL || 'info@idaic.org';
+            const html = `
+              <h2>New member registration</h2>
+              <p>A new member has submitted the external registration form.</p>
+              <ul>
+                <li><strong>Name:</strong> ${(profileData.name || '').replace(/</g, '&lt;')}</li>
+                <li><strong>Email:</strong> ${(profileData.email || '').replace(/</g, '&lt;')}</li>
+                <li><strong>Company:</strong> ${(profileData.company || '—').replace(/</g, '&lt;')}</li>
+                <li><strong>Title:</strong> ${(profileData.title || '—').replace(/</g, '&lt;')}</li>
+                <li><strong>Region:</strong> ${(profileData.region || '—').replace(/</g, '&lt;')}</li>
+                <li><strong>Category:</strong> ${(profileData.category || '—').replace(/</g, '&lt;')}${profileData.other_category ? ' (' + String(profileData.other_category).replace(/</g, '&lt;') + ')' : ''}</li>
+                <li><strong>LinkedIn:</strong> ${(profileData.linkedin_url || '—').replace(/</g, '&lt;')}</li>
+              </ul>
+              ${profileData.organization_description ? `<p><strong>Organization description:</strong><br/>${String(profileData.organization_description).replace(/</g, '&lt;').replace(/\n/g, '<br/>')}</p>` : ''}
+              ${profileData.contribution ? `<p><strong>Contribution:</strong><br/>${String(profileData.contribution).replace(/</g, '&lt;').replace(/\n/g, '<br/>')}</p>` : ''}
+              <p><em>Review and approve in the IDAIC members portal.</em></p>
+            `;
+            const emailResponse = await fetch(`${baseUrl}/.netlify/functions/sendEmail`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                to: notifyEmail,
+                subject: `New member registration: ${(profileData.name || profileData.email || 'Unknown').toString().substring(0, 50)}`,
+                html
+              })
+            });
+            if (emailResponse.ok) {
+              console.log('✅ New member notification email sent to', notifyEmail);
+            } else {
+              console.error('Failed to send new member notification email:', await emailResponse.text());
+            }
+          } catch (emailErr) {
+            console.error('Error sending new member notification email:', emailErr);
+          }
         }
 
         console.log('✅ Profile saved successfully');
