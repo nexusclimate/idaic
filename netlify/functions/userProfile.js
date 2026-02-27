@@ -243,6 +243,7 @@ exports.handler = async function (event, context) {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                from: 'IDAIC New Member <no-reply@idaic.nexusclimate.co>',
                 to: notifyEmail,
                 subject: `New member registration: ${(profileData.name || profileData.email || 'Unknown').toString().substring(0, 50)}`,
                 html
